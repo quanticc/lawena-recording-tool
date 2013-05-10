@@ -1,0 +1,20 @@
+== LAWENA RECORDING TOOL v3 por Montz ==
+
+Para ejecutar la herramienta, hacer doble click en lwrt.bat.
+La primera vez que se ejecuta, la aplicación les pedirá que ubiquen su directorio de tf2.
+Es el que está ubicado en "\Steam\steamapps\common\team fortress 2\tf". Escójanla y hagan click en el boton "Abrir".
+Luego, la herramienta les pedirá que elijan un directorio donde vayan a quedar las fotos y sonidos de lo que graben.
+Pueden editar 'settings.lwf' manualmente con el bloc de notas, pero no lo recomiendo.
+Para utilizar un HUD custom, copien las carpetas resource y scripts de ese HUD en la carpeta "\hud\custom" y luego elijan la opción Custom HUD en la configuración de HUD de la herramienta.
+Para agregar skyboxes custom, lo unico que necesitan hacer es copiar todos los archivos .vtf (no los .vmt) de la skybox a la carpeta "\Skybox". La herramienta generará una opción para ese skybox automáticamente junto con una foto de previsualización.
+
+La herramienta provee los siguientes bindings:
+
+N - Fija los viewmodels de manera que si estaban visibles en el momento, no se puedan hacer invisibles y viceversa. Una vez que se presiona N sólo se puede revertir reiniciando TF2
+M - Fija la mira default, de manera que no pueda ser cambiada. Una vez que se presiona M sólo se puede revertir reiniciando TF2
+R - Activa/desactiva Ragdolls
+FLECHA ARRIBA - Aumenta el frame rate para grabar
+FLECHA ABAJO - Disminuye el frame rate para grabar
+P - Comienza a grabar una serie de archivos .tga y su .wav respectivo. Cada serie se llama XY_ donde X es una letra entre a y p e Y es un número entre 1 y 16 (ejemplo: a1, b2, c3, etc)
+
+Agradecimientos especiales a Chris por su config genial y a Broesel, m0re, povohat y Barrakketh por sus HUDs. También gracias a Komaokc por sus skyboxes geniales.

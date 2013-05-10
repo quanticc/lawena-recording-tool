@@ -1,0 +1,20 @@
+== LAWENA RECORDING TOOL v3 by Montz ==
+
+To run the tool, double click lwrt.bat.
+The first time you run it, it will ask you to locate your tf2 directory.
+It's the one located in "\Steam\steamapps\common\team fortress 2\tf". Choose it and click on the "Open" button.
+After that, it will ask you to select a directory to store your movie files (everything you record).
+You can manually edit 'settings.lwf' with the notepad, though I don't recommend it.
+To use a custom HUD for recording, copy said HUD's resource and scripts folders into "\hud\custom" and then choose Custom HUD in the HUD settings.
+To use a custom Skybox for recording, simply copy said Skybox's .vtf files (not the .vmt files) into "\Skybox". The tool will automatically generate an option in the settings and a preview screenshot of the skybox.
+
+The tool provides the following bindings:
+
+N - Locks viewmodels so that if they were enabled when you press the key, they stay on and can't be disabled, and viceversa. This setting is overridden by restarting TF2
+M - Locks default crosshair so that it cannot be changed. This setting is overridden by restarting TF2
+R - Enables/disables ragdolls.
+UP ARROW - Increases the recording frame rate
+DOWN ARROW - Decreases the recording frame rate
+P - Starts recording a series of .tga files and their respective .wav file. Each series is named XY_ where X is a letter and Y is a number between 1 and 15 
+
+Special Thanks to Chris for his awesome config and Broesel, m0re, povohat and Barrakketh for their HUDs. Also thanks to Komaokc for his beautiful skyboxes.
