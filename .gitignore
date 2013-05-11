@@ -32,5 +32,6 @@ local.properties
 *.war
 *.ear
 
-*.bat
 logs/
+*.lwf
+!settings.lwf
