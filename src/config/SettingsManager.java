@@ -2,113 +2,124 @@
 package config;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class SettingsManager {
 
+    private static final Logger log = Logger.getLogger("lwrt");
+
     private String filename;
-    private int height;
-    private int width;
-    private int framerate;
-    private int viewmodelfov;
-    private int dxlevel;
-    private String hud;
-    private String viewmodelswitch;
-    private boolean motionblur;
-    private boolean crosshairswitch;
-    private boolean crosshair;
-    private boolean combattext;
-    private boolean announcer;
-    private boolean domination;
-    private boolean hitsounds;
-    private boolean voice;
-    private boolean steamcloud;
+    private int height = 1280;
+    private int width = 720;
+    private int framerate = 120;
+    private int viewmodelfov = 70;
+    private int dxlevel = 98;
+    private String hud = "medic";
+    private String viewmodelswitch = "on";
+    private boolean motionblur = true;
+    private boolean crosshairswitch = false;
+    private boolean crosshair = false;
+    private boolean combattext = false;
+    private boolean announcer = true;
+    private boolean domination = true;
+    private boolean hitsounds = false;
+    private boolean voice = true;
+    private boolean steamcloud = false;
 
-    public SettingsManager(String settingsFile) throws Exception {
-
+    public SettingsManager(String settingsFile) {
         filename = settingsFile;
-
-        BufferedReader settings = new BufferedReader(new FileReader(filename));
-        String line;
-
-        while ((line = settings.readLine()) != null) {
-
-            if (line.charAt(0) == ':')
-                continue;
-
-            if (line.indexOf("height") >= 0) {
-                height = Integer.parseInt(line.substring(line.indexOf('=') + 1));
+        try {
+            BufferedReader settings = new BufferedReader(new FileReader(filename));
+            String line;
+            while ((line = settings.readLine()) != null) {
+                if (line.charAt(0) == ':') {
+                    continue;
+                }
+                if (line.indexOf("height") >= 0) {
+                    try {
+                        height = Integer.parseInt(line.substring(line.indexOf('=') + 1));
+                    } catch (NumberFormatException e) {
+                        log.info("Bad numeric format: height");
+                    }
+                }
+                if (line.indexOf("width") >= 0) {
+                    try {
+                        width = Integer.parseInt(line.substring(line.indexOf('=') + 1));
+                    } catch (NumberFormatException e) {
+                        log.info("Bad numeric format: width");
+                    }
+                }
+                if (line.indexOf("frame rate") >= 0) {
+                    try {
+                        framerate = Integer.parseInt(line.substring(line.indexOf('=') + 1));
+                    } catch (NumberFormatException e) {
+                        log.info("Bad numeric format: framerate");
+                    }
+                }
+                if (line.indexOf("hud") >= 0) {
+                    hud = line.substring(line.indexOf('=') + 1);
+                }
+                if (line.indexOf("viewmodel switching") >= 0) {
+                    viewmodelswitch = line.substring(line.indexOf('=') + 1);
+                }
+                if (line.indexOf("motion") >= 0) {
+                    motionblur = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
+                }
+                if (line.indexOf("viewmodel fov") >= 0) {
+                    try {
+                        viewmodelfov = Integer.parseInt(line.substring(line.indexOf('=') + 1));
+                    } catch (NumberFormatException e) {
+                        log.info("Bad numeric format: viewmodel fov");
+                    }
+                }
+                if (line.indexOf("dxlevel") >= 0) {
+                    try {
+                        dxlevel = Integer.parseInt(line.substring(line.indexOf('=') + 1));
+                    } catch (NumberFormatException e) {
+                        log.info("Bad numeric format: dxlevel");
+                    }
+                }
+                if (line.indexOf("crosshair switching") >= 0) {
+                    crosshairswitch = line.substring(line.indexOf('=') + 1).equals("on") ? true
+                            : false;
+                }
+                if (line.indexOf("crosshair") >= 0) {
+                    crosshair = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
+                }
+                if (line.indexOf("combat text") >= 0) {
+                    combattext = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
+                }
+                if (line.indexOf("announcer") >= 0) {
+                    announcer = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
+                }
+                if (line.indexOf("domination") >= 0) {
+                    domination = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
+                }
+                if (line.indexOf("hit sounds") >= 0) {
+                    hitsounds = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
+                }
+                if (line.indexOf("voice") >= 0) {
+                    voice = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
+                }
+                if (line.indexOf("cloud") >= 0) {
+                    steamcloud = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
+                }
             }
-
-            if (line.indexOf("width") >= 0) {
-                width = Integer.parseInt(line.substring(line.indexOf('=') + 1));
-            }
-
-            if (line.indexOf("frame rate") >= 0) {
-                framerate = Integer.parseInt(line.substring(line.indexOf('=') + 1));
-            }
-            if (line.indexOf("hud") >= 0) {
-                hud = line.substring(line.indexOf('=') + 1);
-            }
-
-            if (line.indexOf("viewmodel switching") >= 0) {
-                viewmodelswitch = line.substring(line.indexOf('=') + 1);
-            }
-
-            if (line.indexOf("motion") >= 0) {
-                motionblur = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
-
-            if (line.indexOf("viewmodel fov") >= 0) {
-                viewmodelfov = Integer.parseInt(line.substring(line.indexOf('=') + 1));
-            }
-
-            if (line.indexOf("dxlevel") >= 0) {
-                dxlevel = Integer.parseInt(line.substring(line.indexOf('=') + 1));
-            }
-
-            if (line.indexOf("crosshair switching") >= 0) {
-                crosshairswitch = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
-
-            if (line.indexOf("crosshair") >= 0) {
-                crosshair = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
-
-            if (line.indexOf("combat text") >= 0) {
-                combattext = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
-
-            if (line.indexOf("announcer") >= 0) {
-                announcer = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
-
-            if (line.indexOf("domination") >= 0) {
-                domination = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
-
-            if (line.indexOf("hit sounds") >= 0) {
-                hitsounds = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
-
-            if (line.indexOf("voice") >= 0) {
-                voice = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
-
-            if (line.indexOf("cloud") >= 0) {
-                steamcloud = line.substring(line.indexOf('=') + 1).equals("on") ? true : false;
-            }
+            settings.close();
+        } catch (FileNotFoundException e) {
+            log.info("Settings file not found, loading default values");
+        } catch (IOException e) {
+            log.info("Problem reading through settings file, will keep some default values");
         }
-
-        settings.close();
     }
 
     public void save() throws Exception {
         PrintWriter settings = new PrintWriter(new FileWriter(filename));
-
         settings.println(": Settings File, feel free to customize manually");
         settings.println(":");
         settings.println(": Resolution Settings");
@@ -138,72 +149,55 @@ public class SettingsManager {
         settings.println("voice=" + (voice ? "on" : "off"));
         settings.println("steam cloud=" + (steamcloud ? "on" : "off"));
         settings.println("dxlevel=" + dxlevel);
-
         settings.close();
     }
 
     public void saveToCfg() throws IOException {
         PrintWriter settings = new PrintWriter(new FileWriter("cfg\\settings.cfg"));
-
         settings.println("alias recframerate host_framerate " + framerate);
-
         if (framerate < 60) {
             settings.println("alias currentfpsup 60fps");
             settings.println("alias currentfpsdn 3840fps");
-        }
-        else if (framerate == 60) {
+        } else if (framerate == 60) {
             settings.println("alias currentfpsup 120fps");
             settings.println("alias currentfpsdn 3840fps");
-        }
-        else if (framerate < 120) {
+        } else if (framerate < 120) {
             settings.println("alias currentfpsup 120fps");
             settings.println("alias currentfpsdn 60fps");
-        }
-        else if (framerate == 120) {
+        } else if (framerate == 120) {
             settings.println("alias currentfpsup 240fps");
             settings.println("alias currentfpsdn 60fps");
-        }
-        else if (framerate < 240) {
+        } else if (framerate < 240) {
             settings.println("alias currentfpsup 240fps");
             settings.println("alias currentfpsdn 120fps");
-        }
-        else if (framerate == 240) {
+        } else if (framerate == 240) {
             settings.println("alias currentfpsup 480fps");
             settings.println("alias currentfpsdn 120fps");
-        }
-        else if (framerate < 480) {
+        } else if (framerate < 480) {
             settings.println("alias currentfpsup 480fps");
             settings.println("alias currentfpsdn 240fps");
-        }
-        else if (framerate == 480) {
+        } else if (framerate == 480) {
             settings.println("alias currentfpsup 960fps");
             settings.println("alias currentfpsdn 240fps");
-        }
-        else if (framerate < 960) {
+        } else if (framerate < 960) {
             settings.println("alias currentfpsup 960fps");
             settings.println("alias currentfpsdn 480fps");
-        }
-        else if (framerate == 960) {
+        } else if (framerate == 960) {
             settings.println("alias currentfpsup 1920fps");
             settings.println("alias currentfpsdn 480fps");
-        }
-        else if (framerate < 1920) {
+        } else if (framerate < 1920) {
             settings.println("alias currentfpsup 1920fps");
             settings.println("alias currentfpsdn 960fps");
-        }
-        else if (framerate == 1920) {
+        } else if (framerate == 1920) {
             settings.println("alias currentfpsup 3840fps");
             settings.println("alias currentfpsdn 960fps");
-        }
-        else if (framerate < 3840) {
+        } else if (framerate < 3840) {
             settings.println("alias currentfpsup 3840fps");
             settings.println("alias currentfpsdn 1920fps");
-        }
-        else if (framerate == 3840) {
+        } else if (framerate == 3840) {
             settings.println("alias currentfpsup 60fps");
             settings.println("alias currentfpsdn 1920fps");
-        }
-        else {
+        } else {
             settings.println("alias currentfpsup 60fps");
             settings.println("alias currentfpsdn 3840fps");
         }
@@ -240,7 +234,6 @@ public class SettingsManager {
         settings.println("volume 0.5");
         settings.println("hud_fastswitch 1");
         settings.println("cl_hud_minmode 1");
-
         settings.close();
     }
 
