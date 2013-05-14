@@ -14,8 +14,8 @@ public class SettingsManager {
     private static final Logger log = Logger.getLogger("lwrt");
 
     private String filename;
-    private int height = 1280;
-    private int width = 720;
+    private int height = 720;
+    private int width = 1280;
     private int framerate = 120;
     private int viewmodelfov = 70;
     private int dxlevel = 98;
