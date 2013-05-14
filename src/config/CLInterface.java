@@ -1,12 +1,12 @@
 
 package config;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.logging.Logger;
 
 public class CLInterface {
+
+    private static final Logger log = Logger.getLogger("lwrt");
 
     Runtime rt;
 
@@ -47,14 +47,15 @@ public class CLInterface {
 
     public void startTf(int width, int height, String dir, int dxlevel) {
         try {
-            Process pr = rt
-                    .exec("\""
-                            + dir
-                            + "\\Steam.exe\""
-                            + " -applaunch 440 -dxlevel "
-                            + dxlevel
-                            + " -novid -noborder -noforcedmparms -noforcemaccel -noforcemspd -console -high -noipx -nojoy -sw -w "
-                            + width + " -h " + height);
+            String command = "\""
+                    + dir
+                    + "\\Steam.exe\""
+                    + " -applaunch 440 -dxlevel "
+                    + dxlevel
+                    + " -novid -noborder -noforcedmparms -noforcemaccel -noforcemspd -console -high -noipx -nojoy -sw -w "
+                    + width + " -h " + height;
+            log.info("Launching TF2: " + command);
+            Process pr = rt.exec(command);
             pr.waitFor();
         } catch (Exception e) {
             e.printStackTrace();

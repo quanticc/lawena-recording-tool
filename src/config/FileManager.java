@@ -4,7 +4,6 @@ package config;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,57 +16,18 @@ public class FileManager {
     private static final Logger log = Logger.getLogger("lwrt");
 
     private String tfdir;
-
-    private Path hudPath = null;
-    private List<Path> voPaths = new ArrayList<>();
-    private List<Path> miscPaths = new ArrayList<>();
-    private List<Path> skyboxPaths = new ArrayList<>();
+    private Path backupPath;
+    private Path customPath;
+    private String hudName;
+    private String skyboxFilename;
+    private boolean replaceVo;
+    private boolean replaceDomination;
+    private boolean replaceAnnouncer;
 
     public FileManager(String dir) {
         tfdir = dir;
-    }
-
-    public void scanBackupFolder() {
-        log.info("Scanning lawena backup folders ...");
-        hudPath = null;
-        voPaths.clear();
-        miscPaths.clear();
-        skyboxPaths.clear();
-        scanFolder(Paths.get(tfdir), "lwrt*");
-    }
-
-    public void scanCustomFolder() {
-        log.info("Scanning tf custom folder ...");
-        hudPath = null;
-        voPaths.clear();
-        miscPaths.clear();
-        skyboxPaths.clear();
-        scanFolder(Paths.get(tfdir, "custom"), "*");
-    }
-
-    private void scanFolder(Path start, String glob) {
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(start, glob)) {
-            for (Path path : stream) {
-                if (Files.isDirectory(path)) {
-                    if (Files.isDirectory(path.resolve("resource"))
-                            && Files.isDirectory(path.resolve("scripts"))) {
-                        log.info("Hud folder found: " + path);
-                        hudPath = path;
-                    } else if (Files.isDirectory(path.resolve("materials/skybox"))) {
-                        log.info("Skybox folder found: " + path);
-                        skyboxPaths.add(path);
-                    } else if (Files.isDirectory(path.resolve("sound/misc"))) {
-                        log.info("Misc folder found: " + path);
-                        miscPaths.add(path);
-                    } else if (Files.isDirectory(path.resolve("sound/vo"))) {
-                        log.info("Vo folder found: " + path);
-                        voPaths.add(path);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            log.log(Level.INFO, "Problem occurred while scanning custom folder", e);
-        }
+        backupPath = Paths.get(tfdir, "lwrtcustom");
+        customPath = Paths.get(tfdir, "custom");
     }
 
     private Path copy(Path from, Path to) throws IOException {
@@ -78,254 +38,166 @@ public class FileManager {
         return Files.walkFileTree(dir, new DeleteDirVisitor());
     }
 
-    public void replaceCfg() {
-        while (!Files.exists(Paths.get(tfdir, "lwrtcfg"))) {
-            try {
-                Files.move(Paths.get(tfdir, "cfg"), Paths.get(tfdir, "lwrtcfg"));
-                copy(Paths.get("cfg"), Paths.get(tfdir, "cfg"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while replacing cfg", e);
-            }
-        }
+    public String getHudName() {
+        return hudName;
     }
 
-    public void restoreCfg() {
-        while (Files.exists(Paths.get(tfdir, "lwrtcfg"))) {
-            try {
-                delete(Paths.get(tfdir, "cfg"));
-                Files.move(Paths.get(tfdir, "lwrtcfg"), Paths.get(tfdir, "cfg"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while restoring cfg", e);
-            }
-        }
+    public String getSkyboxFilename() {
+        return skyboxFilename;
     }
 
-    public void replaceHud(String hud) {
-        while (!Files.exists(Paths.get(tfdir, "lwrthud"))) {
+    public boolean isReplaceAnnouncer() {
+        return replaceAnnouncer;
+    }
+
+    public boolean isReplaceDomination() {
+        return replaceDomination;
+    }
+
+    public boolean isReplaceVo() {
+        return replaceVo;
+    }
+
+    public void replaceAll() {
+        if (!Files.exists(backupPath)) {
+            log.info("Replacing custom files");
             try {
-                Files.createDirectory(Paths.get(tfdir, "lwrthud"));
+                // backup all custom
+                Files.move(customPath, backupPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while creating directory", e);
+                log.log(Level.INFO, "Could not backup custom folder", e);
+                return;
             }
-            if (hudPath != null) {
+            try {
+                // copy lawena's cfg
+                Path cfgPath = Paths.get(tfdir, "custom/lawena/cfg");
+                Files.createDirectories(cfgPath);
+                copy(Paths.get("cfg"), cfgPath);
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not replace cfg files", e);
+            }
+            // copy lawena's hud (resource, scripts)
+            try {
+                Path resourcePath = Paths.get(tfdir, "custom/lawena/resource");
+                Path scriptsPath = Paths.get(tfdir, "custom/lawena/scripts");
+                Files.createDirectories(resourcePath);
+                Files.createDirectories(scriptsPath);
+                copy(Paths.get("hud", hudName, "resource"), resourcePath);
+                copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not replace hud files", e);
+            }
+            // copy lawena's materials/skybox
+            Path materialsPath = Paths.get(tfdir, "custom/lawena/materials/skybox");
+            try {
+                if (skyboxFilename != null && !skyboxFilename.isEmpty()) {
+                    Files.createDirectories(materialsPath);
+                    replaceSkybox();
+                }
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not replace skybox files", e);
                 try {
-                    Files.move(hudPath, Paths.get(tfdir, "lwrthud").resolve(hudPath.getFileName()));
-                    copy(Paths.get("hud", hud), Paths.get(tfdir, "custom", "lwrthud"));
-                } catch (IOException e) {
-                    log.log(Level.INFO, "Problem occurred while replacing hud", e);
+                    delete(materialsPath);
+                } catch (IOException e1) {
+                    log.log(Level.INFO, "Could not delete lawena skybox folder", e1);
+                }
+            }
+            // copy lawena's sound/vo
+            try {
+                if (replaceVo) {
+                    Path voPath = Paths.get(tfdir, "custom/lawena/sound/vo");
+                    Files.createDirectories(voPath);
+                    copy(Paths.get("sound/vo"), voPath);
+                }
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not replace vo sound files", e);
+            }
+            // copy lawena's sound/misc
+            try {
+                Path miscPath = Paths.get(tfdir, "custom/lawena/sound/misc");
+                Files.createDirectories(miscPath);
+                copy(Paths.get("sound/misc"), miscPath);
+                if (replaceDomination) {
+                    copy(Paths.get("sound/miscdom"), miscPath);
+                }
+                if (replaceAnnouncer) {
+                    copy(Paths.get("sound/miscann"), miscPath);
+                }
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not replace misc sound files", e);
+            }
+        } else {
+            log.info("Could not replace custom files because the backup folder 'lwrtcustom' still exists");
+        }
+    }
+
+    private void replaceSkybox() throws IOException {
+        List<Path> vmtPaths = new ArrayList<>();
+        List<Path> vtfPaths = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("skybox"))) {
+            for (Path path : stream) {
+                if (path.endsWith(".vmt")) {
+                    Files.copy(
+                            path,
+                            Paths.get(tfdir, "custom/lawena/materials/skybox").resolve(
+                                    path.getFileName()));
+                    vmtPaths.add(path);
+                }
+                if (path.endsWith(".vtf") && path.startsWith(skyboxFilename)) {
+                    vtfPaths.add(path);
+                }
+            }
+        }
+
+        for (int i = 0; i < vtfPaths.size(); ++i) {
+            for (int j = 0; j < vmtPaths.size(); ++j) {
+                Path vtf = vtfPaths.get(i);
+                Path vmt = vmtPaths.get(j);
+                if ((vtf.endsWith("up.vtf") && vmt.endsWith("up.vmt"))
+                        || (vtf.endsWith("dn.vtf") && vmt.endsWith("dn.vmt"))
+                        || (vtf.endsWith("bk.vtf") && vmt.endsWith("bk.vmt"))
+                        || (vtf.endsWith("ft.vtf") && vmt.endsWith("ft.vmt"))
+                        || (vtf.endsWith("lf.vtf") && vmt.endsWith("lf.vmt"))
+                        || (vtf.endsWith("rt.vtf") && vmt.endsWith("rt.vmt"))) {
+                    String vmtFilename = vmt.getFileName().toString();
+                    Files.copy(
+                            vtfPaths.get(i),
+                            Paths.get(tfdir, "custom/lawena/materials/skybox").resolve(
+                                    vmtFilename.substring(0, vmtFilename.indexOf(".vmt")) + ".vtf"));
                 }
             }
         }
     }
 
-    public void restoreHud() {
-        while (Files.exists(Paths.get(tfdir, "lwrthud"))) {
+    public void restoreAll() {
+        if (Files.exists(backupPath)) {
+            log.info("Restoring custom files");
             try {
-                delete(Paths.get(tfdir, "custom", "lwrthud"));
-            } catch (NoSuchFileException e) {
-                log.info("Custom hud folder not found");
+                delete(customPath);
+                Files.move(backupPath, customPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while deleting lawena hud", e);
-            }
-            try {
-                if (hudPath != null) {
-                    Files.move(Paths.get(tfdir, "lwrthud").resolve(hudPath.getFileName()), Paths
-                            .get(tfdir, "custom").resolve(hudPath.getFileName()));
-                }
-                delete(Paths.get(tfdir, "lwrthud"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while restoring hud", e);
+                log.log(Level.INFO, "Could not restore files", e);
             }
         }
     }
 
-    public void replaceVo() {
-        while (!Files.exists(Paths.get(tfdir, "lwrtvo"))) {
-            try {
-                Files.createDirectory(Paths.get(tfdir, "lwrtvo"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while creating directory", e);
-            }
-            for (Path path : voPaths) {
-                try {
-                    Files.move(path, Paths.get(tfdir, "lwrtvo").resolve(path.getFileName()));
-                } catch (IOException e) {
-                    log.log(Level.INFO, "Problem occurred while moving existing vo files", e);
-                }
-            }
-            try {
-                Files.createDirectories(Paths.get(tfdir, "custom", "lwrtvo", "sound", "vo"));
-                copy(Paths.get("sound", "vo"),
-                        Paths.get(tfdir, "custom", "lwrtvo", "sound", "vo"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while copying lawena vo files", e);
-            }
-        }
+    public void setHudName(String hudName) {
+        this.hudName = hudName;
     }
 
-    public void restoreVo() {
-        while (Files.exists(Paths.get(tfdir, "lwrtvo"))) {
-            try {
-                delete(Paths.get(tfdir, "custom", "lwrtvo"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while deleting lawena vo files", e);
-            }
-            for (Path path : voPaths) {
-                try {
-                    Files.move(Paths.get(tfdir, "lwrtvo").resolve(path.getFileName()),
-                            Paths.get(tfdir, "custom").resolve(path.getFileName()));
-                } catch (IOException e) {
-                    log.log(Level.INFO, "Problem occurred while restoring vo files", e);
-                }
-            }
-            try {
-                delete(Paths.get(tfdir, "lwrtvo"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while deleting lawena vo folder", e);
-            }
-        }
+    public void setReplaceAnnouncer(boolean replaceAnnouncer) {
+        this.replaceAnnouncer = replaceAnnouncer;
     }
 
-    public void replaceMisc(boolean dom, boolean ann) {
-        while (!Files.exists(Paths.get(tfdir, "lwrtmisc"))) {
-            try {
-                Files.createDirectory(Paths.get(tfdir, "lwrtmisc"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while creating directory", e);
-            }
-            for (Path path : miscPaths) {
-                try {
-                    Files.move(path, Paths.get(tfdir, "lwrtmisc").resolve(path.getFileName()));
-                } catch (IOException e) {
-                    log.log(Level.INFO, "Problem occurred while moving existing misc files", e);
-                }
-            }
-            try {
-                Path soundMiscPath = Paths.get(tfdir, "custom", "lwrtmisc", "sound", "misc");
-                Files.createDirectories(soundMiscPath);
-                copy(Paths.get("sound", "misc"), soundMiscPath);
-                if (dom)
-                    copy(Paths.get("sound", "miscdom"), soundMiscPath);
-                if (ann)
-                    copy(Paths.get("sound", "miscann"), soundMiscPath);
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while copying lawena misc files", e);
-            }
-        }
+    public void setReplaceDomination(boolean replaceDomination) {
+        this.replaceDomination = replaceDomination;
     }
 
-    public void restoreMisc() {
-        while (Files.exists(Paths.get(tfdir, "lwrtmisc"))) {
-            try {
-                delete(Paths.get(tfdir, "custom", "lwrtmisc"));
-            } catch (NoSuchFileException e) {
-                log.info("Custom misc folder not found");
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while deleting lawena misc files", e);
-            }
-            for (Path path : miscPaths) {
-                try {
-                    Files.move(Paths.get(tfdir, "lwrtmisc").resolve(path.getFileName()),
-                            Paths.get(tfdir, "custom").resolve(path.getFileName()));
-                } catch (IOException e) {
-                    log.log(Level.INFO, "Problem occurred while restoring misc files", e);
-                }
-            }
-            try {
-                delete(Paths.get(tfdir, "lwrtmisc"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while deleting lawena misc folder", e);
-            }
-        }
-
+    public void setReplaceVo(boolean replaceVo) {
+        this.replaceVo = replaceVo;
     }
 
-    public void replaceSkybox(final String filename) {
-        while (!Files.exists(Paths.get(tfdir, "lwrtSkybox"))) {
-            try {
-                Files.createDirectory(Paths.get(tfdir, "lwrtSkybox"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while creating directory", e);
-            }
-            for (Path path : skyboxPaths) {
-                try {
-                    Files.move(path, Paths.get(tfdir, "lwrtSkybox").resolve(path.getFileName()));
-                } catch (IOException e) {
-                    log.log(Level.INFO, "Couldn't backup Skybox files", e);
-                }
-            }
-
-            List<Path> vmtPaths = new ArrayList<>();
-            List<Path> vtfPaths = new ArrayList<>();
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("Skybox"))) {
-                for (Path path : stream) {
-                    if (path.endsWith(".vmt")) {
-                        Files.copy(path,
-                                Paths.get(tfdir, "custom", "lwrtSkybox", "materials", "Skybox")
-                                        .resolve(path.getFileName()));
-                        vmtPaths.add(path);
-                    }
-                    if (path.endsWith(".vtf")) {
-                        vtfPaths.add(path);
-                    }
-                }
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while replacing Skybox files", e);
-            }
-
-            for (int i = 0; i < vtfPaths.size(); ++i) {
-                for (int j = 0; j < vmtPaths.size(); ++j) {
-                    Path vtf = vtfPaths.get(i);
-                    Path vmt = vmtPaths.get(j);
-                    if ((vtf.endsWith("up.vtf") && vmt.endsWith("up.vmt"))
-                            || (vtf.endsWith("dn.vtf") && vmt.endsWith("dn.vmt"))
-                            || (vtf.endsWith("bk.vtf") && vmt.endsWith("bk.vmt"))
-                            || (vtf.endsWith("ft.vtf") && vmt.endsWith("ft.vmt"))
-                            || (vtf.endsWith("lf.vtf") && vmt.endsWith("lf.vmt"))
-                            || (vtf.endsWith("rt.vtf") && vmt.endsWith("rt.vmt"))) {
-                        String vmtFilename = vmt.getFileName().toString();
-                        try {
-                            Files.copy(
-                                    vtfPaths.get(i),
-                                    Paths.get(tfdir, "custom", "lwrtSkybox", "materials",
-                                            "Skybox")
-                                            .resolve(
-                                                    vmtFilename.substring(0,
-                                                            vmtFilename.indexOf(".vmt"))
-                                                            + ".vtf"));
-                        } catch (IOException e) {
-                            log.log(Level.INFO, "Problem occurred while copying Skybox files",
-                                    e);
-                        }
-                    }
-                }
-            }
-        }
+    public void setSkyboxFilename(String skyboxFilename) {
+        this.skyboxFilename = skyboxFilename;
     }
-
-    public void restoreSkybox() {
-        while (Files.exists(Paths.get(tfdir, "lwrtSkybox"))) {
-            try {
-                delete(Paths.get(tfdir, "custom", "lwrtSkybox"));
-            } catch (NoSuchFileException e) {
-                log.info("Custom Skybox folder not found");
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while deleting lawena Skybox files", e);
-            }
-            for (Path path : skyboxPaths) {
-                try {
-                    Files.move(Paths.get(tfdir, "lwrtSkybox").resolve(path.getFileName()), Paths
-                            .get(tfdir, "custom").resolve(path.getFileName()));
-                } catch (IOException e) {
-                    log.log(Level.INFO, "Problem occured while restoring Skybox files", e);
-                }
-            }
-            try {
-                delete(Paths.get(tfdir, "lwrtSkybox"));
-            } catch (IOException e) {
-                log.log(Level.INFO, "Problem occurred while deleting lawena Skybox folder", e);
-            }
-        }
-    }
-
 }

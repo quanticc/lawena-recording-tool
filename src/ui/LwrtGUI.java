@@ -190,13 +190,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
         movies = new MovieManager(moviedir);
         files = new FileManager(tfdir);
 
-        files.scanBackupFolder();
-        files.restoreVo();
-        files.restoreMisc();
-        files.restoreCfg();
-        files.restoreHud();
-        files.restoreSkybox();
-        files.scanCustomFolder();
+        files.restoreAll();
 
         oDxlevel = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",
                 "DXLevel_V1", 0);
@@ -562,24 +556,19 @@ public class LwrtGUI extends JFrame implements ActionListener {
                 log.log(Level.INFO, "", e2);
             }
 
-            if (!settings.getAnnouncer()) {
-                files.replaceVo();
-            }
-
+            // backup entire custom folder and then replace with lawena stuff
+            files.setReplaceVo(!settings.getAnnouncer());
             if (skybox.getSelectedIndex() != 0) {
-                files.replaceSkybox((String) skybox.getSelectedItem());
+                files.setSkyboxFilename((String) skybox.getSelectedItem());
             }
-
-            files.replaceMisc(!settings.getDomination(), !settings.getAnnouncer());
-            files.replaceCfg();
-            files.replaceHud(settings.getHud());
+            files.setReplaceAnnouncer(!settings.getAnnouncer());
+            files.setReplaceDomination(!settings.getDomination());
+            files.setHudName(settings.getHud());
+            files.replaceAll();
 
             setTitle("Starting TF2...");
-
             cl.startTf(settings.getWidth(), settings.getHeight(), steampath, settings.getDxlevel());
-
             int timeout = 0;
-
             while (!cl.isRunning("hl2.exe") && timeout < 40) {
                 try {
                     Thread.sleep(3000);
@@ -588,9 +577,8 @@ public class LwrtGUI extends JFrame implements ActionListener {
                     log.log(Level.INFO, "", e1);
                 }
             }
-
+            
             setTitle("Running TF2...");
-
             while (cl.isRunning("hl2.exe")) {
                 try {
                     Thread.sleep(3000);
@@ -600,21 +588,10 @@ public class LwrtGUI extends JFrame implements ActionListener {
             }
 
             setTitle("Restoring Config...");
-
-            if (!settings.getAnnouncer()) {
-                files.restoreVo();
-            }
-
-            if (skybox.getSelectedIndex() != 0) {
-                files.restoreSkybox();
-            }
-
-            files.restoreMisc();
-            files.restoreCfg();
-            files.restoreHud();
-
+            files.restoreAll();
             cl.regedit("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1",
                     oDxlevel);
+            
             setEnabled(true);
             setTitle("lawena Recording Tool v3.1");
         }
