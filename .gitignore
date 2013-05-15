@@ -34,4 +34,3 @@ local.properties
 
 logs/
 *.lwf
-!settings.lwf
