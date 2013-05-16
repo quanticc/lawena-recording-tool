@@ -16,18 +16,24 @@ public class FileManager {
     private static final Logger log = Logger.getLogger("lwrt");
 
     private String tfdir;
-    private Path backupPath;
-    private Path customPath;
+
     private String hudName;
     private String skyboxFilename;
     private boolean replaceVo;
     private boolean replaceDomination;
     private boolean replaceAnnouncer;
 
+    private Path configBackupPath;
+    private Path configPath;
+    private Path customBackupPath;
+    private Path customPath;
+
     public FileManager(String dir) {
         tfdir = dir;
-        backupPath = Paths.get(tfdir, "lwrtcustom");
+        customBackupPath = Paths.get(tfdir, "lwrtcustom");
         customPath = Paths.get(tfdir, "custom");
+        configBackupPath = Paths.get(tfdir, "lwrtcfg");
+        configPath = Paths.get(tfdir, "cfg");
     }
 
     private Path copy(Path from, Path to) throws IOException {
@@ -59,11 +65,22 @@ public class FileManager {
     }
 
     public void replaceAll() {
-        if (!Files.exists(backupPath)) {
+        if (!Files.exists(configBackupPath)) {
+            log.info("Backing up cfg files");
+            try {
+                // backup tf/cfg
+                Files.createDirectories(configBackupPath);
+                copy(configPath, configBackupPath);
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not backup cfg folder", e);
+                return;
+            }
+        }
+        if (!Files.exists(customBackupPath)) {
             log.info("Replacing custom files");
             try {
                 // backup all custom
-                Files.move(customPath, backupPath);
+                Files.move(customPath, customBackupPath);
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not backup custom folder", e);
                 return;
@@ -170,13 +187,22 @@ public class FileManager {
     }
 
     public void restoreAll() {
-        if (Files.exists(backupPath)) {
+        if (Files.exists(configBackupPath)) {
+            log.info("Restoring cfg files");
+            try {
+                delete(configPath);
+                Files.move(configBackupPath, configPath);
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not restore cfg files", e);
+            }
+        }
+        if (Files.exists(customBackupPath)) {
             log.info("Restoring custom files");
             try {
                 delete(customPath);
-                Files.move(backupPath, customPath);
+                Files.move(customBackupPath, customPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not restore files", e);
+                log.log(Level.INFO, "Could not restore custom files", e);
             }
         }
     }
