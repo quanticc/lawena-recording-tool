@@ -1,6 +1,6 @@
 == LAWENA RECORDING TOOL v3 by Montz ==
 
-To run the tool, double click lwrt.bat.
+To run the tool, double click lawena.jar (requires Java 1.7).
 The first time you run it, it will ask you to locate your tf2 directory.
 It's the one located in "\Steam\steamapps\common\team fortress 2\tf". Choose it and click on the "Open" button.
 After that, it will ask you to select a directory to store your movie files (everything you record).

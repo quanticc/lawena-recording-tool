@@ -1,13 +1,16 @@
-lawena-recording-tool
+lawena Recording Tool
 =====================
 
 Simple Team Fortress 2 (TF2) movie recording tool
 
-Original project at [Google Code](http://code.google.com/p/lawenarecordingtool/) by Montz
+Original project at [Google Code](http://code.google.com/p/lawenarecordingtool/) by Montz. This is a fork to support SteamPipe and other fixes.
 
-To use this, clone/download this repo and execute 'buildrun.bat' to compile and package a jar that you can later execute.
+#### Downloads
 
-####About this
-- Requires Java 7.
-- Currently testing if it handles the SteamPipe folder structure correctly.
-- Backup your **cfg** and **custom** folders before launching TF2 from this tool while I verify that it runs well.
+- [Download latest full package](https://dl.dropboxusercontent.com/u/74380/lawena/lawena-all.rar) containing everything, just extract to any folder and double-click **lawena.jar**. (22 MB)
+- Alternatively, download only the [executable](https://dl.dropboxusercontent.com/u/74380/lawena/lawena-executable.rar) with just the latest lawena.jar. (37 KB)
+
+#### About this
+- Requires Java [1.7](http://www.java.com).
+- Recommendation: Make a backup of your **cfg** and **custom** folders, just in case.
+- Check out the [wiki](https://github.com/iabarca/lawena-recording-tool/wiki).

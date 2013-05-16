@@ -1,6 +1,6 @@
 == LAWENA RECORDING TOOL v3 por Montz ==
 
-Para ejecutar la herramienta, hacer doble click en lwrt.bat.
+Para ejecutar la herramienta, hacer doble click en lawena.jar (requiere Java 1.7).
 La primera vez que se ejecuta, la aplicación les pedirá que ubiquen su directorio de tf2.
 Es el que está ubicado en "\Steam\steamapps\common\team fortress 2\tf". Escójanla y hagan click en el boton "Abrir".
 Luego, la herramienta les pedirá que elijan un directorio donde vayan a quedar las fotos y sonidos de lo que graben.
