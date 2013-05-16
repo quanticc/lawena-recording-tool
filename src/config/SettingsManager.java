@@ -16,7 +16,7 @@ public class SettingsManager {
     private enum Key {
         Height(720), Width(1280), Framerate(120), ViewmodelFov(70), DxLevel(98), Hud("medic"), ViewmodelSwitch(
                 "on"), MotionBlur(true), CrosshairSwitch(false), Crosshair(false), CombatText(false), Announcer(
-                true), Domination(true), Hitsounds(false), Voice(true), SteamCloud(false);
+                true), Domination(true), Hitsounds(false), Voice(false), SteamCloud(false);
 
         private Object value;
 
