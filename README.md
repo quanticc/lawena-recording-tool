@@ -1,6 +1,8 @@
 lawena Recording Tool
 =====================
 
+[![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.png)](https://travis-ci.org/iabarca/lawena-recording-tool)
+
 Simple Team Fortress 2 (TF2) movie recording tool
 
 Original project at [Google Code](http://code.google.com/p/lawenarecordingtool/) by Montz. This is a fork to support SteamPipe and other fixes.
