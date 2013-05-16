@@ -9,8 +9,9 @@ Original project at [Google Code](http://code.google.com/p/lawenarecordingtool/)
 
 #### Downloads
 
-- [Download latest full package](https://dl.dropboxusercontent.com/u/74380/lawena/lawena-all.rar) containing everything, just extract to any folder and double-click **lawena.jar**. (22 MB)
-- Alternatively, download only the [executable](https://dl.dropboxusercontent.com/u/74380/lawena/lawena-executable.rar) with just the latest lawena.jar. (37 KB)
+- Option A: [Download latest full package](https://dl.dropboxusercontent.com/u/74380/lawena/lawena-all.rar) containing everything, just extract to any folder and run **lawena.exe**. (~22 MB)
+- Option B: [Download exe file only](https://dl.dropboxusercontent.com/u/74380/lawena/lawena-executable.rar) for a quick update. Still requires all lawena's resources.
+- Option C: Clone or [Download](https://github.com/iabarca/lawena-recording-tool/zipball/master) this repository and execute **build-jar.bat** (requires JDK 1.7) and then double-click **lawena.jar**.
 
 #### About this
 - Requires Java [1.7](http://www.java.com).
