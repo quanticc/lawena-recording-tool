@@ -401,7 +401,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
 
         add(tabbedpane);
 
-        setTitle("lawena Recording Tool v3.1");
+        setTitle("lawena Recording Tool");
         pack();
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -453,7 +453,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
                 settings.save();
                 settings.saveToCfg();
             } catch (Exception e1) {
-                log.log(Level.INFO, "Problem saving settings", e1);
+                log.log(Level.WARNING, "A problem occurred while saving settings", e1);
             }
         }
 
@@ -497,7 +497,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
             try {
                 vdmgenerator.generate();
             } catch (IOException e1) {
-                log.log(Level.INFO, "", e1);
+                log.log(Level.WARNING, "A problem occurred while generating the VDM", e1);
             }
         }
 
@@ -543,7 +543,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
             try {
                 settings.saveToCfg();
             } catch (Exception e1) {
-                log.log(Level.INFO, "", e1);
+                log.log(Level.WARNING, "A problem occurred while saving to settings.cfg file", e1);
             }
 
             setEnabled(false);
@@ -552,8 +552,8 @@ public class LwrtGUI extends JFrame implements ActionListener {
             try {
                 movies.createMovienameCfgs();
                 movies.movieOffset();
-            } catch (IOException e2) {
-                log.log(Level.INFO, "", e2);
+            } catch (IOException e1) {
+                log.log(Level.WARNING, "A problem occured while creating movie config", e1);
             }
 
             // backup entire custom folder and then replace with lawena stuff
@@ -574,16 +574,16 @@ public class LwrtGUI extends JFrame implements ActionListener {
                     Thread.sleep(3000);
                     ++timeout;
                 } catch (Exception e1) {
-                    log.log(Level.INFO, "", e1);
+                    log.log(Level.WARNING, "", e1);
                 }
             }
-            
+
             setTitle("Running TF2...");
             while (cl.isRunning("hl2.exe")) {
                 try {
                     Thread.sleep(3000);
                 } catch (Exception e1) {
-                    log.log(Level.INFO, "", e1);
+                    log.log(Level.WARNING, "", e1);
                 }
             }
 
@@ -591,9 +591,9 @@ public class LwrtGUI extends JFrame implements ActionListener {
             files.restoreAll();
             cl.regedit("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1",
                     oDxlevel);
-            
+
             setEnabled(true);
-            setTitle("lawena Recording Tool v3.1");
+            setTitle("lawena Recording Tool");
         }
     }
 
@@ -826,18 +826,15 @@ public class LwrtGUI extends JFrame implements ActionListener {
         return current;
     }
 
-    static public void main(String[] args) throws Exception {
-
+    public static void main(String[] args) throws Exception {
         SimpleLog sl = new SimpleLog("lwrt");
-        sl.startConsoleLog();
-        sl.startShortLogfileOutput();
-        log.info("Starting lawena Recording Tool v3.1");
+        sl.startLoggingToConsole();
 
         try {
             // Set System L&F
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            System.err.println("Error setting look and feel!");
+            log.warning("Could not set the look and feel");
             System.exit(1);
         }
 
@@ -848,7 +845,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
                     frame.init();
                     Thread.sleep(1000);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.log(Level.WARNING, "Problem while running the GUI", e);
                 }
                 frame.setVisible(true);
             }

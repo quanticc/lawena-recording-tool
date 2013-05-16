@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SettingsManager {
@@ -42,16 +43,14 @@ public class SettingsManager {
         properties = new Properties(defaults);
         try {
             properties.load(new FileReader(filename));
-            log.info("Settings loaded from " + filename);
         } catch (FileNotFoundException e) {
-            log.info("Settings file not found, loading defaults");
+            // do nothing, will load defaults
         } catch (IOException e) {
-            log.info("Problem while loading settings, reverting to defaults");
+            log.log(Level.INFO, "Problem while loading settings, reverting to defaults", e);
         }
     }
 
     public void save() throws Exception {
-        log.info("Storing config to " + filename);
         PrintWriter pw = new PrintWriter(new FileWriter(filename));
         properties.store(pw, "lawena settings");
     }
@@ -164,10 +163,11 @@ public class SettingsManager {
     }
 
     private int getInt(Key key) {
+        String value = properties.getProperty(key.toString());
         try {
-            return Integer.parseInt(properties.getProperty(key.toString()));
+            return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            log.info("Invalid numeric format in key: " + key + ", loading default value");
+            log.info("Invalid numeric format in " + key + ": " + value + ", loading default value");
             return Integer.parseInt(key.value.toString());
         }
     }

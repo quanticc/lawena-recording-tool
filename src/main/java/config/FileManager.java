@@ -66,7 +66,6 @@ public class FileManager {
 
     public void replaceAll() {
         if (!Files.exists(configBackupPath)) {
-            log.info("Backing up cfg files");
             try {
                 // backup tf/cfg
                 Files.createDirectories(configBackupPath);
@@ -77,7 +76,6 @@ public class FileManager {
             }
         }
         if (!Files.exists(customBackupPath)) {
-            log.info("Replacing custom files");
             try {
                 // backup all custom
                 Files.move(customPath, customBackupPath);
@@ -188,7 +186,6 @@ public class FileManager {
 
     public void restoreAll() {
         if (Files.exists(configBackupPath)) {
-            log.info("Restoring cfg files");
             try {
                 delete(configPath);
                 Files.move(configBackupPath, configPath);
@@ -197,7 +194,6 @@ public class FileManager {
             }
         }
         if (Files.exists(customBackupPath)) {
-            log.info("Restoring custom files");
             try {
                 delete(customPath);
                 Files.move(customBackupPath, customPath);
