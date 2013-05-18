@@ -151,7 +151,8 @@ public class LwrtGUI extends JFrame implements ActionListener {
             br.close();
         }
 
-        while (!dirfile.exists() || !Files.exists(Paths.get(tfdir)) || tfdir.indexOf("tf") < 0) {
+        while (!dirfile.exists() || !Files.exists(Paths.get(tfdir))
+                || !Paths.get(tfdir).toFile().getName().toString().equals("tf")) {
             int returnVal = choosedir.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 tfdir = choosedir.getSelectedFile().getPath();
