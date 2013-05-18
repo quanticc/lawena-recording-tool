@@ -1,4 +1,34 @@
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'eclipse'
 
-mainClassName = "ui.LwrtGUI"
+mainClassName = 'ui.LwrtGUI'
+
+sourceSets {
+    main {
+        resources {
+            exclude '**/*.db'
+        }
+    }
+}
+
+jar {
+    manifest {
+        new ByteArrayOutputStream().withStream { execOS ->
+            def result = exec {
+                executable = 'git'
+                args = [ 'describe', '--tags' ]
+                standardOutput = execOS
+            }
+            def buildVersion = execOS.toString().trim()
+            println("Version: " + buildVersion)
+            version buildVersion
+        }
+        attributes (
+            'Main-Class': mainClassName,
+            'Implementation-Title': 'lawena Recording Tool',
+            'Implementation-Version': version,
+            'Implementation-Build': new Date().format("yyyy-MM-dd HH:mm:ss") 
+        )
+    }
+}

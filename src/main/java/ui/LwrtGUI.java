@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -210,9 +211,15 @@ public class LwrtGUI extends JFrame implements ActionListener {
         };
 
         String[] skyboxfiles = new File("Skybox").list(filter);
-        String[] skyboxes = new String[skyboxfiles.length + 1];
+        int skyboxlength;
+        if (skyboxfiles == null) {
+            skyboxlength = 0;
+        } else {
+            skyboxlength = skyboxfiles.length;
+        }
+        String[] skyboxes = new String[skyboxlength + 1];
 
-        for (int i = 1; i < skyboxfiles.length + 1; ++i) {
+        for (int i = 1; i < skyboxlength + 1; ++i) {
             cl.generatePreview(skyboxfiles[i - 1]);
             skyboxes[i] = skyboxfiles[i - 1].substring(0, skyboxfiles[i - 1].indexOf("up.vtf"));
         }
@@ -395,7 +402,6 @@ public class LwrtGUI extends JFrame implements ActionListener {
         vdmpanel.add(tickpanel);
         vdmpanel.add(createvdmpanel);
         vdmpanel.add(ticksscrollpane);
-        // add(new JLabel("Made by Montz"));
 
         tabbedpane.addTab("Settings", settingspanel);
         tabbedpane.addTab("VDM", vdmpanel);
@@ -403,6 +409,12 @@ public class LwrtGUI extends JFrame implements ActionListener {
         add(tabbedpane);
 
         setTitle("lawena Recording Tool");
+        try {
+            setIconImage(new ImageIcon(LwrtGUI.class.getClassLoader().getResource("ui/tf2.png")).getImage());
+        } catch (Exception e) {
+            // Could not load icon, no big deal
+            log.log(Level.INFO, "Could not load frame icon", e);
+        }
         pack();
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
