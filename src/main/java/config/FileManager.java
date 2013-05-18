@@ -67,11 +67,12 @@ public class FileManager {
     public void replaceAll() {
         if (!Files.exists(configBackupPath)) {
             try {
-                // backup tf/cfg
-                Files.createDirectories(configBackupPath);
-                copy(configPath, configBackupPath);
+                // backup tf/cfg and copy lawena's cfg
+                Files.move(configPath, configBackupPath);
+                Files.createDirectories(configPath);
+                copy(Paths.get("cfg"), configPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not backup cfg folder", e);
+                log.log(Level.INFO, "Could not replace cfg files", e);
                 return;
             }
         }
@@ -82,14 +83,6 @@ public class FileManager {
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not backup custom folder", e);
                 return;
-            }
-            try {
-                // copy lawena's cfg
-                Path cfgPath = Paths.get(tfdir, "custom/lawena/cfg");
-                Files.createDirectories(cfgPath);
-                copy(Paths.get("cfg"), cfgPath);
-            } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace cfg files", e);
             }
             // copy lawena's hud (resource, scripts)
             try {
