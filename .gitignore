@@ -8,6 +8,7 @@
 *.lwf
 *.exe
 *.log
+cfg/mov/**
 
 # NetBeans #
 nbproject/private/
