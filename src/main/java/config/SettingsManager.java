@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SettingsManager {
@@ -46,7 +45,7 @@ public class SettingsManager {
         } catch (FileNotFoundException e) {
             // do nothing, will load defaults
         } catch (IOException e) {
-            log.log(Level.INFO, "Problem while loading settings, reverting to defaults", e);
+            log.info("Problem while loading settings, reverting to defaults: " + e);
         }
     }
 
@@ -127,7 +126,7 @@ public class SettingsManager {
         settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_green 200");
         settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_blue 200");
         settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_scale 32");
-        settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_alpha 200");
+        settings.println((crosshairswitch ? "//" : "") + "cl_crosshairalpha 200");
         settings.println((crosshairswitch ? "//" : "") + "lockcrosshair");
         settings.println("crosshair " + (crosshair ? "1" : "0"));
         settings.println("hud_combattext " + (combattext ? "1" : "0"));
