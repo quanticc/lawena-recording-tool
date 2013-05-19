@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
@@ -47,11 +46,8 @@ import javax.swing.table.TableColumn;
 public class LwrtGUI extends JFrame implements ActionListener {
 
     private static final Logger log = Logger.getLogger("lwrt");
-
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 1L;
+    
     private JComboBox<String> resolution;
     private JComboBox<String> framerate;
     private JComboBox<String> hud;
@@ -123,9 +119,9 @@ public class LwrtGUI extends JFrame implements ActionListener {
     private String moviedir;
     private String steampath;
     private String currentdemo;
+    private String version;
 
     public void init() throws Exception {
-
         choosedir = new JFileChooser("C:\\");
         choosedemo = new JFileChooser("C:\\");
         choosemovie = new JFileChooser("C:\\");
@@ -136,6 +132,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
         tfdir = "";
         moviedir = "";
         currentdemo = "";
+        version = this.getClass().getPackage().getImplementationVersion().split("-")[0];
 
         steampath = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1);
 
@@ -408,12 +405,11 @@ public class LwrtGUI extends JFrame implements ActionListener {
 
         add(tabbedpane);
 
-        setTitle("lawena Recording Tool");
+        setTitle("lawena Recording Tool " + version);
         try {
             setIconImage(new ImageIcon(LwrtGUI.class.getClassLoader().getResource("ui/tf2.png")).getImage());
         } catch (Exception e) {
-            // Could not load icon, no big deal
-            log.log(Level.INFO, "Could not load frame icon", e);
+            log.info("Could not load frame icon: " + e);
         }
         pack();
 
@@ -466,7 +462,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
                 settings.save();
                 settings.saveToCfg();
             } catch (Exception e1) {
-                log.log(Level.WARNING, "A problem occurred while saving settings", e1);
+                log.warning("A problem occurred while saving settings: " + e1);
             }
         }
 
@@ -510,7 +506,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
             try {
                 vdmgenerator.generate();
             } catch (IOException e1) {
-                log.log(Level.WARNING, "A problem occurred while generating the VDM", e1);
+                log.warning("A problem occurred while generating the VDM: " + e1);
             }
         }
 
@@ -556,7 +552,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
             try {
                 settings.saveToCfg();
             } catch (Exception e1) {
-                log.log(Level.WARNING, "A problem occurred while saving to settings.cfg file", e1);
+                log.warning("A problem occurred while saving to settings.cfg file: " + e1);
             }
 
             setEnabled(false);
@@ -566,7 +562,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
                 movies.createMovienameCfgs();
                 movies.movieOffset();
             } catch (IOException e1) {
-                log.log(Level.WARNING, "A problem occured while creating movie config", e1);
+                log.warning("A problem occured while creating movie config: " + e1);
             }
 
             // backup entire custom folder and then replace with lawena stuff
@@ -587,7 +583,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
                     Thread.sleep(3000);
                     ++timeout;
                 } catch (Exception e1) {
-                    log.log(Level.WARNING, "", e1);
+                    log.warning("A problem occurred while starting TF2: " + e1);
                 }
             }
 
@@ -596,7 +592,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
                 try {
                     Thread.sleep(3000);
                 } catch (Exception e1) {
-                    log.log(Level.WARNING, "", e1);
+                    log.warning("A problem occurred while running TF2: " + e1);
                 }
             }
 
@@ -606,7 +602,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
                     oDxlevel);
 
             setEnabled(true);
-            setTitle("lawena Recording Tool");
+            setTitle("lawena Recording Tool " + version);
         }
     }
 
@@ -690,13 +686,11 @@ public class LwrtGUI extends JFrame implements ActionListener {
     }
 
     private boolean checkIfNumber(String in) {
-
         try {
             Integer.parseInt(in);
         } catch (NumberFormatException ex) {
             return false;
         }
-
         return true;
     }
 
@@ -847,7 +841,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
             // Set System L&F
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            log.warning("Could not set the look and feel");
+            log.warning("Could not set the look and feel: " + e);
             System.exit(1);
         }
 
@@ -858,7 +852,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
                     frame.init();
                     Thread.sleep(1000);
                 } catch (Exception e) {
-                    log.log(Level.WARNING, "Problem while running the GUI", e);
+                    log.warning("Problem while running the GUI: " + e);
                 }
                 frame.setVisible(true);
             }

@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileManager {
@@ -72,7 +71,7 @@ public class FileManager {
                 Files.createDirectories(configPath);
                 copy(Paths.get("cfg"), configPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace cfg files", e);
+                log.info("Could not replace cfg files: " + e);
                 return;
             }
         }
@@ -81,7 +80,7 @@ public class FileManager {
                 // backup all custom
                 Files.move(customPath, customBackupPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not backup custom folder", e);
+                log.info("Could not backup custom folder: " + e);
                 return;
             }
             // copy lawena's hud (resource, scripts)
@@ -93,7 +92,7 @@ public class FileManager {
                 copy(Paths.get("hud", hudName, "resource"), resourcePath);
                 copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace hud files", e);
+                log.info("Could not replace hud files: " + e);
             }
             // copy lawena's materials/skybox
             Path materialsPath = Paths.get(tfdir, "custom/lawena/materials/skybox");
@@ -103,11 +102,11 @@ public class FileManager {
                     replaceSkybox();
                 }
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace skybox files", e);
+                log.info("Could not replace skybox files: " + e);
                 try {
                     delete(materialsPath);
                 } catch (IOException e1) {
-                    log.log(Level.INFO, "Could not delete lawena skybox folder", e1);
+                    log.info("Could not delete lawena skybox folder: " + e);
                 }
             }
             // copy lawena's sound/vo
@@ -118,7 +117,7 @@ public class FileManager {
                     copy(Paths.get("sound/vo"), voPath);
                 }
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace vo sound files", e);
+                log.info("Could not replace vo sound files: " + e);
             }
             // copy lawena's sound/misc
             try {
@@ -132,26 +131,23 @@ public class FileManager {
                     copy(Paths.get("sound/miscann"), miscPath);
                 }
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace misc sound files", e);
+                log.info("Could not replace misc sound files: " + e);
             }
-        } else {
-            log.info("Could not replace custom files because the backup folder 'lwrtcustom' still exists");
         }
     }
 
     private void replaceSkybox() throws IOException {
         List<Path> vmtPaths = new ArrayList<>();
         List<Path> vtfPaths = new ArrayList<>();
+        Path skyboxPath = Paths.get(tfdir, "custom/lawena/materials/skybox");
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("skybox"))) {
             for (Path path : stream) {
-                if (path.endsWith(".vmt")) {
-                    Files.copy(
-                            path,
-                            Paths.get(tfdir, "custom/lawena/materials/skybox").resolve(
-                                    path.getFileName()));
+                String pathStr = path.toFile().getName();
+                if (pathStr.endsWith(".vmt")) {
+                    Files.copy(path, skyboxPath.resolve(pathStr));
                     vmtPaths.add(path);
                 }
-                if (path.endsWith(".vtf") && path.startsWith(skyboxFilename)) {
+                if (pathStr.endsWith(".vtf") && pathStr.startsWith(skyboxFilename)) {
                     vtfPaths.add(path);
                 }
             }
@@ -159,19 +155,16 @@ public class FileManager {
 
         for (int i = 0; i < vtfPaths.size(); ++i) {
             for (int j = 0; j < vmtPaths.size(); ++j) {
-                Path vtf = vtfPaths.get(i);
-                Path vmt = vmtPaths.get(j);
+                String vtf = vtfPaths.get(i).getFileName().toString();
+                String vmt = vmtPaths.get(j).getFileName().toString();
                 if ((vtf.endsWith("up.vtf") && vmt.endsWith("up.vmt"))
                         || (vtf.endsWith("dn.vtf") && vmt.endsWith("dn.vmt"))
                         || (vtf.endsWith("bk.vtf") && vmt.endsWith("bk.vmt"))
                         || (vtf.endsWith("ft.vtf") && vmt.endsWith("ft.vmt"))
                         || (vtf.endsWith("lf.vtf") && vmt.endsWith("lf.vmt"))
                         || (vtf.endsWith("rt.vtf") && vmt.endsWith("rt.vmt"))) {
-                    String vmtFilename = vmt.getFileName().toString();
-                    Files.copy(
-                            vtfPaths.get(i),
-                            Paths.get(tfdir, "custom/lawena/materials/skybox").resolve(
-                                    vmtFilename.substring(0, vmtFilename.indexOf(".vmt")) + ".vtf"));
+                    Files.copy(vtfPaths.get(i),
+                            skyboxPath.resolve(vmt.substring(0, vmt.indexOf(".vmt")) + ".vtf"));
                 }
             }
         }
@@ -181,17 +174,25 @@ public class FileManager {
         if (Files.exists(configBackupPath)) {
             try {
                 delete(configPath);
+            } catch (IOException e) {
+                log.info("Could not delete lawena cfg folder: " + e);
+            }
+            try {
                 Files.move(configBackupPath, configPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not restore cfg files", e);
+                log.info("Could not restore cfg files: " + e);
             }
         }
         if (Files.exists(customBackupPath)) {
             try {
                 delete(customPath);
+            } catch (IOException e) {
+                log.info("Could not delete lawena custom files: " + e);
+            }
+            try {
                 Files.move(customBackupPath, customPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not restore custom files", e);
+                log.info("Could not restore custom files: " + e);
             }
         }
     }
