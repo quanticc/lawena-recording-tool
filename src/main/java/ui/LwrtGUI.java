@@ -47,7 +47,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
 
     private static final Logger log = Logger.getLogger("lwrt");
     private static final long serialVersionUID = 1L;
-    
+
     private JComboBox<String> resolution;
     private JComboBox<String> framerate;
     private JComboBox<String> hud;
@@ -132,7 +132,11 @@ public class LwrtGUI extends JFrame implements ActionListener {
         tfdir = "";
         moviedir = "";
         currentdemo = "";
-        version = this.getClass().getPackage().getImplementationVersion().split("-")[0];
+        try {
+            version = this.getClass().getPackage().getImplementationVersion().split("-")[0];
+        } catch (Exception e) {
+            version = "";        
+        }
 
         steampath = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1);
 
@@ -407,7 +411,8 @@ public class LwrtGUI extends JFrame implements ActionListener {
 
         setTitle("lawena Recording Tool " + version);
         try {
-            setIconImage(new ImageIcon(LwrtGUI.class.getClassLoader().getResource("ui/tf2.png")).getImage());
+            setIconImage(new ImageIcon(LwrtGUI.class.getClassLoader().getResource("ui/tf2.png"))
+                    .getImage());
         } catch (Exception e) {
             log.info("Could not load frame icon: " + e);
         }
