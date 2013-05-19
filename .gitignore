@@ -5,9 +5,9 @@
 *.war
 *.ear
 
-logs/
 *.lwf
 *.exe
+*.log
 
 # NetBeans #
 nbproject/private/
