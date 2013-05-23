@@ -12,6 +12,8 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -135,7 +137,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
         try {
             version = this.getClass().getPackage().getImplementationVersion().split("-")[0];
         } catch (Exception e) {
-            version = "";        
+            version = "";
         }
 
         steampath = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1);
@@ -326,7 +328,15 @@ public class LwrtGUI extends JFrame implements ActionListener {
         clearvdm.addActionListener(this);
         skyboxpreview.addActionListener(this);
 
-        addWindowListener(new LwrtWindowListener());
+        addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                files.restoreAll();
+                System.exit(0);
+            }
+
+        });
 
         respanel = new JPanel();
         respanel2 = new JPanel();
@@ -550,6 +560,8 @@ public class LwrtGUI extends JFrame implements ActionListener {
         }
 
         if (e.getSource() == start) {
+
+            files.restoreAll();
 
             if (!setSettings())
                 return;
@@ -849,6 +861,12 @@ public class LwrtGUI extends JFrame implements ActionListener {
             log.warning("Could not set the look and feel: " + e);
             System.exit(1);
         }
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            public void uncaughtException(Thread t, final Throwable e) {
+                e.printStackTrace();
+            }
+        });
 
         SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {

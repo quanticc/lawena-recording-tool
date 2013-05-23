@@ -32,7 +32,8 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOption);
+        Path target = Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOption);
+        target.toFile().setWritable(false);
         return FileVisitResult.CONTINUE;
     }
 }

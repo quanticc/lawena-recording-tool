@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Panel;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +43,15 @@ public class PreviewWindow extends Panel {
     public void show() {
         frame = new JFrame("Preview");
         frame.add(this);
-        frame.addWindowListener(new PreviewWindowListener());
+        frame.addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                JFrame frame = (JFrame) (e.getWindow());
+                frame.dispose();
+            }
+
+        });
         frame.setSize(500, 500);
         frame.setVisible(true);
 
