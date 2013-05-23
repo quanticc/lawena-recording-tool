@@ -8,12 +8,7 @@ lawena Recording Tool
 * Inicia TF2, lawena hara un respaldo de tus carpetas cfg y custom mientras TF2 esta corriendo.
 * Carga una demo y presiona P para comenzar la grabacion.
 * Cuando cierres TF2, tus archivos se deberian restaurar y no deberia haber ninguna carpeta "lwrt" dentro de la de tf.
-*
-
-* Start TF2, lawena will make a backup of your cfg and custom folder while TF2 is running.
-* Load a demo and press P to start recording.
-* When you close TF2, your files should be restored and should be no "lwrt" folders on your tf folder.
-* If lawena is not closed properly, running it once should restore all folders. Your files are inside the "lwrtcfg" and "lwrtcustom" folders.
+* Si lawena no se cierra correctamente, ejecutarlo una vez deberia restaurar las carpetas. Tus archivos estan dentro de las carpetas "lwrtcfg" y "lwrtcustom".
 
 * Para utilizar un HUD custom, copien las carpetas resource y scripts de ese HUD en la carpeta "\hud\custom" y luego elijan la opción Custom HUD en la configuración de HUD de la herramienta.
 * Para agregar skyboxes custom, lo unico que necesitan hacer es copiar todos los archivos .vtf (no los .vmt) de la skybox a la carpeta "\Skybox". La herramienta generará una opción para ese skybox automáticamente junto con una foto de previsualización.
