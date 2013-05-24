@@ -4,11 +4,15 @@ package config;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
 
 public class FileManager {
 
@@ -41,6 +45,18 @@ public class FileManager {
 
     private Path delete(Path dir) throws IOException {
         return Files.walkFileTree(dir, new DeleteDirVisitor());
+    }
+
+    private boolean isEmpty(Path dir) {
+        if (Files.exists(dir)) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+                return !stream.iterator().hasNext();
+            } catch (IOException e) {
+                return false;
+            }
+        } else {
+            return true;
+        }
     }
 
     public String getHudName() {
@@ -174,25 +190,37 @@ public class FileManager {
         if (Files.exists(configBackupPath)) {
             try {
                 delete(configPath);
+            } catch (NoSuchFileException e) {
             } catch (IOException e) {
                 log.info("Could not delete lawena cfg folder: " + e);
             }
             try {
-                Files.move(configBackupPath, configPath);
+                if (isEmpty(configPath)) {
+                    Files.move(configBackupPath, configPath, StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    showRestoreMessage();
+                }
             } catch (IOException e) {
                 log.info("Could not restore cfg files: " + e);
+                showRestoreMessage();
             }
         }
         if (Files.exists(customBackupPath)) {
             try {
                 delete(customPath);
+            } catch (NoSuchFileException e) {
             } catch (IOException e) {
                 log.info("Could not delete lawena custom files: " + e);
             }
             try {
-                Files.move(customBackupPath, customPath);
+                if (isEmpty(customPath)) {
+                    Files.move(customBackupPath, customPath, StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    showRestoreMessage();
+                }
             } catch (IOException e) {
                 log.info("Could not restore custom files: " + e);
+                showRestoreMessage();
             }
         }
     }
@@ -215,5 +243,15 @@ public class FileManager {
 
     public void setSkyboxFilename(String skyboxFilename) {
         this.skyboxFilename = skyboxFilename;
+    }
+
+    private void showRestoreMessage() {
+        JOptionPane
+                .showMessageDialog(
+                        null,
+                        "Some lawena files might still exist inside 'cfg' or 'custom'.\n" +
+                                "Your files will be restored once you close lawena.",
+                        "Restoring config files",
+                        JOptionPane.INFORMATION_MESSAGE);
     }
 }
