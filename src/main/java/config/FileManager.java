@@ -84,6 +84,7 @@ public class FileManager {
         if (!Files.exists(configBackupPath)) {
             try {
                 // backup tf/cfg and copy lawena's cfg
+                configPath.toFile().setWritable(true);
                 Files.move(configPath, configBackupPath);
                 Files.createDirectories(configPath);
                 copy(Paths.get("cfg"), configPath);
@@ -95,6 +96,7 @@ public class FileManager {
         if (!Files.exists(customBackupPath)) {
             try {
                 // backup all custom
+                customPath.toFile().setWritable(true);
                 Files.move(customPath, customBackupPath);
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not backup custom folder", e);
