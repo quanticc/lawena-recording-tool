@@ -47,14 +47,14 @@ public class CLInterface {
 
     public void startTf(int width, int height, String dir, int dxlevel) {
         try {
-            String command = "\""
-                    + dir
-                    + "\\Steam.exe\""
-                    + " -applaunch 440 -dxlevel "
-                    + dxlevel
-                    + " -novid -noborder -noforcedmparms -noforcemaccel -noforcemspd -console -high -noipx -nojoy -sw -w "
-                    + width + " -h " + height;
-            Process pr = rt.exec(command);
+            String[] cmd = new String[] {
+                    dir + "\\Steam.exe",
+                    "-applaunch 440 -dxlevel "
+                            + dxlevel
+                            + " -novid -noborder -noforcedmparms -noforcemaccel -noforcemspd -console -high -noipx -nojoy -sw -w "
+                            + width + " -h " + height
+            };
+            Process pr = rt.exec(cmd);
             pr.waitFor();
         } catch (Exception e) {
             e.printStackTrace();
