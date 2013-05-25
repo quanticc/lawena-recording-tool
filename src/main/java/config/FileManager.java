@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -87,7 +88,7 @@ public class FileManager {
                 Files.createDirectories(configPath);
                 copy(Paths.get("cfg"), configPath);
             } catch (IOException e) {
-                log.info("Could not replace cfg files: " + e);
+                log.log(Level.INFO, "Could not replace cfg files", e);
                 return;
             }
         }
@@ -96,7 +97,7 @@ public class FileManager {
                 // backup all custom
                 Files.move(customPath, customBackupPath);
             } catch (IOException e) {
-                log.info("Could not backup custom folder: " + e);
+                log.log(Level.INFO, "Could not backup custom folder", e);
                 return;
             }
             // copy lawena's hud (resource, scripts)
@@ -108,7 +109,7 @@ public class FileManager {
                 copy(Paths.get("hud", hudName, "resource"), resourcePath);
                 copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
             } catch (IOException e) {
-                log.info("Could not replace hud files: " + e);
+                log.log(Level.INFO, "Could not replace hud files", e);
             }
             // copy lawena's materials/skybox
             Path materialsPath = Paths.get(tfdir, "custom/lawena/materials/skybox");
@@ -118,11 +119,11 @@ public class FileManager {
                     replaceSkybox();
                 }
             } catch (IOException e) {
-                log.info("Could not replace skybox files: " + e);
+                log.log(Level.INFO, "Could not replace skybox files", e);
                 try {
                     delete(materialsPath);
                 } catch (IOException e1) {
-                    log.info("Could not delete lawena skybox folder: " + e);
+                    log.log(Level.INFO, "Could not delete lawena skybox folder", e);
                 }
             }
             // copy lawena's sound/vo
@@ -133,7 +134,7 @@ public class FileManager {
                     copy(Paths.get("sound/vo"), voPath);
                 }
             } catch (IOException e) {
-                log.info("Could not replace vo sound files: " + e);
+                log.log(Level.INFO, "Could not replace vo sound files", e);
             }
             // copy lawena's sound/misc
             try {
@@ -147,7 +148,7 @@ public class FileManager {
                     copy(Paths.get("sound/miscann"), miscPath);
                 }
             } catch (IOException e) {
-                log.info("Could not replace misc sound files: " + e);
+                log.log(Level.INFO, "Could not replace misc sound files", e);
             }
         }
     }
@@ -192,7 +193,7 @@ public class FileManager {
                 delete(configPath);
             } catch (NoSuchFileException e) {
             } catch (IOException e) {
-                log.info("Could not delete lawena cfg folder: " + e);
+                log.log(Level.INFO, "Could not delete lawena cfg folder", e);
             }
             try {
                 if (isEmpty(configPath)) {
@@ -201,7 +202,7 @@ public class FileManager {
                     showRestoreMessage();
                 }
             } catch (IOException e) {
-                log.info("Could not restore cfg files: " + e);
+                log.log(Level.INFO, "Could not restore cfg files", e);
                 showRestoreMessage();
             }
         }
@@ -210,7 +211,7 @@ public class FileManager {
                 delete(customPath);
             } catch (NoSuchFileException e) {
             } catch (IOException e) {
-                log.info("Could not delete lawena custom files: " + e);
+                log.log(Level.INFO, "Could not delete lawena custom files", e);
             }
             try {
                 if (isEmpty(customPath)) {
@@ -219,7 +220,7 @@ public class FileManager {
                     showRestoreMessage();
                 }
             } catch (IOException e) {
-                log.info("Could not restore custom files: " + e);
+                log.log(Level.INFO, "Could not restore custom files", e);
                 showRestoreMessage();
             }
         }
@@ -251,7 +252,7 @@ public class FileManager {
                         null,
                         "Some lawena files might still exist inside 'cfg' or 'custom'.\n" +
                                 "Your files will be restored once you close lawena.",
-                        "Restoring config files",
+                        "Restoring user files",
                         JOptionPane.INFORMATION_MESSAGE);
     }
 }

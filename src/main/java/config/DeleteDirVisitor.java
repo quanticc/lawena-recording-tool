@@ -8,6 +8,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
@@ -21,7 +22,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
             Files.delete(path);
         } catch (NoSuchFileException e) {
         } catch (IOException e) {
-            log.info("Could not delete file: " + e);
+            log.log(Level.INFO, "Could not delete file", e);
         }
         return FileVisitResult.CONTINUE;
     }
@@ -33,7 +34,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
                 Files.delete(dir);
             } catch (NoSuchFileException e) {
             } catch (IOException e) {
-                log.info("Could not delete directory: " + e);
+                log.log(Level.INFO, "Could not delete directory", e);
             }
             return FileVisitResult.CONTINUE;
         }
