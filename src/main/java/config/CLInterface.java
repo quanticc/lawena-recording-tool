@@ -8,16 +8,11 @@ import java.io.InputStreamReader;
 
 public class CLInterface {
 
-    Runtime rt;
-
-    public CLInterface() {
-        rt = Runtime.getRuntime();
-    }
-
     public String regQuery(String key, String value, int mode) {
         String result = "";
         try {
-            Process pr = rt.exec("reg query " + key + " /v " + value);
+            ProcessBuilder pb = new ProcessBuilder("reg", "query", key, "/v", value);
+            Process pr = pb.start();
             BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;
             while ((line = input.readLine()) != null) {
@@ -38,7 +33,8 @@ public class CLInterface {
 
     public void regedit(String key, String value, String content) {
         try {
-            Process pr = rt.exec("batch\\rg.bat " + key + " " + value + " " + content);
+            ProcessBuilder pb = new ProcessBuilder("batch\\rg.bat", key, value, content);
+            Process pr = pb.start();
             pr.waitFor();
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,14 +43,11 @@ public class CLInterface {
 
     public void startTf(int width, int height, String dir, int dxlevel) {
         try {
-            String[] cmd = new String[] {
-                    dir + "\\Steam.exe",
-                    "-applaunch 440 -dxlevel "
-                            + dxlevel
-                            + " -novid -noborder -noforcedmparms -noforcemaccel -noforcemspd -console -high -noipx -nojoy -sw -w "
-                            + width + " -h " + height
-            };
-            Process pr = rt.exec(cmd);
+            ProcessBuilder pb = new ProcessBuilder(dir + "/steam.exe", "-applaunch", "440",
+                    "-dxlevel", dxlevel + "", "-novid", "-noborder", "-noforcedmparms",
+                    "-noforcemaccel", "-noforcemspd", "-console", "-high", "-noipx", "-nojoy",
+                    "-sw", "-w", width + "", "-h", height + "");
+            Process pr = pb.start();
             pr.waitFor();
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,9 +58,10 @@ public class CLInterface {
         boolean found = false;
         File file = new File("batch\\procchk.vbs");
         try {
-            Process p = rt.exec("cscript //NoLogo " + "\"" + file.getPath() + "\" " + prname);
+            ProcessBuilder pb = new ProcessBuilder("cscript", "//NoLogo", file.getPath(), prname);
+            Process pr = pb.start();
             BufferedReader input =
-                    new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;
             line = input.readLine();
             if (line != null) {
@@ -84,8 +78,9 @@ public class CLInterface {
 
     public void generatePreview(String skyboxfile) throws IOException {
         try {
-            Process pr = rt.exec("\"vtfcmd\\VTFCmd.exe\" -file \"Skybox\\" + skyboxfile
-                    + "\" -output \"Skybox\" -exportformat \"png\"");
+            ProcessBuilder pb = new ProcessBuilder("vtfcmd\\VTFCmd.exe", "-file", "Skybox\\",
+                    skyboxfile, "-output", "Skybox", "-exportformat", "png");
+            Process pr = pb.start();
             pr.waitFor();
         } catch (Exception e) {
             e.printStackTrace();
