@@ -37,6 +37,19 @@
 		"tall"	"0"
 	}	
 	
+	HudKothTimeStatus
+	{
+		"fieldName" "HudKothTimeStatus"
+		"visible" "0"
+		"enabled" "0"
+		"xpos"	"c-1000"
+		"ypos"	"0"
+		"wide"	"200"
+		"tall"	"60"
+		"blue_active_xpos"			"34"
+		"red_active_xpos"			"100"
+	}	
+	
 	HudCloakMeter
 	{
 		"fieldName"		"HudCloakMeter"
