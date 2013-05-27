@@ -45,6 +45,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+import lawena.Lawena;
+
 public class LwrtGUI extends JFrame implements ActionListener {
 
     private static final Logger log = Logger.getLogger("lwrt");
@@ -871,9 +873,10 @@ public class LwrtGUI extends JFrame implements ActionListener {
         SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
                 LwrtGUI frame = new LwrtGUI();
+                Lawena lawena = new Lawena();
                 try {
                     frame.init();
-                    Thread.sleep(1000);
+                    lawena.start();
                 } catch (Exception e) {
                     log.warning("Problem while running the GUI: " + e);
                 }
