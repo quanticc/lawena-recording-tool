@@ -437,7 +437,8 @@ public class LwrtGUI extends JFrame implements ActionListener {
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
-        setSize((int) (dim.width / 1.4), (int) (dim.height / 1.4));
+        double factor = (windows ? 2 : 1.4);
+        setSize((int) (dim.width / factor), (int) (dim.height / factor));
         int w = getSize().width;
         int h = getSize().height;
         int x = (dim.width - w) / 2;
