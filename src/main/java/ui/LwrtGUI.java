@@ -50,6 +50,8 @@ public class LwrtGUI extends JFrame implements ActionListener {
     private static final Logger log = Logger.getLogger("lwrt");
     private static final long serialVersionUID = 1L;
 
+    private boolean windows = System.getProperty("os.name").contains("Windows");
+
     private JComboBox<String> resolution;
     private JComboBox<String> framerate;
     private JComboBox<String> hud;
@@ -140,7 +142,14 @@ public class LwrtGUI extends JFrame implements ActionListener {
             version = "";
         }
 
-        steampath = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1);
+        if (windows) {
+            steampath = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1);
+            oDxlevel = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",
+                    "DXLevel_V1", 0);
+        } else {
+            steampath = "~/.local/share/Steam";
+            oDxlevel = "";
+        }
 
         choosedir.setDialogTitle("Choose your \"tf\" directory");
         choosedir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -196,9 +205,6 @@ public class LwrtGUI extends JFrame implements ActionListener {
         files = new FileManager(tfdir);
 
         files.restoreAll();
-
-        oDxlevel = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",
-                "DXLevel_V1", 0);
 
         tabbedpane = new JTabbedPane();
         settingspanel = new JPanel();
@@ -312,6 +318,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
         clearticks = new JButton("Clear Tick List");
         clearvdm = new JButton("Delete VDM files");
         skyboxpreview = new JButton("Preview Skybox");
+        skyboxpreview.setEnabled(windows);
         height.setEditable(resolution.getSelectedIndex() == 4);
         width.setEditable(resolution.getSelectedIndex() == 4);
         fps.setEditable(framerate.getSelectedIndex() == 7);
@@ -430,7 +437,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
-        setSize(dim.width / 2, dim.height / 2);
+        setSize((int) (dim.width / 1.4), (int) (dim.height / 1.4));
         int w = getSize().width;
         int h = getSize().height;
         int x = (dim.width - w) / 2;
@@ -595,7 +602,8 @@ public class LwrtGUI extends JFrame implements ActionListener {
             setTitle("Starting TF2...");
             cl.startTf(settings.getWidth(), settings.getHeight(), steampath, settings.getDxlevel());
             int timeout = 0;
-            while (!cl.isRunning("hl2.exe") && timeout < 40) {
+            String processName = windows ? "hl2.exe" : "hl2_linux";
+            while (!cl.isRunning(processName) && timeout < 40) {
                 try {
                     Thread.sleep(3000);
                     ++timeout;
@@ -605,7 +613,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
             }
 
             setTitle("Running TF2...");
-            while (cl.isRunning("hl2.exe")) {
+            while (cl.isRunning(processName)) {
                 try {
                     Thread.sleep(3000);
                 } catch (Exception e1) {
@@ -615,8 +623,10 @@ public class LwrtGUI extends JFrame implements ActionListener {
 
             setTitle("Restoring Config...");
             files.restoreAll();
-            cl.regedit("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1",
-                    oDxlevel);
+            if (windows) {
+                cl.regedit("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",
+                        "DXLevel_V1", oDxlevel);
+            }
 
             setEnabled(true);
             setTitle("lawena Recording Tool " + version);
