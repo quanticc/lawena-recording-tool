@@ -45,7 +45,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
-import lawena.Lawena;
 
 public class LwrtGUI extends JFrame implements ActionListener {
 
@@ -288,7 +287,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
         }
 
         hud.setSelectedIndex(hudChoice(settings.getHud()));
-        viewmodelswitch.setSelectedIndex(viewmodelChoice(settings.getViewmodelSwitch()));
+//        viewmodelswitch.setSelectedIndex(viewmodelChoice(settings.getViewmodelSwitch()));
         dxlevel.setSelectedIndex(dxlevelChoice(settings.getDxlevel()));
         viewmodelfov = new JSlider(JSlider.HORIZONTAL, 55, 70, settings.getViewmodelFov());
         viewmodelfov.setMajorTickSpacing(5);
@@ -806,23 +805,23 @@ public class LwrtGUI extends JFrame implements ActionListener {
         }
 
         index = dxlevel.getSelectedIndex();
-        switch (index) {
-            case 0:
-                settings.setDxlevel(80);
-                break;
-            case 1:
-                settings.setDxlevel(81);
-                break;
-            case 2:
-                settings.setDxlevel(90);
-                break;
-            case 3:
-                settings.setDxlevel(95);
-                break;
-            case 4:
-                settings.setDxlevel(98);
-                break;
-        }
+//        switch (index) {
+//            case 0:
+//                settings.setDxlevel(80);
+//                break;
+//            case 1:
+//                settings.setDxlevel(81);
+//                break;
+//            case 2:
+//                settings.setDxlevel(90);
+//                break;
+//            case 3:
+//                settings.setDxlevel(95);
+//                break;
+//            case 4:
+//                settings.setDxlevel(98);
+//                break;
+//        }
 
         settings.setViewmodelFov(viewmodelfov.getValue());
         settings.setMotionBlur(motionblur.isSelected());
@@ -872,15 +871,15 @@ public class LwrtGUI extends JFrame implements ActionListener {
 
         SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
-                LwrtGUI frame = new LwrtGUI();
+                //LwrtGUI frame = new LwrtGUI();
                 Lawena lawena = new Lawena();
                 try {
-                    frame.init();
+                    //frame.init();
                     lawena.start();
                 } catch (Exception e) {
                     log.warning("Problem while running the GUI: " + e);
                 }
-                frame.setVisible(true);
+                //frame.setVisible(true);
             }
         });
     }

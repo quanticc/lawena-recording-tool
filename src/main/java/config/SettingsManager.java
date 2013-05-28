@@ -6,7 +6,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SettingsManager {
@@ -14,19 +17,57 @@ public class SettingsManager {
     private static final Logger log = Logger.getLogger("lwrt");
 
     private enum Key {
-        Height(720), Width(1280), Framerate(120), ViewmodelFov(70), DxLevel(98), Hud("medic"), ViewmodelSwitch(
-                "on"), MotionBlur(true), CrosshairSwitch(false), Crosshair(false), CombatText(false), Announcer(
-                true), Domination(true), Hitsounds(false), Voice(false), SteamCloud(false);
+        Height(720, 360, Integer.MAX_VALUE),
+        Width(1280, 640, Integer.MAX_VALUE),
+        Framerate(120, 30, Integer.MAX_VALUE),
+        ViewmodelSwitch("on", "on", "off", "default"),
+        ViewmodelFov(70, 55, 90),
+        DxLevel("98", "80", "81", "90", "95", "98"),
+        Hud("medic", "killnotices", "medic", "full", "custom"),
+        TfDir(""),
+        MovieDir(""),
+        EnableMotionBlur(true),
+        EnableCustomParticles(false),
+        DisableCrosshairSwitch(false),
+        DisableCrosshair(false),
+        DisableCombatText(false),
+        DisableAnnouncer(true),
+        DisableDomination(true),
+        DisableHitsounds(false),
+        DisableVoice(false),
+        DisableSteamCloud(false);
 
         private Object value;
-
-        private Key(Object value) {
+        private List<String> valid;
+        private int min;
+        private int max;
+        
+        private Key(String value) {
             this.value = value;
+        }
+
+        private Key(boolean value) {
+            this.value = value;
+        }
+
+        private Key(int value, int min, int max) {
+            this.value = value;
+        }
+
+        private Key(String value, String... validValues) {
+            this(value);
+            if (validValues != null) {
+                this.valid = Arrays.asList(validValues);
+            }
         }
 
         @Override
         public String toString() {
-            return name().toLowerCase();
+            return name();
+        }
+
+        public boolean isValid(String str) {
+            return valid == null || valid.contains(str);
         }
     }
 
@@ -45,27 +86,31 @@ public class SettingsManager {
         } catch (FileNotFoundException e) {
             // do nothing, will load defaults
         } catch (IOException e) {
-            log.info("Problem while loading settings, reverting to defaults: " + e);
+            log.log(Level.INFO, "Problem while loading settings, reverting to defaults", e);
         }
     }
 
-    public void save() throws Exception {
-        PrintWriter pw = new PrintWriter(new FileWriter(filename));
-        properties.store(pw, "lawena settings");
+    public void save() {
+        try {
+            PrintWriter pw = new PrintWriter(new FileWriter(filename));
+            properties.store(pw, "lawena settings");
+        } catch (IOException e) {
+            log.log(Level.INFO, "Settings could not be saved", e);
+        }
     }
 
     public void saveToCfg() throws IOException {
         PrintWriter settings = new PrintWriter(new FileWriter("cfg\\settings.cfg"));
         int framerate = getFramerate();
-        boolean motionblur = getMotionBlur();
-        boolean steamcloud = getSteamCloud();
+        boolean motionblur = getEnableMotionBlur();
+        boolean steamcloud = getDisableSteamCloud();
         int viewmodelfov = getViewmodelFov();
         String viewmodelswitch = getViewmodelSwitch();
-        boolean crosshairswitch = getCrosshairSwitch();
-        boolean crosshair = getCrosshair();
-        boolean combattext = getCombattext();
-        boolean hitsounds = getHitsounds();
-        boolean voice = getVoice();
+        boolean crosshairswitch = getDisableCrosshairSwitch();
+        boolean crosshair = getDisableCrosshair();
+        boolean combattext = getDisableCombattext();
+        boolean hitsounds = getDisableHitsounds();
+        boolean voice = getDisableVoice();
         settings.println("alias recframerate host_framerate " + framerate);
         if (framerate < 60) {
             settings.println("alias currentfpsup 60fps");
@@ -150,7 +195,11 @@ public class SettingsManager {
     }
 
     private void setString(Key key, String value) {
-        properties.setProperty(key.toString(), value);
+        if (key.isValid(value)) {
+            properties.setProperty(key.toString(), value);
+        } else {
+            throw new IllegalArgumentException(key + " does not allow value: " + value);
+        }
     }
 
     private String getString(Key key) {
@@ -158,7 +207,11 @@ public class SettingsManager {
     }
 
     private void setInt(Key key, int value) {
-        properties.setProperty(key.toString(), value + "");
+        if (value >= key.min && value <= key.max) {
+            properties.setProperty(key.toString(), value + "");
+        } else {
+            throw new IllegalArgumentException(key + " does not allow value: " + value);
+        }
     }
 
     private int getInt(Key key) {
@@ -203,48 +256,56 @@ public class SettingsManager {
         setInt(Key.ViewmodelFov, value);
     }
 
-    public void setMotionBlur(boolean value) {
-        setBoolean(Key.MotionBlur, value);
+    public void setEnableMotionBlur(boolean value) {
+        setBoolean(Key.EnableMotionBlur, value);
     }
 
     public void setViewmodelSwitch(String value) {
         setString(Key.ViewmodelSwitch, value);
     }
 
-    public void setCrosshairSwitch(boolean value) {
-        setBoolean(Key.CrosshairSwitch, value);
+    public void setDisableCrosshairSwitch(boolean value) {
+        setBoolean(Key.DisableCrosshairSwitch, value);
     }
 
-    public void setCrosshair(boolean value) {
-        setBoolean(Key.Crosshair, value);
+    public void setDisableCrosshair(boolean value) {
+        setBoolean(Key.DisableCrosshair, value);
     }
 
-    public void setCombattext(boolean value) {
-        setBoolean(Key.CombatText, value);
+    public void setDisableCombattext(boolean value) {
+        setBoolean(Key.DisableCombatText, value);
     }
 
-    public void setAnnouncer(boolean value) {
-        setBoolean(Key.Announcer, value);
+    public void setDisableAnnouncer(boolean value) {
+        setBoolean(Key.DisableAnnouncer, value);
     }
 
-    public void setDomination(boolean value) {
-        setBoolean(Key.Domination, value);
+    public void setDisableDomination(boolean value) {
+        setBoolean(Key.DisableDomination, value);
     }
 
-    public void setHitsounds(boolean value) {
-        setBoolean(Key.Hitsounds, value);
+    public void setDisableHitsounds(boolean value) {
+        setBoolean(Key.DisableHitsounds, value);
     }
 
-    public void setVoice(boolean value) {
-        setBoolean(Key.Voice, value);
+    public void setDisableVoice(boolean value) {
+        setBoolean(Key.DisableVoice, value);
     }
 
-    public void setSteamCloud(boolean value) {
-        setBoolean(Key.SteamCloud, value);
+    public void setDisableSteamCloud(boolean value) {
+        setBoolean(Key.DisableSteamCloud, value);
     }
 
-    public void setDxlevel(int value) {
-        setInt(Key.DxLevel, value);
+    public void setDxlevel(String value) {
+        setString(Key.DxLevel, value);
+    }
+
+    public void setTfDir(String value) {
+        setString(Key.TfDir, value);
+    }
+
+    public void setMovieDir(String value) {
+        setString(Key.MovieDir, value);
     }
 
     public int getHeight() {
@@ -267,47 +328,57 @@ public class SettingsManager {
         return getInt(Key.ViewmodelFov);
     }
 
-    public boolean getMotionBlur() {
-        return getBoolean(Key.MotionBlur);
+    public boolean getEnableMotionBlur() {
+        return getBoolean(Key.EnableMotionBlur);
     }
 
     public String getViewmodelSwitch() {
         return getString(Key.ViewmodelSwitch);
     }
 
-    public boolean getCrosshairSwitch() {
-        return getBoolean(Key.CrosshairSwitch);
+    public boolean getDisableCrosshairSwitch() {
+        return getBoolean(Key.DisableCrosshairSwitch);
     }
 
-    public boolean getCrosshair() {
-        return getBoolean(Key.Crosshair);
+    public boolean getDisableCrosshair() {
+        return getBoolean(Key.DisableCrosshair);
     }
 
-    public boolean getCombattext() {
-        return getBoolean(Key.CombatText);
+    public boolean getDisableCombattext() {
+        return getBoolean(Key.DisableCombatText);
     }
 
-    public boolean getAnnouncer() {
-        return getBoolean(Key.Announcer);
+    public boolean getDisableAnnouncer() {
+        return getBoolean(Key.DisableAnnouncer);
     }
 
-    public boolean getDomination() {
-        return getBoolean(Key.Domination);
+    public boolean getDisableDomination() {
+        return getBoolean(Key.DisableDomination);
     }
 
-    public boolean getHitsounds() {
-        return getBoolean(Key.Hitsounds);
+    public boolean getDisableHitsounds() {
+        return getBoolean(Key.DisableHitsounds);
     }
 
-    public boolean getVoice() {
-        return getBoolean(Key.Voice);
+    public boolean getDisableVoice() {
+        return getBoolean(Key.DisableVoice);
     }
 
-    public boolean getSteamCloud() {
-        return getBoolean(Key.SteamCloud);
+    public boolean getDisableSteamCloud() {
+        return getBoolean(Key.DisableSteamCloud);
     }
 
-    public int getDxlevel() {
-        return getInt(Key.DxLevel);
+    public String getDxlevel() {
+        return getString(Key.DxLevel);
+    }
+
+    public String getTfDir() {
+        String value = getString(Key.TfDir);
+        return (value == null ? "" : value);
+    }
+
+    public String getMovieDir() {
+        String value = getString(Key.MovieDir);
+        return (value == null ? "" : value);
     }
 }
