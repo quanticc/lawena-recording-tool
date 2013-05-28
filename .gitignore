@@ -55,3 +55,7 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
+.*
+!.gitignore
+!.travis.yml
+*~
