@@ -1,13 +1,13 @@
 #!/bin/bash
 
-if [ "$1" == "root" ]
+if [ "$1" != "root" ]
 then
 
-	if [ "($whoami)" = "root" ]
-	then
+	if [[ !$EUID -ne 0 ]]
+       	then
 		echo "Warning: It is not a good idea to run this script as root"
 		echo "		Add 'root' as a launch option to bypass"
-	
+		exit 0	
 	fi
 fi
 
