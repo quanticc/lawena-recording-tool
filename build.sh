@@ -33,7 +33,7 @@ echo Main-Class: $mainclass > $manifest
 jar -cfm ../$jaroutput $manifest ${classes[@]}
 cd ..
 rm -r -f $binary
-chmod -x $jaroutput
+chmod +x $jaroutput
 
 if [ -x $exe ]
 then
@@ -43,10 +43,10 @@ fi
 echo "jaroutput=\"lawena.jar\"
 if [ -x $jaroutput ]
 then
-	jar -jar $jaroutput
+	java -jar $jaroutput
 else
 	echo \"Please run build.sh\"
 fi
 " > $exe
 
-chmod -x $exe
+chmod +x $exe
