@@ -11,7 +11,6 @@ import java.awt.Insets;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -439,7 +438,6 @@ public class LawenaView extends JFrame {
         btnStartTf.setIconTextGap(10);
         // alternatively, LawenaView.class.getResource("/ui/tf2full.png")
         try {
-            btnStartTf.setIcon(new ImageIcon(LawenaView.class.getResource("/ui/tf2_16.png")));
         } catch (Exception e) {
         }
         GridBagConstraints gbc_btnStartTf = new GridBagConstraints();
