@@ -17,7 +17,7 @@ import javax.swing.JOptionPane;
 
 public class FileManager {
 
-    private static final Logger log = Logger.getLogger("lwrt");
+    private static final Logger log = Logger.getLogger("lawena");
 
     private String tfdir;
 
@@ -83,7 +83,7 @@ public class FileManager {
     public void replaceAll() {
         if (!Files.exists(configBackupPath)) {
             try {
-                // backup tf/cfg and copy lawena's cfg
+                log.fine("Making a backup of your configs");
                 configPath.toFile().setWritable(true);
                 Files.move(configPath, configBackupPath);
                 Files.createDirectories(configPath);
@@ -95,15 +95,15 @@ public class FileManager {
         }
         if (!Files.exists(customBackupPath)) {
             try {
-                // backup all custom
+                log.fine("Making a backup of your custom files");
                 customPath.toFile().setWritable(true);
                 Files.move(customPath, customBackupPath);
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not backup custom folder", e);
                 return;
             }
-            // copy lawena's hud (resource, scripts)
             try {
+                log.fine("Copying selected hud files");
                 Path resourcePath = Paths.get(tfdir, "custom/lawena/resource");
                 Path scriptsPath = Paths.get(tfdir, "custom/lawena/scripts");
                 Files.createDirectories(resourcePath);
@@ -113,10 +113,10 @@ public class FileManager {
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not replace hud files", e);
             }
-            // copy lawena's materials/skybox
             Path materialsPath = Paths.get(tfdir, "custom/lawena/materials/skybox");
             try {
                 if (skyboxFilename != null && !skyboxFilename.isEmpty()) {
+                    log.fine("Copying selected skybox files");
                     Files.createDirectories(materialsPath);
                     replaceSkybox();
                 }
@@ -128,9 +128,9 @@ public class FileManager {
                     log.log(Level.INFO, "Could not delete lawena skybox folder", e);
                 }
             }
-            // copy lawena's sound/vo
             try {
                 if (replaceVo) {
+                    log.fine("Replacing voiceover sound files");
                     Path voPath = Paths.get(tfdir, "custom/lawena/sound/vo");
                     Files.createDirectories(voPath);
                     copy(Paths.get("sound/vo"), voPath);
@@ -144,9 +144,11 @@ public class FileManager {
                 Files.createDirectories(miscPath);
                 copy(Paths.get("sound/misc"), miscPath);
                 if (replaceDomination) {
+                    log.fine("Replacing domination sound files");
                     copy(Paths.get("sound/miscdom"), miscPath);
                 }
                 if (replaceAnnouncer) {
+                    log.fine("Replacing announcer sound files");
                     copy(Paths.get("sound/miscann"), miscPath);
                 }
             } catch (IOException e) {
@@ -191,6 +193,7 @@ public class FileManager {
 
     public void restoreAll() {
         if (Files.exists(configBackupPath)) {
+            log.fine("Restoring all user config files");
             try {
                 delete(configPath);
             } catch (NoSuchFileException e) {
@@ -209,6 +212,7 @@ public class FileManager {
             }
         }
         if (Files.exists(customBackupPath)) {
+            log.fine("Restoring all user custom files");
             try {
                 delete(customPath);
             } catch (NoSuchFileException e) {

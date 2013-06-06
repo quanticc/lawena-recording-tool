@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
 
-    private static final Logger log = Logger.getLogger("lwrt");
+    private static final Logger log = Logger.getLogger("lawena");
 
     @Override
     public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
