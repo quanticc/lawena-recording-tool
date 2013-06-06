@@ -21,6 +21,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -334,14 +336,17 @@ public class Lawena {
     private JFileChooser choosedir;
     private String steampath;
     private String oDxlevel;
+    
     private String version;
+    private String build;
 
     public Lawena() {
         try {
             version = this.getClass().getPackage().getImplementationVersion().split("-")[0];
         } catch (Exception e) {
-            version = "";
+            version = "4.0";
         }
+        build = getManifestString("Implementation-Build", "0");
         String osname = System.getProperty("os.name");
         if (osname.contains("Windows")) {
             cl = new CLWindows();
@@ -394,6 +399,16 @@ public class Lawena {
         files.restoreAll();
 
         vdm = new DemoEditor(settings);
+    }
+    
+    private String getManifestString(String key, String defaultValue) {
+        try {
+            return new JarFile(new File(this.getClass().getProtectionDomain().getCodeSource()
+                    .getLocation().toURI()))
+                    .getManifest().getMainAttributes().getValue(key);
+        } catch (IOException | URISyntaxException e) {
+        }
+        return defaultValue;
     }
 
     private SwingWorker<Map<String, ImageIcon>, Void> getSkyboxLoader(final List<String> data) {
@@ -502,7 +517,7 @@ public class Lawena {
 
         new StartLogger("lawena").toTextComponent(Level.FINE, view.getTextAreaLog()).toLabel(
                 Level.FINE, view.getLblStatus());
-        log.fine("Started lawena Recording Tool " + version);
+        log.fine("Started lawena Recording Tool " + version + " build " + build);
         log.fine("TF2 path: " + settings.getTfDir());
         log.fine("Movie path: " + settings.getMovieDir());
 
