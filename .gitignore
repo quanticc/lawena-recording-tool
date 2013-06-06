@@ -8,7 +8,7 @@
 *.lwf
 *.exe
 *.log
-cfg/mov/**
+cfg/mov/*.cfg
 target/
 
 # NetBeans #
