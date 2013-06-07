@@ -172,13 +172,13 @@ public class StartLogger {
     }
 
     public StartLogger toFile(Level level) {
-        String pattern = logger.getName() + "%u.log";
+        String pattern = logger.getName() + ".%u.%g.log";
         File logFolder = new File(pattern).getParentFile();
         try {
             if (logFolder != null && !logFolder.exists()) {
                 logFolder.mkdir();
             }
-            FileHandler localFileHandler = new FileHandler(pattern, 16384, 3, true);
+            FileHandler localFileHandler = new FileHandler(pattern, 1024000, 3, true);
             localFileHandler.setFormatter(new LogFormatter().dateFormat(DATETIME).fullTraces());
             localFileHandler.setLevel(level);
             logger.addHandler(localFileHandler);
