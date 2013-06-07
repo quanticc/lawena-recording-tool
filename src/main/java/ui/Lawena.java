@@ -420,8 +420,11 @@ public class Lawena {
                 try {
                     for (String skybox : data) {
                         log.fine("Generating skybox preview: " + skybox);
-                        cl.generatePreview(skybox + "up.vtf");
-                        ImageIcon icon = createPreviewIcon("skybox/" + skybox + "up.png");
+                        String img = "skybox/" + skybox + "up.png";
+                        if (!Files.exists(Paths.get(img))) {
+                            cl.generatePreview(skybox + "up.vtf");                            
+                        }
+                        ImageIcon icon = createPreviewIcon(img);
                         map.put(skybox, icon);
                     }
                 } catch (Exception e) {
