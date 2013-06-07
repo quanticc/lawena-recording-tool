@@ -10,6 +10,7 @@
 *.log
 cfg/mov/*.cfg
 target/
+version.txt
 
 # NetBeans #
 nbproject/private/
