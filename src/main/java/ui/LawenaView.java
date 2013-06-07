@@ -11,6 +11,7 @@ import java.awt.Insets;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -24,6 +25,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
@@ -66,7 +68,7 @@ public class LawenaView extends JFrame {
     private JRadioButton rdbtnViewmodelsDefault;
     private final ButtonGroup buttonGroupViewmodels = new ButtonGroup();
     private JCheckBox chckbxLoadCustomContent;
-    private CheckBoxList listCustomContent;
+    private JTable tableCustomContent;
     private JScrollPane scrollPane;
     private JPanel panel;
     private JButton btnAll;
@@ -86,10 +88,7 @@ public class LawenaView extends JFrame {
      * Create the frame.
      */
     public LawenaView() {
-        setMinimumSize(new Dimension(720, 420));
-        setTitle("lawena Recording Tool");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(50, 50, 750, 450);
 
         menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -105,6 +104,7 @@ public class LawenaView extends JFrame {
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(5, 5));
+        contentPane.setPreferredSize(new Dimension(720, 430));
         setContentPane(contentPane);
 
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -380,8 +380,8 @@ public class LawenaView extends JFrame {
         gbc_scrollPane.gridy = 6;
         panelSettings.add(scrollPane, gbc_scrollPane);
 
-        listCustomContent = new CheckBoxList();
-        scrollPane.setViewportView(listCustomContent);
+        tableCustomContent = new JTable();
+        scrollPane.setViewportView(tableCustomContent);
 
         disableVoiceChat = new JCheckBox("Disable Voice Chat");
         GridBagConstraints gbc_disableVoiceChat = new GridBagConstraints();
@@ -436,10 +436,7 @@ public class LawenaView extends JFrame {
 
         btnStartTf = new JButton("Start Team Fortress 2");
         btnStartTf.setIconTextGap(10);
-        // alternatively, LawenaView.class.getResource("/ui/tf2full.png")
-        try {
-        } catch (Exception e) {
-        }
+
         GridBagConstraints gbc_btnStartTf = new GridBagConstraints();
         gbc_btnStartTf.fill = GridBagConstraints.BOTH;
         gbc_btnStartTf.gridx = 4;
@@ -482,6 +479,9 @@ public class LawenaView extends JFrame {
         gbc_lblStatus.gridx = 0;
         gbc_lblStatus.gridy = 0;
         panelStatusbar.add(lblStatus, gbc_lblStatus);
+
+        setIconImage(new ImageIcon(this.getClass().getClassLoader().getResource("ui/tf2.png"))
+                .getImage());
     }
 
     public JComboBox<String> getCmbResolution() {
@@ -596,8 +596,8 @@ public class LawenaView extends JFrame {
         return textAreaLog;
     }
 
-    public CheckBoxList getListCustomContent() {
-        return listCustomContent;
+    public JTable getTableCustomContent() {
+        return tableCustomContent;
     }
 
     public JTabbedPane getTabbedPane() {
