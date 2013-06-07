@@ -88,6 +88,7 @@ public class LawenaView extends JFrame {
      * Create the frame.
      */
     public LawenaView() {
+        setMinimumSize(new Dimension(720, 430));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         menuBar = new JMenuBar();
@@ -480,8 +481,15 @@ public class LawenaView extends JFrame {
         gbc_lblStatus.gridy = 0;
         panelStatusbar.add(lblStatus, gbc_lblStatus);
 
-        setIconImage(new ImageIcon(this.getClass().getClassLoader().getResource("ui/tf2.png"))
-                .getImage());
+        try {
+            setIconImage(new ImageIcon(this.getClass().getClassLoader().getResource("ui/tf2.png"))
+                    .getImage());
+        } catch (Exception e) {
+        }
+        
+        pack();
+        setSize(new Dimension(720, 430));
+        setLocationByPlatform(true);
     }
 
     public JComboBox<String> getCmbResolution() {
