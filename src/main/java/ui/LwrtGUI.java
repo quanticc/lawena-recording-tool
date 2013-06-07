@@ -14,7 +14,7 @@ public class LwrtGUI {
     private static final Logger log = Logger.getLogger("lawena");    
 
     public static void main(String[] args) throws Exception {
-        new StartLogger("lawena").toConsole(Level.FINER);
+        new StartLogger("lawena").toFile(Level.FINE);
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

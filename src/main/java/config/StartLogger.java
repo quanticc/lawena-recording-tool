@@ -178,7 +178,7 @@ public class StartLogger {
             if (logFolder != null && !logFolder.exists()) {
                 logFolder.mkdir();
             }
-            FileHandler localFileHandler = new FileHandler(pattern, 16384, 1, true);
+            FileHandler localFileHandler = new FileHandler(pattern, 16384, 3, true);
             localFileHandler.setFormatter(new LogFormatter().dateFormat(DATETIME).fullTraces());
             localFileHandler.setLevel(level);
             logger.addHandler(localFileHandler);

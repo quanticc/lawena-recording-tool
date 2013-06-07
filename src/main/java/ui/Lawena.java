@@ -384,7 +384,7 @@ public class Lawena {
         if (moviedir != null && !moviedir.isEmpty()) {
             moviepath = Paths.get(moviedir);
         }
-        if (moviepath == null && !Files.exists(moviepath)) {
+        if (moviepath == null || !Files.exists(moviepath)) {
             moviepath = getMoviePath();
             if (moviepath == null) {
                 log.info("No movie directory specified, exiting.");
