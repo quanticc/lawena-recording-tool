@@ -60,7 +60,7 @@ public class LawenaView extends JFrame {
     private JLabel lblFrameRate;
     private JButton btnSaveSettings;
     private JButton btnClearMovieFolder;
-    private JPanel panelBottom;
+    private JPanel panelBottomLeft;
     private JLabel lblSkyboxPreview;
     private JTable tableCustomContent;
     private JScrollPane scrollPane;
@@ -79,6 +79,7 @@ public class LawenaView extends JFrame {
     private Component verticalStrut;
     private JLabel lblPreview;
     private Component horizontalStrut;
+    private JPanel panelBottomRight;
 
     /**
      * Create the frame.
@@ -116,7 +117,7 @@ public class LawenaView extends JFrame {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
         gbl_panelSettings.columnWeights = new double[] {
-                0.0, 1.0, 0.0, 1.0, 2.0
+                0.0, 1.0, 0.0, 1.0, 10.0
         };
         gbl_panelSettings.rowWeights = new double[] {
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE
@@ -396,34 +397,40 @@ public class LawenaView extends JFrame {
         gbc_disableCrosshairSwitch.gridy = 2;
         panelCheckboxes.add(disableCrosshairSwitch, gbc_disableCrosshairSwitch);
 
-        panelBottom = new JPanel();
-        FlowLayout flowLayout = (FlowLayout) panelBottom.getLayout();
-        flowLayout.setVgap(0);
-        flowLayout.setHgap(0);
-        GridBagConstraints gbc_panelBottom = new GridBagConstraints();
-        gbc_panelBottom.anchor = GridBagConstraints.WEST;
-        gbc_panelBottom.gridwidth = 5;
-        gbc_panelBottom.insets = new Insets(0, 5, 5, 5);
-        gbc_panelBottom.fill = GridBagConstraints.VERTICAL;
-        gbc_panelBottom.gridx = 0;
-        gbc_panelBottom.gridy = 10;
-        panelSettings.add(panelBottom, gbc_panelBottom);
+        panelBottomLeft = new JPanel();
+        FlowLayout fl_panelBottomLeft = (FlowLayout) panelBottomLeft.getLayout();
+        fl_panelBottomLeft.setVgap(0);
+        fl_panelBottomLeft.setHgap(0);
+        GridBagConstraints gbc_panelBottomLeft = new GridBagConstraints();
+        gbc_panelBottomLeft.anchor = GridBagConstraints.WEST;
+        gbc_panelBottomLeft.gridwidth = 3;
+        gbc_panelBottomLeft.insets = new Insets(0, 5, 5, 5);
+        gbc_panelBottomLeft.fill = GridBagConstraints.VERTICAL;
+        gbc_panelBottomLeft.gridx = 0;
+        gbc_panelBottomLeft.gridy = 10;
+        panelSettings.add(panelBottomLeft, gbc_panelBottomLeft);
 
         btnSaveSettings = new JButton("Save Settings");
-        panelBottom.add(btnSaveSettings);
+        panelBottomLeft.add(btnSaveSettings);
 
         btnClearMovieFolder = new JButton("Clear Movie Files");
-        panelBottom.add(btnClearMovieFolder);
+        panelBottomLeft.add(btnClearMovieFolder);
+        
+        panelBottomRight = new JPanel();
+        FlowLayout fl_panelBottomRight = (FlowLayout) panelBottomRight.getLayout();
+        fl_panelBottomRight.setVgap(0);
+        fl_panelBottomRight.setHgap(0);
+        GridBagConstraints gbc_panelBottomRight = new GridBagConstraints();
+        gbc_panelBottomRight.gridwidth = 3;
+        gbc_panelBottomRight.anchor = GridBagConstraints.EAST;
+        gbc_panelBottomRight.insets = new Insets(0, 0, 5, 5);
+        gbc_panelBottomRight.fill = GridBagConstraints.VERTICAL;
+        gbc_panelBottomRight.gridx = 3;
+        gbc_panelBottomRight.gridy = 10;
+        panelSettings.add(panelBottomRight, gbc_panelBottomRight);
 
         btnStartTf = new JButton("Start Team Fortress 2");
-
-        GridBagConstraints gbc_btnStartTf = new GridBagConstraints();
-        gbc_btnStartTf.insets = new Insets(0, 0, 5, 5);
-        gbc_btnStartTf.fill = GridBagConstraints.BOTH;
-        gbc_btnStartTf.gridx = 4;
-        gbc_btnStartTf.gridy = 10;
-        gbc_btnStartTf.gridwidth = 2;
-        panelSettings.add(btnStartTf, gbc_btnStartTf);
+        panelBottomRight.add(btnStartTf);
 
         JPanel panelLog = new JPanel();
         tabbedPane.addTab("Log", null, panelLog, null);
