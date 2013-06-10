@@ -76,7 +76,7 @@ public class CLWindows implements CommandLine {
     }
 
     @Override
-    public Process startTf(int width, int height, String dxlevel) {
+    public void startTf(int width, int height, String dxlevel) {
         try {
             ProcessBuilder pb = new ProcessBuilder(getSteamPath() + "/steam.exe", "-applaunch",
                     "440", "-dxlevel", dxlevel + "", "-novid", "-noborder", "-noforcedmparms",
@@ -84,12 +84,15 @@ public class CLWindows implements CommandLine {
                     "-sw", "-w", width + "", "-h", height + "");
             log.fine("Starting TF2 in " + width + "x" + height + " with dxlevel " + dxlevel);
             Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                log.fine("[steam] " + line);
+            }
             pr.waitFor();
-            return pr;
         } catch (InterruptedException | IOException e) {
             log.log(Level.INFO, "Process was interrupted", e);
         }
-        return null;
     }
 
     private void regedit(String key, String value, String content) {
@@ -187,6 +190,22 @@ public class CLWindows implements CommandLine {
         }
         if (!fileList.isEmpty()) {
             extractVpkFile(tfpath, vpkname, dest, fileList);
+        }
+    }
+
+    @Override
+    public void killTf2Process() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("taskkill", "/F", "/IM", "hl2.exe");
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                log.fine("[taskkill] " + line);
+            }
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.info("Problem stopping TF2 process");
         }
     }
 

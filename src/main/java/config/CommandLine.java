@@ -17,10 +17,12 @@ public interface CommandLine {
 
     public String getSteamPath();
 
-    public Process startTf(int width, int height, String dxlevel);
+    public void startTf(int width, int height, String dxlevel);
 
     public List<String> getVpkContents(Path tfpath, Path vpkpath);
 
     public void extractIfNeeded(Path tfpath, String vpkname, Path dest, String... files) throws IOException;
+
+    public void killTf2Process();
 
 }

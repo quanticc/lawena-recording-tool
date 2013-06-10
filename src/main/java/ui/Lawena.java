@@ -122,26 +122,23 @@ public class Lawena {
             settings.setCrosshair(!view.getDisableCrosshair().isSelected());
             settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
             settings.setHitsounds(!view.getDisableHitSounds().isSelected());
-            // settings.setSteamCloud(!view.getDisableSteamCloud().isSelected());
             settings.setVoice(!view.getDisableVoiceChat().isSelected());
         }
     }
 
     public class StartTfTask extends SwingWorker<Void, Void> {
 
-        private Process tf2Process = null;
-
         @Override
         protected Void doInBackground() throws Exception {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
+                public void run() {
+                    view.getBtnStartTf().setEnabled(false);
+                }
+            });
             if (currentTask == null) {
                 currentTask = this;
-                SwingUtilities.invokeAndWait(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        view.getBtnStartTf().setEnabled(false);
-                    }
-                });
 
                 // Restoring user files
                 status.info("Restoring your files");
@@ -162,26 +159,22 @@ public class Lawena {
 
                 // Backing up user files and copying lawena files
                 status.info("Copying lawena files to cfg and custom");
-                // files.setReplaceVo(!settings.getAnnouncer());
                 if (view.getCmbSkybox().getSelectedIndex() != 0) {
                     files.setSkyboxFilename((String) view.getCmbSkybox().getSelectedItem());
                 }
-                // files.setReplaceAnnouncer(!settings.getAnnouncer());
-                // files.setReplaceDomination(!settings.getDomination());
                 files.setHudName(settings.getHud());
                 files.replaceAll();
 
                 // Launching process
                 status.info("Launching TF2 process");
-                tf2Process = cl.startTf(settings.getWidth(), settings.getHeight(),
-                        settings.getDxlevel());
+                cl.startTf(settings.getWidth(), settings.getHeight(), settings.getDxlevel());
 
                 SwingUtilities.invokeAndWait(new Runnable() {
 
                     @Override
                     public void run() {
                         view.getBtnStartTf().setEnabled(true);
-                        view.getBtnStartTf().setText("Cancel");
+                        view.getBtnStartTf().setText("Stop Team Fortress 2");
                     }
                 });
 
@@ -189,7 +182,7 @@ public class Lawena {
                 int timeout = 0;
                 int maxtimeout = 40;
                 int millis = 3000;
-                status.info("Waiting for TF2 to start");
+                status.info("Waiting for TF2 to start...");
                 while (!cl.isTf2Running() && timeout < maxtimeout) {
                     Thread.sleep(millis);
                     ++timeout;
@@ -202,17 +195,19 @@ public class Lawena {
                     return null;
                 }
 
-                // Running TF2, wait until it's finished
-                status.info("Waiting for TF2 to finish running. Press Cancel to abort");
+                log.fine("TF2 has started running");
+                status.info("Waiting for TF2 to finish running...");
                 while (cl.isTf2Running()) {
                     Thread.sleep(millis);
                 }
 
             } else {
-                if (!cl.isTf2Running()) {
+                if (cl.isTf2Running()) {
                     status.info("Attempting to finish TF2 process");
-                    currentTask.getTf2Process().destroy();
-                    currentTask.cancel(true);
+                    cl.killTf2Process();
+                    if (!cl.isTf2Running()) {
+                        currentTask.cancel(true);
+                    }
                 } else {
                     status.info("TF2 was not running, cancelling");
                 }
@@ -232,10 +227,6 @@ public class Lawena {
                 view.getBtnStartTf().setEnabled(true);
                 status.info("");
             }
-        }
-
-        public Process getTf2Process() {
-            return tf2Process;
         }
 
     }

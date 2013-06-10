@@ -39,9 +39,9 @@ public class CLLinux implements CommandLine {
     }
 
     @Override
-    public Process startTf(int width, int height, String dxlevel) {
+    public void startTf(int width, int height, String dxlevel) {
         // TODO Auto-generated method stub
-        return null;
+        
     }
 
     @Override
@@ -53,6 +53,12 @@ public class CLLinux implements CommandLine {
     @Override
     public void extractIfNeeded(Path tfpath, String vpkname, Path dest, String... files)
             throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void killTf2Process() {
         // TODO Auto-generated method stub
         
     }
