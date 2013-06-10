@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -27,12 +29,9 @@ public class SettingsManager {
         TfDir(""),
         MovieDir(""),
         MotionBlur(true),
-        CustomParticles(false),
         CrosshairSwitch(false),
         Crosshair(false),
         CombatText(false),
-        Announcer(false),
-        Domination(false),
         Hitsounds(false),
         Voice(false),
         SteamCloud(false);
@@ -282,14 +281,6 @@ public class SettingsManager {
         setBoolean(Key.CombatText, value);
     }
 
-    public void setAnnouncer(boolean value) {
-        setBoolean(Key.Announcer, value);
-    }
-
-    public void setDomination(boolean value) {
-        setBoolean(Key.Domination, value);
-    }
-
     public void setHitsounds(boolean value) {
         setBoolean(Key.Hitsounds, value);
     }
@@ -354,14 +345,6 @@ public class SettingsManager {
         return getBoolean(Key.CombatText);
     }
 
-    public boolean getAnnouncer() {
-        return getBoolean(Key.Announcer);
-    }
-
-    public boolean getDomination() {
-        return getBoolean(Key.Domination);
-    }
-
     public boolean getHitsounds() {
         return getBoolean(Key.Hitsounds);
     }
@@ -381,6 +364,10 @@ public class SettingsManager {
     public String getTfDir() {
         String value = getString(Key.TfDir);
         return (value == null ? "" : value);
+    }
+    
+    public Path getTfPath() {
+        return Paths.get(getTfDir());
     }
 
     public String getMovieDir() {

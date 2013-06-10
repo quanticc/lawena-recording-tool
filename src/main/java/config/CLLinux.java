@@ -1,6 +1,9 @@
 
 package config;
 
+import java.nio.file.Path;
+import java.util.List;
+
 public class CLLinux implements CommandLine {
 
     @Override
@@ -36,6 +39,12 @@ public class CLLinux implements CommandLine {
 
     @Override
     public Process startTf(int width, int height, String dxlevel) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<String> getVpkContents(Path tfpath, Path vpkpath) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -1,15 +1,17 @@
 
 package ui;
 
-import config.CommandLine;
-import config.FileManager;
 import config.CLLinux;
-import config.MovieManager;
 import config.CLOSX;
+import config.CLWindows;
+import config.CommandLine;
+import config.CustomPath;
+import config.CustomPathList;
+import config.FileManager;
+import config.MovieManager;
 import config.SettingsManager;
 import config.SettingsManager.Key;
 import config.StartLogger;
-import config.CLWindows;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -23,12 +25,14 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +44,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
@@ -111,25 +114,17 @@ public class Lawena {
             String framerate = (String) view.getCmbFramerate().getSelectedItem();
             settings.setFramerate(Integer.parseInt(framerate));
             settings.setHud(Key.Hud.getAllowedValues().get(view.getCmbHud().getSelectedIndex()));
-            List<AbstractButton> elements = Collections.list(view.getButtonGroupViewmodels()
-                    .getElements());
-            for (AbstractButton element : elements) {
-                if (element.getModel().isSelected()) {
-                    settings.setViewmodelSwitch(element.getText().toLowerCase());
-                }
-            }
+            settings.setViewmodelSwitch(Key.ViewmodelSwitch.getAllowedValues().get(
+                    view.getCmbViewmodel().getSelectedIndex()));
             settings.setViewmodelFov((int) view.getSpinnerViewmodelFov().getValue());
             settings.setDxlevel(Key.DxLevel.getAllowedValues().get(
                     view.getCmbQuality().getSelectedIndex()));
             settings.setMotionBlur(view.getEnableMotionBlur().isSelected());
-            // settings.setParticles(view.getEnableParticles().isSelected());
-            settings.setAnnouncer(!view.getDisableAnnouncer().isSelected());
             settings.setCombattext(!view.getDisableCombatText().isSelected());
             settings.setCrosshair(!view.getDisableCrosshair().isSelected());
             settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
-            settings.setDomination(!view.getDisableDominationSounds().isSelected());
             settings.setHitsounds(!view.getDisableHitSounds().isSelected());
-            settings.setSteamCloud(!view.getDisableSteamCloud().isSelected());
+            // settings.setSteamCloud(!view.getDisableSteamCloud().isSelected());
             settings.setVoice(!view.getDisableVoiceChat().isSelected());
         }
     }
@@ -151,9 +146,11 @@ public class Lawena {
                 });
 
                 // Restoring user files
+                status.info("Restoring your files");
                 files.restoreAll();
 
                 // Saving ui settings to cfg files
+                status.info("Saving settings and generating cfg files");
                 try {
                     new SaveSettings().setSettings();
                     settings.saveToCfg();
@@ -161,19 +158,23 @@ public class Lawena {
                     movies.movieOffset();
                 } catch (IOException e) {
                     log.log(Level.INFO, "A problem occurred while saving settings", e);
+                    status.info("Problem while saving to settings file, check log for details");
+                    return null;
                 }
 
                 // Backing up user files and copying lawena files
-                files.setReplaceVo(!settings.getAnnouncer());
+                status.info("Copying lawena files to cfg and custom");
+                // files.setReplaceVo(!settings.getAnnouncer());
                 if (view.getCmbSkybox().getSelectedIndex() != 0) {
                     files.setSkyboxFilename((String) view.getCmbSkybox().getSelectedItem());
                 }
-                files.setReplaceAnnouncer(!settings.getAnnouncer());
-                files.setReplaceDomination(!settings.getDomination());
+                // files.setReplaceAnnouncer(!settings.getAnnouncer());
+                // files.setReplaceDomination(!settings.getDomination());
                 files.setHudName(settings.getHud());
                 files.replaceAll();
 
                 // Launching process
+                status.info("Launching TF2 process");
                 tf2Process = cl.startTf(settings.getWidth(), settings.getHeight(),
                         settings.getDxlevel());
 
@@ -190,7 +191,7 @@ public class Lawena {
                 int timeout = 0;
                 int maxtimeout = 40;
                 int millis = 3000;
-                log.fine("Waiting for TF2 to start");
+                status.info("Waiting for TF2 to start");
                 while (!cl.isTf2Running() && timeout < maxtimeout) {
                     Thread.sleep(millis);
                     ++timeout;
@@ -199,22 +200,23 @@ public class Lawena {
                 if (timeout >= maxtimeout) {
                     int s = timeout * (millis / 1000);
                     log.info("TF2 launch timed out after " + s + " seconds");
+                    status.info("TF2 launch timed out, aborting");
                     return null;
                 }
 
                 // Running TF2, wait until it's finished
-                log.fine("Waiting for TF2 to finish running");
+                status.info("Waiting for TF2 to finish running. Press Cancel to abort");
                 while (cl.isTf2Running()) {
                     Thread.sleep(millis);
                 }
 
             } else {
                 if (!cl.isTf2Running()) {
-                    log.fine("Attempting to finish TF2 process");
+                    status.info("Attempting to finish TF2 process");
                     currentTask.getTf2Process().destroy();
                     currentTask.cancel(true);
                 } else {
-                    log.fine("TF2 was not running, cancelling");
+                    status.info("TF2 was not running, cancelling");
                 }
             }
 
@@ -230,7 +232,7 @@ public class Lawena {
                 cl.setSystemDxLevel(oDxlevel);
                 view.getBtnStartTf().setText("Start Team Fortress 2");
                 view.getBtnStartTf().setEnabled(true);
-                log.fine("Ready");
+                status.info("");
             }
         }
 
@@ -251,11 +253,12 @@ public class Lawena {
     }
 
     private static final Logger log = Logger.getLogger("lawena");
+    private static final Logger status = Logger.getLogger("status");
 
     private static StartTfTask currentTask = null;
 
     private static ImageIcon createPreviewIcon(String imageName) {
-        int size = 64;
+        int size = 96;
         BufferedImage image;
         File input = new File(imageName);
         image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
@@ -312,17 +315,6 @@ public class Lawena {
         }
     }
 
-    private static void selectRadioItem(ButtonGroup group, String selectedValue,
-            List<String> possibleValues) {
-        List<AbstractButton> elements = Collections.list(group.getElements());
-        if (possibleValues != null && !possibleValues.isEmpty()) {
-            int i = possibleValues.indexOf(selectedValue);
-            if (i >= 0) {
-                group.setSelected(elements.get(i).getModel(), true);
-            }
-        }
-    }
-
     private LawenaView view;
 
     private SettingsManager settings;
@@ -330,13 +322,14 @@ public class Lawena {
     private FileManager files;
     private DemoEditor vdm;
     private CommandLine cl;
+    private CustomPathList customPaths;
 
     private HashMap<String, ImageIcon> skyboxMap;
     private JFileChooser choosemovie;
     private JFileChooser choosedir;
     private String steampath;
     private String oDxlevel;
-    
+
     private String version;
     private String build;
 
@@ -398,9 +391,12 @@ public class Lawena {
         settings.save();
         files.restoreAll();
 
+        customPaths = new CustomPathList();
+        files.setCustomPathList(customPaths);
+
         vdm = new DemoEditor(settings);
     }
-    
+
     private String getManifestString(String key, String defaultValue) {
         try {
             return new JarFile(new File(this.getClass().getProtectionDomain().getCodeSource()
@@ -418,14 +414,17 @@ public class Lawena {
             protected Map<String, ImageIcon> doInBackground() throws Exception {
                 final Map<String, ImageIcon> map = new HashMap<>();
                 try {
+                    int i = 1;
                     for (String skybox : data) {
-                        log.fine("Generating skybox preview: " + skybox);
+                        setProgress((int) (100 * ((double) i / data.size())));
+                        status.fine("[" + getProgress() + "%] Generating skybox preview: " + skybox);
                         String img = "skybox/" + skybox + "up.png";
                         if (!Files.exists(Paths.get(img))) {
-                            cl.generatePreview(skybox + "up.vtf");                            
+                            cl.generatePreview(skybox + "up.vtf");
                         }
                         ImageIcon icon = createPreviewIcon(img);
                         map.put(skybox, icon);
+                        i++;
                     }
                 } catch (Exception e) {
                     log.log(Level.INFO, "Problem while loading skyboxes", e);
@@ -437,10 +436,11 @@ public class Lawena {
             protected void done() {
                 try {
                     skyboxMap.putAll(get());
+                    log.fine("Skybox loading and preview generation complete");
                 } catch (CancellationException | InterruptedException | ExecutionException e) {
-                    log.finer("Skybox preview generator task was cancelled");
+                    log.info("Skybox preview generator task was cancelled");
                 }
-                log.fine("Ready");
+                status.info("");
             }
 
         };
@@ -518,15 +518,15 @@ public class Lawena {
     public void start() {
         view = new LawenaView();
 
-        new StartLogger("lawena").toTextComponent(Level.FINE, view.getTextAreaLog()).toLabel(
-                Level.FINE, view.getLblStatus());
+        new StartLogger("lawena").toTextComponent(Level.FINE, view.getTextAreaLog());
+        new StartLogger("status").toLabel(Level.FINE, view.getLblStatus());
         log.fine("Started lawena Recording Tool " + version + " build " + build);
-        log.fine("TF2 path: " + settings.getTfDir());
+        log.fine("TF2 path: " + settings.getTfPath());
         log.fine("Movie path: " + settings.getMovieDir());
 
         view.setTitle("lawena Recording Tool");
         try {
-            view.setIconImage(new ImageIcon(LwrtGUI.class.getClassLoader()
+            view.setIconImage(new ImageIcon(Lawena.class.getClassLoader()
                     .getResource("ui/tf2.png"))
                     .getImage());
         } catch (Exception e) {
@@ -550,7 +550,7 @@ public class Lawena {
                 Arrays.asList("killnotices", "medic", "full", "custom"));
         selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
                 Arrays.asList("80", "81", "90", "95", "98"));
-        selectRadioItem(view.getButtonGroupViewmodels(), settings.getViewmodelSwitch(),
+        selectComboItem(view.getCmbViewmodel(), settings.getViewmodelSwitch(),
                 Arrays.asList("on", "off", "default"));
 
         view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
@@ -560,17 +560,19 @@ public class Lawena {
         } catch (IllegalArgumentException e) {
         }
         configureSkyboxes(view.getCmbSkybox());
+        
+        JTable table = view.getTableCustomContent();
+        table.setModel(customPaths);
+        table.getColumnModel().getColumn(0).setMaxWidth(20);
+        table.setDefaultRenderer(CustomPath.class, new TooltipRenderer());
 
         // set remaining values
         view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
-        // view.getEnableParticles().setSelected(settings.getParticles());
-        view.getDisableAnnouncer().setSelected(!settings.getAnnouncer());
         view.getDisableCombatText().setSelected(!settings.getCombattext());
         view.getDisableCrosshair().setSelected(!settings.getCrosshair());
         view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
-        view.getDisableDominationSounds().setSelected(!settings.getDomination());
         view.getDisableHitSounds().setSelected(!settings.getHitsounds());
-        view.getDisableSteamCloud().setSelected(!settings.getSteamCloud());
+        // view.getDisableSteamCloud().setSelected(!settings.getSteamCloud());
         view.getDisableVoiceChat().setSelected(!settings.getVoice());
 
         // register actions
@@ -585,10 +587,70 @@ public class Lawena {
                 new StartTfTask().execute();
             }
         });
+        
+        DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
+
+            @Override
+            public boolean accept(Path entry) throws IOException {
+                return Files.isDirectory(entry) || entry.toString().endsWith(".vpk");
+            }
+        };
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("custom"), filter)) {
+            for (Path path : stream) {
+                CustomPath cp = new CustomPath(path);
+                cp.setSelected(true);
+                cp.setContents(getDirectoryContents(path));
+                customPaths.addPath(cp);
+            }
+        } catch (IOException e) {
+            log.log(Level.INFO, "", e);
+        }
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(settings.getTfDir(),
+                "custom"), filter)) {
+            for (Path path : stream) {
+                CustomPath cp = new CustomPath(path);
+                cp.setContents(getDirectoryContents(path));
+                customPaths.addPath(cp);
+            }
+        } catch (IOException e) {
+            log.log(Level.INFO, "", e);
+        }
 
         view.getTabbedPane().addTab("VDM", null, vdm.start());
 
         view.setVisible(true);
     }
 
+    private List<String> getDirectoryContents(Path start) {
+        if (Files.isDirectory(start)) {
+            final List<String> files = new ArrayList<>();
+            try {
+                Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                            throws IOException {
+                        files.add(file.toString());
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException e)
+                            throws IOException {
+                        if (e == null) {
+                            return FileVisitResult.CONTINUE;
+                        } else {
+                            throw e;
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                log.info("Problem while retrieving folder contents");
+            }
+            return files;
+        } else {
+            return cl.getVpkContents(settings.getTfPath(), start);
+        }
+    }
 }

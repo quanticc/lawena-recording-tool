@@ -14,7 +14,7 @@ public class LwrtGUI {
     private static final Logger log = Logger.getLogger("lawena");    
 
     public static void main(String[] args) throws Exception {
-        new StartLogger("lawena").toFile(Level.FINE);
+        new StartLogger("lawena").toConsole(Level.FINER).toFile(Level.FINE);
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -25,7 +25,7 @@ public class LwrtGUI {
 
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, final Throwable e) {
-                log.log(Level.SEVERE, "Unexpected problem in thread " + t, e);
+                log.log(Level.SEVERE, "Unexpected problem in " + t, e);
             }
         });
 

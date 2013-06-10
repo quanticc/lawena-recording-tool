@@ -23,14 +23,14 @@ public class FileManager {
 
     private String hudName;
     private String skyboxFilename;
-    private boolean replaceVo;
-    private boolean replaceDomination;
-    private boolean replaceAnnouncer;
 
     private Path configBackupPath;
     private Path configPath;
     private Path customBackupPath;
     private Path customPath;
+    private Path localCustomPath = Paths.get("custom");
+
+    private CustomPathList customPathList;
 
     public FileManager(String dir) {
         tfdir = dir;
@@ -68,22 +68,18 @@ public class FileManager {
         return skyboxFilename;
     }
 
-    public boolean isReplaceAnnouncer() {
-        return replaceAnnouncer;
+    public CustomPathList getCustomPathList() {
+        return customPathList;
     }
 
-    public boolean isReplaceDomination() {
-        return replaceDomination;
-    }
-
-    public boolean isReplaceVo() {
-        return replaceVo;
+    public void setCustomPathList(CustomPathList customPathList) {
+        this.customPathList = customPathList;
     }
 
     public void replaceAll() {
         if (!Files.exists(configBackupPath)) {
             try {
-                log.fine("Making a backup of your configs");
+                log.fine("Making a backup of your config files");
                 configPath.toFile().setWritable(true);
                 Files.move(configPath, configBackupPath);
                 Files.createDirectories(configPath);
@@ -128,31 +124,47 @@ public class FileManager {
                     log.log(Level.INFO, "Could not delete lawena skybox folder", e);
                 }
             }
-            try {
-                if (replaceVo) {
-                    log.fine("Replacing voiceover sound files");
-                    Path voPath = Paths.get(tfdir, "custom/lawena/sound/vo");
-                    Files.createDirectories(voPath);
-                    copy(Paths.get("sound/vo"), voPath);
+            // Copy selected custom files
+            if (customPathList != null) {
+                log.fine("Copying selected custom vpks and folders");
+                for (CustomPath cp : customPathList.getList()) {
+                    if (cp.isSelected()) {
+                        Path source;
+                        if (cp.getPath().startsWith(customPath)) {
+                            source = customBackupPath.resolve(cp.getPath().getFileName());
+                        } else if (cp.getPath().startsWith(localCustomPath)) {
+                            source = localCustomPath.resolve(cp.getPath().getFileName());
+                        } else {
+                            log.info("Not loading custom file with wrong path: "
+                                    + cp.getPath());
+                            continue;
+                        }
+                        if (Files.exists(source)) {
+                            if (Files.isDirectory(source)) {
+                                try {
+                                    Path dest = customPath.resolve(source.getFileName());
+                                    copy(source, dest);
+                                } catch (IOException e) {
+                                    log.log(Level.INFO,
+                                            "Could not copy custom folder: " + source.getFileName(),
+                                            e);
+                                }
+                            } else if (source.getFileName().toString().endsWith(".vpk")) {
+                                try {
+                                    Path dest = customPath.resolve(source.getFileName());
+                                    Files.copy(source, dest);
+                                } catch (IOException e) {
+                                    log.log(Level.INFO,
+                                            "Could not copy custom vpk: " + source.getFileName(), e);
+                                }
+                            } else {
+                                log.info("Not copying this custom file: " + source.getFileName());
+                            }
+                        } else {
+                            log.info("Custom file does not exist: " + source);
+                        }
+                    }
                 }
-            } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace vo sound files", e);
-            }
-            // copy lawena's sound/misc
-            try {
-                Path miscPath = Paths.get(tfdir, "custom/lawena/sound/misc");
-                Files.createDirectories(miscPath);
-                copy(Paths.get("sound/misc"), miscPath);
-                if (replaceDomination) {
-                    log.fine("Replacing domination sound files");
-                    copy(Paths.get("sound/miscdom"), miscPath);
-                }
-                if (replaceAnnouncer) {
-                    log.fine("Replacing announcer sound files");
-                    copy(Paths.get("sound/miscann"), miscPath);
-                }
-            } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace misc sound files", e);
             }
         }
     }
@@ -234,18 +246,6 @@ public class FileManager {
 
     public void setHudName(String hudName) {
         this.hudName = hudName;
-    }
-
-    public void setReplaceAnnouncer(boolean replaceAnnouncer) {
-        this.replaceAnnouncer = replaceAnnouncer;
-    }
-
-    public void setReplaceDomination(boolean replaceDomination) {
-        this.replaceDomination = replaceDomination;
-    }
-
-    public void setReplaceVo(boolean replaceVo) {
-        this.replaceVo = replaceVo;
     }
 
     public void setSkyboxFilename(String skyboxFilename) {

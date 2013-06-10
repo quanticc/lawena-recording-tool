@@ -5,6 +5,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,8 +70,8 @@ public class CLWindows implements CommandLine {
     @Override
     public Process startTf(int width, int height, String dxlevel) {
         try {
-            ProcessBuilder pb = new ProcessBuilder(getSteamPath() + "/steam.exe", "-applaunch", "440",
-                    "-dxlevel", dxlevel + "", "-novid", "-noborder", "-noforcedmparms",
+            ProcessBuilder pb = new ProcessBuilder(getSteamPath() + "/steam.exe", "-applaunch",
+                    "440", "-dxlevel", dxlevel + "", "-novid", "-noborder", "-noforcedmparms",
                     "-noforcemaccel", "-noforcemspd", "-console", "-high", "-noipx", "-nojoy",
                     "-sw", "-w", width + "", "-h", height + "");
             log.fine("Starting TF2 in " + width + "x" + height + " with dxlevel " + dxlevel);
@@ -111,6 +114,25 @@ public class CLWindows implements CommandLine {
                     result.indexOf('\n', result.lastIndexOf("0x")));
         return result.substring(result.lastIndexOf(":") - 1,
                 result.indexOf('\n', result.lastIndexOf(":")));
+    }
+
+    @Override
+    public List<String> getVpkContents(Path tfpath, Path vpkpath) {
+        Path vpktool = tfpath.resolve("../bin/vpk.exe");
+        List<String> files = new ArrayList<>();
+        try {
+            ProcessBuilder pb = new ProcessBuilder(vpktool.toString(), "l", vpkpath.toString());
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                files.add(line);
+            }
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.info("Problem retrieving contents of VPK file: " + vpkpath);
+        }
+        return files;
     }
 
 }
