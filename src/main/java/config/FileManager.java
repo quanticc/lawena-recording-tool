@@ -31,13 +31,15 @@ public class FileManager {
     private Path localCustomPath = Paths.get("custom");
 
     private CustomPathList customPathList;
+    private CommandLine cl;
 
-    public FileManager(String dir) {
+    public FileManager(String dir, CommandLine cmdLine) {
         tfdir = dir;
         customBackupPath = Paths.get(tfdir, "lwrtcustom");
         customPath = Paths.get(tfdir, "custom");
         configBackupPath = Paths.get(tfdir, "lwrtcfg");
         configPath = Paths.get(tfdir, "cfg");
+        cl = cmdLine;
     }
 
     private Path copy(Path from, Path to) throws IOException {
@@ -177,6 +179,8 @@ public class FileManager {
             for (Path path : stream) {
                 String pathStr = path.toFile().getName();
                 if (pathStr.endsWith(".vmt")) {
+                    cl.extractIfNeeded(Paths.get(tfdir), "custom/skybox.vpk",
+                            Paths.get("skybox"), path.getFileName().toString());
                     Files.copy(path, skyboxPath.resolve(pathStr));
                     vmtPaths.add(path);
                 }
@@ -196,6 +200,9 @@ public class FileManager {
                         || (vtf.endsWith("ft.vtf") && vmt.endsWith("ft.vmt"))
                         || (vtf.endsWith("lf.vtf") && vmt.endsWith("lf.vmt"))
                         || (vtf.endsWith("rt.vtf") && vmt.endsWith("rt.vmt"))) {
+                    Path src = vtfPaths.get(i);
+                    cl.extractIfNeeded(Paths.get(tfdir), "skybox.vpk",
+                            Paths.get("skybox"), src.getFileName().toString());
                     Files.copy(vtfPaths.get(i),
                             skyboxPath.resolve(vmt.substring(0, vmt.indexOf(".vmt")) + ".vtf"));
                 }

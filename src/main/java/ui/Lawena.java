@@ -1,8 +1,6 @@
 
 package ui;
 
-import config.CLLinux;
-import config.CLOSX;
 import config.CLWindows;
 import config.CommandLine;
 import config.CustomPath;
@@ -343,10 +341,10 @@ public class Lawena {
         String osname = System.getProperty("os.name");
         if (osname.contains("Windows")) {
             cl = new CLWindows();
-        } else if (osname.contains("Linux")) {
-            cl = new CLLinux();
-        } else if (osname.contains("OS X")) {
-            cl = new CLOSX();
+            // } else if (osname.contains("Linux")) {
+            // cl = new CLLinux();
+            // } else if (osname.contains("OS X")) {
+            // cl = new CLOSX();
         } else {
             throw new UnsupportedOperationException("OS not supported");
         }
@@ -369,8 +367,8 @@ public class Lawena {
             }
         }
         tfdir = tfpath.toString();
-        files = new FileManager(tfdir);
         settings.setTfDir(tfdir);
+        files = new FileManager(tfdir, cl);
 
         String moviedir = settings.getMovieDir();
         Path moviepath = null;
@@ -420,7 +418,10 @@ public class Lawena {
                         status.fine("[" + getProgress() + "%] Generating skybox preview: " + skybox);
                         String img = "skybox/" + skybox + "up.png";
                         if (!Files.exists(Paths.get(img))) {
-                            cl.generatePreview(skybox + "up.vtf");
+                            String filename = skybox + "up.vtf";
+                            cl.extractIfNeeded(settings.getTfPath(), "custom/skybox.vpk",
+                                    Paths.get("skybox"), filename);
+                            cl.generatePreview(filename);
                         }
                         ImageIcon icon = createPreviewIcon(img);
                         map.put(skybox, icon);
@@ -449,8 +450,8 @@ public class Lawena {
     private void configureSkyboxes(final JComboBox<String> combo) {
         Vector<String> data = new Vector<>();
         Path dir = Paths.get("skybox");
-        log.fine("Loading skyboxes from folder");
         if (Files.exists(dir)) {
+            log.fine("Loading skyboxes from folder");
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*up.vtf")) {
                 for (Path path : stream) {
                     log.finer("Skybox found at: " + path);
@@ -460,6 +461,22 @@ public class Lawena {
                 }
             } catch (IOException e) {
                 log.log(Level.INFO, "Problem while loading skyboxes", e);
+            }
+        }
+        Path vpk = Paths.get("custom/skybox.vpk");
+        if (Files.exists(vpk)) {
+            log.fine("Searching for skyboxes in " + vpk);
+            for (String file : cl.getVpkContents(settings.getTfPath(), vpk)) {
+                if (file.endsWith("up.vtf")) {
+                    log.finer("[skybox.vpk] Skybox found at: " + file);
+                    String skybox = file;
+                    skybox = skybox.substring(0, skybox.indexOf("up.vtf"));
+                    if (!data.contains(skybox)) {
+                        data.add(skybox);
+                    } else {
+                        log.finer("Not adding because it already exists: " + skybox);
+                    }
+                }
             }
         }
         skyboxMap = new HashMap<>(data.size());
@@ -560,7 +577,7 @@ public class Lawena {
         } catch (IllegalArgumentException e) {
         }
         configureSkyboxes(view.getCmbSkybox());
-        
+
         JTable table = view.getTableCustomContent();
         table.setModel(customPaths);
         table.getColumnModel().getColumn(0).setMaxWidth(20);
@@ -587,12 +604,13 @@ public class Lawena {
                 new StartTfTask().execute();
             }
         });
-        
+
         DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
 
             @Override
             public boolean accept(Path entry) throws IOException {
-                return Files.isDirectory(entry) || entry.toString().endsWith(".vpk");
+                return (Files.isDirectory(entry) || entry.toString().endsWith(".vpk"))
+                        && !entry.getFileName().toString().equals("skybox.vpk");
             }
         };
 

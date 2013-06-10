@@ -5,7 +5,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -18,12 +20,18 @@ public class CLWindows implements CommandLine {
     @Override
     public void generatePreview(String skyboxFilename) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("vtfcmd\\VTFCmd.exe", "-file", "Skybox\\",
-                    skyboxFilename, "-output", "Skybox", "-exportformat", "png");
+            ProcessBuilder pb = new ProcessBuilder("vtfcmd\\VTFCmd.exe", "-file", "skybox\\" +
+                    skyboxFilename, "-output", "skybox", "-exportformat", "png");
+            log.finer("generatePreview: " + pb.command());
             Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                log.finer("[vtfcmd] " + line);
+            }
             pr.waitFor();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException | IOException e) {
+            log.log(Level.INFO, "Problem while generating png from vtf file", e);
         }
     }
 
@@ -118,7 +126,7 @@ public class CLWindows implements CommandLine {
 
     @Override
     public List<String> getVpkContents(Path tfpath, Path vpkpath) {
-        Path vpktool = tfpath.resolve("../bin/vpk.exe");
+        Path vpktool = resolveVpkToolPath(tfpath);
         List<String> files = new ArrayList<>();
         try {
             ProcessBuilder pb = new ProcessBuilder(vpktool.toString(), "l", vpkpath.toString());
@@ -133,6 +141,53 @@ public class CLWindows implements CommandLine {
             log.info("Problem retrieving contents of VPK file: " + vpkpath);
         }
         return files;
+    }
+
+    private Path resolveVpkToolPath(Path tfpath) {
+        return tfpath.resolve("../bin/vpk.exe");
+    }
+
+    private void extractVpkFile(Path tfpath, String vpkname, Path dest, List<String> files) {
+        Path vpktool = resolveVpkToolPath(tfpath);
+        List<String> cmds = new ArrayList<>();
+        try {
+            cmds.add(vpktool.toString());
+            cmds.add("x");
+            cmds.add(Paths.get(vpkname).toAbsolutePath().toString());
+            cmds.addAll(files);
+            ProcessBuilder pb = new ProcessBuilder(cmds);
+            pb.directory(dest.toFile());
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                log.fine("[vpk] " + line);
+            }
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.info("Problem extracting contents from VPK file: " + vpkname);
+        }
+    }
+
+    @Override
+    public void extractIfNeeded(Path tfpath, String vpkname, Path dest, String... files)
+            throws IOException {
+        List<String> fileList = new ArrayList<>();
+        for (String file : files) {
+            if (!Files.exists(dest.resolve(file))) {
+                if (Files.exists(Paths.get(vpkname))) {
+                    if (!Files.exists(dest) || !Files.isDirectory(dest)) {
+                        Files.createDirectory(dest);
+                    }
+                    fileList.add(file);
+                } else {
+                    log.info("Required file was not found: " + file);
+                }
+            }
+        }
+        if (!fileList.isEmpty()) {
+            extractVpkFile(tfpath, vpkname, dest, fileList);
+        }
     }
 
 }

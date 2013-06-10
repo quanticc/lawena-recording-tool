@@ -1,6 +1,7 @@
 
 package config;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -47,6 +48,13 @@ public class CLLinux implements CommandLine {
     public List<String> getVpkContents(Path tfpath, Path vpkpath) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void extractIfNeeded(Path tfpath, String vpkname, Path dest, String... files)
+            throws IOException {
+        // TODO Auto-generated method stub
+        
     }
 
 }
