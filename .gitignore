@@ -11,6 +11,8 @@
 cfg/mov/*.cfg
 target/
 version.txt
+skybox/
+*.lck
 
 # NetBeans #
 nbproject/private/

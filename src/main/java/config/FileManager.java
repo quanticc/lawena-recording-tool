@@ -8,8 +8,8 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -122,6 +122,7 @@ public class FileManager {
                 log.log(Level.INFO, "Could not replace skybox files", e);
                 try {
                     delete(materialsPath);
+                    log.fine("Skybox folder deleted, no skybox files were replaced");
                 } catch (IOException e1) {
                     log.log(Level.INFO, "Could not delete lawena skybox folder", e);
                 }
@@ -172,15 +173,14 @@ public class FileManager {
     }
 
     private void replaceSkybox() throws IOException {
-        List<Path> vmtPaths = new ArrayList<>();
-        List<Path> vtfPaths = new ArrayList<>();
+        Set<Path> vmtPaths = new LinkedHashSet<>();
+        Set<Path> vtfPaths = new LinkedHashSet<>();
         Path skyboxPath = Paths.get(tfdir, "custom/lawena/materials/skybox");
+        String skyboxVpk = "custom/skybox.vpk";
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("skybox"))) {
             for (Path path : stream) {
                 String pathStr = path.toFile().getName();
                 if (pathStr.endsWith(".vmt")) {
-                    cl.extractIfNeeded(Paths.get(tfdir), "custom/skybox.vpk",
-                            Paths.get("skybox"), path.getFileName().toString());
                     Files.copy(path, skyboxPath.resolve(pathStr));
                     vmtPaths.add(path);
                 }
@@ -190,20 +190,31 @@ public class FileManager {
             }
         }
 
-        for (int i = 0; i < vtfPaths.size(); ++i) {
-            for (int j = 0; j < vmtPaths.size(); ++j) {
-                String vtf = vtfPaths.get(i).getFileName().toString();
-                String vmt = vmtPaths.get(j).getFileName().toString();
+        for (String pathStr : cl.getVpkContents(Paths.get(tfdir), Paths.get(skyboxVpk))) {
+            Path path = Paths.get("skybox", pathStr);
+            if (pathStr.endsWith(".vmt")) {
+                cl.extractIfNeeded(Paths.get(tfdir), skyboxVpk, Paths.get("skybox"), pathStr);
+                Files.copy(path, skyboxPath.resolve(pathStr));
+                vmtPaths.add(path);
+            }
+            if (pathStr.endsWith(".vtf") && pathStr.startsWith(skyboxFilename)) {
+                vtfPaths.add(path);
+            }
+        }
+
+        for (Path vtfPath : vtfPaths) {
+            for (Path vmtPath : vmtPaths) {
+                String vtf = vtfPath.getFileName().toString();
+                String vmt = vmtPath.getFileName().toString();
                 if ((vtf.endsWith("up.vtf") && vmt.endsWith("up.vmt"))
                         || (vtf.endsWith("dn.vtf") && vmt.endsWith("dn.vmt"))
                         || (vtf.endsWith("bk.vtf") && vmt.endsWith("bk.vmt"))
                         || (vtf.endsWith("ft.vtf") && vmt.endsWith("ft.vmt"))
                         || (vtf.endsWith("lf.vtf") && vmt.endsWith("lf.vmt"))
                         || (vtf.endsWith("rt.vtf") && vmt.endsWith("rt.vmt"))) {
-                    Path src = vtfPaths.get(i);
-                    cl.extractIfNeeded(Paths.get(tfdir), "skybox.vpk",
-                            Paths.get("skybox"), src.getFileName().toString());
-                    Files.copy(vtfPaths.get(i),
+                    cl.extractIfNeeded(Paths.get(tfdir), skyboxVpk, Paths.get("skybox"), vtfPath
+                            .getFileName().toString());
+                    Files.copy(vtfPath,
                             skyboxPath.resolve(vmt.substring(0, vmt.indexOf(".vmt")) + ".vtf"));
                 }
             }
