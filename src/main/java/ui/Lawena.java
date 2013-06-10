@@ -18,6 +18,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -139,10 +141,14 @@ public class Lawena {
             });
             if (currentTask == null) {
                 currentTask = this;
+                setCurrentWorker(this);
+                view.getProgressBar().setIndeterminate(false);
+                setProgress(0);
 
                 // Restoring user files
                 status.info("Restoring your files");
                 files.restoreAll();
+                setProgress(25);
 
                 // Saving ui settings to cfg files
                 status.info("Saving settings and generating cfg files");
@@ -156,6 +162,7 @@ public class Lawena {
                     status.info("Problem while saving to settings file, check log for details");
                     return null;
                 }
+                setProgress(50);
 
                 // Backing up user files and copying lawena files
                 status.info("Copying lawena files to cfg and custom");
@@ -164,6 +171,7 @@ public class Lawena {
                 }
                 files.setHudName(settings.getHud());
                 files.replaceAll();
+                setProgress(75);
 
                 // Launching process
                 status.info("Launching TF2 process");
@@ -177,13 +185,16 @@ public class Lawena {
                         view.getBtnStartTf().setText("Stop Team Fortress 2");
                     }
                 });
+                setProgress(100);
 
                 // Waiting up to 2 minutes for TF2 to start
                 int timeout = 0;
                 int maxtimeout = 40;
                 int millis = 3000;
+                setProgress(0);
                 status.info("Waiting for TF2 to start...");
                 while (!cl.isTf2Running() && timeout < maxtimeout) {
+                    setProgress((int) ((double) timeout / maxtimeout * 100));
                     Thread.sleep(millis);
                     ++timeout;
                 }
@@ -197,6 +208,7 @@ public class Lawena {
 
                 log.fine("TF2 has started running");
                 status.info("Waiting for TF2 to finish running...");
+                view.getProgressBar().setIndeterminate(true);
                 while (cl.isTf2Running()) {
                     Thread.sleep(millis);
                 }
@@ -220,6 +232,7 @@ public class Lawena {
         protected void done() {
             if (!isCancelled()) {
                 currentTask = null;
+                setCurrentWorker(null);
                 view.getBtnStartTf().setEnabled(false);
                 files.restoreAll();
                 cl.setSystemDxLevel(oDxlevel);
@@ -401,12 +414,15 @@ public class Lawena {
 
             @Override
             protected Map<String, ImageIcon> doInBackground() throws Exception {
+                setCurrentWorker(this);
+                view.getProgressBar().setIndeterminate(false);
+                setProgress(0);
                 final Map<String, ImageIcon> map = new HashMap<>();
                 try {
                     int i = 1;
                     for (String skybox : data) {
                         setProgress((int) (100 * ((double) i / data.size())));
-                        status.fine("[" + getProgress() + "%] Generating skybox preview: " + skybox);
+                        status.fine("Generating skybox preview: " + skybox);
                         String img = "skybox/" + skybox + "up.png";
                         if (!Files.exists(Paths.get(img))) {
                             String filename = skybox + "up.vtf";
@@ -433,6 +449,9 @@ public class Lawena {
                     log.info("Skybox preview generator task was cancelled");
                 }
                 status.info("");
+                if (!isCancelled()) {
+                    setCurrentWorker(null);
+                }
             }
 
         };
@@ -660,6 +679,25 @@ public class Lawena {
             return files;
         } else {
             return cl.getVpkContents(settings.getTfPath(), start);
+        }
+    }
+
+    private void setCurrentWorker(SwingWorker<?, ?> worker) {
+        if (worker != null) {
+            view.getProgressBar().setVisible(true);
+            view.getProgressBar().setIndeterminate(true);
+            view.getProgressBar().setValue(0);
+            worker.addPropertyChangeListener(new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if ("progress".equals(evt.getPropertyName())) {
+                        view.getProgressBar().setValue((Integer) evt.getNewValue());
+                    }
+                }
+            });
+        } else {
+            view.getProgressBar().setVisible(false);
+            view.getProgressBar().setIndeterminate(false);
+            view.getProgressBar().setValue(0);
         }
     }
 }

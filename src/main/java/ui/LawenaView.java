@@ -34,6 +34,7 @@ import javax.swing.UIManager;
 import java.awt.Component;
 
 import javax.swing.Box;
+import javax.swing.JProgressBar;
 
 public class LawenaView extends JFrame {
 
@@ -80,6 +81,7 @@ public class LawenaView extends JFrame {
     private JLabel lblPreview;
     private Component horizontalStrut;
     private JPanel panelBottomRight;
+    private JProgressBar progressBar;
 
     /**
      * Create the frame.
@@ -448,13 +450,13 @@ public class LawenaView extends JFrame {
         contentPane.add(panelStatusbar, BorderLayout.SOUTH);
         GridBagLayout gbl_panelStatusbar = new GridBagLayout();
         gbl_panelStatusbar.columnWidths = new int[] {
-                31, 0, 0, 0, 0
+                31, 0, 0, 0
         };
         gbl_panelStatusbar.rowHeights = new int[] {
                 14, 0
         };
         gbl_panelStatusbar.columnWeights = new double[] {
-                0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE
+                0.0, 1.0, 0.0, Double.MIN_VALUE
         };
         gbl_panelStatusbar.rowWeights = new double[] {
                 0.0, Double.MIN_VALUE
@@ -468,6 +470,13 @@ public class LawenaView extends JFrame {
         gbc_lblStatus.gridx = 0;
         gbc_lblStatus.gridy = 0;
         panelStatusbar.add(lblStatus, gbc_lblStatus);
+        
+        progressBar = new JProgressBar();
+        GridBagConstraints gbc_progressBar = new GridBagConstraints();
+        gbc_progressBar.anchor = GridBagConstraints.EAST;
+        gbc_progressBar.gridx = 2;
+        gbc_progressBar.gridy = 0;
+        panelStatusbar.add(progressBar, gbc_progressBar);
 
         pack();
         setMinimumSize(new Dimension(650, 400));
@@ -576,5 +585,8 @@ public class LawenaView extends JFrame {
 
     public JLabel getLblPreview() {
         return lblPreview;
+    }
+    public JProgressBar getProgressBar() {
+        return progressBar;
     }
 }
