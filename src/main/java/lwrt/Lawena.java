@@ -22,8 +22,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -318,6 +320,11 @@ public class Lawena {
             }
         }
     }
+    
+    private static String now(String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(Calendar.getInstance().getTime());
+    }
 
     private LawenaView view;
 
@@ -335,7 +342,7 @@ public class Lawena {
     private String oDxlevel;
 
     private String version = "4.0";
-    private String build;
+    private String build = now("yyyyMMddHHmmss") + "-SNAPSHOT";
 
     public Lawena() {
         try {
