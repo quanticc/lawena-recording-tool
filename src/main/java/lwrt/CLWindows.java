@@ -45,7 +45,7 @@ public class CLWindows extends CommandLine {
         boolean found = false;
         try {
             ProcessBuilder pb = new ProcessBuilder("cscript", "//NoLogo", new File(
-                    "batch\\procchk.vbs").getPath(), "hl2.exe");
+                    "batch\\procchk.vbs").getPath(), processName);
             Process pr = pb.start();
             BufferedReader input =
                     new BufferedReader(new InputStreamReader(pr.getInputStream()));
