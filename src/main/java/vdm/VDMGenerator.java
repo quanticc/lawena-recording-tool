@@ -1,5 +1,5 @@
 
-package ui;
+package vdm;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -97,7 +97,7 @@ public class VDMGenerator {
 
             vdmcontent += "}\n";
 
-            vdm = new PrintWriter(new FileWriter(tfdir + "\\"
+            vdm = new PrintWriter(new FileWriter(tfdir + "/"
                     + demolist[j].substring(0, demolist[j].indexOf(".dem")) + ".vdm"));
 
             vdm.print(vdmcontent);

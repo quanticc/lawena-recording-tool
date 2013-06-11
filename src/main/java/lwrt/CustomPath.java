@@ -1,16 +1,15 @@
-package config;
+package lwrt;
 
 import java.nio.file.Path;
-import java.util.List;
 
 public class CustomPath {
     
     private Path path;
     private boolean selected = false;
-    private transient List<String> contents;
     
     public CustomPath(Path path) {
         this.path = path;
+        selected = path.startsWith("custom");
     }
     
     public Path getPath() {
@@ -23,14 +22,6 @@ public class CustomPath {
     
     public void setSelected(boolean selected) {
         this.selected = selected;
-    }
-    
-    public List<String> getContents() {
-        return contents;
-    }
-    
-    public void setContents(List<String> contents) {
-        this.contents = contents;
     }
     
     @Override

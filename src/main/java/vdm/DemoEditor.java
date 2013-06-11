@@ -1,17 +1,15 @@
 
-package ui;
+package vdm;
 
-import config.SettingsManager;
+import ui.DemoEditorView;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +20,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+import lwrt.SettingsManager;
+
 public class DemoEditor {
 
     private static final Logger log = Logger.getLogger("lawena");
@@ -30,7 +30,7 @@ public class DemoEditor {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (!Files.exists(Paths.get(settings.getTfDir(), view.getTxtDemofile().getText()))) {
+            if (!Files.exists(settings.getTfPath().resolve(view.getTxtDemofile().getText()))) {
                 JOptionPane.showMessageDialog(view,
                         "Please fill the required demo file field with a valid demo file", "Error",
                         JOptionPane.ERROR_MESSAGE);
@@ -89,7 +89,7 @@ public class DemoEditor {
         @Override
         public void actionPerformed(ActionEvent e) {
             ticklist = generateTickList(0);
-            vdmgenerator = new VDMGenerator(ticklist, settings.getTfDir());
+            vdmgenerator = new VDMGenerator(ticklist, settings.getTfPath().toString());
 
             try {
                 vdmgenerator.generate();
@@ -118,17 +118,8 @@ public class DemoEditor {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            String moviedir = settings.getMovieDir();
-
-            DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
-                public boolean accept(Path file) throws IOException {
-                    return file.getFileName().endsWith(".tga")
-                            || file.getFileName().endsWith(".wav");
-                }
-            };
-
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(moviedir),
-                    filter)) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getMoviePath(),
+                    "*.{tga,wav}")) {
                 for (Path path : stream) {
                     path.toFile().setWritable(true);
                     Files.delete(path);
@@ -155,7 +146,7 @@ public class DemoEditor {
         choosedemo.setFileFilter(new FileNameExtensionFilter("Demo files", new String[] {
                 "DEM"
         }));
-        choosedemo.setCurrentDirectory(new File(settings.getTfDir()));
+        choosedemo.setCurrentDirectory(settings.getTfPath().toFile());
         Object[][] tickdata = {};
         String[] columnames = {
                 "Demo name", "Starting Tick", "Ending Tick"

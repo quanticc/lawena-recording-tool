@@ -13,6 +13,8 @@ sourceSets {
 }
 
 jar {
+    archiveName = 'lawena.jar'
+    destinationDir = null
     manifest {
         new ByteArrayOutputStream().withStream { execOS ->
             def result = exec {

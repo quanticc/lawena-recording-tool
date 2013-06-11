@@ -1,5 +1,5 @@
 
-package config;
+package lwrt;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -85,7 +85,7 @@ public class MovieManager {
             }
         }
 
-        PrintWriter pw = new PrintWriter(new FileWriter("cfg\\namescroll.cfg"));
+        PrintWriter pw = new PrintWriter(new FileWriter("cfg/namescroll.cfg"));
         pw.println(alias);
         pw.close();
     }
@@ -101,9 +101,9 @@ public class MovieManager {
         };
 
         for (int i = 0; i < 16; ++i) {
-            PrintWriter pw = new PrintWriter(new FileWriter("cfg\\mov\\" + letters[i] + numbers[i]
+            PrintWriter pw = new PrintWriter(new FileWriter("cfg/mov/" + letters[i] + numbers[i]
                     + ".cfg"));
-            pw.println("startmovie \"" + moviedir + "\\" + letters[i] + numbers[i] + "_\"");
+            pw.println("startmovie \"" + moviedir + "/" + letters[i] + numbers[i] + "_\"");
             pw.close();
         }
     }

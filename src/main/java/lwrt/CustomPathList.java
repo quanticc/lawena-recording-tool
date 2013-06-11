@@ -1,6 +1,10 @@
 
-package config;
+package lwrt;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +20,17 @@ public class CustomPathList extends AbstractTableModel {
      * 
      */
     private static final long serialVersionUID = 1L;
+    private static final DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
+
+        @Override
+        public boolean accept(Path entry) throws IOException {
+            return (Files.isDirectory(entry) || entry.toString().endsWith(".vpk"))
+                    && !entry.getFileName().toString().equals("skybox.vpk");
+        }
+    };
 
     private List<CustomPath> list = new ArrayList<>();
-    
+
     public List<CustomPath> getList() {
         return list;
     }
@@ -74,7 +86,7 @@ public class CustomPathList extends AbstractTableModel {
 
     }
 
-    public void addPath(CustomPath e) {
+    private void addPath(CustomPath e) {
         int row = getRowCount();
         list.add(e);
         fireTableRowsInserted(row, row);
@@ -82,6 +94,23 @@ public class CustomPathList extends AbstractTableModel {
 
     public CustomPath getPath(int index) {
         return list.get(index);
+    }
+
+    public void clear() {
+        int size = list.size();
+        if (size > 0) {
+            list.clear();
+            fireTableRowsDeleted(0, size - 1);
+        }
+    }
+
+    public void addAllFromPath(Path dir) throws IOException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, filter)) {
+            for (Path path : stream) {
+                CustomPath cp = new CustomPath(path);
+                addPath(cp);
+            }
+        }
     }
 
 }

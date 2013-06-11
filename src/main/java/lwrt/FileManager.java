@@ -1,5 +1,8 @@
 
-package config;
+package lwrt;
+
+import util.CopyDirVisitor;
+import util.DeleteDirVisitor;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -19,27 +22,16 @@ public class FileManager {
 
     private static final Logger log = Logger.getLogger("lawena");
 
-    private String tfdir;
-
     private String hudName;
     private String skyboxFilename;
 
-    private Path configBackupPath;
-    private Path configPath;
-    private Path customBackupPath;
-    private Path customPath;
-    private Path localCustomPath = Paths.get("custom");
-
     private CustomPathList customPathList;
+    private SettingsManager cfg;
     private CommandLine cl;
 
-    public FileManager(String dir, CommandLine cmdLine) {
-        tfdir = dir;
-        customBackupPath = Paths.get(tfdir, "lwrtcustom");
-        customPath = Paths.get(tfdir, "custom");
-        configBackupPath = Paths.get(tfdir, "lwrtcfg");
-        configPath = Paths.get(tfdir, "cfg");
-        cl = cmdLine;
+    public FileManager(SettingsManager cfg, CommandLine cl) {
+        this.cfg = cfg;
+        this.cl = cl;
     }
 
     private Path copy(Path from, Path to) throws IOException {
@@ -79,6 +71,13 @@ public class FileManager {
     }
 
     public void replaceAll() {
+        Path tfpath = cfg.getTfPath();
+        Path customBackupPath = tfpath.resolve("lwrtcustom");
+        Path customPath = tfpath.resolve("custom");
+        Path configBackupPath = tfpath.resolve("lwrtcfg");
+        Path configPath = tfpath.resolve("cfg");
+        Path localCustomPath = Paths.get("custom");
+
         if (!Files.exists(configBackupPath)) {
             try {
                 log.fine("Making a backup of your config files");
@@ -102,8 +101,8 @@ public class FileManager {
             }
             try {
                 log.fine("Copying selected hud files");
-                Path resourcePath = Paths.get(tfdir, "custom/lawena/resource");
-                Path scriptsPath = Paths.get(tfdir, "custom/lawena/scripts");
+                Path resourcePath = tfpath.resolve("custom/lawena/resource");
+                Path scriptsPath = tfpath.resolve("custom/lawena/scripts");
                 Files.createDirectories(resourcePath);
                 Files.createDirectories(scriptsPath);
                 copy(Paths.get("hud", hudName, "resource"), resourcePath);
@@ -111,7 +110,7 @@ public class FileManager {
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not replace hud files", e);
             }
-            Path materialsPath = Paths.get(tfdir, "custom/lawena/materials/skybox");
+            Path materialsPath = tfpath.resolve("custom/lawena/materials/skybox");
             try {
                 if (skyboxFilename != null && !skyboxFilename.isEmpty()) {
                     log.fine("Copying selected skybox files");
@@ -173,9 +172,10 @@ public class FileManager {
     }
 
     private void replaceSkybox() throws IOException {
+        Path tfpath = cfg.getTfPath();
         Set<Path> vmtPaths = new LinkedHashSet<>();
         Set<Path> vtfPaths = new LinkedHashSet<>();
-        Path skyboxPath = Paths.get(tfdir, "custom/lawena/materials/skybox");
+        Path skyboxPath = tfpath.resolve("custom/lawena/materials/skybox");
         String skyboxVpk = "custom/skybox.vpk";
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("skybox"))) {
             for (Path path : stream) {
@@ -190,10 +190,10 @@ public class FileManager {
             }
         }
 
-        for (String pathStr : cl.getVpkContents(Paths.get(tfdir), Paths.get(skyboxVpk))) {
+        for (String pathStr : cl.getVpkContents(tfpath, Paths.get(skyboxVpk))) {
             Path path = Paths.get("skybox", pathStr);
             if (pathStr.endsWith(".vmt")) {
-                cl.extractIfNeeded(Paths.get(tfdir), skyboxVpk, Paths.get("skybox"), pathStr);
+                cl.extractIfNeeded(tfpath, skyboxVpk, Paths.get("skybox"), pathStr);
                 Files.copy(path, skyboxPath.resolve(pathStr));
                 vmtPaths.add(path);
             }
@@ -212,7 +212,7 @@ public class FileManager {
                         || (vtf.endsWith("ft.vtf") && vmt.endsWith("ft.vmt"))
                         || (vtf.endsWith("lf.vtf") && vmt.endsWith("lf.vmt"))
                         || (vtf.endsWith("rt.vtf") && vmt.endsWith("rt.vmt"))) {
-                    cl.extractIfNeeded(Paths.get(tfdir), skyboxVpk, Paths.get("skybox"), vtfPath
+                    cl.extractIfNeeded(tfpath, skyboxVpk, Paths.get("skybox"), vtfPath
                             .getFileName().toString());
                     Files.copy(vtfPath,
                             skyboxPath.resolve(vmt.substring(0, vmt.indexOf(".vmt")) + ".vtf"));
@@ -222,6 +222,12 @@ public class FileManager {
     }
 
     public void restoreAll() {
+        Path tfpath = cfg.getTfPath();
+        Path customBackupPath = tfpath.resolve("lwrtcustom");
+        Path customPath = tfpath.resolve("custom");
+        Path configBackupPath = tfpath.resolve("lwrtcfg");
+        Path configPath = tfpath.resolve("cfg");
+
         if (Files.exists(configBackupPath)) {
             log.fine("Restoring all user config files");
             try {

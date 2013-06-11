@@ -1,8 +1,8 @@
 @echo off
 
 set binary=bin
-set source=src/main/java/config/*.java src/main/java/ui/*.java
-set classes=config/*.class ui/*.class
+set source=src/main/java/lwrt/*.java src/main/java/ui/*.java src/main/java/util/*.java src/main/java/vdm/*.java
+set classes=lwrt/*.class ui/*.class util/*.class vdm/*.class
 set classpath=.
 set mainclass=ui.LwrtGUI
 set manifest=manifest.txt

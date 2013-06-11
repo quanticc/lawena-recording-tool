@@ -1,13 +1,15 @@
 
 package ui;
 
-import config.StartLogger;
+import util.StartLogger;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+
+import lwrt.Lawena;
 
 public class LwrtGUI {
     

@@ -1,15 +1,10 @@
 
-package ui;
+package lwrt;
 
-import config.CLWindows;
-import config.CommandLine;
-import config.CustomPath;
-import config.CustomPathList;
-import config.FileManager;
-import config.MovieManager;
-import config.SettingsManager;
-import config.SettingsManager.Key;
-import config.StartLogger;
+import ui.LawenaView;
+import ui.TooltipRenderer;
+import util.StartLogger;
+import vdm.DemoEditor;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -21,16 +16,12 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,6 +40,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -56,14 +48,22 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
+import lwrt.SettingsManager.Key;
+
 public class Lawena {
 
     public class MovieFolderChange implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
-            log.fine("MovieFolderChange: Not yet implemented");
+            if (currentTask == null) {
+                Path newpath = getChosenMoviePath();
+                if (newpath != null) {
+                    settings.setMoviePath(newpath);
+                }
+            } else {
+                JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
+            }
         }
 
     }
@@ -72,19 +72,14 @@ public class Lawena {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".tga") || name.endsWith(".wav");
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getMoviePath(),
+                    "*.{tga,wav}")) {
+                for (Path path : stream) {
+                    path.toFile().setWritable(true);
+                    Files.delete(path);
                 }
-            };
-
-            String[] moviefiles = new File(settings.getMovieDir()).list(filter);
-
-            for (int i = 0; i < moviefiles.length; ++i) {
-                File tgafile = new File(settings.getMovieDir() + "\\" + moviefiles[i]);
-                tgafile.setWritable(true);
-                if (!tgafile.delete())
-                    throw new IllegalArgumentException("Cannot delete file '" + moviefiles[i] + "'");
+            } catch (IOException ex) {
+                log.log(Level.INFO, "Problem while loading skyboxes", ex);
             }
         }
 
@@ -193,7 +188,7 @@ public class Lawena {
                 int millis = 3000;
                 setProgress(0);
                 status.info("Waiting for TF2 to start...");
-                while (!cl.isTf2Running() && timeout < maxtimeout) {
+                while (!cl.isRunningTF2() && timeout < maxtimeout) {
                     setProgress((int) ((double) timeout / maxtimeout * 100));
                     Thread.sleep(millis);
                     ++timeout;
@@ -209,15 +204,15 @@ public class Lawena {
                 log.fine("TF2 has started running");
                 status.info("Waiting for TF2 to finish running...");
                 view.getProgressBar().setIndeterminate(true);
-                while (cl.isTf2Running()) {
+                while (cl.isRunningTF2()) {
                     Thread.sleep(millis);
                 }
 
             } else {
-                if (cl.isTf2Running()) {
+                if (cl.isRunningTF2()) {
                     status.info("Attempting to finish TF2 process");
                     cl.killTf2Process();
-                    if (!cl.isTf2Running()) {
+                    if (!cl.isRunningTF2()) {
                         currentTask.cancel(true);
                     }
                 } else {
@@ -248,8 +243,15 @@ public class Lawena {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
-            log.fine("Tf2FolderChange: Not yet implemented");
+            if (currentTask == null) {
+                Path newpath = getChosenTfPath();
+                if (newpath != null) {
+                    settings.setTfPath(newpath);
+                    scanCustomPaths();
+                }
+            } else {
+                JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
+            }
         }
 
     }
@@ -332,14 +334,13 @@ public class Lawena {
     private String steampath;
     private String oDxlevel;
 
-    private String version;
+    private String version = "4.0";
     private String build;
 
     public Lawena() {
         try {
             version = this.getClass().getPackage().getImplementationVersion().split("-")[0];
         } catch (Exception e) {
-            version = "4.0";
         }
         build = getManifestString("Implementation-Build", "0");
         String osname = System.getProperty("os.name");
@@ -352,43 +353,34 @@ public class Lawena {
         } else {
             throw new UnsupportedOperationException("OS not supported");
         }
+
         settings = new SettingsManager("settings.lwf");
         oDxlevel = cl.getSystemDxLevel();
-
         steampath = cl.getSteamPath();
-        String tfdir = settings.getTfDir();
-        Path tfpath;
-        if (tfdir == null || tfdir.isEmpty()) {
+        Path tfpath = settings.getTfPath();
+        if (tfpath == null) {
             tfpath = Paths.get(steampath, "steamapps/common/team fortress 2/tf");
-        } else {
-            tfpath = Paths.get(tfdir);
         }
         if (!Files.exists(tfpath)) {
-            tfpath = getTfPath();
+            tfpath = getChosenTfPath();
             if (tfpath == null) {
                 log.info("No tf directory specified, exiting.");
                 System.exit(1);
             }
         }
-        tfdir = tfpath.toString();
-        settings.setTfDir(tfdir);
-        files = new FileManager(tfdir, cl);
+        settings.setTfPath(tfpath);
+        files = new FileManager(settings, cl);
 
-        String moviedir = settings.getMovieDir();
-        Path moviepath = null;
-        if (moviedir != null && !moviedir.isEmpty()) {
-            moviepath = Paths.get(moviedir);
-        }
+        Path moviepath = settings.getMoviePath();
         if (moviepath == null || !Files.exists(moviepath)) {
-            moviepath = getMoviePath();
+            moviepath = getChosenMoviePath();
             if (moviepath == null) {
                 log.info("No movie directory specified, exiting.");
                 System.exit(1);
             }
         }
-        moviedir = moviepath.toString();
-        movies = new MovieManager(moviedir);
-        settings.setMovieDir(moviedir);
+        movies = new MovieManager(moviepath.toString());
+        settings.setMoviePath(moviepath);
 
         settings.save();
         files.restoreAll();
@@ -409,52 +401,80 @@ public class Lawena {
         return defaultValue;
     }
 
-    private SwingWorker<Map<String, ImageIcon>, Void> getSkyboxLoader(final List<String> data) {
-        return new SwingWorker<Map<String, ImageIcon>, Void>() {
+    public void start() {
+        view = new LawenaView();
+
+        new StartLogger("lawena").toTextComponent(Level.FINE, view.getTextAreaLog());
+        new StartLogger("status").toLabel(Level.FINE, view.getLblStatus());
+        log.fine("Started lawena Recording Tool " + version + " build " + build);
+        log.fine("TF2 path: " + settings.getTfPath());
+        log.fine("Movie path: " + settings.getMoviePath());
+
+        view.setTitle("lawena Recording Tool");
+        try {
+            view.setIconImage(new ImageIcon(Lawena.class.getClassLoader()
+                    .getResource("ui/tf2.png"))
+                    .getImage());
+        } catch (Exception e) {
+        }
+        view.addWindowListener(new WindowAdapter() {
 
             @Override
-            protected Map<String, ImageIcon> doInBackground() throws Exception {
-                setCurrentWorker(this);
-                view.getProgressBar().setIndeterminate(false);
-                setProgress(0);
-                final Map<String, ImageIcon> map = new HashMap<>();
-                try {
-                    int i = 1;
-                    for (String skybox : data) {
-                        setProgress((int) (100 * ((double) i / data.size())));
-                        status.fine("Generating skybox preview: " + skybox);
-                        String img = "skybox/" + skybox + "up.png";
-                        if (!Files.exists(Paths.get(img))) {
-                            String filename = skybox + "up.vtf";
-                            cl.extractIfNeeded(settings.getTfPath(), "custom/skybox.vpk",
-                                    Paths.get("skybox"), filename);
-                            cl.generatePreview(filename);
-                        }
-                        ImageIcon icon = createPreviewIcon(img);
-                        map.put(skybox, icon);
-                        i++;
-                    }
-                } catch (Exception e) {
-                    log.log(Level.INFO, "Problem while loading skyboxes", e);
-                }
-                return map;
+            public void windowClosing(WindowEvent e) {
+                log.fine("Exiting");
+                files.restoreAll();
+                System.exit(0);
             }
+
+        });
+
+        registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
+                view.getLblResolution());
+        registerValidation(view.getCmbFramerate(), "[1-9][0-9]*",
+                view.getLblFrameRate());
+        selectComboItem(view.getCmbHud(), settings.getHud(),
+                Arrays.asList("killnotices", "medic", "full", "custom"));
+        selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
+                Arrays.asList("80", "81", "90", "95", "98"));
+        selectComboItem(view.getCmbViewmodel(), settings.getViewmodelSwitch(),
+                Arrays.asList("on", "off", "default"));
+
+        view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
+        view.getCmbFramerate().setSelectedItem(settings.getFramerate() + "");
+        try {
+            view.getSpinnerViewmodelFov().setValue(settings.getViewmodelFov());
+        } catch (IllegalArgumentException e) {
+        }
+        configureSkyboxes(view.getCmbSkybox());
+
+        JTable table = view.getTableCustomContent();
+        table.setModel(customPaths);
+        table.getColumnModel().getColumn(0).setMaxWidth(20);
+        table.setDefaultRenderer(CustomPath.class, new TooltipRenderer());
+
+        view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
+        view.getDisableCombatText().setSelected(!settings.getCombattext());
+        view.getDisableCrosshair().setSelected(!settings.getCrosshair());
+        view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
+        view.getDisableHitSounds().setSelected(!settings.getHitsounds());
+        view.getDisableVoiceChat().setSelected(!settings.getVoice());
+
+        view.getMntmChangeTfDirectory().addActionListener(new Tf2FolderChange());
+        view.getMntmChangeMovieDirectory().addActionListener(new MovieFolderChange());
+        view.getBtnClearMovieFolder().addActionListener(new MovieFolderClear());
+        view.getBtnSaveSettings().addActionListener(new SaveSettings());
+        view.getBtnStartTf().addActionListener(new ActionListener() {
 
             @Override
-            protected void done() {
-                try {
-                    skyboxMap.putAll(get());
-                    log.fine("Skybox loading and preview generation complete");
-                } catch (CancellationException | InterruptedException | ExecutionException e) {
-                    log.info("Skybox preview generator task was cancelled");
-                }
-                status.info("");
-                if (!isCancelled()) {
-                    setCurrentWorker(null);
-                }
+            public void actionPerformed(ActionEvent e) {
+                new StartTfTask().execute();
             }
+        });
 
-        };
+        scanCustomPaths();
+
+        view.getTabbedPane().addTab("VDM", null, vdm.start());
+        view.setVisible(true);
     }
 
     private void configureSkyboxes(final JComboBox<String> combo) {
@@ -505,7 +525,65 @@ public class Lawena {
 
     }
 
-    private Path getMoviePath() {
+    private SwingWorker<Map<String, ImageIcon>, Void> getSkyboxLoader(final List<String> data) {
+        return new SwingWorker<Map<String, ImageIcon>, Void>() {
+
+            @Override
+            protected Map<String, ImageIcon> doInBackground() throws Exception {
+                setCurrentWorker(this);
+                view.getProgressBar().setIndeterminate(false);
+                setProgress(0);
+                final Map<String, ImageIcon> map = new HashMap<>();
+                try {
+                    int i = 1;
+                    for (String skybox : data) {
+                        setProgress((int) (100 * ((double) i / data.size())));
+                        status.fine("Generating skybox preview: " + skybox);
+                        String img = "skybox/" + skybox + "up.png";
+                        if (!Files.exists(Paths.get(img))) {
+                            String filename = skybox + "up.vtf";
+                            cl.extractIfNeeded(settings.getTfPath(), "custom/skybox.vpk",
+                                    Paths.get("skybox"), filename);
+                            cl.generatePreview(filename);
+                        }
+                        ImageIcon icon = createPreviewIcon(img);
+                        map.put(skybox, icon);
+                        i++;
+                    }
+                } catch (Exception e) {
+                    log.log(Level.INFO, "Problem while loading skyboxes", e);
+                }
+                return map;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    skyboxMap.putAll(get());
+                    log.fine("Skybox loading and preview generation complete");
+                } catch (CancellationException | InterruptedException | ExecutionException e) {
+                    log.info("Skybox preview generator task was cancelled");
+                }
+                status.info("");
+                if (!isCancelled()) {
+                    setCurrentWorker(null);
+                }
+            }
+
+        };
+    }
+
+    private void scanCustomPaths() {
+        customPaths.clear();
+        try {
+            customPaths.addAllFromPath(Paths.get("custom"));
+            customPaths.addAllFromPath(settings.getTfPath().resolve("custom"));
+        } catch (IOException e) {
+            log.log(Level.FINE, "Problem while loading custom paths", e);
+        }
+    }
+
+    private Path getChosenMoviePath() {
         Path selected = null;
         int ret = 0;
         while ((selected == null && ret == 0) || (selected != null && !Files.exists(selected))) {
@@ -522,7 +600,7 @@ public class Lawena {
         return selected;
     }
 
-    private Path getTfPath() {
+    private Path getChosenTfPath() {
         Path selected = null;
         int ret = 0;
         while ((selected == null && ret == 0)
@@ -540,146 +618,6 @@ public class Lawena {
             }
         }
         return selected;
-    }
-
-    public void start() {
-        view = new LawenaView();
-
-        new StartLogger("lawena").toTextComponent(Level.FINE, view.getTextAreaLog());
-        new StartLogger("status").toLabel(Level.FINE, view.getLblStatus());
-        log.fine("Started lawena Recording Tool " + version + " build " + build);
-        log.fine("TF2 path: " + settings.getTfPath());
-        log.fine("Movie path: " + settings.getMovieDir());
-
-        view.setTitle("lawena Recording Tool");
-        try {
-            view.setIconImage(new ImageIcon(Lawena.class.getClassLoader()
-                    .getResource("ui/tf2.png"))
-                    .getImage());
-        } catch (Exception e) {
-        }
-        view.addWindowListener(new WindowAdapter() {
-
-            @Override
-            public void windowClosing(WindowEvent e) {
-                log.fine("Exiting");
-                files.restoreAll();
-                System.exit(0);
-            }
-
-        });
-
-        registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
-                view.getLblResolution());
-        registerValidation(view.getCmbFramerate(), "[1-9][0-9]*",
-                view.getLblFrameRate());
-        selectComboItem(view.getCmbHud(), settings.getHud(),
-                Arrays.asList("killnotices", "medic", "full", "custom"));
-        selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
-                Arrays.asList("80", "81", "90", "95", "98"));
-        selectComboItem(view.getCmbViewmodel(), settings.getViewmodelSwitch(),
-                Arrays.asList("on", "off", "default"));
-
-        view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
-        view.getCmbFramerate().setSelectedItem(settings.getFramerate() + "");
-        try {
-            view.getSpinnerViewmodelFov().setValue(settings.getViewmodelFov());
-        } catch (IllegalArgumentException e) {
-        }
-        configureSkyboxes(view.getCmbSkybox());
-
-        JTable table = view.getTableCustomContent();
-        table.setModel(customPaths);
-        table.getColumnModel().getColumn(0).setMaxWidth(20);
-        table.setDefaultRenderer(CustomPath.class, new TooltipRenderer());
-
-        // set remaining values
-        view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
-        view.getDisableCombatText().setSelected(!settings.getCombattext());
-        view.getDisableCrosshair().setSelected(!settings.getCrosshair());
-        view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
-        view.getDisableHitSounds().setSelected(!settings.getHitsounds());
-        // view.getDisableSteamCloud().setSelected(!settings.getSteamCloud());
-        view.getDisableVoiceChat().setSelected(!settings.getVoice());
-
-        // register actions
-        view.getMntmChangeTfDirectory().addActionListener(new Tf2FolderChange());
-        view.getMntmChangeMovieDirectory().addActionListener(new MovieFolderChange());
-        view.getBtnClearMovieFolder().addActionListener(new MovieFolderClear());
-        view.getBtnSaveSettings().addActionListener(new SaveSettings());
-        view.getBtnStartTf().addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new StartTfTask().execute();
-            }
-        });
-
-        DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
-
-            @Override
-            public boolean accept(Path entry) throws IOException {
-                return (Files.isDirectory(entry) || entry.toString().endsWith(".vpk"))
-                        && !entry.getFileName().toString().equals("skybox.vpk");
-            }
-        };
-
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("custom"), filter)) {
-            for (Path path : stream) {
-                CustomPath cp = new CustomPath(path);
-                cp.setSelected(true);
-                cp.setContents(getDirectoryContents(path));
-                customPaths.addPath(cp);
-            }
-        } catch (IOException e) {
-            log.log(Level.INFO, "", e);
-        }
-
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(settings.getTfDir(),
-                "custom"), filter)) {
-            for (Path path : stream) {
-                CustomPath cp = new CustomPath(path);
-                cp.setContents(getDirectoryContents(path));
-                customPaths.addPath(cp);
-            }
-        } catch (IOException e) {
-            log.log(Level.INFO, "", e);
-        }
-
-        view.getTabbedPane().addTab("VDM", null, vdm.start());
-
-        view.setVisible(true);
-    }
-
-    private List<String> getDirectoryContents(Path start) {
-        if (Files.isDirectory(start)) {
-            final List<String> files = new ArrayList<>();
-            try {
-                Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                            throws IOException {
-                        files.add(file.toString());
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult postVisitDirectory(Path dir, IOException e)
-                            throws IOException {
-                        if (e == null) {
-                            return FileVisitResult.CONTINUE;
-                        } else {
-                            throw e;
-                        }
-                    }
-                });
-            } catch (IOException e) {
-                log.info("Problem while retrieving folder contents");
-            }
-            return files;
-        } else {
-            return cl.getVpkContents(settings.getTfPath(), start);
-        }
     }
 
     private void setCurrentWorker(SwingWorker<?, ?> worker) {

@@ -1,5 +1,5 @@
 
-package config;
+package lwrt;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -9,8 +9,11 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,18 +22,19 @@ public class SettingsManager {
     private static final Logger log = Logger.getLogger("lawena");
 
     public enum Key {
-        Height(720, 360, Integer.MAX_VALUE),
-        Width(1280, 640, Integer.MAX_VALUE),
-        Framerate(120, 30, Integer.MAX_VALUE),
-        ViewmodelSwitch("on", "on", "off", "default"),
-        ViewmodelFov(70, 55, 90),
-        DxLevel("98", "80", "81", "90", "95", "98"),
-        Hud("medic", "killnotices", "medic", "full", "custom"),
         TfDir(""),
         MovieDir(""),
+        Width(1280, 640, Integer.MAX_VALUE),
+        Height(720, 360, Integer.MAX_VALUE),
+        Framerate(120, 30, Integer.MAX_VALUE),
+        DxLevel("98", "80", "81", "90", "95", "98"),
+        Hud("medic", "killnotices", "medic", "full", "custom"),
+        Skybox(""),
+        ViewmodelSwitch("on", "on", "off", "default"),
+        ViewmodelFov(70, 55, 90),
         MotionBlur(true),
-        CrosshairSwitch(false),
         Crosshair(false),
+        CrosshairSwitch(false),
         CombatText(false),
         Hitsounds(false),
         Voice(false),
@@ -70,11 +74,11 @@ public class SettingsManager {
         public boolean isValid(String str) {
             return allowedValues == null || allowedValues.contains(str);
         }
-        
+
         public List<String> getAllowedValues() {
             return allowedValues;
         }
-        
+
     }
 
     private String filename;
@@ -82,7 +86,17 @@ public class SettingsManager {
 
     public SettingsManager(String settingsFile) {
         filename = settingsFile;
-        properties = new Properties();
+        properties = new Properties() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Set<Object> keySet()
+            {
+                return Collections.unmodifiableSet(new TreeSet<Object>(super.keySet()));
+            }
+
+        };
         for (Key key : Key.values()) {
             properties.setProperty(key.toString(), key.value + "");
         }
@@ -105,7 +119,7 @@ public class SettingsManager {
     }
 
     public void saveToCfg() throws IOException {
-        PrintWriter settings = new PrintWriter(new FileWriter("cfg\\settings.cfg"));
+        PrintWriter settings = new PrintWriter(new FileWriter("cfg/settings.cfg"));
         int framerate = getFramerate();
         boolean motionblur = getMotionBlur();
         boolean steamcloud = getSteamCloud();
@@ -297,12 +311,16 @@ public class SettingsManager {
         setString(Key.DxLevel, value);
     }
 
-    public void setTfDir(String value) {
-        setString(Key.TfDir, value);
+    public void setTfPath(Path value) {
+        setString(Key.TfDir, value.toString());
     }
 
-    public void setMovieDir(String value) {
-        setString(Key.MovieDir, value);
+    public void setMoviePath(Path value) {
+        setString(Key.MovieDir, value.toString());
+    }
+
+    public void setSkybox(String value) {
+        setString(Key.Skybox, value);
     }
 
     public int getHeight() {
@@ -361,17 +379,17 @@ public class SettingsManager {
         return getString(Key.DxLevel);
     }
 
-    public String getTfDir() {
-        String value = getString(Key.TfDir);
-        return (value == null ? "" : value);
-    }
-    
     public Path getTfPath() {
-        return Paths.get(getTfDir());
+        String value = getString(Key.TfDir);
+        return (value == null ? null : Paths.get(value));
     }
 
-    public String getMovieDir() {
+    public Path getMoviePath() {
         String value = getString(Key.MovieDir);
-        return (value == null ? "" : value);
+        return (value == null ? null : Paths.get(value));
+    }
+
+    public String getSkybox() {
+        return getString(Key.Skybox);
     }
 }
