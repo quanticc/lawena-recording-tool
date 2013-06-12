@@ -320,7 +320,7 @@ public class Lawena {
             }
         }
     }
-    
+
     private static String now(String format) {
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         return sdf.format(Calendar.getInstance().getTime());
@@ -353,8 +353,8 @@ public class Lawena {
         String osname = System.getProperty("os.name");
         if (osname.contains("Windows")) {
             cl = new CLWindows();
-            // } else if (osname.contains("Linux")) {
-            // cl = new CLLinux();
+        } else if (osname.contains("Linux")) {
+            cl = new CLLinux();
             // } else if (osname.contains("OS X")) {
             // cl = new CLOSX();
         } else {
