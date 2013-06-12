@@ -9,6 +9,7 @@
 *.exe
 *.log
 cfg/mov/**
+version.txt
 
 # NetBeans #
 nbproject/private/
@@ -55,3 +56,7 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
+.*
+!.gitignore
+!.travis.yml
+*~

@@ -5,8 +5,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CLInterface {
+
+    private boolean windows = System.getProperty("os.name").contains("Windows");
 
     public String regQuery(String key, String value, int mode) {
         String result = "";
@@ -43,47 +50,69 @@ public class CLInterface {
 
     public void startTf(int width, int height, String dir, int dxlevel) {
         try {
-            ProcessBuilder pb = new ProcessBuilder(dir + "/steam.exe", "-applaunch", "440",
-                    "-dxlevel", dxlevel + "", "-novid", "-noborder", "-noforcedmparms",
-                    "-noforcemaccel", "-noforcemspd", "-console", "-high", "-noipx", "-nojoy",
-                    "-sw", "-w", width + "", "-h", height + "");
+            if (!windows) {
+                Set<PosixFilePermission> perms777 = new HashSet<>();
+                perms777.add(PosixFilePermission.OWNER_READ);
+                perms777.add(PosixFilePermission.OWNER_WRITE);
+                perms777.add(PosixFilePermission.OWNER_EXECUTE);
+                perms777.add(PosixFilePermission.GROUP_READ);
+                perms777.add(PosixFilePermission.GROUP_WRITE);
+                perms777.add(PosixFilePermission.GROUP_EXECUTE);
+                perms777.add(PosixFilePermission.OTHERS_READ);
+                perms777.add(PosixFilePermission.OTHERS_WRITE);
+                perms777.add(PosixFilePermission.OTHERS_EXECUTE);
+                Files.setPosixFilePermissions(Paths.get(dir, "steam.sh"), perms777);
+            }
+            ProcessBuilder pb = new ProcessBuilder(dir + (windows ? "/steam.exe" : "/steam.sh"),
+                    "-applaunch", "440", "-dxlevel", dxlevel + "", "-novid", "-noborder",
+                    "-noforcedmparms", "-noforcemaccel", "-noforcemspd", "-console", "-high",
+                    "-noipx", "-nojoy", "-sw", "-w", width + "", "-h", height + "");
             Process pr = pb.start();
             pr.waitFor();
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public boolean isRunning(String prname) {
         boolean found = false;
-        File file = new File("batch\\procchk.vbs");
+        ProcessBuilder pb;
+        if (windows) {
+            File file = new File("batch\\procchk.vbs");
+            pb = new ProcessBuilder("cscript", "//NoLogo", file.getPath(), prname);
+        } else {
+            pb = new ProcessBuilder("pgrep", prname);
+        }
         try {
-            ProcessBuilder pb = new ProcessBuilder("cscript", "//NoLogo", file.getPath(), prname);
             Process pr = pb.start();
-            BufferedReader input =
-                    new BufferedReader(new InputStreamReader(pr.getInputStream()));
-            String line;
-            line = input.readLine();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line = input.readLine();
             if (line != null) {
-                if (line.equals(prname)) {
+                if (!windows || line.equals(prname)) {
                     found = true;
                 }
             }
             input.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return found;
     }
 
     public void generatePreview(String skyboxfile) throws IOException {
-        try {
-            ProcessBuilder pb = new ProcessBuilder("vtfcmd\\VTFCmd.exe", "-file", "Skybox\\",
-                    skyboxfile, "-output", "Skybox", "-exportformat", "png");
-            Process pr = pb.start();
-            pr.waitFor();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (windows) {
+            try {
+                ProcessBuilder pb = new ProcessBuilder("vtfcmd\\VTFCmd.exe", "-file", "Skybox\\",
+                        skyboxfile, "-output", "Skybox", "-exportformat", "png");
+                Process pr = pb.start();
+                pr.waitFor();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // not yet supported
         }
     }
 }
