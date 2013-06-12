@@ -57,9 +57,10 @@ public class StartLogger {
                     ex.printStackTrace(new PrintWriter(writer));
                     builder.append(writer);
                 } else {
-                    String message = ex.getLocalizedMessage();
+                    String message = ex.toString();
                     if (message != null) {
-                        builder.append(" -- " + message);
+                        builder.append(newLine);
+                        builder.append("Caused by " + message);
                     }
                     builder.append(newLine);
                 }
