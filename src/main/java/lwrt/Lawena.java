@@ -414,7 +414,7 @@ public class Lawena {
             // cl = new CLOSX();
         } else {
             throw new UnsupportedOperationException("OS not supported");
-        }        
+        }
         cl.setLookAndFeel();
 
         settings = new SettingsManager("settings.lwf");
@@ -674,8 +674,8 @@ public class Lawena {
         Path selected = null;
         int ret = 0;
         while ((selected == null && ret == 0)
-                || (selected != null && (!Files.exists(selected)/* || !selected.getFileName().equals(
-                        "tf")*/))) {
+                || (selected != null && (!Files.exists(selected) || !selected.toFile().getName()
+                        .toString().equals("tf")))) {
             choosedir = new JFileChooser();
             choosedir.setDialogTitle("Choose your \"tf\" directory");
             choosedir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
