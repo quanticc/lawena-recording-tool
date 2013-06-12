@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.UIManager;
+
 public abstract class CommandLine {
 
     protected static final Logger log = Logger.getLogger("lawena");
@@ -136,6 +138,14 @@ public abstract class CommandLine {
             pr.waitFor();
         } catch (InterruptedException | IOException e) {
             log.log(Level.INFO, "Process was interrupted", e);
+        }
+    }
+
+    public void setLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Could not set the look and feel", e);
         }
     }
 

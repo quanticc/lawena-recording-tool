@@ -415,13 +415,15 @@ public class Lawena {
         } else {
             throw new UnsupportedOperationException("OS not supported");
         }
+        
+        cl.setLookAndFeel();
 
         settings = new SettingsManager("settings.lwf");
         oDxlevel = cl.getSystemDxLevel();
         steampath = cl.getSteamPath();
         Path tfpath = settings.getTfPath();
         if (tfpath == null || tfpath.toString().isEmpty()) {
-            tfpath = Paths.get(steampath, "steamapps/common/team fortress 2/tf");
+            tfpath = Paths.get(steampath, "SteamApps/common/Team Fortress 2/tf");
         }
         if (!Files.exists(tfpath)) {
             tfpath = getChosenTfPath();
@@ -679,6 +681,7 @@ public class Lawena {
             choosedir.setDialogTitle("Choose your \"tf\" directory");
             choosedir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             choosedir.setCurrentDirectory(new File(steampath));
+            choosedir.setFileHidingEnabled(false);
             ret = choosedir.showOpenDialog(null);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 selected = choosedir.getSelectedFile().toPath();

@@ -71,5 +71,9 @@ public class CLLinux extends CommandLine {
     public void setSystemDxLevel(String dxlevel) {
         log.fine("[linux] SystemDxLevel won't be set");
     }
+    
+    @Override
+    public void setLookAndFeel() {
+    }
 
 }
