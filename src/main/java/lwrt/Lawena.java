@@ -57,7 +57,7 @@ public class Lawena {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (currentTask == null) {
+            if (currentStartTfTask == null) {
                 Path newpath = getChosenMoviePath();
                 if (newpath != null) {
                     settings.setMoviePath(newpath);
@@ -69,20 +69,69 @@ public class Lawena {
 
     }
 
-    public class MovieFolderClear implements ActionListener {
+    public class ClearMoviesTask extends SwingWorker<Void, Path> {
+
+        private int count = 0;
 
         @Override
-        public void actionPerformed(ActionEvent e) {
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getMoviePath(),
-                    "*.{tga,wav}")) {
-                for (Path path : stream) {
-                    path.toFile().setWritable(true);
-                    Files.delete(path);
+        protected Void doInBackground() throws Exception {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
+                public void run() {
+                    view.getBtnClearMovieFolder().setEnabled(false);
                 }
-            } catch (IOException ex) {
-                log.log(Level.INFO, "Problem while loading skyboxes", ex);
+            });
+            if (currentClearMoviesTask == null) {
+                currentClearMoviesTask = this;
+                setCurrentWorker(this);
+                SwingUtilities.invokeAndWait(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        view.getBtnClearMovieFolder().setEnabled(true);
+                        view.getBtnClearMovieFolder().setText("Cancel Deletion");
+                    }
+                });
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(
+                        settings.getMoviePath(),
+                        "*.{tga,wav}")) {
+                    for (Path path : stream) {
+                        if (isCancelled()) {
+                            break;
+                        }
+                        path.toFile().setWritable(true);
+                        Files.delete(path);
+                        publish(path);
+                    }
+                } catch (IOException ex) {
+                    log.log(Level.INFO, "Problem while clearing movie folder", ex);
+                }
+            } else {
+                log.fine("Cancelling movie folder clearing task");
+                status.info("Cancelling task");
+                currentClearMoviesTask.cancel(true);
             }
+
+            return null;
         }
+
+        @Override
+        protected void process(List<Path> chunks) {
+            count += chunks.size();
+            status.info("Deleting " + count + " files from movie folder...");
+        };
+
+        @Override
+        protected void done() {
+            if (!isCancelled()) {
+                currentClearMoviesTask = null;
+                setCurrentWorker(null);
+                log.fine("Movie folder cleared: " + count + " files deleted");
+                view.getBtnClearMovieFolder().setEnabled(true);
+                status.info("");
+            }
+        };
 
     }
 
@@ -136,8 +185,8 @@ public class Lawena {
                     view.getBtnStartTf().setEnabled(false);
                 }
             });
-            if (currentTask == null) {
-                currentTask = this;
+            if (currentStartTfTask == null) {
+                currentStartTfTask = this;
                 setCurrentWorker(this);
                 view.getProgressBar().setIndeterminate(false);
                 setProgress(0);
@@ -211,7 +260,7 @@ public class Lawena {
                     status.info("Attempting to finish TF2 process");
                     cl.killTf2Process();
                     if (!cl.isRunningTF2()) {
-                        currentTask.cancel(true);
+                        currentStartTfTask.cancel(true);
                     }
                 } else {
                     status.info("TF2 was not running, cancelling");
@@ -224,7 +273,7 @@ public class Lawena {
         @Override
         protected void done() {
             if (!isCancelled()) {
-                currentTask = null;
+                currentStartTfTask = null;
                 setCurrentWorker(null);
                 view.getBtnStartTf().setEnabled(false);
                 files.restoreAll();
@@ -241,7 +290,7 @@ public class Lawena {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (currentTask == null) {
+            if (currentStartTfTask == null) {
                 Path newpath = getChosenTfPath();
                 if (newpath != null) {
                     settings.setTfPath(newpath);
@@ -257,7 +306,8 @@ public class Lawena {
     private static final Logger log = Logger.getLogger("lawena");
     private static final Logger status = Logger.getLogger("status");
 
-    private static StartTfTask currentTask = null;
+    private static StartTfTask currentStartTfTask = null;
+    private static ClearMoviesTask currentClearMoviesTask = null;
 
     private static ImageIcon createPreviewIcon(String imageName) {
         int size = 96;
@@ -465,13 +515,19 @@ public class Lawena {
 
         view.getMntmChangeTfDirectory().addActionListener(new Tf2FolderChange());
         view.getMntmChangeMovieDirectory().addActionListener(new MovieFolderChange());
-        view.getBtnClearMovieFolder().addActionListener(new MovieFolderClear());
         view.getBtnSaveSettings().addActionListener(new SaveSettings());
         view.getBtnStartTf().addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 new StartTfTask().execute();
+            }
+        });
+        view.getBtnClearMovieFolder().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ClearMoviesTask().execute();
             }
         });
 

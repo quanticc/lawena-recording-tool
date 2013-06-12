@@ -3,6 +3,7 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -10,6 +11,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -20,6 +22,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
@@ -27,14 +30,9 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.UIManager;
-
-import java.awt.Component;
-
-import javax.swing.Box;
-import javax.swing.JProgressBar;
 
 public class LawenaView extends JFrame {
 
@@ -417,7 +415,7 @@ public class LawenaView extends JFrame {
 
         btnClearMovieFolder = new JButton("Clear Movie Files");
         panelBottomLeft.add(btnClearMovieFolder);
-        
+
         panelBottomRight = new JPanel();
         FlowLayout fl_panelBottomRight = (FlowLayout) panelBottomRight.getLayout();
         fl_panelBottomRight.setVgap(0);
@@ -453,7 +451,7 @@ public class LawenaView extends JFrame {
                 31, 0, 0, 0
         };
         gbl_panelStatusbar.rowHeights = new int[] {
-                14, 0
+                12, 0
         };
         gbl_panelStatusbar.columnWeights = new double[] {
                 0.0, 1.0, 0.0, Double.MIN_VALUE
@@ -470,7 +468,7 @@ public class LawenaView extends JFrame {
         gbc_lblStatus.gridx = 0;
         gbc_lblStatus.gridy = 0;
         panelStatusbar.add(lblStatus, gbc_lblStatus);
-        
+
         progressBar = new JProgressBar();
         GridBagConstraints gbc_progressBar = new GridBagConstraints();
         gbc_progressBar.anchor = GridBagConstraints.EAST;
@@ -586,7 +584,9 @@ public class LawenaView extends JFrame {
     public JLabel getLblPreview() {
         return lblPreview;
     }
+
     public JProgressBar getProgressBar() {
         return progressBar;
     }
+
 }
