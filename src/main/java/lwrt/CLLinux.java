@@ -24,8 +24,7 @@ public class CLLinux extends CommandLine {
 
     @Override
     public ProcessBuilder getBuilderVTFCmd(String skyboxFilename) {
-        return new ProcessBuilder("vtfcmd\\VTFCmd.exe", "-file", "skybox\\" +
-                skyboxFilename, "-output", "skybox", "-exportformat", "png");
+        return null;
     }
 
     @Override
@@ -40,7 +39,7 @@ public class CLLinux extends CommandLine {
 
     @Override
     public String getSystemDxLevel() {
-        return "98";
+        return "90";
     }
 
     @Override
@@ -65,7 +64,7 @@ public class CLLinux extends CommandLine {
 
     @Override
     public Path resolveVpkToolPath(Path tfpath) {
-        return tfpath.resolve("../bin/vpk");
+        return tfpath.resolve("../bin/vpk_linux32");
     }
 
     @Override
