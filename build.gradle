@@ -13,6 +13,8 @@ sourceSets {
 }
 
 jar {
+    archiveName = 'lawena.jar'
+    destinationDir = null
     manifest {
         new ByteArrayOutputStream().withStream { execOS ->
             def result = exec {
@@ -21,14 +23,17 @@ jar {
                 standardOutput = execOS
             }
             def buildVersion = execOS.toString().trim()
-            println("Version: " + buildVersion)
             version buildVersion
         }
+        
+        ext.buildTime = new Date().format("yyyyMMddHHmmss")
+        file('version.txt').write ext.buildTime
+        
         attributes (
             'Main-Class': mainClassName,
             'Implementation-Title': 'lawena Recording Tool',
             'Implementation-Version': version,
-            'Implementation-Build': new Date().format("yyyy-MM-dd HH:mm:ss") 
+            'Implementation-Build': ext.buildTime 
         )
     }
 }
