@@ -477,7 +477,7 @@ public class LawenaView extends JFrame {
         panelStatusbar.add(progressBar, gbc_progressBar);
 
         pack();
-        setMinimumSize(new Dimension(650, 400));
+        setMinimumSize(new Dimension(750, 400));
         setLocationByPlatform(true);
     }
 

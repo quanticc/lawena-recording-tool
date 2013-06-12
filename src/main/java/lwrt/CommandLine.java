@@ -18,19 +18,19 @@ public abstract class CommandLine {
 
     protected static final Logger log = Logger.getLogger("lawena");
     
-    public abstract ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel);
+    public abstract ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel) throws IOException;
     
     public abstract ProcessBuilder getBuilderTF2ProcessKiller();
     
     public abstract ProcessBuilder getBuilderVTFCmd(String skyboxFilename);
 
-    public abstract String getSteamPath();
+    public abstract Path getSteamPath();
 
     public abstract String getSystemDxLevel();
 
     public abstract boolean isRunningTF2();
 
-    public abstract Path resolveVpkToolPath(Path tfpath);
+    public abstract Path resolveVpkToolPath(Path tfpath) throws IOException;
 
     public abstract void setSystemDxLevel(String dxlevel);
 
@@ -55,9 +55,9 @@ public abstract class CommandLine {
     }
 
     private void extractVpkFile(Path tfpath, String vpkname, Path dest, List<String> files) {
-        Path vpktool = resolveVpkToolPath(tfpath);
         List<String> cmds = new ArrayList<>();
         try {
+            Path vpktool = resolveVpkToolPath(tfpath);
             cmds.add(vpktool.toString());
             cmds.add("x");
             cmds.add(Paths.get(vpkname).toAbsolutePath().toString());
@@ -93,9 +93,9 @@ public abstract class CommandLine {
     }
 
     public List<String> getVpkContents(Path tfpath, Path vpkpath) {
-        Path vpktool = resolveVpkToolPath(tfpath);
         List<String> files = new ArrayList<>();
         try {
+            Path vpktool = resolveVpkToolPath(tfpath);
             ProcessBuilder pb = new ProcessBuilder(vpktool.toString(), "l", vpkpath.toString());
             Process pr = pb.start();
             BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
@@ -104,6 +104,7 @@ public abstract class CommandLine {
                 files.add(line);
             }
             pr.waitFor();
+            log.fine("[" + vpkpath.getFileName() + "] Contents retrieved: " + files.size() + " file(s)");
         } catch (InterruptedException | IOException e) {
             log.info("Problem retrieving contents of VPK file: " + vpkpath);
         }

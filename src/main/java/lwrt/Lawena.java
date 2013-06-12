@@ -393,7 +393,7 @@ public class Lawena {
     private HashMap<String, ImageIcon> skyboxMap;
     private JFileChooser choosemovie;
     private JFileChooser choosedir;
-    private String steampath;
+    private Path steampath;
     private String oDxlevel;
 
     private String version = "4.0-SNAPSHOT";
@@ -404,7 +404,7 @@ public class Lawena {
         if (impl != null) {
             version = impl;
         }
-        build = getManifestString("Implementation-Build", "@" + now("yyyyMMddHHmmss"));
+        build = getManifestString("Implementation-Build", "custom-" + now("yyyyMMddHHmmss"));
         String osname = System.getProperty("os.name");
         if (osname.contains("Windows")) {
             cl = new CLWindows();
@@ -414,8 +414,7 @@ public class Lawena {
             // cl = new CLOSX();
         } else {
             throw new UnsupportedOperationException("OS not supported");
-        }
-        
+        }        
         cl.setLookAndFeel();
 
         settings = new SettingsManager("settings.lwf");
@@ -423,7 +422,7 @@ public class Lawena {
         steampath = cl.getSteamPath();
         Path tfpath = settings.getTfPath();
         if (tfpath == null || tfpath.toString().isEmpty()) {
-            tfpath = Paths.get(steampath, "SteamApps/common/Team Fortress 2/tf");
+            tfpath = steampath.resolve("SteamApps/common/Team Fortress 2/tf");
         }
         if (!Files.exists(tfpath)) {
             tfpath = getChosenTfPath();
@@ -675,12 +674,12 @@ public class Lawena {
         Path selected = null;
         int ret = 0;
         while ((selected == null && ret == 0)
-                || (selected != null && (!Files.exists(selected) || !selected.getFileName().equals(
-                        "tf")))) {
+                || (selected != null && (!Files.exists(selected)/* || !selected.getFileName().equals(
+                        "tf")*/))) {
             choosedir = new JFileChooser();
             choosedir.setDialogTitle("Choose your \"tf\" directory");
             choosedir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            choosedir.setCurrentDirectory(new File(steampath));
+            choosedir.setCurrentDirectory(steampath.toFile());
             choosedir.setFileHidingEnabled(false);
             ret = choosedir.showOpenDialog(null);
             if (ret == JFileChooser.APPROVE_OPTION) {
@@ -688,6 +687,7 @@ public class Lawena {
             } else {
                 selected = null;
             }
+            log.finer("Selected path: " + selected);
         }
         return selected;
     }

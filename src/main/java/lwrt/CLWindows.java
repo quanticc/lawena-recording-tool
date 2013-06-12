@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 
 public class CLWindows extends CommandLine {
@@ -30,8 +31,8 @@ public class CLWindows extends CommandLine {
     }
 
     @Override
-    public String getSteamPath() {
-        return regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1);
+    public Path getSteamPath() {
+        return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1));
     }
 
     @Override
