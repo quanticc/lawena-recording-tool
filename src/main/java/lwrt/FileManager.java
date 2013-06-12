@@ -188,7 +188,7 @@ public class FileManager {
             Path path = Paths.get("skybox", pathStr);
             if (pathStr.endsWith(".vmt")) {
                 cl.extractIfNeeded(tfpath, skyboxVpk, Paths.get("skybox"), pathStr);
-                Files.copy(path, skyboxPath.resolve(pathStr));
+                Files.copy(path, skyboxPath.resolve(pathStr), StandardCopyOption.REPLACE_EXISTING);
                 vmtPaths.add(path);
             }
             if (pathStr.endsWith(".vtf") && pathStr.startsWith(skyboxFilename)) {

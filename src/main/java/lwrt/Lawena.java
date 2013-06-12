@@ -97,7 +97,7 @@ public class Lawena {
                             view.getBtnClearMovieFolder().setText("Stop Clearing");
                         }
                     });
-                    
+
                     for (Path path : stream) {
                         if (isCancelled()) {
                             break;
@@ -106,7 +106,7 @@ public class Lawena {
                         Files.delete(path);
                         publish(path);
                     }
-                    
+
                 } catch (IOException ex) {
                     log.log(Level.INFO, "Problem while clearing movie folder", ex);
                 }
@@ -130,7 +130,11 @@ public class Lawena {
             if (!isCancelled()) {
                 currentClearMoviesTask = null;
                 setCurrentWorker(null);
-                log.fine("Movie folder cleared: " + count + " files deleted");
+                if (count > 0) {
+                    log.fine("Movie folder cleared: " + count + " files deleted");
+                } else {
+                    log.fine("Movie folder already clean, no files deleted");
+                }
                 view.getBtnClearMovieFolder().setEnabled(true);
                 view.getBtnClearMovieFolder().setText("Clear Movie Files");
                 status.info("");
@@ -143,12 +147,13 @@ public class Lawena {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            log.fine("Saving settings");
+            setSettings();
+            settings.save();
             try {
-                setSettings();
-                settings.save();
                 settings.saveToCfg();
-            } catch (Exception e1) {
-                log.warning("A problem occurred while saving settings: " + e1);
+            } catch (IOException ex) {
+                log.warning("A problem occurred while saving settings: " + ex);
             }
         }
 
