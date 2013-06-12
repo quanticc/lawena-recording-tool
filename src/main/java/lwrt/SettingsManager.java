@@ -29,7 +29,7 @@ public class SettingsManager {
         Framerate(120, 30, Integer.MAX_VALUE),
         DxLevel("98", "80", "81", "90", "95", "98"),
         Hud("medic", "killnotices", "medic", "full", "custom"),
-        Skybox(""),
+        Skybox("Default"),
         ViewmodelSwitch("on", "on", "off", "default"),
         ViewmodelFov(70, 55, 90),
         MotionBlur(true),
@@ -77,6 +77,10 @@ public class SettingsManager {
 
         public List<String> getAllowedValues() {
             return allowedValues;
+        }
+        
+        public Object defValue() {
+            return value;
         }
 
     }

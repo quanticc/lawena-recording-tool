@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -122,6 +121,7 @@ public class Lawena {
             settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
             settings.setHitsounds(!view.getDisableHitSounds().isSelected());
             settings.setVoice(!view.getDisableVoiceChat().isSelected());
+            settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
         }
     }
 
@@ -163,10 +163,6 @@ public class Lawena {
 
                 // Backing up user files and copying lawena files
                 status.info("Copying lawena files to cfg and custom");
-                if (view.getCmbSkybox().getSelectedIndex() != 0) {
-                    files.setSkyboxFilename((String) view.getCmbSkybox().getSelectedItem());
-                }
-                files.setHudName(settings.getHud());
                 files.replaceAll();
                 setProgress(75);
 
@@ -341,15 +337,15 @@ public class Lawena {
     private String steampath;
     private String oDxlevel;
 
-    private String version = "4.0";
-    private String build = now("yyyyMMddHHmmss") + "-SNAPSHOT";
+    private String version = "4.0-SNAPSHOT";
+    private String build;
 
     public Lawena() {
-        try {
-            version = this.getClass().getPackage().getImplementationVersion().split("-")[0];
-        } catch (Exception e) {
+        String impl = this.getClass().getPackage().getImplementationVersion();
+        if (impl != null) {
+            version = impl;
         }
-        build = getManifestString("Implementation-Build", "0");
+        build = getManifestString("Implementation-Build", "@" + now("yyyyMMddHHmmss"));
         String osname = System.getProperty("os.name");
         if (osname.contains("Windows")) {
             cl = new CLWindows();
@@ -365,7 +361,7 @@ public class Lawena {
         oDxlevel = cl.getSystemDxLevel();
         steampath = cl.getSteamPath();
         Path tfpath = settings.getTfPath();
-        if (tfpath == null) {
+        if (tfpath == null || tfpath.toString().isEmpty()) {
             tfpath = Paths.get(steampath, "steamapps/common/team fortress 2/tf");
         }
         if (!Files.exists(tfpath)) {
@@ -379,7 +375,7 @@ public class Lawena {
         files = new FileManager(settings, cl);
 
         Path moviepath = settings.getMoviePath();
-        if (moviepath == null || !Files.exists(moviepath)) {
+        if (moviepath == null || moviepath.toString().isEmpty() || !Files.exists(moviepath)) {
             moviepath = getChosenMoviePath();
             if (moviepath == null) {
                 log.info("No movie directory specified, exiting.");
@@ -428,7 +424,7 @@ public class Lawena {
 
             @Override
             public void windowClosing(WindowEvent e) {
-                log.fine("Exiting");
+                log.fine("Closing");
                 files.restoreAll();
                 System.exit(0);
             }
@@ -440,11 +436,12 @@ public class Lawena {
         registerValidation(view.getCmbFramerate(), "[1-9][0-9]*",
                 view.getLblFrameRate());
         selectComboItem(view.getCmbHud(), settings.getHud(),
-                Arrays.asList("killnotices", "medic", "full", "custom"));
+                Key.Hud.getAllowedValues());
         selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
-                Arrays.asList("80", "81", "90", "95", "98"));
+                Key.DxLevel.getAllowedValues());
         selectComboItem(view.getCmbViewmodel(), settings.getViewmodelSwitch(),
-                Arrays.asList("on", "off", "default"));
+                Key.ViewmodelSwitch.getAllowedValues());
+        selectComboItem(view.getCmbSkybox(), settings.getSkybox(), null);
 
         view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
         view.getCmbFramerate().setSelectedItem(settings.getFramerate() + "");
@@ -518,7 +515,7 @@ public class Lawena {
         }
         skyboxMap = new HashMap<>(data.size());
         getSkyboxLoader(new ArrayList<>(data)).execute();
-        data.add(0, "Default");
+        data.add(0, (String) Key.Skybox.defValue());
         combo.setModel(new DefaultComboBoxModel<String>(data));
         combo.addActionListener(new ActionListener() {
 

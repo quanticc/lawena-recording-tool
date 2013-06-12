@@ -18,12 +18,11 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import lwrt.SettingsManager.Key;
+
 public class FileManager {
 
     private static final Logger log = Logger.getLogger("lawena");
-
-    private String hudName;
-    private String skyboxFilename;
 
     private CustomPathList customPathList;
     private SettingsManager cfg;
@@ -52,14 +51,6 @@ public class FileManager {
         } else {
             return true;
         }
-    }
-
-    public String getHudName() {
-        return hudName;
-    }
-
-    public String getSkyboxFilename() {
-        return skyboxFilename;
     }
 
     public CustomPathList getCustomPathList() {
@@ -105,22 +96,24 @@ public class FileManager {
                 Path scriptsPath = tfpath.resolve("custom/lawena/scripts");
                 Files.createDirectories(resourcePath);
                 Files.createDirectories(scriptsPath);
+                String hudName = cfg.getHud();
                 copy(Paths.get("hud", hudName, "resource"), resourcePath);
                 copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not replace hud files", e);
             }
-            Path materialsPath = tfpath.resolve("custom/lawena/materials/skybox");
+            Path skyboxPath = tfpath.resolve("custom/lawena/materials/skybox");
             try {
-                if (skyboxFilename != null && !skyboxFilename.isEmpty()) {
+                String sky = cfg.getSkybox();
+                if (sky != null && !sky.isEmpty() && !sky.equals(Key.Skybox.defValue())) {
                     log.fine("Copying selected skybox files");
-                    Files.createDirectories(materialsPath);
+                    Files.createDirectories(skyboxPath);
                     replaceSkybox();
                 }
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not replace skybox files", e);
                 try {
-                    delete(materialsPath);
+                    delete(skyboxPath);
                     log.fine("Skybox folder deleted, no skybox files were replaced");
                 } catch (IOException e1) {
                     log.log(Level.INFO, "Could not delete lawena skybox folder", e);
@@ -177,6 +170,7 @@ public class FileManager {
         Set<Path> vtfPaths = new LinkedHashSet<>();
         Path skyboxPath = tfpath.resolve("custom/lawena/materials/skybox");
         String skyboxVpk = "custom/skybox.vpk";
+        String skyboxFilename = cfg.getSkybox();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("skybox"))) {
             for (Path path : stream) {
                 String pathStr = path.toFile().getName();
@@ -266,14 +260,6 @@ public class FileManager {
                 showRestoreMessage();
             }
         }
-    }
-
-    public void setHudName(String hudName) {
-        this.hudName = hudName;
-    }
-
-    public void setSkyboxFilename(String skyboxFilename) {
-        this.skyboxFilename = skyboxFilename;
     }
 
     private void showRestoreMessage() {
