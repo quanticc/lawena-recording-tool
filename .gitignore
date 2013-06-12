@@ -9,6 +9,7 @@
 *.exe
 *.log
 cfg/mov/**
+version.txt
 
 # NetBeans #
 nbproject/private/

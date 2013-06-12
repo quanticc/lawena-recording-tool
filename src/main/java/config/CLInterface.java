@@ -2,10 +2,14 @@
 package config;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CLInterface {
 
@@ -46,7 +50,20 @@ public class CLInterface {
 
     public void startTf(int width, int height, String dir, int dxlevel) {
         try {
-            ProcessBuilder pb = new ProcessBuilder(dir + (windows ? "/steam.exe" : "steam"),
+            if (!windows) {
+                Set<PosixFilePermission> perms777 = new HashSet<>();
+                perms777.add(PosixFilePermission.OWNER_READ);
+                perms777.add(PosixFilePermission.OWNER_WRITE);
+                perms777.add(PosixFilePermission.OWNER_EXECUTE);
+                perms777.add(PosixFilePermission.GROUP_READ);
+                perms777.add(PosixFilePermission.GROUP_WRITE);
+                perms777.add(PosixFilePermission.GROUP_EXECUTE);
+                perms777.add(PosixFilePermission.OTHERS_READ);
+                perms777.add(PosixFilePermission.OTHERS_WRITE);
+                perms777.add(PosixFilePermission.OTHERS_EXECUTE);
+                Files.setPosixFilePermissions(Paths.get(dir, "steam.sh"), perms777);
+            }
+            ProcessBuilder pb = new ProcessBuilder(dir + (windows ? "/steam.exe" : "/steam.sh"),
                     "-applaunch", "440", "-dxlevel", dxlevel + "", "-novid", "-noborder",
                     "-noforcedmparms", "-noforcemaccel", "-noforcemspd", "-console", "-high",
                     "-noipx", "-nojoy", "-sw", "-w", width + "", "-h", height + "");

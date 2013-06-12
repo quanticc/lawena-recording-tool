@@ -147,7 +147,7 @@ public class LwrtGUI extends JFrame implements ActionListener {
             oDxlevel = cl.regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",
                     "DXLevel_V1", 0);
         } else {
-            steampath = "~/.local/share/Steam";
+            steampath = Paths.get(System.getProperty("user.home"), ".local/share/Steam").toString();
             oDxlevel = "";
         }
 
