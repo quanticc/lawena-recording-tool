@@ -83,19 +83,21 @@ public class Lawena {
                 }
             });
             if (currentClearMoviesTask == null) {
-                currentClearMoviesTask = this;
-                setCurrentWorker(this);
-                SwingUtilities.invokeAndWait(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        view.getBtnClearMovieFolder().setEnabled(true);
-                        view.getBtnClearMovieFolder().setText("Cancel Deletion");
-                    }
-                });
                 try (DirectoryStream<Path> stream = Files.newDirectoryStream(
                         settings.getMoviePath(),
                         "*.{tga,wav}")) {
+
+                    currentClearMoviesTask = this;
+                    setCurrentWorker(this);
+                    SwingUtilities.invokeAndWait(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            view.getBtnClearMovieFolder().setEnabled(true);
+                            view.getBtnClearMovieFolder().setText("Stop Clearing");
+                        }
+                    });
+                    
                     for (Path path : stream) {
                         if (isCancelled()) {
                             break;
@@ -104,6 +106,7 @@ public class Lawena {
                         Files.delete(path);
                         publish(path);
                     }
+                    
                 } catch (IOException ex) {
                     log.log(Level.INFO, "Problem while clearing movie folder", ex);
                 }
@@ -129,6 +132,7 @@ public class Lawena {
                 setCurrentWorker(null);
                 log.fine("Movie folder cleared: " + count + " files deleted");
                 view.getBtnClearMovieFolder().setEnabled(true);
+                view.getBtnClearMovieFolder().setText("Clear Movie Files");
                 status.info("");
             }
         };
