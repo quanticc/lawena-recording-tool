@@ -14,26 +14,118 @@ import java.util.logging.Logger;
 
 import javax.swing.UIManager;
 
+/**
+ * This class lets you access to all values and actions that are OS-dependent,
+ * aiming to simplify the porting of some features to all systems where TF2 can
+ * run (Windows, Linux and OSX)
+ * 
+ * @author iabarca "Quantic"
+ */
 public abstract class CommandLine {
 
+    /**
+     * Main logger for the tool, by default it will write {@link Level#FINE} and
+     * higher events to file and in a simpler way to the "Log" tab in the UI.
+     * Also it will write {@link Level#FINER} and higher events to console it
+     * it's enabled.
+     */
     protected static final Logger log = Logger.getLogger("lawena");
-    
-    public abstract ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel) throws IOException;
-    
+
+    /**
+     * Returns the necessary {@link ProcessBuilder} to launch TF2. It will be
+     * used when {@link #startTf(int, int, String)} is called.
+     * 
+     * @param width the user-specified width resolution to run TF2
+     * @param height the user-specified height resolution to run TF2
+     * @param dxlevel the user-specified directx level to run TF2
+     * @return The <code>ProcessBuilder</code> used to create a {@link Process}
+     *         and launch TF2 with it or <code>null</code> if it couldn't be
+     *         created.
+     */
+    public abstract ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel);
+
+    /**
+     * Returns the necessary {@link ProcessBuilder} to stop or kill the TF2
+     * process, to abort its execution. It will be used when
+     * {@link #killTf2Process()} is called.
+     * 
+     * @return The <code>ProcessBuilder</code> used to create a {@link Process}
+     *         and kill the TF2 process or <code>null</code> if it couldn't be
+     *         created.
+     */
     public abstract ProcessBuilder getBuilderTF2ProcessKiller();
-    
+
+    /**
+     * Returns the necessary {@link ProcessBuilder} to generate a preview of a
+     * VTF file, in particular in this tool, to generate a skybox preview. It
+     * will be used when {@link #generatePreview(String)} is called.
+     * 
+     * @param skyboxFilename the filename of the skybox file to generate the
+     *            preview
+     * @return The <code>ProcessBuilder</code> used to create a {@link Process}
+     *         and generate the skybox preview or <code>null</code> if it
+     *         couldn't be created.
+     */
     public abstract ProcessBuilder getBuilderVTFCmd(String skyboxFilename);
 
+    /**
+     * Returns the {@link Path} of the Steam installation (where Steam.exe,
+     * steam.sh or equivalent is located)
+     * 
+     * @return The <code>Path</code> where Steam and TF2 main executable, can be
+     *         located.
+     */
     public abstract Path getSteamPath();
 
+    /**
+     * Returns the system DirectX level if it's stored somewhere in the
+     * filesystem.
+     * 
+     * @return a <code>String</code> representing the dxlevel value to use when
+     *         launching TF2 or <code>null</code> if it couldn't be retrieved.
+     */
     public abstract String getSystemDxLevel();
 
+    /**
+     * Checks if the TF2 process is running.
+     * 
+     * @return <code>true</code> if TF2 process still runs in the system or
+     *         <code>false</code> if it does not.
+     */
     public abstract boolean isRunningTF2();
 
-    public abstract Path resolveVpkToolPath(Path tfpath) throws IOException;
+    /**
+     * Returns the {@link Path} where the VPK included with TF2 is located. This
+     * will be used to extract skyboxes for preview generation and loading, and
+     * could be used for other features like packing, extracting, listing, etc.
+     * 
+     * @param tfpath the path where the HL2 executable for TF2 is located
+     * @return The <code>Path</code> to the VPK tool resolved from the tfpath.
+     */
+    public abstract Path resolveVpkToolPath(Path tfpath);
 
+    /**
+     * Store the set DirectX level in the filesystem for future use, like with
+     * the {@link #getSystemDxLevel()} method. If the operation is not supported
+     * this should be implemented as a no-op method or with a simple log
+     * message.
+     * 
+     * @param dxlevel the user-specified DirectX level
+     */
     public abstract void setSystemDxLevel(String dxlevel);
 
+    /**
+     * Extracts VPK-packed files to a specified path only if they not exist in
+     * the destination path.
+     * 
+     * @param tfpath The {@link Path} where HL2 main executable for TF2 is
+     *            located
+     * @param vpkname The name of the VPK file to possibly extract the files
+     * @param dest The <code>Path</code> where the files will be extracted to
+     * @param files The filenames included in the VPK that might be extracted
+     * @throws IOException If an error occurred while creating the destination
+     *             folder
+     */
     public void extractIfNeeded(Path tfpath, String vpkname, Path dest, String... files)
             throws IOException {
         List<String> fileList = new ArrayList<>();
@@ -76,6 +168,12 @@ public abstract class CommandLine {
         }
     }
 
+    /**
+     * Generate an preview image representing a specified skybox.
+     * 
+     * @param skyboxFilename The filename of the skybox to generate the preview
+     * @see #getBuilderVTFCmd(String)
+     */
     public void generatePreview(String skyboxFilename) {
         try {
             ProcessBuilder pb = getBuilderVTFCmd(skyboxFilename);
@@ -92,6 +190,16 @@ public abstract class CommandLine {
         }
     }
 
+    /**
+     * List the files of a specified VPK file.
+     * 
+     * @param tfpath The {@link Path} where HL2 main executable for TF2 is
+     *            located
+     * @param vpkpath The <code>Path</code> where the VPK file to search is
+     *            located
+     * @return A {@link List} of <code>String</code>s of all the files inside
+     *         the specified VPK file.
+     */
     public List<String> getVpkContents(Path tfpath, Path vpkpath) {
         List<String> files = new ArrayList<>();
         try {
@@ -104,13 +212,20 @@ public abstract class CommandLine {
                 files.add(line);
             }
             pr.waitFor();
-            log.fine("[" + vpkpath.getFileName() + "] Contents retrieved: " + files.size() + " file(s)");
+            log.fine("[" + vpkpath.getFileName() + "] Contents retrieved: " + files.size()
+                    + " file(s)");
         } catch (InterruptedException | IOException e) {
             log.info("Problem retrieving contents of VPK file: " + vpkpath);
         }
         return files;
     }
 
+    /**
+     * Stop or kill the TF2 process, whether it's being run from the tool or
+     * not.
+     * 
+     * @see #getBuilderTF2ProcessKiller()
+     */
     public void killTf2Process() {
         try {
             ProcessBuilder pb = getBuilderTF2ProcessKiller();
@@ -126,6 +241,14 @@ public abstract class CommandLine {
         }
     }
 
+    /**
+     * Launch TF2 with some user-specified parameters.
+     * 
+     * @param width the user-specified width resolution to run TF2
+     * @param height the user-specified height resolution to run TF2
+     * @param dxlevel the user-specified directx level to run TF2
+     * @see #getBuilderStartTF2(int, int, String)
+     */
     public void startTf(int width, int height, String dxlevel) {
         try {
             ProcessBuilder pb = getBuilderStartTF2(width, height, dxlevel);
@@ -142,6 +265,10 @@ public abstract class CommandLine {
         }
     }
 
+    /**
+     * Set the Look & Feel of the Graphical User Interface of the tool. By
+     * default it uses the system L&F.
+     */
     public void setLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

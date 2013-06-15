@@ -14,6 +14,8 @@ import java.util.logging.Level;
 
 public class CLLinux extends CommandLine {
 
+    // Java 7's way to avoid chmod. TODO: reduce the permission level, currently
+    // using "chmod a+rwx" or "chmod 777"
     private static Set<PosixFilePermission> perms777 = new HashSet<PosixFilePermission>();
 
     {
@@ -29,13 +31,18 @@ public class CLLinux extends CommandLine {
     }
 
     @Override
-    public ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel)
-            throws IOException {
+    public ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel) {
         Path steam = getSteamPath().resolve("steam.sh");
-        Files.setPosixFilePermissions(steam, perms777);
-        return new ProcessBuilder(steam.toString(), "-applaunch", "440", "-dxlevel", dxlevel + "",
-                "-novid", "-noborder", "-noforcedmparms", "-noforcemaccel", "-noforcemspd",
-                "-console", "-high", "-noipx", "-nojoy", "-sw", "-w", width + "", "-h", height + "");
+        try {
+            Files.setPosixFilePermissions(steam, perms777);
+            return new ProcessBuilder(steam.toString(), "-applaunch", "440", "-dxlevel", dxlevel
+                    + "", "-novid", "-noborder", "-noforcedmparms", "-noforcemaccel",
+                    "-noforcemspd", "-console", "-high", "-noipx", "-nojoy", "-sw", "-w", width
+                            + "", "-h", height + "");
+        } catch (IOException e) {
+            log.log(Level.INFO, "Problem while settings permissions to steam client", e);
+        }
+        return null;
     }
 
     @Override
@@ -84,9 +91,13 @@ public class CLLinux extends CommandLine {
     }
 
     @Override
-    public Path resolveVpkToolPath(Path tfpath) throws IOException {
+    public Path resolveVpkToolPath(Path tfpath) {
         Path path = tfpath.resolve("../bin/vpk_linux32");
-        Files.setPosixFilePermissions(path, perms777);
+        try {
+            Files.setPosixFilePermissions(path, perms777);
+        } catch (IOException e) {
+            log.log(Level.FINE, "Could not set file permissions to VPK tool", e);
+        }
         return path;
     }
 
@@ -97,6 +108,7 @@ public class CLLinux extends CommandLine {
 
     @Override
     public void setLookAndFeel() {
+        // use java default: Nimbus
     }
 
 }
