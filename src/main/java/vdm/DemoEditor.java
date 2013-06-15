@@ -10,12 +10,15 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -25,6 +28,7 @@ import lwrt.SettingsManager;
 public class DemoEditor {
 
     private static final Logger log = Logger.getLogger("lawena");
+    private static final Logger status = Logger.getLogger("status");
 
     public class VdmAddTick implements ActionListener {
 
@@ -114,20 +118,56 @@ public class DemoEditor {
 
     }
 
-    public class VdmDeleteFiles implements ActionListener {
+    public class ClearVdmFilesTask extends SwingWorker<Void, Path> {
+
+        private int count = 0;
 
         @Override
-        public void actionPerformed(ActionEvent e) {
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getMoviePath(),
-                    "*.{tga,wav}")) {
+        protected Void doInBackground() throws Exception {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
+                public void run() {
+                    view.getBtnDeleteVdmFiles().setEnabled(false);
+                }
+            });
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getTfPath(),
+                    "*.vdm")) {
+
                 for (Path path : stream) {
+                    if (isCancelled()) {
+                        break;
+                    }
                     path.toFile().setWritable(true);
                     Files.delete(path);
+                    publish(path);
                 }
+
             } catch (IOException ex) {
-                log.log(Level.INFO, "Could not delete all movie files", ex);
+                log.log(Level.INFO, "Problem while deleting VDM files", ex);
             }
+
+            return null;
         }
+
+        @Override
+        protected void process(List<Path> chunks) {
+            count += chunks.size();
+            status.info("Deleting " + count + " VDM files from TF2 folder...");
+        };
+
+        @Override
+        protected void done() {
+            if (!isCancelled()) {
+                if (count > 0) {
+                    log.fine("VDM files cleared: " + count + " files deleted");
+                } else {
+                    log.fine("No VDM files were deleted");
+                }
+                view.getBtnDeleteVdmFiles().setEnabled(true);
+                status.info("");
+            }
+        };
 
     }
 
@@ -170,7 +210,13 @@ public class DemoEditor {
         view.getBtnBrowse().addActionListener(new VdmBrowseDemo());
         view.getBtnClearTickList().addActionListener(new VdmClearTicks());
         view.getBtnCreateVdmFiles().addActionListener(new VdmCreateFile());
-        view.getBtnDeleteVdmFiles().addActionListener(new VdmDeleteFiles());
+        view.getBtnDeleteVdmFiles().addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ClearVdmFilesTask().execute();
+            }
+        });
 
         return view;
     }
