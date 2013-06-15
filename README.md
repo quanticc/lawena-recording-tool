@@ -3,7 +3,7 @@ lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-reco
 
 Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at [Google Code](http://code.google.com/p/lawenarecordingtool/). The project source and issue tracking is now hosted here on GitHub. It requires [Java 1.7](http://www.java.com) and it's currently being maintained by [Quantic](http://steamcommunity.com/id/thepropane).
 
-#### Download lawena (auto-updatable)
+#### Download lawena (with auto-updates)
 - Get the [Launcher](https://www.dropbox.com/sh/lfyio7gxaf1gml3/o_vAogSmB7/v4/lawena-recording-tool.v4.zip)
 - Extract to any folder and run **lawena.exe**, on first run it will get all the base files and then it will update whenever a new version comes up.
 
@@ -35,6 +35,7 @@ Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at 
 - This version will detect all VPKs and folders inside your "tf/custom" folder, so just by having your files there you'll have the option to load them when lawena launches TF2
 - You can also use the "custom" folder of lawena, where some default VPK were included to show how it works
 - If you select your custom HUD in the custom resources list, you'll have to select "Custom" as your selected HUD option or there could be conflicts
+- If you want to add extra skyboxes, put the files inside the "skybox" folder of lawena and it will load along the included
 
 #### Troubleshooting
 - If lawena is not closed properly, running it once should restore all folders. Your files are inside the "lwrtcfg" and "lwrtcustom" folders
@@ -55,5 +56,3 @@ Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at 
 - Broesel, m0re, povohat and Barrakketh - HUDs.
 - Komaokc - skyboxes.
 
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/iabarca/lawena-recording-tool/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
