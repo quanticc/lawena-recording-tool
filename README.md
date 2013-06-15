@@ -3,25 +3,24 @@ lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-reco
 
 Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at [Google Code](http://code.google.com/p/lawenarecordingtool/). The project source and issue tracking is now hosted here on GitHub. It requires [Java 1.7](http://www.java.com) and it's currently being maintained by [Quantic](http://steamcommunity.com/id/thepropane).
 
-**About this branch:** This v4 branch will eventually be merged into master when all planned features are included and stable
-
 #### Download lawena (auto-updatable)
 - Get the [Launcher](https://www.dropbox.com/sh/lfyio7gxaf1gml3/o_vAogSmB7/v4/lawena-recording-tool.v4.zip)
-- Extract to any folder and run **lawena.exe**
+- Extract to any folder and run **lawena.exe**, on first run it will get all the base files and then it will update whenever a new version comes up.
 
 #### New features in this version
 - Renewed graphical user interface
-- Ability to load custom materials/models/etc as folders or VPKs
+- Ability to load custom materials/models/skins/etc as folders or VPKs
 - Included PLDX enhanced particles
 - Many included resources are now packed into VPKs
 - Auto-updates using the launcher
-- Pending: hl2_linux support
-- Pending: Better VDM file generation support
+- Linux TF2 support
+- More powerful VDM editor and generator (pending feature)
 
-#### Build from repository (no auto-updates)
+#### Build from repository
 - Clone or download this repository
 - Use [Gradle](http://www.gradle.org/) to build the jar with the ``gradle jar`` command, then you can double-click **lawena.jar**
 - Alternatively, on Windows you can build it with "build.bat", and on Linux using "build.sh". You can then run the tool using "lawena.bat" or "lawena.sh" respectively.
+- Updates using ``git pull``
 
 #### Instructions
 - Run lawena.exe, the updater should run and it will automatically launch the tool
@@ -39,7 +38,7 @@ Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at 
 
 #### Troubleshooting
 - If lawena is not closed properly, running it once should restore all folders. Your files are inside the "lwrtcfg" and "lwrtcustom" folders
-- Please report any [issue](https://github.com/iabarca/lawena-recording-tool/issues) you might find. Also you can suggest features here!
+- Please report any [issue](https://github.com/iabarca/lawena-recording-tool/issues) you might find. Also you can suggest features there!
 
 #### Keybindings
 - **N** - Locks viewmodels so that if they were enabled when you press the key, they stay on and can't be disabled, and viceversa
@@ -48,10 +47,13 @@ Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at 
 - **UP ARROW** - Increases the recording frame rate
 - **DOWN ARROW** - Decreases the recording frame rate
 - **P** - Starts recording a series of .tga files and their respective .wav file. Each series is named XY_ where X is a letter and Y is a number between 1 and 15
-- **NumPad** - Third-person camera control (angle, position, distance). More details in the included README.txt file.
+- **NumPad Keys** - Third-person camera control (angle, position, distance). More details in the included README.txt file.
 
 #### Credits and Thanks
 - Montz - original lawena developer.
 - Chris Down - configs.
 - Broesel, m0re, povohat and Barrakketh - HUDs.
 - Komaokc - skyboxes.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/iabarca/lawena-recording-tool/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
