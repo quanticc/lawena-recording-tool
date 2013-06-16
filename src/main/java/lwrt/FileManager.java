@@ -97,8 +97,10 @@ public class FileManager {
                 Files.createDirectories(resourcePath);
                 Files.createDirectories(scriptsPath);
                 String hudName = cfg.getHud();
-                copy(Paths.get("hud", hudName, "resource"), resourcePath);
-                copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
+                if (!hudName.equals("custom")) {
+                    copy(Paths.get("hud", hudName, "resource"), resourcePath);
+                    copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
+                }
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not replace hud files", e);
             }

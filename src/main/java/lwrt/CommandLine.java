@@ -212,7 +212,7 @@ public abstract class CommandLine {
                 files.add(line);
             }
             pr.waitFor();
-            log.fine("[" + vpkpath.getFileName() + "] Contents retrieved: " + files.size()
+            log.finer("[" + vpkpath.getFileName() + "] Contents retrieved: " + files.size()
                     + " file(s)");
         } catch (InterruptedException | IOException e) {
             log.info("Problem retrieving contents of VPK file: " + vpkpath);

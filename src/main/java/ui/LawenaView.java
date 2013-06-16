@@ -165,8 +165,8 @@ public class LawenaView extends JFrame {
         panelSettings.add(cmbFramerate, gbc_cmbFramerate);
 
         panelCustomContent = new JPanel();
-        panelCustomContent.setBorder(new TitledBorder(null, "Custom Content", TitledBorder.LEADING,
-                TitledBorder.TOP, null, null));
+        panelCustomContent.setBorder(new TitledBorder(null, "Select Custom Content to Load",
+                TitledBorder.LEADING, TitledBorder.TOP, null, null));
         GridBagConstraints gbc_panelCustomContent = new GridBagConstraints();
         gbc_panelCustomContent.insets = new Insets(0, 0, 5, 0);
         gbc_panelCustomContent.gridwidth = 2;

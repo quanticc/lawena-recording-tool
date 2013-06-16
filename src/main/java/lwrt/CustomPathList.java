@@ -1,14 +1,27 @@
 
 package lwrt;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.table.AbstractTableModel;
+
+import lwrt.CustomPath.PathContents;
 
 public class CustomPathList extends AbstractTableModel {
 
@@ -20,24 +33,48 @@ public class CustomPathList extends AbstractTableModel {
      * 
      */
     private static final long serialVersionUID = 1L;
+    private static final Logger log = Logger.getLogger("lawena");
     private static final DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
 
         @Override
         public boolean accept(Path entry) throws IOException {
             return (Files.isDirectory(entry) || entry.toString().endsWith(".vpk"))
-                    && !entry.getFileName().toString().equals("skybox.vpk");
+                    && !ignoredPaths.contains(entry);
         }
     };
+
+    private static final Map<Path, CustomPath> defaultPaths = new LinkedHashMap<>();
+    private static final List<Path> ignoredPaths = new ArrayList<>();
+
+    {
+        List<CustomPath> list = new ArrayList<>();
+        list.add(new CustomPath(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet.of(
+                PathContents.REQUIRED, PathContents.READONLY)));
+        list.add(new CustomPath(Paths.get("custom/no_announcer_voices.vpk"),
+                "Disable announcer voices"));
+        list.add(new CustomPath(Paths.get("custom/no_applause_sounds.vpk"),
+                "Disable applause sounds"));
+        list.add(new CustomPath(Paths.get("custom/no_domination_sounds.vpk"),
+                "Disable domination/revenge sounds"));
+        list.add(new CustomPath(Paths.get("custom/pldx_particles.vpk"),
+                "Enable enhanced particles"));
+        for (CustomPath path : list) {
+            defaultPaths.put(path.getPath(), path);
+        }
+        ignoredPaths.add(Paths.get("custom/skybox.vpk"));
+    }
 
     private List<CustomPath> list = new ArrayList<>();
 
     public List<CustomPath> getList() {
-        return list;
+        return Collections.unmodifiableList(list);
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column == Column.SELECTED.ordinal();
+        CustomPath cp = list.get(row);
+        return !cp.getContents().contains(PathContents.READONLY)
+                && column == Column.SELECTED.ordinal();
     }
 
     @Override
@@ -83,7 +120,6 @@ public class CustomPathList extends AbstractTableModel {
                 cp.setSelected((boolean) value);
             default:
         }
-
     }
 
     private void addPath(CustomPath e) {
@@ -104,12 +140,54 @@ public class CustomPathList extends AbstractTableModel {
         }
     }
 
-    public void addAllFromPath(Path dir) throws IOException {
+    public void addAllFromPath(Path dir) {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, filter)) {
             for (Path path : stream) {
-                CustomPath cp = new CustomPath(path);
+                CustomPath cp = defaultPaths.get(path);
+                if (cp == null) {
+                    cp = new CustomPath(path);
+                }
                 addPath(cp);
             }
+        } catch (IOException e) {
+            log.log(Level.FINE, "Problem while loading custom paths", e);
+        }
+    }
+
+    public void validateRequired() {
+        for (CustomPath cp : defaultPaths.values()) {
+            if (cp.getContents().contains(PathContents.REQUIRED)) {
+                if (!list.contains(cp)) {
+                    Path filename = cp.getPath().getFileName();
+                    Path destdir = Paths.get("custom");
+                    unpackFileFromJar(Paths.get("lwrtvpks.jar"), filename.toString(), destdir);
+                    if (Files.exists(destdir.resolve(filename))) {
+                        addPath(cp);
+                    }
+                }
+            }
+        }
+    }
+
+    private void unpackFileFromJar(Path jarpath, String name, Path destpath) {
+        JarFile jar;
+        try {
+            jar = new JarFile(jarpath.toFile());
+            JarEntry entry = jar.getJarEntry(name);
+            if (entry != null) {
+                InputStream is = jar.getInputStream(entry);
+                FileOutputStream fos = new FileOutputStream(destpath.resolve(name).toFile());
+                while (is.available() > 0) {
+                    fos.write(is.read());
+                }
+                fos.close();
+                is.close();
+            } else {
+                log.warning("File " + name + " does not exist in " + jarpath);
+            }
+            jar.close();
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Could not unpack file " + name + " from jar: " + jarpath, e);
         }
     }
 

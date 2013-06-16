@@ -3,6 +3,7 @@ package lwrt;
 
 import ui.LawenaView;
 import ui.TooltipRenderer;
+import util.ListFilesVisitor;
 import util.StartLogger;
 import vdm.DemoEditor;
 
@@ -25,6 +26,8 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +46,15 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 
+import lwrt.CustomPath.PathContents;
 import lwrt.SettingsManager.Key;
 
 public class Lawena {
@@ -514,7 +520,16 @@ public class Lawena {
         JTable table = view.getTableCustomContent();
         table.setModel(customPaths);
         table.getColumnModel().getColumn(0).setMaxWidth(20);
-        table.setDefaultRenderer(CustomPath.class, new TooltipRenderer());
+        table.setDefaultRenderer(CustomPath.class, new TooltipRenderer(settings));
+        TableRowSorter<CustomPathList> sorter = new TableRowSorter<>(customPaths);
+        table.setRowSorter(sorter);
+        RowFilter<CustomPathList, Object> filter = new RowFilter<CustomPathList, Object>() {
+            public boolean include(Entry<? extends CustomPathList, ? extends Object> entry) {
+                CustomPath cp = (CustomPath) entry.getValue(CustomPathList.Column.PATH.ordinal());
+                return !cp.getContents().contains(PathContents.READONLY);
+            }
+        };
+        sorter.setRowFilter(filter);
 
         view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
         view.getDisableCombatText().setSelected(!settings.getCombattext());
@@ -551,7 +566,7 @@ public class Lawena {
         Vector<String> data = new Vector<>();
         Path dir = Paths.get("skybox");
         if (Files.exists(dir)) {
-            log.fine("Loading skyboxes from folder");
+            log.finer("Loading skyboxes from folder");
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*up.vtf")) {
                 for (Path path : stream) {
                     log.finer("Skybox found at: " + path);
@@ -565,7 +580,7 @@ public class Lawena {
         }
         Path vpk = Paths.get("custom/skybox.vpk");
         if (Files.exists(vpk)) {
-            log.fine("Searching for skyboxes in " + vpk);
+            log.finer("Searching for skyboxes in " + vpk);
             for (String file : cl.getVpkContents(settings.getTfPath(), vpk)) {
                 if (file.endsWith("up.vtf")) {
                     log.finer("[skybox.vpk] Skybox found at: " + file);
@@ -645,12 +660,40 @@ public class Lawena {
 
     private void scanCustomPaths() {
         customPaths.clear();
-        try {
-            customPaths.addAllFromPath(Paths.get("custom"));
-            customPaths.addAllFromPath(settings.getTfPath().resolve("custom"));
-        } catch (IOException e) {
-            log.log(Level.FINE, "Problem while loading custom paths", e);
+        customPaths.addAllFromPath(Paths.get("custom"));
+        customPaths.addAllFromPath(settings.getTfPath().resolve("custom"));
+        customPaths.validateRequired();
+        for (CustomPath cp : customPaths.getList()) {
+            EnumSet<PathContents> contents = cp.getContents();
+            Path path = cp.getPath();
+            if (!contents.contains(PathContents.READONLY)) {
+                List<String> files = getContentsList(path);
+                for (String file : files) {
+                    if (file.startsWith("resource/") || file.startsWith("scripts/")) {
+                        contents.add(PathContents.HUD);
+                    } else if (file.startsWith("cfg/") && file.endsWith(".cfg")) {
+                        contents.add(PathContents.CONFIG);
+                    } else if (file.startsWith("materials/skybox/")) {
+                        contents.add(PathContents.SKYBOX);
+                    }
+                }
+            }
         }
+    }
+
+    private List<String> getContentsList(Path path) {
+        if (path.toString().endsWith(".vpk")) {
+            return cl.getVpkContents(settings.getTfPath(), path);
+        } else if (Files.isDirectory(path)) {
+            ListFilesVisitor visitor = new ListFilesVisitor(path);
+            try {
+                Files.walkFileTree(path, visitor);
+                return visitor.getFiles();
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not walk through this directory", e);
+            }
+        }
+        return Collections.emptyList();
     }
 
     private Path getChosenMoviePath() {
