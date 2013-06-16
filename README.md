@@ -14,7 +14,6 @@ Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at 
 - Many included resources are now packed into VPKs
 - Auto-updates using the launcher
 - Linux TF2 support
-- More powerful VDM editor and generator (pending feature)
 
 #### Build from repository
 - Clone or download this repository
@@ -35,11 +34,11 @@ Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at 
 - This version will detect all VPKs and folders inside your "tf/custom" folder, so just by having your files there you'll have the option to load them when lawena launches TF2
 - You can also use the "custom" folder of lawena, where some default VPK were included to show how it works
 - If you select your custom HUD in the custom resources list, you'll have to select "Custom" as your selected HUD option or there could be conflicts
-- If you want to add extra skyboxes, put the files inside the "skybox" folder of lawena and it will load along the included
+- If you want to add extra skyboxes, put the .vtf files (not the .vmt) inside the "skybox" folder of lawena and it will load along the included
 
 #### Troubleshooting
 - If lawena is not closed properly, running it once should restore all folders. Your files are inside the "lwrtcfg" and "lwrtcustom" folders
-- Please report any [issue](https://github.com/iabarca/lawena-recording-tool/issues) you might find. Also you can suggest features there!
+- Please report any [issue](https://github.com/iabarca/lawena-recording-tool/issues) you might find. Also you can use that same page to suggest new features.
 
 #### Keybindings
 - **N** - Locks viewmodels so that if they were enabled when you press the key, they stay on and can't be disabled, and viceversa

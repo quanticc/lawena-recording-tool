@@ -1,26 +1,55 @@
 lawena Recording Tool
 ---------------------
 
-* Run lawena.exe, a splash screen should appear.
-* Choose your tf directory, for instance "\Steam\steamapps\common\Team Fortress 2\tf".
-* Choose your moviefile directory, where the tool will store everything you record.
-* Configure it as you like, also you can save settings to a file and edit them later.
-* Start TF2, lawena will make a backup of your cfg and custom folder while TF2 is running.
-* Load a demo and press P to start recording.
-* When you close TF2, your files should be restored and should be no "lwrt" folders inside your tf folder.
-* If lawena is not closed properly, running it once should restore all folders. Your files are inside the "lwrtcfg" and "lwrtcustom" folders.
+ Instructions
 
-* To use a custom HUD for recording, copy said HUD's resource and scripts folders into "\hud\custom" and then choose Custom HUD in the HUD settings.
-* To use a custom Skybox for recording, simply copy said Skybox's .vtf files (not the .vmt files) into "\Skybox". The tool will automatically generate an option in the settings and a preview screenshot of the skybox.
-
-The tool provides the following keybindings:
-
-N - Locks viewmodels so that if they were enabled when you press the key, they stay on and can't be disabled, and viceversa. This setting is overridden by restarting TF2
-M - Locks default crosshair so that it cannot be changed. This setting is overridden by restarting TF2
-R - Enables/disables ragdolls.
-UP ARROW - Increases the recording frame rate
-DOWN ARROW - Decreases the recording frame rate
-P - Starts recording a series of .tga files and their respective .wav file. Each series is named XY_ where X is a letter and Y is a number between 1 and 15 
+   * Run lawena.exe, the updater should run and it will automatically launch the tool
+   * Your TF2 directory should be auto-detected (you can always change it from the "File" menu in the UI)
+   * Choose your moviefile directory, where the tool will store everything you record
+   * Configure it as you like, also you can save settings to a file and edit them later
+   * Start TF2, lawena will make a backup of your cfg and custom folder while TF2 is running
+   * Load a demo and press P to start recording
+   * When you close TF2, your files should be restored (there should be no "lwrt" folders inside your tf folder)
 
 
-Special Thanks to Montz for this tool, Chris for his awesome config and Broesel, m0re, povohat and Barrakketh for their HUDs. Also thanks to Komaokc for his beautiful skyboxes.
+ Adding custom resources
+
+   * This version will detect all VPKs and folders inside your "tf/custom" folder, so just by having your files there you'll have the option to load them when lawena launches TF2
+   * You can also use the "custom" folder of lawena, where some default VPK were included to show how it works
+   * If you select your custom HUD in the custom resources list, you'll have to select "Custom" as your selected HUD option or there could be conflicts
+   * If you want to add extra skyboxes, put the .vtf files (not the .vmt) inside the "skybox" folder of lawena and it will load along the included
+
+ Troubleshooting
+
+   * If lawena is not closed properly, running it once should restore all folders. Your files are inside the "lwrtcfg" and "lwrtcustom" folders
+   * Please report any issue you might find on https://github.com/iabarca/lawena-recording-tool/issues where you can also suggest new features
+   
+
+ Keybindings
+
+   * N - Locks viewmodels so that if they were enabled when you press the key, they stay on and can't be disabled, and viceversa
+   * M - Locks default crosshair so that it cannot be changed
+   * R - Enables/disables ragdolls
+   * UP ARROW - Increases the recording frame rate
+   * DOWN ARROW - Decreases the recording frame rate
+   * P - Starts recording a series of .tga files and their respective .wav file. Each series is named XY_ where X is a letter and Y is a number between 1 and 15
+   * Numpad Plus - Switch to third person
+   * Numpad Minus - Switch back to first person
+   * Numpad 2 - Back view (only in third person)
+   * Numpad 8 - Front view (only in third person)
+   * Numpad 5 - Toggle camera distance (only in third person)
+   * Numpad 0 - Toggle camera pitch (only in third person)
+   * Numpad 1 - Back-Left view (only in third person)
+   * Numpad 4 - Left view (only in third person)
+   * Numpad 7 - Front-Left view (only in third person)
+   * Numpad 3 - Back-Right view (only in third person)
+   * Numpad 6 - Right view (only in third person)
+   * Numpad 9 - Front-Right view (only in third person) 
+
+Credits and Thanks
+
+   * Montz - original lawena developer.
+   * Chris Down - configs.
+   * Broesel, m0re, povohat and Barrakketh - HUDs.
+   * Komaokc - skyboxes.
+
