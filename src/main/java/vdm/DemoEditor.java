@@ -92,13 +92,15 @@ public class DemoEditor {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            ticklist = generateTickList(0);
-            vdmgenerator = new VDMGenerator(ticklist, settings.getTfPath().toString());
+            if (model.getRowCount() > 0) {
+                ticklist = generateTickList(0);
+                vdmgenerator = new VDMGenerator(ticklist, settings.getTfPath().toString());
 
-            try {
-                vdmgenerator.generate();
-            } catch (IOException e1) {
-                log.warning("A problem occurred while generating the VDM: " + e1);
+                try {
+                    vdmgenerator.generate();
+                } catch (IOException e1) {
+                    log.warning("A problem occurred while generating the VDM: " + e1);
+                }
             }
         }
 
@@ -211,7 +213,7 @@ public class DemoEditor {
         view.getBtnClearTickList().addActionListener(new VdmClearTicks());
         view.getBtnCreateVdmFiles().addActionListener(new VdmCreateFile());
         view.getBtnDeleteVdmFiles().addActionListener(new ActionListener() {
-            
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 new ClearVdmFilesTask().execute();
