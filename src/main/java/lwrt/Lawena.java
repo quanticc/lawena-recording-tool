@@ -556,7 +556,17 @@ public class Lawena {
             }
         });
 
-        scanCustomPaths();
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    scanCustomPaths();
+                } catch (Exception e) {
+                    log.log(Level.INFO, "Problem while scanning custom paths", e);
+                }
+                return null;
+            }
+        }.execute();
 
         view.getTabbedPane().addTab("VDM", null, vdm.start());
         view.setVisible(true);
@@ -679,6 +689,7 @@ public class Lawena {
                 }
             }
         }
+        customPaths.fireTableRowsUpdated(0, customPaths.getRowCount() - 1);
     }
 
     private List<String> getContentsList(Path path) {
@@ -689,8 +700,8 @@ public class Lawena {
             try {
                 Files.walkFileTree(path, visitor);
                 return visitor.getFiles();
-            } catch (IOException e) {
-                log.log(Level.INFO, "Could not walk through this directory", e);
+            } catch (IllegalArgumentException | IOException e) {
+                log.log(Level.INFO, "Could not walk through this directory: " + path, e);
             }
         }
         return Collections.emptyList();

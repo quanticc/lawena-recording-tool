@@ -48,8 +48,8 @@ public class CustomPathList extends AbstractTableModel {
 
     {
         List<CustomPath> list = new ArrayList<>();
-        list.add(new CustomPath(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet.of(
-                PathContents.REQUIRED, PathContents.READONLY)));
+        list.add(new CustomPath(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet
+                .of(PathContents.READONLY)));
         list.add(new CustomPath(Paths.get("custom/no_announcer_voices.vpk"),
                 "Disable announcer voices"));
         list.add(new CustomPath(Paths.get("custom/no_applause_sounds.vpk"),
@@ -59,6 +59,8 @@ public class CustomPathList extends AbstractTableModel {
         list.add(new CustomPath(Paths.get("custom/pldx_particles.vpk"),
                 "Enable enhanced particles"));
         for (CustomPath path : list) {
+            path.getContents().add(PathContents.REQUIRED);
+            path.setSelected(true);
             defaultPaths.put(path.getPath(), path);
         }
         ignoredPaths.add(Paths.get("custom/skybox.vpk"));
