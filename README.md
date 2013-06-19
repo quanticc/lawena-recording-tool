@@ -55,3 +55,5 @@ Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at 
 - Broesel, m0re, povohat and Barrakketh - HUDs.
 - Komaokc - skyboxes.
 
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/f54384a134a114f62e4ff6f8bdd2561d "githalytics.com")](http://githalytics.com/iabarca/lawena-recording-tool)
