@@ -12,11 +12,8 @@ import java.util.logging.Level;
 public class CLWindows extends CommandLine {
 
     @Override
-    public ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel) {
-        return new ProcessBuilder(getSteamPath() + "/steam.exe", "-applaunch", "440", "-dxlevel",
-                dxlevel + "", "-novid", "-noborder", "-noforcedmparms", "-noforcemaccel",
-                "-noforcemspd", "-console", "-high", "-noipx", "-nojoy", "-sw", "-w", width + "",
-                "-h", height + "");
+    public ProcessBuilder getBuilderStartTF2() {
+        return new ProcessBuilder(getSteamPath() + "/steam.exe");
     }
 
     @Override

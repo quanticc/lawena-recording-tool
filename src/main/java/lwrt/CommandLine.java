@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,14 +36,11 @@ public abstract class CommandLine {
      * Returns the necessary {@link ProcessBuilder} to launch TF2. It will be
      * used when {@link #startTf(int, int, String)} is called.
      * 
-     * @param width the user-specified width resolution to run TF2
-     * @param height the user-specified height resolution to run TF2
-     * @param dxlevel the user-specified directx level to run TF2
      * @return The <code>ProcessBuilder</code> used to create a {@link Process}
      *         and launch TF2 with it or <code>null</code> if it couldn't be
      *         created.
      */
-    public abstract ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel);
+    public abstract ProcessBuilder getBuilderStartTF2();
 
     /**
      * Returns the necessary {@link ProcessBuilder} to stop or kill the TF2
@@ -244,15 +242,31 @@ public abstract class CommandLine {
     /**
      * Launch TF2 with some user-specified parameters.
      * 
-     * @param width the user-specified width resolution to run TF2
-     * @param height the user-specified height resolution to run TF2
-     * @param dxlevel the user-specified directx level to run TF2
-     * @see #getBuilderStartTF2(int, int, String)
+     * @param cfg the program settings from it will retrieve values like the
+     *            dxlevel and the resolution
+     * @see #getBuilderStartTF2()
      */
-    public void startTf(int width, int height, String dxlevel) {
+    public void startTf(SettingsManager cfg) {
+        String dxlevel = cfg.getDxlevel();
+        String width = cfg.getWidth() + "";
+        String height = cfg.getHeight() + "";
         try {
-            ProcessBuilder pb = getBuilderStartTF2(width, height, dxlevel);
             log.fine("Starting TF2 in " + width + "x" + height + " with dxlevel " + dxlevel);
+            ProcessBuilder pb = getBuilderStartTF2();
+            pb.command().addAll(
+                    Arrays.asList("-applaunch", "440", "-dxlevel", dxlevel, "-novid", "-noborder",
+                            "-noforcedmparms", "-noforcemaccel", "-noforcemspd", "-console",
+                            "-high", "-noipx", "-nojoy", "-sw", "-w", width, "-h", height));
+            if (cfg.getCondebug()) {
+                pb.command().add("-condebug");
+                Path logpath = cfg.getTfPath().resolve("console.log");
+                log.info("TF2 console output saved to: " + logpath);
+                try {
+                    Files.deleteIfExists(logpath);
+                } catch (IOException e) {
+                    log.log(Level.FINE, "Could not delete previous console.log file", e);
+                }
+            }
             Process pr = pb.start();
             BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;

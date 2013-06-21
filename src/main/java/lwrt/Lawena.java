@@ -186,6 +186,7 @@ public class Lawena {
             settings.setHitsounds(!view.getDisableHitSounds().isSelected());
             settings.setVoice(!view.getDisableVoiceChat().isSelected());
             settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
+            settings.setCondebug(view.getChckbxUsecondebug().isSelected());
         }
     }
 
@@ -232,7 +233,7 @@ public class Lawena {
 
                 // Launching process
                 status.info("Launching TF2 process");
-                cl.startTf(settings.getWidth(), settings.getHeight(), settings.getDxlevel());
+                cl.startTf(settings);
 
                 SwingUtilities.invokeAndWait(new Runnable() {
 
@@ -537,6 +538,7 @@ public class Lawena {
         view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
         view.getDisableHitSounds().setSelected(!settings.getHitsounds());
         view.getDisableVoiceChat().setSelected(!settings.getVoice());
+        view.getChckbxUsecondebug().setSelected(settings.getCondebug());
 
         view.getMntmChangeTfDirectory().addActionListener(new Tf2FolderChange());
         view.getMntmChangeMovieDirectory().addActionListener(new MovieFolderChange());

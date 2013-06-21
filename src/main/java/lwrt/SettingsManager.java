@@ -9,11 +9,8 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +23,7 @@ public class SettingsManager {
         MovieDir(""),
         Width(1280, 640, Integer.MAX_VALUE),
         Height(720, 360, Integer.MAX_VALUE),
-        Framerate(120, 30, Integer.MAX_VALUE),
+        Framerate(120, 24, Integer.MAX_VALUE),
         DxLevel("98", "80", "81", "90", "95", "98"),
         Hud("medic", "killnotices", "medic", "full", "custom"),
         Skybox("Default"),
@@ -38,7 +35,8 @@ public class SettingsManager {
         CombatText(false),
         Hitsounds(false),
         Voice(false),
-        SteamCloud(false);
+        SteamCloud(false),
+        Condebug(true);
 
         private Object value;
         private List<String> allowedValues;
@@ -78,7 +76,7 @@ public class SettingsManager {
         public List<String> getAllowedValues() {
             return allowedValues;
         }
-        
+
         public Object defValue() {
             return value;
         }
@@ -90,17 +88,7 @@ public class SettingsManager {
 
     public SettingsManager(String settingsFile) {
         filename = settingsFile;
-        properties = new Properties() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Set<Object> keySet()
-            {
-                return Collections.unmodifiableSet(new TreeSet<Object>(super.keySet()));
-            }
-
-        };
+        properties = new Properties();
         for (Key key : Key.values()) {
             properties.setProperty(key.toString(), key.value + "");
         }
@@ -125,15 +113,6 @@ public class SettingsManager {
     public void saveToCfg() throws IOException {
         PrintWriter settings = new PrintWriter(new FileWriter("cfg/settings.cfg"));
         int framerate = getFramerate();
-        boolean motionblur = getMotionBlur();
-        boolean steamcloud = getSteamCloud();
-        int viewmodelfov = getViewmodelFov();
-        String viewmodelswitch = getViewmodelSwitch();
-        boolean crosshairswitch = getCrosshairSwitch();
-        boolean crosshair = getCrosshair();
-        boolean combattext = getCombattext();
-        boolean hitsounds = getHitsounds();
-        boolean voice = getVoice();
         settings.println("alias recframerate host_framerate " + framerate);
         if (framerate < 60) {
             settings.println("alias currentfpsup 60fps");
@@ -181,14 +160,15 @@ public class SettingsManager {
             settings.println("alias currentfpsup 60fps");
             settings.println("alias currentfpsdn 3840fps");
         }
-
-        settings.println("mat_motion_blur_enabled " + (motionblur ? "1" : "0"));
-        settings.println("mat_motion_blur_forward_enabled " + (motionblur ? "1" : "0"));
-        settings.println("mat_motion_blur_strength " + (motionblur ? "1" : "0"));
-        settings.println((steamcloud ? "//" : "") + "cl_cloud_settings 0");
-        settings.println("viewmodel_fov_demo " + viewmodelfov);
-        settings.println((viewmodelswitch.equals("off") ? "//" : "") + "lockviewmodelson");
-        settings.println((viewmodelswitch.equals("on") ? "//" : "") + "lockviewmodelsoff");
+        settings.println("mat_motion_blur_enabled " + (getMotionBlur() ? "1" : "0"));
+        settings.println("mat_motion_blur_forward_enabled " + (getMotionBlur() ? "1" : "0"));
+        settings.println("mat_motion_blur_strength " + (getMotionBlur() ? "1" : "0"));
+        settings.println((getSteamCloud() ? "//" : "") + "cl_cloud_settings 0");
+        settings.println((getCondebug() ? "" : "//") + "con_timestamp 1");
+        settings.println("viewmodel_fov_demo " + getViewmodelFov());
+        settings.println((getViewmodelSwitch().equals("off") ? "//" : "") + "lockviewmodelson");
+        settings.println((getViewmodelSwitch().equals("on") ? "//" : "") + "lockviewmodelsoff");
+        boolean crosshairswitch = getCrosshairSwitch();
         settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_file \"\"");
         settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_red 200");
         settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_green 200");
@@ -196,11 +176,11 @@ public class SettingsManager {
         settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_scale 32");
         settings.println((crosshairswitch ? "//" : "") + "cl_crosshairalpha 200");
         settings.println((crosshairswitch ? "//" : "") + "lockcrosshair");
-        settings.println("crosshair " + (crosshair ? "1" : "0"));
-        settings.println("hud_combattext " + (combattext ? "1" : "0"));
-        settings.println("hud_combattext_healing " + (combattext ? "1" : "0"));
-        settings.println("tf_dingalingaling " + (hitsounds ? "1" : "0"));
-        settings.println("voice_enable " + (voice ? "1" : "0"));
+        settings.println("crosshair " + (getCrosshair() ? "1" : "0"));
+        settings.println("hud_combattext " + (getCombattext() ? "1" : "0"));
+        settings.println("hud_combattext_healing " + (getCombattext() ? "1" : "0"));
+        settings.println("tf_dingalingaling " + (getHitsounds() ? "1" : "0"));
+        settings.println("voice_enable " + (getVoice() ? "1" : "0"));
         settings.println("alias voice_enable \"\"");
         settings.println("cl_autorezoom 0");
         settings.println("hud_saytext_time 0");
@@ -327,6 +307,10 @@ public class SettingsManager {
         setString(Key.Skybox, value);
     }
 
+    public void setCondebug(boolean value) {
+        setBoolean(Key.Condebug, value);
+    }
+
     public int getHeight() {
         return getInt(Key.Height);
     }
@@ -395,5 +379,9 @@ public class SettingsManager {
 
     public String getSkybox() {
         return getString(Key.Skybox);
+    }
+
+    public boolean getCondebug() {
+        return getBoolean(Key.Condebug);
     }
 }

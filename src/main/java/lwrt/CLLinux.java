@@ -14,8 +14,6 @@ import java.util.logging.Level;
 
 public class CLLinux extends CommandLine {
 
-    // Java 7's way to avoid chmod. TODO: reduce the permission level, currently
-    // using "chmod a+rwx" or "chmod 777"
     private static Set<PosixFilePermission> perms777 = new HashSet<PosixFilePermission>();
 
     {
@@ -31,14 +29,11 @@ public class CLLinux extends CommandLine {
     }
 
     @Override
-    public ProcessBuilder getBuilderStartTF2(int width, int height, String dxlevel) {
+    public ProcessBuilder getBuilderStartTF2() {
         Path steam = getSteamPath().resolve("steam.sh");
         try {
             Files.setPosixFilePermissions(steam, perms777);
-            return new ProcessBuilder(steam.toString(), "-applaunch", "440", "-dxlevel", dxlevel
-                    + "", "-novid", "-noborder", "-noforcedmparms", "-noforcemaccel",
-                    "-noforcemspd", "-console", "-high", "-noipx", "-nojoy", "-sw", "-w", width
-                            + "", "-h", height + "");
+            return new ProcessBuilder(steam.toString());
         } catch (IOException e) {
             log.log(Level.INFO, "Problem while settings permissions to steam client", e);
         }
