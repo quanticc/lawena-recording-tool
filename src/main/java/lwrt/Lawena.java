@@ -417,8 +417,8 @@ public class Lawena {
             cl = new CLWindows();
         } else if (osname.contains("Linux")) {
             cl = new CLLinux();
-            // } else if (osname.contains("OS X")) {
-            // cl = new CLOSX();
+        } else if (osname.contains("OS X")) {
+            cl = new CLOSX();
         } else {
             throw new UnsupportedOperationException("OS not supported");
         }
