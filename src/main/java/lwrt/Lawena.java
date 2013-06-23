@@ -281,20 +281,29 @@ public class Lawena {
             customPaths.validateRequired();
             int i = 0;
             for (CustomPath cp : customPaths.getList()) {
-                EnumSet<PathContents> contents = cp.getContents();
+                EnumSet<PathContents> c = cp.getContents();
                 Path path = cp.getPath();
-                if (!contents.contains(PathContents.READONLY)) {
+                if (!c.contains(PathContents.READONLY)) {
                     List<String> files = getContentsList(path);
+                    boolean hud = false;
+                    boolean cfg = false;
+                    boolean sky = false;
                     for (String file : files) {
-                        if (file.startsWith("resource/") || file.startsWith("scripts/")) {
-                            contents.add(PathContents.HUD);
-                        } else if (file.startsWith("cfg/") && file.endsWith(".cfg")) {
-                            contents.add(PathContents.CONFIG);
-                        } else if (file.startsWith("materials/skybox/")) {
-                            contents.add(PathContents.SKYBOX);
-                        } else {
-                            continue;
+                        if (hud && cfg & sky) {
+                            break;
                         }
+                        if (!hud && (file.startsWith("resource/") || file.startsWith("scripts/"))) {
+                            c.add(PathContents.HUD);
+                            hud = true;
+                        } else if (!cfg && file.startsWith("cfg/") && file.endsWith(".cfg")) {
+                            c.add(PathContents.CONFIG);
+                            cfg = true;
+                        } else if (!sky && file.startsWith("materials/skybox/")) {
+                            c.add(PathContents.SKYBOX);
+                            sky = true;
+                        }
+                    }
+                    if (hud || cfg || sky) {
                         customPaths.fireTableRowsUpdated(i, i);
                     }
                 }
