@@ -34,7 +34,7 @@ public class TooltipRenderer extends DefaultTableCellRenderer {
         sb.append("<html>Filename: <b>");
         sb.append(cp.getPath().getFileName());
         sb.append("</b><br>Location: ");
-        sb.append((path.startsWith(tfpath) ? "Inside TF2 dir: " + tfpath.relativize(path) : path).toString());
+        sb.append((path.startsWith(tfpath) ? "TF2 Path: " + tfpath.relativize(path) : path).toString());
         if (cp.isSelected()) {
             if (contents.contains(PathContents.HUD)) {
                 sb.append("<br><font color='#ff0000'>Possible HUD file conflict.</font>");

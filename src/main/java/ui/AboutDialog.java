@@ -76,8 +76,8 @@ public class AboutDialog extends JDialog {
         }
         contentPanel.add(lblHeader, BorderLayout.NORTH);
 
-        JLabel lblContent = new JLabel("<html><div style=\\\"text-align: center;\\\">Version <b>" +
-                version + "</b><br>" + build);
+        JLabel lblContent = new JLabel("<html><div style=\\\"text-align: center;\\\"><br>"
+                + "Version <b>" + version + "</b><br>" + build);
         lblContent.setHorizontalAlignment(SwingConstants.CENTER);
         lblContent.setFont(new Font("Tahoma", Font.PLAIN, 11));
         contentPanel.add(lblContent, BorderLayout.CENTER);
