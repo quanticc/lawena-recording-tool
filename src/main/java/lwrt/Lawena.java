@@ -69,7 +69,7 @@ public class Lawena {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (currentStartTfTask == null) {
+            if (startTfTask == null) {
                 Path newpath = getChosenMoviePath();
                 if (newpath != null) {
                     settings.setMoviePath(newpath);
@@ -94,13 +94,13 @@ public class Lawena {
                     view.getBtnClearMovieFolder().setEnabled(false);
                 }
             });
-            if (currentClearMoviesTask == null) {
+            if (clearMoviesTask == null) {
                 try (DirectoryStream<Path> stream = Files.newDirectoryStream(
                         settings.getMoviePath(),
                         "*.{tga,wav}")) {
 
-                    currentClearMoviesTask = this;
-                    setCurrentWorker(this);
+                    clearMoviesTask = this;
+                    setCurrentWorker(this, true);
                     SwingUtilities.invokeAndWait(new Runnable() {
 
                         @Override
@@ -125,7 +125,7 @@ public class Lawena {
             } else {
                 log.fine("Cancelling movie folder clearing task");
                 status.info("Cancelling task");
-                currentClearMoviesTask.cancel(true);
+                clearMoviesTask.cancel(true);
             }
 
             return null;
@@ -140,8 +140,8 @@ public class Lawena {
         @Override
         protected void done() {
             if (!isCancelled()) {
-                currentClearMoviesTask = null;
-                setCurrentWorker(null);
+                clearMoviesTask = null;
+                setCurrentWorker(null, false);
                 if (count > 0) {
                     log.fine("Movie folder cleared: " + count + " files deleted");
                 } else {
@@ -166,10 +166,9 @@ public class Lawena {
                     view.getBtnStartTf().setEnabled(false);
                 }
             });
-            if (currentStartTfTask == null) {
-                currentStartTfTask = this;
-                setCurrentWorker(this);
-                view.getProgressBar().setIndeterminate(false);
+            if (startTfTask == null) {
+                startTfTask = this;
+                setCurrentWorker(this, false);
                 setProgress(0);
 
                 // Restoring user files
@@ -241,7 +240,7 @@ public class Lawena {
                     status.info("Attempting to finish TF2 process");
                     cl.killTf2Process();
                     if (!cl.isRunningTF2()) {
-                        currentStartTfTask.cancel(true);
+                        startTfTask.cancel(true);
                     }
                 } else {
                     status.info("TF2 was not running, cancelling");
@@ -254,8 +253,8 @@ public class Lawena {
         @Override
         protected void done() {
             if (!isCancelled()) {
-                currentStartTfTask = null;
-                setCurrentWorker(null);
+                startTfTask = null;
+                setCurrentWorker(null, false);
                 view.getBtnStartTf().setEnabled(false);
                 files.restoreAll();
                 cl.setSystemDxLevel(oDxlevel);
@@ -337,11 +336,63 @@ public class Lawena {
         }
     }
 
+    public class SkyboxPreviewTask extends SwingWorker<Map<String, ImageIcon>, Void> {
+
+        private List<String> data;
+
+        public SkyboxPreviewTask(List<String> data) {
+            this.data = data;
+        }
+
+        @Override
+        protected Map<String, ImageIcon> doInBackground() throws Exception {
+            setCurrentWorker(this, false);
+            setProgress(0);
+            final Map<String, ImageIcon> map = new HashMap<>();
+            try {
+                int i = 1;
+                for (String skybox : data) {
+                    setProgress((int) (100 * ((double) i / data.size())));
+                    status.fine("Generating skybox preview: " + skybox);
+                    String img = "skybox/" + skybox + "up.png";
+                    if (!Files.exists(Paths.get(img))) {
+                        String filename = skybox + "up.vtf";
+                        cl.extractIfNeeded(settings.getTfPath(), "custom/skybox.vpk",
+                                Paths.get("skybox"), filename);
+                        cl.generatePreview(filename);
+                    }
+                    ImageIcon icon = createPreviewIcon(img);
+                    map.put(skybox, icon);
+                    i++;
+                }
+            } catch (Exception e) {
+                log.log(Level.INFO, "Problem while loading skyboxes", e);
+            }
+            return map;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                skyboxMap.putAll(get());
+                selectSkyboxFromSettings();
+                log.fine("Skybox loading and preview generation complete");
+            } catch (CancellationException | InterruptedException | ExecutionException e) {
+                log.info("Skybox preview generator task was cancelled");
+            }
+            status.info("");
+            if (!isCancelled()) {
+                setCurrentWorker(null, false);
+            }
+        }
+
+    }
+
     public class Tf2FolderChange implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (currentStartTfTask == null) {
+            if (startTfTask == null) {
                 Path newpath = getChosenTfPath();
                 if (newpath != null) {
                     settings.setTfPath(newpath);
@@ -357,8 +408,8 @@ public class Lawena {
     private static final Logger log = Logger.getLogger("lawena");
     private static final Logger status = Logger.getLogger("status");
 
-    private static StartTfTask currentStartTfTask = null;
-    private static ClearMoviesTask currentClearMoviesTask = null;
+    private static StartTfTask startTfTask = null;
+    private static ClearMoviesTask clearMoviesTask = null;
 
     private static ImageIcon createPreviewIcon(String imageName) {
         int size = 96;
@@ -667,7 +718,6 @@ public class Lawena {
     }
 
     private void saveSettings() {
-        log.fine("Saving settings");
         String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
         if (resolution.length == 2) {
             settings.setWidth(Integer.parseInt(resolution[0]));
@@ -705,6 +755,7 @@ public class Lawena {
         }
         settings.setCustomResources(selected);
         settings.save();
+        log.fine("Settings saved");
     }
 
     private void saveAndExit() {
@@ -714,7 +765,7 @@ public class Lawena {
     }
 
     private void configureSkyboxes(final JComboBox<String> combo) {
-        Vector<String> data = new Vector<>();
+        final Vector<String> data = new Vector<>();
         Path dir = Paths.get("skybox");
         if (Files.exists(dir)) {
             log.finer("Loading skyboxes from folder");
@@ -746,7 +797,7 @@ public class Lawena {
             }
         }
         skyboxMap = new HashMap<>(data.size());
-        getSkyboxLoader(new ArrayList<>(data)).execute();
+        new SkyboxPreviewTask(new ArrayList<>(data)).execute();
         data.add(0, (String) Key.Skybox.defValue());
         combo.setModel(new DefaultComboBoxModel<String>(data));
         combo.addActionListener(new ActionListener() {
@@ -759,55 +810,6 @@ public class Lawena {
             }
         });
 
-    }
-
-    private SwingWorker<Map<String, ImageIcon>, Void> getSkyboxLoader(final List<String> data) {
-        return new SwingWorker<Map<String, ImageIcon>, Void>() {
-
-            @Override
-            protected Map<String, ImageIcon> doInBackground() throws Exception {
-                setCurrentWorker(this);
-                view.getProgressBar().setIndeterminate(false);
-                setProgress(0);
-                final Map<String, ImageIcon> map = new HashMap<>();
-                try {
-                    int i = 1;
-                    for (String skybox : data) {
-                        setProgress((int) (100 * ((double) i / data.size())));
-                        status.fine("Generating skybox preview: " + skybox);
-                        String img = "skybox/" + skybox + "up.png";
-                        if (!Files.exists(Paths.get(img))) {
-                            String filename = skybox + "up.vtf";
-                            cl.extractIfNeeded(settings.getTfPath(), "custom/skybox.vpk",
-                                    Paths.get("skybox"), filename);
-                            cl.generatePreview(filename);
-                        }
-                        ImageIcon icon = createPreviewIcon(img);
-                        map.put(skybox, icon);
-                        i++;
-                    }
-                } catch (Exception e) {
-                    log.log(Level.INFO, "Problem while loading skyboxes", e);
-                }
-                return map;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    skyboxMap.putAll(get());
-                    selectSkyboxFromSettings();
-                    log.fine("Skybox loading and preview generation complete");
-                } catch (CancellationException | InterruptedException | ExecutionException e) {
-                    log.info("Skybox preview generator task was cancelled");
-                }
-                status.info("");
-                if (!isCancelled()) {
-                    setCurrentWorker(null);
-                }
-            }
-
-        };
     }
 
     private void selectSkyboxFromSettings() {
@@ -853,23 +855,30 @@ public class Lawena {
         return selected;
     }
 
-    private void setCurrentWorker(SwingWorker<?, ?> worker) {
-        if (worker != null) {
-            view.getProgressBar().setVisible(true);
-            view.getProgressBar().setIndeterminate(true);
-            view.getProgressBar().setValue(0);
-            worker.addPropertyChangeListener(new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if ("progress".equals(evt.getPropertyName())) {
-                        view.getProgressBar().setValue((Integer) evt.getNewValue());
-                    }
+    private void setCurrentWorker(final SwingWorker<?, ?> worker, final boolean indeterminate) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                if (worker != null) {
+                    view.getProgressBar().setVisible(true);
+                    view.getProgressBar().setIndeterminate(indeterminate);
+                    view.getProgressBar().setValue(0);
+                    worker.addPropertyChangeListener(new PropertyChangeListener() {
+                        public void propertyChange(PropertyChangeEvent evt) {
+                            if ("progress".equals(evt.getPropertyName())) {
+                                view.getProgressBar().setValue((Integer) evt.getNewValue());
+                            }
+                        }
+                    });
+                } else {
+                    view.getProgressBar().setVisible(false);
+                    view.getProgressBar().setIndeterminate(indeterminate);
+                    view.getProgressBar().setValue(0);
                 }
-            });
-        } else {
-            view.getProgressBar().setVisible(false);
-            view.getProgressBar().setIndeterminate(false);
-            view.getProgressBar().setValue(0);
-        }
+            }
+        });
+
     }
 
 }
