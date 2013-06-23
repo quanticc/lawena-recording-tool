@@ -71,7 +71,12 @@ public class DemoEditor {
             int returnVal = choosedemo.showOpenDialog(view);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 currentdemo = choosedemo.getSelectedFile().getName();
-                view.getTxtDemofile().setText(currentdemo);
+                if (Files.exists(choosedemo.getSelectedFile().toPath())) {
+                    view.getTxtDemofile().setText(currentdemo);
+                } else {
+                    JOptionPane.showMessageDialog(view, "The selected file does not exist.",
+                            "Browse", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         }
 
@@ -107,8 +112,8 @@ public class DemoEditor {
         private TickList generateTickList(int i) {
             TickList current;
 
-            current = new TickList((String) model.getValueAt(i, 0), Integer.parseInt((String) model
-                    .getValueAt(i, 1)), Integer.parseInt((String) model.getValueAt(i, 2)));
+            current = new TickList((String) model.getValueAt(i, 0), (int) model.getValueAt(i, 1),
+                    (int) model.getValueAt(i, 2));
 
             if (i + 1 == view.getTableTicks().getRowCount())
                 return current;
@@ -117,7 +122,6 @@ public class DemoEditor {
 
             return current;
         }
-
     }
 
     public class ClearVdmFilesTask extends SwingWorker<Void, Path> {

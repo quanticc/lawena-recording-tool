@@ -145,7 +145,7 @@ public class DemoEditorView extends JPanel {
 
         scrollPane_1 = new JScrollPane();
         GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
-        gbc_scrollPane_1.insets = new Insets(0, 5, 0, 0);
+        gbc_scrollPane_1.insets = new Insets(0, 5, 5, 5);
         gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
         gbc_scrollPane_1.gridwidth = 7;
         gbc_scrollPane_1.gridx = 0;
