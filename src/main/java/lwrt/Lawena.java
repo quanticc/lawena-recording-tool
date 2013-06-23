@@ -1,6 +1,7 @@
 
 package lwrt;
 
+import ui.AboutDialog;
 import ui.LawenaView;
 import ui.TooltipRenderer;
 import util.ListFilesVisitor;
@@ -8,6 +9,7 @@ import util.StartLogger;
 import vdm.DemoEditor;
 
 import java.awt.Color;
+import java.awt.Dialog.ModalityType;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,6 +47,7 @@ import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -428,6 +431,7 @@ public class Lawena {
     private DemoEditor vdm;
     private CommandLine cl;
     private CustomPathList customPaths;
+    private AboutDialog dialog;
 
     private HashMap<String, ImageIcon> skyboxMap;
     private JFileChooser choosemovie;
@@ -527,6 +531,18 @@ public class Lawena {
                 saveAndExit();
             }
 
+        });
+        view.getMntmAbout().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (dialog == null) {
+                    dialog = new AboutDialog(version, build);
+                    dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                    dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+                }
+                dialog.setVisible(true);
+            }
         });
 
         JTable table = view.getTableCustomContent();

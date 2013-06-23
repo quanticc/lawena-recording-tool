@@ -4,6 +4,7 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -35,10 +36,64 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LawenaView extends JFrame {
+
+    private static final Logger log = Logger.getLogger("lawena");
+
+    private class MntmPatchNotesActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            try {
+                Desktop.getDesktop().browse(
+                        new URI("https://github.com/iabarca/lawena-recording-tool/commits/master"));
+            } catch (IOException | URISyntaxException e1) {
+                log.log(Level.INFO, "Could not open URL", e1);
+            }
+        }
+    }
+
+    private class MntmProjectPageActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            try {
+                Desktop.getDesktop().browse(
+                        new URI("http://code.google.com/p/lawenarecordingtool/"));
+            } catch (IOException | URISyntaxException e1) {
+                log.log(Level.INFO, "Could not open URL", e1);
+            }
+        }
+    }
+
+    private class MntmVdmTutorialActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            try {
+                Desktop.getDesktop().browse(
+                        new URI("http://code.google.com/p/lawenarecordingtool/wiki/VDMtutorial"));
+            } catch (IOException | URISyntaxException e1) {
+                log.log(Level.INFO, "Could not open URL", e1);
+            }
+        }
+    }
+
+    private class MntmInstructionsActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            try {
+                Desktop.getDesktop().browse(
+                        new URI("http://code.google.com/p/lawenarecordingtool/wiki/Instructions"));
+            } catch (IOException | URISyntaxException e1) {
+                log.log(Level.INFO, "Could not open URL", e1);
+            }
+        }
+    }
 
     /**
      * 
@@ -90,6 +145,13 @@ public class LawenaView extends JFrame {
     private JMenuItem mntmRevertToDefault;
     private JSeparator separator_1;
     private JMenuItem mntmExit;
+    private JMenu mnHelp;
+    private JMenuItem mntmInstructions;
+    private JMenuItem mntmVdmTutorial;
+    private JMenuItem mntmProjectPage;
+    private JMenuItem mntmPatchNotes;
+    private JSeparator separator_2;
+    private JMenuItem mntmAbout;
 
     /**
      * Create the frame.
@@ -121,6 +183,31 @@ public class LawenaView extends JFrame {
         mntmExit = new JMenuItem("Exit");
         mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_MASK));
         mnFile.add(mntmExit);
+
+        mnHelp = new JMenu(" Help ");
+        menuBar.add(mnHelp);
+
+        mntmInstructions = new JMenuItem("Instructions and FAQ");
+        mntmInstructions.addActionListener(new MntmInstructionsActionListener());
+        mnHelp.add(mntmInstructions);
+
+        mntmVdmTutorial = new JMenuItem("VDM Tutorial");
+        mntmVdmTutorial.addActionListener(new MntmVdmTutorialActionListener());
+        mnHelp.add(mntmVdmTutorial);
+
+        mntmProjectPage = new JMenuItem("Project Page");
+        mntmProjectPage.addActionListener(new MntmProjectPageActionListener());
+        mnHelp.add(mntmProjectPage);
+
+        mntmPatchNotes = new JMenuItem("Patch Notes");
+        mntmPatchNotes.addActionListener(new MntmPatchNotesActionListener());
+        mnHelp.add(mntmPatchNotes);
+
+        separator_2 = new JSeparator();
+        mnHelp.add(separator_2);
+
+        mntmAbout = new JMenuItem("About");
+        mnHelp.add(mntmAbout);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(5, 5));
@@ -632,5 +719,9 @@ public class LawenaView extends JFrame {
 
     public JMenuItem getMntmExit() {
         return mntmExit;
+    }
+
+    public JMenuItem getMntmAbout() {
+        return mntmAbout;
     }
 }
