@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -27,6 +30,7 @@ public class SettingsManager {
         DxLevel("98", "80", "81", "90", "95", "98"),
         Hud("medic", "killnotices", "medic", "full", "custom"),
         Skybox("Default"),
+        CustomResources(""),
         ViewmodelSwitch("on", "on", "off", "default"),
         ViewmodelFov(70, 55, 90),
         MotionBlur(true),
@@ -98,6 +102,12 @@ public class SettingsManager {
             // do nothing, will load defaults
         } catch (IOException e) {
             log.log(Level.INFO, "Problem while loading settings, reverting to defaults", e);
+        }
+    }
+
+    public void loadDefaults() {
+        for (Key key : Key.values()) {
+            properties.setProperty(key.toString(), key.value + "");
         }
     }
 
@@ -311,6 +321,26 @@ public class SettingsManager {
         setBoolean(Key.Condebug, value);
     }
 
+    public void setCustomResources(List<String> values) {
+        Key key = Key.CustomResources;
+        setString(key, listToString(values, '|'));
+    }
+
+    private String listToString(List<String> list, char separator) {
+        Iterator<String> it = list.iterator();
+        if (!it.hasNext())
+            return "";
+
+        StringBuilder sb = new StringBuilder();
+        for (;;) {
+            String e = it.next();
+            sb.append(e);
+            if (!it.hasNext())
+                return sb.toString();
+            sb.append(separator);
+        }
+    }
+
     public int getHeight() {
         return getInt(Key.Height);
     }
@@ -383,5 +413,16 @@ public class SettingsManager {
 
     public boolean getCondebug() {
         return getBoolean(Key.Condebug);
+    }
+
+    public List<String> getCustomResources() {
+        Key key = Key.CustomResources;
+        String value = getString(key);
+        List<String> list = new ArrayList<>();
+        if (!value.isEmpty()) {
+            String[] resources = getString(key).split("\\|");
+            Collections.addAll(list, resources);
+        }
+        return list;
     }
 }

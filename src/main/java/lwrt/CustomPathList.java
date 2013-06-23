@@ -124,7 +124,7 @@ public class CustomPathList extends AbstractTableModel {
         }
     }
 
-    private void addPath(CustomPath e) {
+    private void insertRow(CustomPath e) {
         int row = getRowCount();
         list.add(e);
         fireTableRowsInserted(row, row);
@@ -142,30 +142,32 @@ public class CustomPathList extends AbstractTableModel {
         }
     }
 
-    public void addAllFromPath(Path dir) {
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, filter)) {
-            for (Path path : stream) {
-                CustomPath cp = defaultPaths.get(path);
-                if (cp == null) {
-                    cp = new CustomPath(path);
+    public void addPaths(Path... dirs) {
+        for (Path dir : dirs) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, filter)) {
+                for (Path path : stream) {
+                    CustomPath cp = defaultPaths.get(path);
+                    if (cp == null) {
+                        cp = new CustomPath(path);
+                    }
+                    insertRow(cp);
                 }
-                addPath(cp);
+            } catch (IOException e) {
+                log.log(Level.FINE, "Problem while loading custom paths", e);
             }
-        } catch (IOException e) {
-            log.log(Level.FINE, "Problem while loading custom paths", e);
         }
     }
 
+    // for each "required" custom path, extract it from jar and add it
+    // in case the user deleted the custom vpks/folders included with lawena
     public void validateRequired() {
         for (CustomPath cp : defaultPaths.values()) {
-            if (cp.getContents().contains(PathContents.REQUIRED)) {
-                if (!list.contains(cp)) {
-                    Path filename = cp.getPath().getFileName();
-                    Path destdir = Paths.get("custom");
-                    unpackFileFromJar(Paths.get("lwrtvpks.jar"), filename.toString(), destdir);
-                    if (Files.exists(destdir.resolve(filename))) {
-                        addPath(cp);
-                    }
+            if (cp.getContents().contains(PathContents.REQUIRED) && !list.contains(cp)) {
+                Path filename = cp.getPath().getFileName();
+                Path destdir = Paths.get("custom");
+                unpackFileFromJar(Paths.get("lwrtvpks.jar"), filename.toString(), destdir);
+                if (Files.exists(destdir.resolve(filename))) {
+                    insertRow(cp);
                 }
             }
         }

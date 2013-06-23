@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,8 +30,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -149,47 +152,6 @@ public class Lawena {
 
     }
 
-    public class SaveSettings implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            log.fine("Saving settings");
-            setSettings();
-            settings.save();
-            try {
-                settings.saveToCfg();
-            } catch (IOException ex) {
-                log.warning("A problem occurred while saving settings: " + ex);
-            }
-        }
-
-        public void setSettings() {
-            String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
-            if (resolution.length == 2) {
-                settings.setWidth(Integer.parseInt(resolution[0]));
-                settings.setHeight(Integer.parseInt(resolution[1]));
-            } else {
-                throw new IllegalArgumentException("Bad resolution format");
-            }
-            String framerate = (String) view.getCmbFramerate().getSelectedItem();
-            settings.setFramerate(Integer.parseInt(framerate));
-            settings.setHud(Key.Hud.getAllowedValues().get(view.getCmbHud().getSelectedIndex()));
-            settings.setViewmodelSwitch(Key.ViewmodelSwitch.getAllowedValues().get(
-                    view.getCmbViewmodel().getSelectedIndex()));
-            settings.setViewmodelFov((int) view.getSpinnerViewmodelFov().getValue());
-            settings.setDxlevel(Key.DxLevel.getAllowedValues().get(
-                    view.getCmbQuality().getSelectedIndex()));
-            settings.setMotionBlur(view.getEnableMotionBlur().isSelected());
-            settings.setCombattext(!view.getDisableCombatText().isSelected());
-            settings.setCrosshair(!view.getDisableCrosshair().isSelected());
-            settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
-            settings.setHitsounds(!view.getDisableHitSounds().isSelected());
-            settings.setVoice(!view.getDisableVoiceChat().isSelected());
-            settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
-            settings.setCondebug(view.getChckbxUsecondebug().isSelected());
-        }
-    }
-
     public class StartTfTask extends SwingWorker<Void, Void> {
 
         @Override
@@ -215,13 +177,13 @@ public class Lawena {
                 // Saving ui settings to cfg files
                 status.info("Saving settings and generating cfg files");
                 try {
-                    new SaveSettings().setSettings();
+                    saveSettings();
                     settings.saveToCfg();
                     movies.createMovienameCfgs();
                     movies.movieOffset();
                 } catch (IOException e) {
-                    log.log(Level.INFO, "A problem occurred while saving settings", e);
-                    status.info("Problem while saving to settings file, check log for details");
+                    log.log(Level.INFO, "Problem while saving settings to file", e);
+                    status.info("Launch aborted: Problem while saving settings to file");
                     return null;
                 }
                 setProgress(50);
@@ -260,7 +222,7 @@ public class Lawena {
                 if (timeout >= maxtimeout) {
                     int s = timeout * (millis / 1000);
                     log.info("TF2 launch timed out after " + s + " seconds");
-                    status.info("TF2 launch timed out, aborting");
+                    status.info("Launch aborted: TF2 did not start after " + s + " seconds");
                     return null;
                 }
 
@@ -302,6 +264,67 @@ public class Lawena {
 
     }
 
+    public class PathScanTask extends SwingWorker<Void, Void> {
+        @Override
+        protected Void doInBackground() throws Exception {
+            try {
+                scan();
+            } catch (Exception e) {
+                log.log(Level.INFO, "Problem while scanning custom paths", e);
+            }
+            return null;
+        }
+
+        private void scan() {
+            customPaths.clear();
+            customPaths.addPaths(Paths.get("custom"), settings.getTfPath().resolve("custom"));
+            customPaths.validateRequired();
+            int i = 0;
+            for (CustomPath cp : customPaths.getList()) {
+                EnumSet<PathContents> contents = cp.getContents();
+                Path path = cp.getPath();
+                if (!contents.contains(PathContents.READONLY)) {
+                    List<String> files = getContentsList(path);
+                    for (String file : files) {
+                        if (file.startsWith("resource/") || file.startsWith("scripts/")) {
+                            contents.add(PathContents.HUD);
+                        } else if (file.startsWith("cfg/") && file.endsWith(".cfg")) {
+                            contents.add(PathContents.CONFIG);
+                        } else if (file.startsWith("materials/skybox/")) {
+                            contents.add(PathContents.SKYBOX);
+                        } else {
+                            continue;
+                        }
+                        customPaths.fireTableRowsUpdated(i, i);
+                    }
+                }
+                i++;
+            }
+        }
+
+        private List<String> getContentsList(Path path) {
+            if (path.toString().endsWith(".vpk")) {
+                return cl.getVpkContents(settings.getTfPath(), path);
+            } else if (Files.isDirectory(path)) {
+                ListFilesVisitor visitor = new ListFilesVisitor(path);
+                try {
+                    Set<FileVisitOption> set = new HashSet<>();
+                    set.add(FileVisitOption.FOLLOW_LINKS);
+                    Files.walkFileTree(path, set, 3, visitor);
+                    return visitor.getFiles();
+                } catch (IllegalArgumentException | IOException e) {
+                    log.log(Level.INFO, "Could not walk through this directory: " + path, e);
+                }
+            }
+            return Collections.emptyList();
+        }
+
+        @Override
+        protected void done() {
+            loadResourceSettings();
+        }
+    }
+
     public class Tf2FolderChange implements ActionListener {
 
         @Override
@@ -310,7 +333,7 @@ public class Lawena {
                 Path newpath = getChosenTfPath();
                 if (newpath != null) {
                     settings.setTfPath(newpath);
-                    scanCustomPaths();
+                    new PathScanTask().execute();
                 }
             } else {
                 JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
@@ -411,7 +434,7 @@ public class Lawena {
         if (impl != null) {
             version = impl;
         }
-        build = getManifestString("Implementation-Build", "custom-" + now("yyyyMMddHHmmss"));
+        build = getManifestString("Implementation-Build", now("yyyyMMddHHmmss"));
         String osname = System.getProperty("os.name");
         if (osname.contains("Windows")) {
             cl = new CLWindows();
@@ -462,13 +485,14 @@ public class Lawena {
     }
 
     private String getManifestString(String key, String defaultValue) {
-        try {
-            return new JarFile(new File(this.getClass().getProtectionDomain().getCodeSource()
-                    .getLocation().toURI()))
-                    .getManifest().getMainAttributes().getValue(key);
+        try (JarFile jar = new JarFile(new File(this.getClass().getProtectionDomain()
+                .getCodeSource().getLocation().toURI()))) {
+            String value = jar.getManifest().getMainAttributes()
+                    .getValue(key);
+            return (value == null ? "bat." + defaultValue : value);
         } catch (IOException | URISyntaxException e) {
         }
-        return defaultValue;
+        return "custom." + defaultValue;
     }
 
     public void start() {
@@ -491,32 +515,10 @@ public class Lawena {
 
             @Override
             public void windowClosing(WindowEvent e) {
-                log.fine("Closing");
-                files.restoreAll();
-                System.exit(0);
+                saveAndExit();
             }
 
         });
-
-        registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
-                view.getLblResolution());
-        registerValidation(view.getCmbFramerate(), "[1-9][0-9]*",
-                view.getLblFrameRate());
-        selectComboItem(view.getCmbHud(), settings.getHud(),
-                Key.Hud.getAllowedValues());
-        selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
-                Key.DxLevel.getAllowedValues());
-        selectComboItem(view.getCmbViewmodel(), settings.getViewmodelSwitch(),
-                Key.ViewmodelSwitch.getAllowedValues());
-        selectComboItem(view.getCmbSkybox(), settings.getSkybox(), null);
-
-        view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
-        view.getCmbFramerate().setSelectedItem(settings.getFramerate() + "");
-        try {
-            view.getSpinnerViewmodelFov().setValue(settings.getViewmodelFov());
-        } catch (IllegalArgumentException e) {
-        }
-        configureSkyboxes(view.getCmbSkybox());
 
         JTable table = view.getTableCustomContent();
         table.setModel(customPaths);
@@ -531,18 +533,52 @@ public class Lawena {
             }
         };
         sorter.setRowFilter(filter);
+        new PathScanTask().execute();
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    configureSkyboxes(view.getCmbSkybox());
+                } catch (Exception e) {
+                    log.log(Level.INFO, "Problem while configuring skyboxes", e);
+                }
+                return null;
+            }
 
-        view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
-        view.getDisableCombatText().setSelected(!settings.getCombattext());
-        view.getDisableCrosshair().setSelected(!settings.getCrosshair());
-        view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
-        view.getDisableHitSounds().setSelected(!settings.getHitsounds());
-        view.getDisableVoiceChat().setSelected(!settings.getVoice());
-        view.getChckbxUsecondebug().setSelected(settings.getCondebug());
+            @Override
+            protected void done() {
+                selectSkyboxFromSettings();
+            };
+        }.execute();
+
+        loadSettings();
 
         view.getMntmChangeTfDirectory().addActionListener(new Tf2FolderChange());
         view.getMntmChangeMovieDirectory().addActionListener(new MovieFolderChange());
-        view.getBtnSaveSettings().addActionListener(new SaveSettings());
+        view.getMntmRevertToDefault().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                settings.loadDefaults();
+                loadSettings();
+                loadResourceSettings();
+                saveSettings();
+            }
+        });
+        view.getMntmExit().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveAndExit();
+            }
+        });
+        view.getBtnSaveSettings().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveSettings();
+            }
+        });
         view.getBtnStartTf().addActionListener(new ActionListener() {
 
             @Override
@@ -558,20 +594,98 @@ public class Lawena {
             }
         });
 
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                try {
-                    scanCustomPaths();
-                } catch (Exception e) {
-                    log.log(Level.INFO, "Problem while scanning custom paths", e);
-                }
-                return null;
-            }
-        }.execute();
-
         view.getTabbedPane().addTab("VDM", null, vdm.start());
         view.setVisible(true);
+    }
+
+    private void loadSettings() {
+        registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
+                view.getLblResolution());
+        registerValidation(view.getCmbFramerate(), "[1-9][0-9]*",
+                view.getLblFrameRate());
+        selectComboItem(view.getCmbHud(), settings.getHud(),
+                Key.Hud.getAllowedValues());
+        selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
+                Key.DxLevel.getAllowedValues());
+        selectComboItem(view.getCmbViewmodel(), settings.getViewmodelSwitch(),
+                Key.ViewmodelSwitch.getAllowedValues());
+        selectSkyboxFromSettings();
+        view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
+        view.getCmbFramerate().setSelectedItem(settings.getFramerate() + "");
+        try {
+            view.getSpinnerViewmodelFov().setValue(settings.getViewmodelFov());
+        } catch (IllegalArgumentException e) {
+        }
+        view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
+        view.getDisableCombatText().setSelected(!settings.getCombattext());
+        view.getDisableCrosshair().setSelected(!settings.getCrosshair());
+        view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
+        view.getDisableHitSounds().setSelected(!settings.getHitsounds());
+        view.getDisableVoiceChat().setSelected(!settings.getVoice());
+        view.getChckbxUsecondebug().setSelected(settings.getCondebug());
+    }
+
+    private void loadResourceSettings() {
+        List<String> selected = settings.getCustomResources();
+        Path tfpath = settings.getTfPath();
+        int i = 0;
+        for (CustomPath cp : customPaths.getList()) {
+            Path path = cp.getPath();
+            if (!cp.getContents().contains(PathContents.READONLY) && !selected.isEmpty()) {
+                String key = (path.startsWith(tfpath) ? "tf*" : "");
+                key += path.getFileName().toString();
+                cp.setSelected(selected.contains(key));
+                customPaths.fireTableRowsUpdated(i, i);
+            }
+            i++;
+        }
+    }
+
+    private void saveSettings() {
+        log.fine("Saving settings");
+        String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
+        if (resolution.length == 2) {
+            settings.setWidth(Integer.parseInt(resolution[0]));
+            settings.setHeight(Integer.parseInt(resolution[1]));
+        } else {
+            log.fine("Bad resolution format, reverting to previously saved");
+            view.getCmbResolution().setSelectedItem(
+                    settings.getWidth() + "x" + settings.getHeight());
+        }
+        String framerate = (String) view.getCmbFramerate().getSelectedItem();
+        settings.setFramerate(Integer.parseInt(framerate));
+        settings.setHud(Key.Hud.getAllowedValues().get(view.getCmbHud().getSelectedIndex()));
+        settings.setViewmodelSwitch(Key.ViewmodelSwitch.getAllowedValues().get(
+                view.getCmbViewmodel().getSelectedIndex()));
+        settings.setViewmodelFov((int) view.getSpinnerViewmodelFov().getValue());
+        settings.setDxlevel(Key.DxLevel.getAllowedValues().get(
+                view.getCmbQuality().getSelectedIndex()));
+        settings.setMotionBlur(view.getEnableMotionBlur().isSelected());
+        settings.setCombattext(!view.getDisableCombatText().isSelected());
+        settings.setCrosshair(!view.getDisableCrosshair().isSelected());
+        settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
+        settings.setHitsounds(!view.getDisableHitSounds().isSelected());
+        settings.setVoice(!view.getDisableVoiceChat().isSelected());
+        settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
+        settings.setCondebug(view.getChckbxUsecondebug().isSelected());
+        Path tfpath = settings.getTfPath();
+        List<String> selected = new ArrayList<>();
+        for (CustomPath cp : customPaths.getList()) {
+            Path path = cp.getPath();
+            if (!cp.getContents().contains(PathContents.READONLY) && cp.isSelected()) {
+                String key = (path.startsWith(tfpath) ? "tf*" : "");
+                key += path.getFileName().toString();
+                selected.add(key);
+            }
+        }
+        settings.setCustomResources(selected);
+        settings.save();
+    }
+
+    private void saveAndExit() {
+        saveSettings();
+        files.restoreAll();
+        System.exit(0);
     }
 
     private void configureSkyboxes(final JComboBox<String> combo) {
@@ -657,6 +771,7 @@ public class Lawena {
             protected void done() {
                 try {
                     skyboxMap.putAll(get());
+                    selectSkyboxFromSettings();
                     log.fine("Skybox loading and preview generation complete");
                 } catch (CancellationException | InterruptedException | ExecutionException e) {
                     log.info("Skybox preview generator task was cancelled");
@@ -670,43 +785,8 @@ public class Lawena {
         };
     }
 
-    private void scanCustomPaths() {
-        customPaths.clear();
-        customPaths.addAllFromPath(Paths.get("custom"));
-        customPaths.addAllFromPath(settings.getTfPath().resolve("custom"));
-        customPaths.validateRequired();
-        for (CustomPath cp : customPaths.getList()) {
-            EnumSet<PathContents> contents = cp.getContents();
-            Path path = cp.getPath();
-            if (!contents.contains(PathContents.READONLY)) {
-                List<String> files = getContentsList(path);
-                for (String file : files) {
-                    if (file.startsWith("resource/") || file.startsWith("scripts/")) {
-                        contents.add(PathContents.HUD);
-                    } else if (file.startsWith("cfg/") && file.endsWith(".cfg")) {
-                        contents.add(PathContents.CONFIG);
-                    } else if (file.startsWith("materials/skybox/")) {
-                        contents.add(PathContents.SKYBOX);
-                    }
-                }
-            }
-        }
-        customPaths.fireTableRowsUpdated(0, customPaths.getRowCount() - 1);
-    }
-
-    private List<String> getContentsList(Path path) {
-        if (path.toString().endsWith(".vpk")) {
-            return cl.getVpkContents(settings.getTfPath(), path);
-        } else if (Files.isDirectory(path)) {
-            ListFilesVisitor visitor = new ListFilesVisitor(path);
-            try {
-                Files.walkFileTree(path, visitor);
-                return visitor.getFiles();
-            } catch (IllegalArgumentException | IOException e) {
-                log.log(Level.INFO, "Could not walk through this directory: " + path, e);
-            }
-        }
-        return Collections.emptyList();
+    private void selectSkyboxFromSettings() {
+        view.getCmbSkybox().setSelectedItem(settings.getSkybox());
     }
 
     private Path getChosenMoviePath() {
@@ -766,4 +846,5 @@ public class Lawena {
             view.getProgressBar().setValue(0);
         }
     }
+
 }

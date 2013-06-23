@@ -33,6 +33,10 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.JSeparator;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
 
 public class LawenaView extends JFrame {
 
@@ -82,6 +86,10 @@ public class LawenaView extends JFrame {
     private JProgressBar progressBar;
     private JPanel panelLogBottom;
     private JCheckBox chckbxUsecondebug;
+    private JSeparator separator;
+    private JMenuItem mntmRevertToDefault;
+    private JSeparator separator_1;
+    private JMenuItem mntmExit;
 
     /**
      * Create the frame.
@@ -95,11 +103,24 @@ public class LawenaView extends JFrame {
         mnFile = new JMenu(" File ");
         menuBar.add(mnFile);
 
-        mntmChangeTfDirectory = new JMenuItem("Change TF2 directory...");
+        mntmChangeTfDirectory = new JMenuItem("Change TF2 Folder...");
         mnFile.add(mntmChangeTfDirectory);
 
-        mntmChangeMovieDirectory = new JMenuItem("Change Movie directory...");
+        mntmChangeMovieDirectory = new JMenuItem("Change Movie Folder...");
         mnFile.add(mntmChangeMovieDirectory);
+
+        separator = new JSeparator();
+        mnFile.add(separator);
+
+        mntmRevertToDefault = new JMenuItem("Revert to Default Settings");
+        mnFile.add(mntmRevertToDefault);
+
+        separator_1 = new JSeparator();
+        mnFile.add(separator_1);
+
+        mntmExit = new JMenuItem("Exit");
+        mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_MASK));
+        mnFile.add(mntmExit);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(5, 5));
@@ -603,5 +624,13 @@ public class LawenaView extends JFrame {
 
     public JCheckBox getChckbxUsecondebug() {
         return chckbxUsecondebug;
+    }
+
+    public JMenuItem getMntmRevertToDefault() {
+        return mntmRevertToDefault;
+    }
+
+    public JMenuItem getMntmExit() {
+        return mntmExit;
     }
 }
