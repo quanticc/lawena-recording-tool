@@ -4,8 +4,11 @@ package vdm;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class VDMGenerator {
+
+    private static final Logger log = Logger.getLogger("lawena");
 
     private TickList ticklist;
     private String tfdir;
@@ -97,11 +100,11 @@ public class VDMGenerator {
 
             vdmcontent += "}\n";
 
-            vdm = new PrintWriter(new FileWriter(tfdir + "/"
-                    + demolist[j].substring(0, demolist[j].indexOf(".dem")) + ".vdm"));
-
+            String filename = tfdir + "/" + demolist[j].substring(0, demolist[j].indexOf(".dem"))
+                    + ".vdm";
+            vdm = new PrintWriter(new FileWriter(filename));
             vdm.print(vdmcontent);
-
+            log.fine("VDM file written to " + filename);
             vdm.close();
         }
     }
