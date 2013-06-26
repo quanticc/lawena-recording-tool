@@ -30,7 +30,7 @@ public class SettingsManager {
         DxLevel("98", "80", "81", "90", "95", "98"),
         Hud("medic", "killnotices", "medic", "full", "custom"),
         Skybox("Default"),
-        CustomResources(""),
+        CustomResources("no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"),
         ViewmodelSwitch("on", "on", "off", "default"),
         ViewmodelFov(70, 55, 90),
         MotionBlur(true),

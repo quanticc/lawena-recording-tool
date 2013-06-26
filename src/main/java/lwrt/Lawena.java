@@ -4,6 +4,7 @@ package lwrt;
 import ui.AboutDialog;
 import ui.LawenaView;
 import ui.TooltipRenderer;
+import util.LawenaException;
 import util.ListFilesVisitor;
 import util.StartLogger;
 import vdm.DemoEditor;
@@ -155,10 +156,10 @@ public class Lawena {
 
     }
 
-    public class StartTfTask extends SwingWorker<Void, Void> {
+    public class StartTfTask extends SwingWorker<Boolean, Void> {
 
         @Override
-        protected Void doInBackground() throws Exception {
+        protected Boolean doInBackground() throws Exception {
             SwingUtilities.invokeAndWait(new Runnable() {
 
                 @Override
@@ -184,15 +185,20 @@ public class Lawena {
                     movies.createMovienameCfgs();
                     movies.movieOffset();
                 } catch (IOException e) {
-                    log.log(Level.INFO, "Problem while saving settings to file", e);
-                    status.info("Launch aborted: Problem while saving settings to file");
-                    return null;
+                    log.log(Level.WARNING, "Problem while saving settings to file", e);
+                    status.info("Failed to save lawena settings to file");
+                    return false;
                 }
                 setProgress(50);
 
                 // Backing up user files and copying lawena files
-                status.info("Copying lawena files to cfg and custom");
-                files.replaceAll();
+                status.info("Copying lawena files to cfg and custom...");
+                try {
+                    files.replaceAll();
+                } catch (LawenaException e) {
+                    status.info(e.getMessage());
+                    return false;
+                }
                 setProgress(75);
 
                 // Launching process
@@ -224,20 +230,26 @@ public class Lawena {
                 if (timeout >= maxtimeout) {
                     int s = timeout * (millis / 1000);
                     log.info("TF2 launch timed out after " + s + " seconds");
-                    status.info("Launch aborted: TF2 did not start after " + s + " seconds");
-                    return null;
+                    status.info("TF2 did not start after " + s + " seconds");
+                    return false;
                 }
 
                 log.fine("TF2 has started running");
                 status.info("Waiting for TF2 to finish running...");
-                view.getProgressBar().setIndeterminate(true);
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        view.getProgressBar().setIndeterminate(true);
+                    }
+                });
                 while (cl.isRunningTF2()) {
                     Thread.sleep(millis);
                 }
 
             } else {
                 if (cl.isRunningTF2()) {
-                    status.info("Attempting to finish TF2 process");
+                    status.info("Attempting to finish TF2 process...");
                     cl.killTf2Process();
                     if (!cl.isRunningTF2()) {
                         startTfTask.cancel(true);
@@ -247,7 +259,7 @@ public class Lawena {
                 }
             }
 
-            return null;
+            return true;
         }
 
         @Override
@@ -256,11 +268,14 @@ public class Lawena {
                 startTfTask = null;
                 setCurrentWorker(null, false);
                 view.getBtnStartTf().setEnabled(false);
-                files.restoreAll();
+                if (!files.restoreAll()) {
+                    status.info("Your files will be restored once you close lawena or run TF2 again");
+                } else {
+                    status.info("TF2 has finished running. All files restored");
+                }
                 cl.setSystemDxLevel(oDxlevel);
                 view.getBtnStartTf().setText("Start Team Fortress 2");
                 view.getBtnStartTf().setEnabled(true);
-                status.info("");
             }
         }
 

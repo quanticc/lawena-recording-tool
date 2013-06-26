@@ -60,7 +60,6 @@ public class CustomPathList extends AbstractTableModel {
                 "Enable enhanced particles"));
         for (CustomPath path : list) {
             path.getContents().add(PathContents.REQUIRED);
-            path.setSelected(true);
             defaultPaths.put(path.getPath(), path);
         }
         ignoredPaths.add(Paths.get("custom/skybox.vpk"));

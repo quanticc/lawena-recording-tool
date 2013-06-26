@@ -3,6 +3,7 @@ package lwrt;
 
 import util.CopyDirVisitor;
 import util.DeleteDirVisitor;
+import util.LawenaException;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -15,8 +16,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.swing.JOptionPane;
 
 import lwrt.SettingsManager.Key;
 
@@ -61,7 +60,7 @@ public class FileManager {
         this.customPathList = customPathList;
     }
 
-    public void replaceAll() {
+    public void replaceAll() throws LawenaException {
         Path tfpath = cfg.getTfPath();
         Path customBackupPath = tfpath.resolve("lwrtcustom");
         Path customPath = tfpath.resolve("custom");
@@ -77,8 +76,8 @@ public class FileManager {
                 Files.createDirectories(configPath);
                 copy(Paths.get("cfg"), configPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace cfg files", e);
-                return;
+                log.log(Level.WARNING, "Could not replace cfg files", e);
+                throw new LawenaException("Failed to replace cfg files", e);
             }
         }
         if (!Files.exists(customBackupPath)) {
@@ -87,8 +86,8 @@ public class FileManager {
                 customPath.toFile().setWritable(true);
                 Files.move(customPath, customBackupPath);
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not backup custom folder", e);
-                return;
+                log.log(Level.WARNING, "Could not backup custom folder", e);
+                throw new LawenaException("Failed to replace custom files", e);
             }
             try {
                 log.fine("Copying selected hud files");
@@ -103,6 +102,7 @@ public class FileManager {
                 }
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not replace hud files", e);
+                throw new LawenaException("Failed to replace hud files", e);
             }
             Path skyboxPath = tfpath.resolve("custom/lawena/materials/skybox");
             try {
@@ -113,13 +113,14 @@ public class FileManager {
                     replaceSkybox();
                 }
             } catch (IOException e) {
-                log.log(Level.INFO, "Could not replace skybox files", e);
+                log.log(Level.WARNING, "Could not replace skybox files", e);
                 try {
                     delete(skyboxPath);
                     log.fine("Skybox folder deleted, no skybox files were replaced");
                 } catch (IOException e1) {
-                    log.log(Level.INFO, "Could not delete lawena skybox folder", e);
+                    log.log(Level.WARNING, "Could not delete lawena skybox folder", e1);
                 }
+                throw new LawenaException("Failed to replace skybox files", e);
             }
             // Copy selected custom files
             if (customPathList != null) {
@@ -132,7 +133,7 @@ public class FileManager {
                         } else if (cp.getPath().startsWith(localCustomPath)) {
                             source = localCustomPath.resolve(cp.getPath().getFileName());
                         } else {
-                            log.info("Not loading custom file with wrong path: "
+                            log.info("Skipping custom file with wrong path: "
                                     + cp.getPath());
                             continue;
                         }
@@ -217,15 +218,16 @@ public class FileManager {
         }
     }
 
-    public void restoreAll() {
+    public boolean restoreAll() {
         Path tfpath = cfg.getTfPath();
         Path customBackupPath = tfpath.resolve("lwrtcustom");
         Path customPath = tfpath.resolve("custom");
         Path configBackupPath = tfpath.resolve("lwrtcfg");
         Path configPath = tfpath.resolve("cfg");
+        boolean restoreComplete = true;
 
         if (Files.exists(configBackupPath)) {
-            log.fine("Restoring all user config files");
+            log.fine("Restoring all your config files");
             try {
                 delete(configPath);
             } catch (NoSuchFileException e) {
@@ -236,15 +238,15 @@ public class FileManager {
                 if (isEmpty(configPath)) {
                     Files.move(configBackupPath, configPath, StandardCopyOption.REPLACE_EXISTING);
                 } else {
-                    showRestoreMessage();
+                    restoreComplete = false;
                 }
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not restore cfg files", e);
-                showRestoreMessage();
+                restoreComplete = false;
             }
         }
         if (Files.exists(customBackupPath)) {
-            log.fine("Restoring all user custom files");
+            log.fine("Restoring all your custom files");
             try {
                 delete(customPath);
             } catch (NoSuchFileException e) {
@@ -255,22 +257,17 @@ public class FileManager {
                 if (isEmpty(customPath)) {
                     Files.move(customBackupPath, customPath, StandardCopyOption.REPLACE_EXISTING);
                 } else {
-                    showRestoreMessage();
+                    restoreComplete = false;
                 }
             } catch (IOException e) {
                 log.log(Level.INFO, "Could not restore custom files", e);
-                showRestoreMessage();
+                restoreComplete = false;
             }
         }
-    }
-
-    private void showRestoreMessage() {
-        JOptionPane
-                .showMessageDialog(
-                        null,
-                        "Some lawena files might still exist inside 'cfg' or 'custom'.\n" +
-                                "Your files will be restored once you close lawena.",
-                        "Restoring user files",
-                        JOptionPane.INFORMATION_MESSAGE);
+        if (!restoreComplete) {
+            log.info("Some lawena files might still exist inside 'cfg' or 'custom'");
+            log.info("Your files will be restored once you close lawena or run TF2");
+        }
+        return restoreComplete;
     }
 }

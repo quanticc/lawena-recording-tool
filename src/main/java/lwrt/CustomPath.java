@@ -31,6 +31,9 @@ public class CustomPath {
         this.path = path;
         this.name = name;
         this.contents = contents;
+        if (contents.contains(PathContents.READONLY)) {
+            selected = true;
+        }
     }
 
     public Path getPath() {
