@@ -775,7 +775,9 @@ public class Lawena {
 
     private void saveAndExit() {
         saveSettings();
-        files.restoreAll();
+        if (!cl.isRunningTF2()) {
+            files.restoreAll();
+        }
         System.exit(0);
     }
 
