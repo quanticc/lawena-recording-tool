@@ -28,12 +28,14 @@ public class DemoEditorView extends JPanel {
     private JLabel lblEndTick;
     private JTextField txtEndtick;
     private JButton btnAdd;
-    private JPanel panel_1;
+    private JPanel panelButtonsLeft;
     private JButton btnClearTickList;
     private JButton btnCreateVdmFiles;
     private JButton btnDeleteVdmFiles;
     private JScrollPane scrollPane_1;
     private JTable tableTicks;
+    private JPanel panelButtonsRight;
+    private JButton btnDeleteSelectedTick;
 
     /**
      * Create the panel.
@@ -47,7 +49,7 @@ public class DemoEditorView extends JPanel {
                 0, 0, 0, 0, 0
         };
         gbl_panelVdm.columnWeights = new double[] {
-                0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE
+                0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE
         };
         gbl_panelVdm.rowWeights = new double[] {
                 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE
@@ -122,26 +124,42 @@ public class DemoEditorView extends JPanel {
         gbc_btnAdd.gridy = 1;
         add(btnAdd, gbc_btnAdd);
 
-        panel_1 = new JPanel();
-        FlowLayout flowLayout_3 = (FlowLayout) panel_1.getLayout();
-        flowLayout_3.setVgap(0);
-        flowLayout_3.setHgap(0);
-        GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-        gbc_panel_1.gridwidth = 7;
-        gbc_panel_1.anchor = GridBagConstraints.WEST;
-        gbc_panel_1.insets = new Insets(0, 5, 5, 0);
-        gbc_panel_1.gridx = 0;
-        gbc_panel_1.gridy = 2;
-        add(panel_1, gbc_panel_1);
-
-        btnClearTickList = new JButton("Clear Tick List");
-        panel_1.add(btnClearTickList);
+        panelButtonsLeft = new JPanel();
+        FlowLayout fl_panelButtonsLeft = (FlowLayout) panelButtonsLeft.getLayout();
+        fl_panelButtonsLeft.setVgap(0);
+        fl_panelButtonsLeft.setHgap(0);
+        GridBagConstraints gbc_panelButtonsLeft = new GridBagConstraints();
+        gbc_panelButtonsLeft.gridwidth = 4;
+        gbc_panelButtonsLeft.anchor = GridBagConstraints.WEST;
+        gbc_panelButtonsLeft.insets = new Insets(0, 5, 5, 5);
+        gbc_panelButtonsLeft.gridx = 0;
+        gbc_panelButtonsLeft.gridy = 2;
+        add(panelButtonsLeft, gbc_panelButtonsLeft);
 
         btnCreateVdmFiles = new JButton("Create VDM Files");
-        panel_1.add(btnCreateVdmFiles);
+        panelButtonsLeft.add(btnCreateVdmFiles);
 
         btnDeleteVdmFiles = new JButton("Delete VDM Files");
-        panel_1.add(btnDeleteVdmFiles);
+        panelButtonsLeft.add(btnDeleteVdmFiles);
+
+        panelButtonsRight = new JPanel();
+        FlowLayout flowLayout = (FlowLayout) panelButtonsRight.getLayout();
+        flowLayout.setAlignment(FlowLayout.TRAILING);
+        flowLayout.setVgap(0);
+        flowLayout.setHgap(0);
+        GridBagConstraints gbc_panelButtonsRight = new GridBagConstraints();
+        gbc_panelButtonsRight.gridwidth = 3;
+        gbc_panelButtonsRight.insets = new Insets(0, 0, 5, 5);
+        gbc_panelButtonsRight.fill = GridBagConstraints.BOTH;
+        gbc_panelButtonsRight.gridx = 4;
+        gbc_panelButtonsRight.gridy = 2;
+        add(panelButtonsRight, gbc_panelButtonsRight);
+
+        btnDeleteSelectedTick = new JButton("Delete Selected Tick");
+        panelButtonsRight.add(btnDeleteSelectedTick);
+
+        btnClearTickList = new JButton("Clear Tick List");
+        panelButtonsRight.add(btnClearTickList);
 
         scrollPane_1 = new JScrollPane();
         GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
@@ -191,5 +209,9 @@ public class DemoEditorView extends JPanel {
 
     public JTable getTableTicks() {
         return tableTicks;
+    }
+
+    public JButton getBtnDeleteSelectedTick() {
+        return btnDeleteSelectedTick;
     }
 }

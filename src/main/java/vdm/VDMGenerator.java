@@ -1,111 +1,101 @@
 
 package vdm;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 public class VDMGenerator {
 
     private static final Logger log = Logger.getLogger("lawena");
 
-    private TickList ticklist;
-    private String tfdir;
+    private List<Tick> ticklist;
+    private Path tfpath;
 
-    public VDMGenerator(TickList ticklist, String tfdir) {
+    public VDMGenerator(List<Tick> ticklist, Path tfpath) {
         this.ticklist = ticklist;
-        this.tfdir = tfdir;
+        this.tfpath = tfpath;
     }
 
-    public void generate() throws IOException {
-        PrintWriter vdm;
-        TickList current = ticklist;
-        String vdmcontent;
-        String[] demolist = new String[1000];
-        int i = 0;
-
-        while (current != null) {
-            boolean seen = false;
-            for (int j = 0; j < i; ++j) {
-                if (current.getDemoName().equals(demolist[j])) {
-                    seen = true;
-                    break;
+    public List<Path> generate() throws IOException {
+        List<Path> paths = new ArrayList<>();
+        Map<String, List<Tick>> demomap = new LinkedHashMap<>();
+        Map<String, String> peeknext = new LinkedHashMap<>();
+        String previous = null;
+        for (Tick tick : ticklist) {
+            List<Tick> ticks;
+            if (!demomap.containsKey(tick.getDemoname())) {
+                ticks = new ArrayList<>();
+                demomap.put(tick.getDemoname(), ticks);
+            } else {
+                ticks = demomap.get(tick.getDemoname());
+            }
+            ticks.add(tick);
+            if (previous != null) {
+                if (!peeknext.containsKey(previous) && !previous.equals(tick.getDemoname())) {
+                    peeknext.put(previous, tick.getDemoname());
                 }
             }
-
-            if (!seen) {
-                demolist[i++] = current.getDemoName();
-            }
-
-            current = current.getNext();
+            previous = tick.getDemoname();
         }
 
-        for (int j = 0; j < i; ++j) {
-            current = ticklist;
-            vdmcontent = "demoactions\n{\n";
+        for (Entry<String, List<Tick>> e : demomap.entrySet()) {
+            String demo = e.getKey();
+            log.finer("creating vdm for demo: " + demo);
+            List<String> lines = new ArrayList<>();
+            lines.add("demoactions\n{");
             int count = 1;
-            int previousSecondTick = 0;
-
-            while (current != null) {
-                if (current.getDemoName().equals(demolist[j])) {
-
-                    vdmcontent += "\t\"" + count++ + "\"\n" +
-                            "\t{\n" +
-                            "\t\tfactory \"SkipAhead\"\n" +
-                            "\t\tname \"skip\"\n" +
-                            "\t\tstarttick \"" + (previousSecondTick + 1) + "\"\n" +
-                            "\t\tskiptotick \"" + (current.getFirstTick() - 1) + "\"\n" +
-                            "\t}\n";
-
-                    vdmcontent += "\t\"" + count++ + "\"\n" +
-                            "\t{\n" +
-                            "\t\tfactory \"PlayCommands\"\n" +
-                            "\t\tname \"startRecording\"\n" +
-                            "\t\tstarttick \"" + current.getFirstTick() + "\"\n" +
-                            "\t\tcommands \"startrecording\"\n" +
-                            "\t}\n" +
-                            "\t\"" + count++ + "\"\n" +
-                            "\t{\n" +
-                            "\t\tfactory \"PlayCommands\"\n" +
-                            "\t\tname \"stopRecording\"\n" +
-                            "\t\tstarttick \"" + current.getSecondTick() + "\"\n" +
-                            "\t\tcommands \"stoprecording\"\n" +
-                            "\t}\n";
-
-                    previousSecondTick = current.getSecondTick();
-                }
-
-                current = current.getNext();
+            int previousEndTick = 0;
+            for (Tick tick : e.getValue()) {
+                lines.add(segment(count++, "SkipAhead", "skip",
+                        "starttick \"" + (previousEndTick + 1) + "\"",
+                        "skiptotick \"" + (tick.getStart() - 1) + "\""));
+                lines.add(segment(count++, "PlayCommands", "startrec",
+                        "commands \"startrecording\""));
+                lines.add(segment(count++, "PlayCommands", "stoprec",
+                        "starttick \"" + tick.getEnd() + "\"",
+                        "commands \"stoprecording\""));
+                previousEndTick = tick.getEnd();
             }
-
-            if (j + 1 < i) {
-                vdmcontent += "\t\"" + count++ + "\"\n" +
-                        "\t{\n" +
-                        "\t\tfactory \"PlayCommands\"\n" +
-                        "\t\tname \"nextDemo\"\n" +
-                        "\t\tstarttick \"" + (previousSecondTick + 1) + "\"\n" +
-                        "\t\tcommands \"playdemo " + demolist[j + 1] + "\"\n" +
-                        "\t}\n";
+            String nextdemo = peeknext.get(demo);
+            if (nextdemo != null) {
+                lines.add(segment(count++, "PlayCommands", "nextdem",
+                        "starttick \"" + (previousEndTick + 1) + "\"",
+                        "commands \"playdemo " + nextdemo + "\""));
+            } else {
+                lines.add(segment(count++, "PlayCommands", "stopdem",
+                        "starttick \"" + (previousEndTick + 1) + "\"",
+                        "commands \"stopdemo\""));
             }
-            else if (j + 1 == i) {
-                vdmcontent += "\t\"" + count++ + "\"\n" +
-                        "\t{\n" +
-                        "\t\tfactory \"PlayCommands\"\n" +
-                        "\t\tname \"stopDemo\"\n" +
-                        "\t\tstarttick \"" + (previousSecondTick + 1) + "\"\n" +
-                        "\t\tcommands \"stopdemo\"\n" +
-                        "\t}\n";
-            }
+            lines.add("}\n");
 
-            vdmcontent += "}\n";
+            Path added = Files.write(
+                    tfpath.resolve(demo.substring(0, demo.indexOf(".dem")) + ".vdm"), lines,
+                    Charset.defaultCharset());
+            paths.add(added);
+            log.fine("VDM file written to " + added);
 
-            String filename = tfdir + "/" + demolist[j].substring(0, demolist[j].indexOf(".dem"))
-                    + ".vdm";
-            vdm = new PrintWriter(new FileWriter(filename));
-            vdm.print(vdmcontent);
-            log.fine("VDM file written to " + filename);
-            vdm.close();
         }
+        return paths;
+    }
+
+    public String segment(int count, String factory, String name, String... args) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\t\"" + count + "\"\n");
+        sb.append("\t{\n");
+        sb.append("\t\tfactory \"" + factory + "\"\n");
+        sb.append("\t\tname \"" + name + "\"\n");
+        for (String arg : args) {
+            sb.append("\t\t" + arg + "\n");
+        }
+        sb.append("\t}");
+        return sb.toString();
     }
 }

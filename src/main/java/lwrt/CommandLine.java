@@ -1,6 +1,7 @@
 
 package lwrt;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -291,4 +292,20 @@ public abstract class CommandLine {
         }
     }
 
+    /**
+     * Use the Java Desktop API to open a folder of the given path.
+     * 
+     * @param path The folder that will be opened with the system file manager.
+     *            If this is not a directory, it will open the file's parent.
+     * @see Desktop#open(java.io.File)
+     */
+    public void openFolder(Path path) {
+        Path parent = path.getParent();
+        Path dir = Files.isDirectory(path) ? path : (parent != null ? parent : path);
+        try {
+            Desktop.getDesktop().open(dir.toFile());
+        } catch (IOException e) {
+            log.log(Level.INFO, "Could not open directory: " + dir, e);
+        }
+    }
 }

@@ -103,4 +103,14 @@ public class CLWindows extends CommandLine {
         regedit("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1", dxlevel);
     }
 
+    @Override
+    public void openFolder(Path dir) {
+        try {
+            Process pr = Runtime.getRuntime().exec("explorer.exe /select," + dir.toString());
+            pr.waitFor();
+        } catch (IOException | InterruptedException e) {
+            // fallback to Java desktop API
+            super.openFolder(dir);
+        }
+    }
 }

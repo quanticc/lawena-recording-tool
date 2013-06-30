@@ -560,7 +560,7 @@ public class Lawena {
         customPaths = new CustomPathList();
         files.setCustomPathList(customPaths);
 
-        vdm = new DemoEditor(settings);
+        vdm = new DemoEditor(settings, cl);
     }
 
     private String getManifestString(String key, String defaultValue) {

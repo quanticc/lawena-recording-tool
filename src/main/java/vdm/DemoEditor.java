@@ -20,9 +20,9 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+import lwrt.CommandLine;
 import lwrt.SettingsManager;
 
 public class DemoEditor {
@@ -49,12 +49,7 @@ public class DemoEditor {
                 if (tick1 >= tick2) {
                     throw new NumberFormatException();
                 }
-
-                Object[] row = {
-                        currentdemo, tick1, tick2
-                };
-
-                model.insertRow(view.getTableTicks().getRowCount(), row);
+                model.addTick(new Tick(currentdemo, tick1, tick2));
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(view,
                         "Please fill the required tick fields with valid numbers", "Error",
@@ -86,9 +81,7 @@ public class DemoEditor {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            while (model.getRowCount() > 0) {
-                model.removeRow(0);
-            }
+            model.clear();
         }
 
     }
@@ -98,29 +91,19 @@ public class DemoEditor {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (model.getRowCount() > 0) {
-                ticklist = generateTickList(0);
-                vdmgenerator = new VDMGenerator(ticklist, settings.getTfPath().toString());
+                vdmgenerator = new VDMGenerator(model.getTickList(), settings.getTfPath());
 
                 try {
-                    vdmgenerator.generate();
+                    List<Path> paths = vdmgenerator.generate();
+                    status.info("VDM generated: " + paths.size()
+                            + (paths.size() == 1 ? " new files" : " new file")
+                            + " in TF2 directory");
+                    cl.openFolder(paths.get(0));
                 } catch (IOException e1) {
                     log.warning("A problem occurred while generating the VDM: " + e1);
+                    status.info("Problem occurred while generating the VDM files");
                 }
             }
-        }
-
-        private TickList generateTickList(int i) {
-            TickList current;
-
-            current = new TickList((String) model.getValueAt(i, 0), (int) model.getValueAt(i, 1),
-                    (int) model.getValueAt(i, 2));
-
-            if (i + 1 == view.getTableTicks().getRowCount())
-                return current;
-
-            current.setNext(generateTickList(i + 1));
-
-            return current;
         }
     }
 
@@ -166,12 +149,15 @@ public class DemoEditor {
         protected void done() {
             if (!isCancelled()) {
                 if (count > 0) {
-                    log.fine("VDM files cleared: " + count + " files deleted");
+                    String str = "VDM files cleared: " + count + (count > 1 ? " files " : " file ")
+                            + "deleted";
+                    log.fine(str);
+                    status.info(str);
                 } else {
                     log.fine("No VDM files were deleted");
+                    status.info("");
                 }
                 view.getBtnDeleteVdmFiles().setEnabled(true);
-                status.info("");
             }
         };
 
@@ -179,25 +165,23 @@ public class DemoEditor {
 
     private DemoEditorView view;
     private JFileChooser choosedemo = new JFileChooser();
-    private DefaultTableModel model;
+    private TickTableModel model;
     private SettingsManager settings;
+    private CommandLine cl;
     private String currentdemo;
-    private TickList ticklist;
     private VDMGenerator vdmgenerator;
 
-    public DemoEditor(SettingsManager settings) {
+    public DemoEditor(SettingsManager settings, CommandLine cl) {
         this.settings = settings;
+        this.cl = cl;
         choosedemo.setDialogTitle("Choose a demo file");
         choosedemo.setFileSelectionMode(JFileChooser.FILES_ONLY);
         choosedemo.setFileFilter(new FileNameExtensionFilter("Demo files", new String[] {
                 "DEM"
         }));
         choosedemo.setCurrentDirectory(settings.getTfPath().toFile());
-        Object[][] tickdata = {};
-        String[] columnames = {
-                "Demo name", "Starting Tick", "Ending Tick"
-        };
-        model = new DefaultTableModel(tickdata, columnames);
+
+        model = new TickTableModel();
     }
 
     public Component start() {
@@ -221,6 +205,16 @@ public class DemoEditor {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new ClearVdmFilesTask().execute();
+            }
+        });
+        view.getBtnDeleteSelectedTick().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int numRows = view.getTableTicks().getSelectedRowCount();
+                for (int i = 0; i < numRows; i++) {
+                    model.removeTick(view.getTableTicks().getSelectedRow());
+                }
             }
         });
 
