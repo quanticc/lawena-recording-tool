@@ -58,6 +58,7 @@ public class VDMGenerator {
                         "starttick \"" + (previousEndTick + 1) + "\"",
                         "skiptotick \"" + (tick.getStart() - 1) + "\""));
                 lines.add(segment(count++, "PlayCommands", "startrec",
+                        "starttick \"" + tick.getStart() + "\"",
                         "commands \"startrecording\""));
                 lines.add(segment(count++, "PlayCommands", "stoprec",
                         "starttick \"" + tick.getEnd() + "\"",
