@@ -96,7 +96,7 @@ public class DemoEditor {
                 try {
                     List<Path> paths = vdmgenerator.generate();
                     status.info("VDM generated: " + paths.size()
-                            + (paths.size() == 1 ? " new files" : " new file")
+                            + (paths.size() == 1 ? " new file" : " new files")
                             + " in TF2 directory");
                     cl.openFolder(paths.get(0));
                 } catch (IOException e1) {
@@ -142,14 +142,16 @@ public class DemoEditor {
         @Override
         protected void process(List<Path> chunks) {
             count += chunks.size();
-            status.info("Deleting " + count + " VDM files from TF2 folder...");
+            status.info("Deleting " + count + (count == 1 ? " VDM file " : " VDM files ")
+                    + "from TF2 folder...");
         };
 
         @Override
         protected void done() {
             if (!isCancelled()) {
                 if (count > 0) {
-                    String str = "VDM files cleared: " + count + (count > 1 ? " files " : " file ")
+                    String str = "VDM files cleared: " + count
+                            + (count == 1 ? " file " : " files ")
                             + "deleted";
                     log.fine(str);
                     status.info(str);
