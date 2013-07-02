@@ -7,7 +7,7 @@ import java.util.EnumSet;
 public class CustomPath {
 
     public enum PathContents {
-        REQUIRED, READONLY, HUD, CONFIG, SKYBOX;
+        DEFAULT, READONLY, HUD, CONFIG, SKYBOX;
 
         public String toString() {
             return name().toLowerCase();
@@ -58,10 +58,7 @@ public class CustomPath {
 
     @Override
     public String toString() {
-        EnumSet<PathContents> c = EnumSet.copyOf(contents);
-        c.remove(PathContents.REQUIRED);
-        c.remove(PathContents.READONLY);
-        return name + (!c.isEmpty() ? " " + c : "");
+        return name;
     }
 
 }
