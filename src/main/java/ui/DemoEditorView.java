@@ -1,17 +1,20 @@
 
 package ui;
 
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import javax.swing.ScrollPaneConstants;
 
 public class DemoEditorView extends JPanel {
 
@@ -36,6 +39,8 @@ public class DemoEditorView extends JPanel {
     private JTable tableTicks;
     private JPanel panelButtonsRight;
     private JButton btnDeleteSelectedTick;
+    private JScrollPane scrollPane;
+    private JTextArea txtrDemodetails;
 
     /**
      * Create the panel.
@@ -49,7 +54,7 @@ public class DemoEditorView extends JPanel {
                 0, 0, 0, 0, 0
         };
         gbl_panelVdm.columnWeights = new double[] {
-                0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE
+                0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE
         };
         gbl_panelVdm.rowWeights = new double[] {
                 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE
@@ -81,6 +86,25 @@ public class DemoEditorView extends JPanel {
         gbc_btnBrowse.gridx = 4;
         gbc_btnBrowse.gridy = 0;
         add(btnBrowse, gbc_btnBrowse);
+
+        scrollPane = new JScrollPane();
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+        gbc_scrollPane.gridheight = 2;
+        gbc_scrollPane.gridwidth = 2;
+        gbc_scrollPane.insets = new Insets(5, 0, 5, 5);
+        gbc_scrollPane.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane.gridx = 5;
+        gbc_scrollPane.gridy = 0;
+        add(scrollPane, gbc_scrollPane);
+
+        txtrDemodetails = new JTextArea();
+        txtrDemodetails.setWrapStyleWord(true);
+        txtrDemodetails.setText("Select a demo to view its details here.");
+        txtrDemodetails.setOpaque(false);
+        txtrDemodetails.setEditable(false);
+        txtrDemodetails.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        scrollPane.setViewportView(txtrDemodetails);
 
         lblStartTick = new JLabel("Start Tick:");
         GridBagConstraints gbc_lblStartTick = new GridBagConstraints();
@@ -144,13 +168,14 @@ public class DemoEditorView extends JPanel {
 
         panelButtonsRight = new JPanel();
         FlowLayout flowLayout = (FlowLayout) panelButtonsRight.getLayout();
-        flowLayout.setAlignment(FlowLayout.TRAILING);
+        flowLayout.setAlignment(FlowLayout.RIGHT);
         flowLayout.setVgap(0);
         flowLayout.setHgap(0);
         GridBagConstraints gbc_panelButtonsRight = new GridBagConstraints();
+        gbc_panelButtonsRight.anchor = GridBagConstraints.EAST;
         gbc_panelButtonsRight.gridwidth = 3;
         gbc_panelButtonsRight.insets = new Insets(0, 0, 5, 5);
-        gbc_panelButtonsRight.fill = GridBagConstraints.BOTH;
+        gbc_panelButtonsRight.fill = GridBagConstraints.VERTICAL;
         gbc_panelButtonsRight.gridx = 4;
         gbc_panelButtonsRight.gridy = 2;
         add(panelButtonsRight, gbc_panelButtonsRight);
@@ -213,5 +238,9 @@ public class DemoEditorView extends JPanel {
 
     public JButton getBtnDeleteSelectedTick() {
         return btnDeleteSelectedTick;
+    }
+
+    public JTextArea getTxtrDemodetails() {
+        return txtrDemodetails;
     }
 }

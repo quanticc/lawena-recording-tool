@@ -2,6 +2,7 @@
 package vdm;
 
 import ui.DemoEditorView;
+import util.DemoPreview;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -11,6 +12,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,6 +43,7 @@ public class DemoEditor {
                 return;
             } else {
                 currentdemo = view.getTxtDemofile().getText();
+                updateDemoDetails();
             }
 
             try {
@@ -68,6 +71,7 @@ public class DemoEditor {
                 currentdemo = choosedemo.getSelectedFile().getName();
                 if (Files.exists(choosedemo.getSelectedFile().toPath())) {
                     view.getTxtDemofile().setText(currentdemo);
+                    updateDemoDetails();
                 } else {
                     JOptionPane.showMessageDialog(view, "The selected file does not exist.",
                             "Browse", JOptionPane.INFORMATION_MESSAGE);
@@ -184,6 +188,28 @@ public class DemoEditor {
         choosedemo.setCurrentDirectory(settings.getTfPath().toFile());
 
         model = new TickTableModel();
+    }
+
+    public void updateDemoDetails() {
+        new SwingWorker<String, Void>() {
+
+            @Override
+            protected String doInBackground() throws Exception {
+                try (DemoPreview dp = new DemoPreview(settings.getTfPath().resolve(currentdemo))) {
+                    return dp.toString();
+                }
+            }
+
+            protected void done() {
+                try {
+                    view.getTxtrDemodetails().setText(get());
+                } catch (InterruptedException | ExecutionException e) {
+                    view.getTxtrDemodetails()
+                            .setText("Could not retrieve demo details");
+                }
+            };
+
+        }.execute();
     }
 
     public Component start() {
