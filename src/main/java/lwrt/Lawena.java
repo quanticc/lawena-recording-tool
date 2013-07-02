@@ -729,7 +729,9 @@ public class Lawena {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                Path movies = settings.getMoviePath();
                 settings.loadDefaults();
+                settings.setMoviePath(movies);
                 loadSettings();
                 customPaths.loadResourceSettings();
                 saveSettings();
