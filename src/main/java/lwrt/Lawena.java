@@ -5,13 +5,22 @@ import ui.AboutDialog;
 import ui.LawenaView;
 import ui.TooltipRenderer;
 import util.LawenaException;
-import util.ListFilesVisitor;
 import util.StartLogger;
+import util.WatchDir;
 import vdm.DemoEditor;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -23,20 +32,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -58,6 +63,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 
@@ -286,6 +294,7 @@ public class Lawena {
         protected Void doInBackground() throws Exception {
             try {
                 scan();
+                watcher.start();
             } catch (Exception e) {
                 log.log(Level.INFO, "Problem while scanning custom paths", e);
             }
@@ -294,60 +303,14 @@ public class Lawena {
 
         private void scan() {
             customPaths.clear();
-            customPaths.addPaths(Paths.get("custom"), settings.getTfPath().resolve("custom"));
+            customPaths.addPaths(Paths.get("custom"));
+            customPaths.addPaths(settings.getTfPath().resolve("custom"));
             customPaths.validateRequired();
-            int i = 0;
-            for (CustomPath cp : customPaths.getList()) {
-                EnumSet<PathContents> c = cp.getContents();
-                Path path = cp.getPath();
-                if (!c.contains(PathContents.READONLY)) {
-                    List<String> files = getContentsList(path);
-                    boolean hud = false;
-                    boolean cfg = false;
-                    boolean sky = false;
-                    for (String file : files) {
-                        if (hud && cfg & sky) {
-                            break;
-                        }
-                        if (!hud && (file.startsWith("resource/") || file.startsWith("scripts/"))) {
-                            c.add(PathContents.HUD);
-                            hud = true;
-                        } else if (!cfg && file.startsWith("cfg/") && file.endsWith(".cfg")) {
-                            c.add(PathContents.CONFIG);
-                            cfg = true;
-                        } else if (!sky && file.startsWith("materials/skybox/")) {
-                            c.add(PathContents.SKYBOX);
-                            sky = true;
-                        }
-                    }
-                    if (hud || cfg || sky) {
-                        customPaths.fireTableRowsUpdated(i, i);
-                    }
-                }
-                i++;
-            }
-        }
-
-        private List<String> getContentsList(Path path) {
-            if (path.toString().endsWith(".vpk")) {
-                return cl.getVpkContents(settings.getTfPath(), path);
-            } else if (Files.isDirectory(path)) {
-                ListFilesVisitor visitor = new ListFilesVisitor(path);
-                try {
-                    Set<FileVisitOption> set = new HashSet<>();
-                    set.add(FileVisitOption.FOLLOW_LINKS);
-                    Files.walkFileTree(path, set, 3, visitor);
-                    return visitor.getFiles();
-                } catch (IllegalArgumentException | IOException e) {
-                    log.log(Level.INFO, "Could not walk through this directory: " + path, e);
-                }
-            }
-            return Collections.emptyList();
         }
 
         @Override
         protected void done() {
-            loadResourceSettings();
+            customPaths.loadResourceSettings();
         }
     }
 
@@ -482,6 +445,7 @@ public class Lawena {
                 combo.setSelectedIndex(i);
             }
         }
+        combo.setEnabled(true);
     }
 
     private static String now(String format) {
@@ -504,6 +468,8 @@ public class Lawena {
     private JFileChooser choosedir;
     private Path steampath;
     private String oDxlevel;
+    private Thread watcher;
+    private Object lastHud;
 
     private String version = "4.0-SNAPSHOT";
     private String build;
@@ -557,8 +523,41 @@ public class Lawena {
         settings.save();
         files.restoreAll();
 
-        customPaths = new CustomPathList();
+        customPaths = new CustomPathList(settings, cl);
         files.setCustomPathList(customPaths);
+
+        watcher = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    WatchDir w = new WatchDir(Paths.get("custom"), false) {
+                        @Override
+                        public void entryCreated(Path child) {
+                            try {
+                                customPaths.addPath(child);
+                            } catch (IOException e) {
+                                log.log(Level.FINE, "Could not add custom path", e);
+                            }
+                        }
+
+                        @Override
+                        public void entryModified(Path child) {
+                            customPaths.updatePath(child);
+                        };
+
+                        @Override
+                        public void entryDeleted(Path child) {
+                            customPaths.removePath(child);
+                        }
+                    };
+                    w.processEvents();
+                } catch (IOException e) {
+                    log.log(Level.FINE, "Problem while watching directory", e);
+                }
+            }
+        }, "FolderWatcher");
+        watcher.setDaemon(true);
 
         vdm = new DemoEditor(settings, cl);
     }
@@ -611,10 +610,90 @@ public class Lawena {
             }
         });
 
-        JTable table = view.getTableCustomContent();
+        final JTable table = view.getTableCustomContent();
         table.setModel(customPaths);
         table.getColumnModel().getColumn(0).setMaxWidth(20);
+        table.getColumnModel().getColumn(2).setMaxWidth(50);
         table.setDefaultRenderer(CustomPath.class, new TooltipRenderer(settings));
+        table.getModel().addTableModelListener(new TableModelListener() {
+
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                log.finer("tableChanged: " + e);
+                if (e.getColumn() == CustomPathList.Column.SELECTED.ordinal()) {
+                    int row = e.getFirstRow();
+                    TableModel model = (TableModel) e.getSource();
+                    CustomPath cp = (CustomPath) model.getValueAt(row,
+                            CustomPathList.Column.PATH.ordinal());
+                    EnumSet<PathContents> set = cp.getContents();
+                    if (cp.isSelected()) {
+                        if (set.contains(PathContents.HUD)) {
+                            lastHud = view.getCmbHud().getSelectedItem();
+                            view.getCmbHud().setSelectedItem("Custom");
+                            view.getCmbHud().setEnabled(false);
+                        }
+                    } else {
+                        if (set.contains(PathContents.HUD)) {
+                            if (lastHud != null) {
+                                view.getCmbHud().setSelectedItem(lastHud);
+                                view.getCmbHud().setEnabled(true);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        table.setDropTarget(new DropTarget() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public synchronized void dragOver(DropTargetDragEvent dtde) {
+                Point point = dtde.getLocation();
+                int row = table.rowAtPoint(point);
+                if (row < 0) {
+                    table.clearSelection();
+                } else {
+                    table.setRowSelectionInterval(row, row);
+                }
+                dtde.acceptDrag(DnDConstants.ACTION_COPY);
+            }
+
+            @Override
+            public synchronized void drop(DropTargetDropEvent dtde) {
+                if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                    Transferable t = dtde.getTransferable();
+                    List<?> fileList = null;
+                    try {
+                        fileList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
+                        if (fileList.size() > 0) {
+                            table.clearSelection();
+                            Point point = dtde.getLocation();
+                            int row = table.rowAtPoint(point);
+                            CustomPathList model = (CustomPathList) table.getModel();
+                            for (Object value : fileList) {
+                                if (value instanceof File) {
+                                    File f = (File) value;
+                                    if (row < 0) {
+                                        model.addPath(f.toPath());
+                                    } else {
+                                        model.insertPath(row, f.toPath());
+                                        row++;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (UnsupportedFlavorException e) {
+                        log.log(Level.FINE, "Drag and drop operation failed", e);
+                    } catch (IOException e) {
+                        log.log(Level.FINE, "Drag and drop operation failed", e);
+                    }
+                } else {
+                    dtde.rejectDrop();
+                }
+            }
+        });
         TableRowSorter<CustomPathList> sorter = new TableRowSorter<>(customPaths);
         table.setRowSorter(sorter);
         RowFilter<CustomPathList, Object> filter = new RowFilter<CustomPathList, Object>() {
@@ -652,7 +731,7 @@ public class Lawena {
             public void actionPerformed(ActionEvent e) {
                 settings.loadDefaults();
                 loadSettings();
-                loadResourceSettings();
+                customPaths.loadResourceSettings();
                 saveSettings();
             }
         });
@@ -663,7 +742,7 @@ public class Lawena {
                 saveAndExit();
             }
         });
-        view.getBtnSaveSettings().addActionListener(new ActionListener() {
+        view.getMntmSaveSettings().addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -682,6 +761,17 @@ public class Lawena {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new ClearMoviesTask().execute();
+            }
+        });
+        view.getBtnOpenCustomFolder().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Desktop.getDesktop().open(Paths.get("custom").toFile());
+                } catch (IOException ex) {
+                    log.log(Level.FINE, "Could not open custom folder", ex);
+                }
             }
         });
 
@@ -714,22 +804,6 @@ public class Lawena {
         view.getDisableHitSounds().setSelected(!settings.getHitsounds());
         view.getDisableVoiceChat().setSelected(!settings.getVoice());
         view.getChckbxUsecondebug().setSelected(settings.getCondebug());
-    }
-
-    private void loadResourceSettings() {
-        List<String> selected = settings.getCustomResources();
-        Path tfpath = settings.getTfPath();
-        int i = 0;
-        for (CustomPath cp : customPaths.getList()) {
-            Path path = cp.getPath();
-            if (!cp.getContents().contains(PathContents.READONLY) && !selected.isEmpty()) {
-                String key = (path.startsWith(tfpath) ? "tf*" : "");
-                key += path.getFileName().toString();
-                cp.setSelected(selected.contains(key));
-                customPaths.fireTableRowsUpdated(i, i);
-            }
-            i++;
-        }
     }
 
     private void saveSettings() {
@@ -775,6 +849,7 @@ public class Lawena {
 
     private void saveAndExit() {
         saveSettings();
+        view.setVisible(false);
         if (!cl.isRunningTF2()) {
             files.restoreAll();
         }
