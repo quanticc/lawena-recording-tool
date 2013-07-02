@@ -270,6 +270,8 @@ public class CustomPathList extends AbstractTableModel {
             // don't remove "default" or "readonly" resources
             EnumSet<PathContents> set = toremove.getContents();
             if (!set.contains(PathContents.DEFAULT) && !set.contains(PathContents.READONLY)) {
+                toremove.setSelected(false);
+                fireTableCellUpdated(i, Column.SELECTED.ordinal());
                 list.remove(i);
                 fireTableRowsDeleted(i, i);
             }

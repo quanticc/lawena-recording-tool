@@ -180,6 +180,14 @@ public class Lawena {
                 setCurrentWorker(this, false);
                 setProgress(0);
 
+                // Checking if the user selects "Custom" HUD in the dropdown,
+                // he or she also selects a "hud" in the sidebar
+                if (!verifyCustomHud()) {
+                    status.info("Please select a custom HUD to the right and retry");
+                    log.info("Launch aborted because the custom HUD to use was not specified");
+                    return false;
+                }
+
                 // Restoring user files
                 status.info("Restoring your files");
                 files.restoreAll();
@@ -270,6 +278,20 @@ public class Lawena {
             return true;
         }
 
+        private boolean verifyCustomHud() {
+            if (view.getCmbHud().getSelectedItem().equals("Custom")) {
+                for (CustomPath cp : customPaths.getList()) {
+                    EnumSet<PathContents> set = cp.getContents();
+                    if (cp.isSelected() && set.contains(PathContents.HUD)) {
+                        return true;
+                    }
+                }
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         @Override
         protected void done() {
             if (!isCancelled()) {
@@ -311,6 +333,7 @@ public class Lawena {
         @Override
         protected void done() {
             customPaths.loadResourceSettings();
+            loadHudComboState();
         }
     }
 
@@ -445,7 +468,6 @@ public class Lawena {
                 combo.setSelectedIndex(i);
             }
         }
-        combo.setEnabled(true);
     }
 
     private static String now(String format) {
@@ -619,27 +641,12 @@ public class Lawena {
 
             @Override
             public void tableChanged(TableModelEvent e) {
-                log.finer("tableChanged: " + e);
                 if (e.getColumn() == CustomPathList.Column.SELECTED.ordinal()) {
                     int row = e.getFirstRow();
                     TableModel model = (TableModel) e.getSource();
                     CustomPath cp = (CustomPath) model.getValueAt(row,
                             CustomPathList.Column.PATH.ordinal());
-                    EnumSet<PathContents> set = cp.getContents();
-                    if (cp.isSelected()) {
-                        if (set.contains(PathContents.HUD)) {
-                            lastHud = view.getCmbHud().getSelectedItem();
-                            view.getCmbHud().setSelectedItem("Custom");
-                            view.getCmbHud().setEnabled(false);
-                        }
-                    } else {
-                        if (set.contains(PathContents.HUD)) {
-                            if (lastHud != null) {
-                                view.getCmbHud().setSelectedItem(lastHud);
-                                view.getCmbHud().setEnabled(true);
-                            }
-                        }
-                    }
+                    checkCustomHud(cp);
                 }
             }
         });
@@ -734,6 +741,7 @@ public class Lawena {
                 settings.setMoviePath(movies);
                 loadSettings();
                 customPaths.loadResourceSettings();
+                loadHudComboState();
                 saveSettings();
             }
         });
@@ -779,6 +787,39 @@ public class Lawena {
 
         view.getTabbedPane().addTab("VDM", null, vdm.start());
         view.setVisible(true);
+    }
+
+    private boolean checkCustomHud(CustomPath cp) {
+        EnumSet<PathContents> set = cp.getContents();
+        if (cp.isSelected()) {
+            if (set.contains(PathContents.HUD)) {
+                lastHud = view.getCmbHud().getSelectedItem();
+                view.getCmbHud().setSelectedItem("Custom");
+                log.finer("HUD combobox disabled");
+                view.getCmbHud().setEnabled(false);
+                return true;
+            }
+        } else {
+            if (set.contains(PathContents.HUD)) {
+                if (lastHud != null) {
+                    view.getCmbHud().setSelectedItem(lastHud);
+                }
+                log.finer("HUD combobox enabled");
+                view.getCmbHud().setEnabled(true);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private void loadHudComboState() {
+        boolean detected = false;
+        for (CustomPath cp : customPaths.getList()) {
+            if (detected) {
+                break;
+            }
+            detected = checkCustomHud(cp);
+        }
     }
 
     private void loadSettings() {
