@@ -100,8 +100,10 @@ public class TickTableModel extends AbstractTableModel {
 
     public void clear() {
         int rowsCleared = list.size();
-        list.clear();
-        fireTableRowsDeleted(0, rowsCleared - 1);
+        if (rowsCleared > 0) {
+            list.clear();
+            fireTableRowsDeleted(0, rowsCleared - 1);
+        }
     }
 
     public void addTick(Tick e) {
