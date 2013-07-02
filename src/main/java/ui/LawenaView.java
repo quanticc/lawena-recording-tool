@@ -51,11 +51,22 @@ public class LawenaView extends JFrame {
 
     private static final Logger log = Logger.getLogger("lawena");
 
+    private class MntmRenderingTutorialActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            try {
+                String url = "http://code.google.com/p/lawenarecordingtool/wiki/RenderingTutorial";
+                Desktop.getDesktop().browse(new URI(url));
+            } catch (IOException | URISyntaxException e1) {
+                log.log(Level.INFO, "Could not open URL", e1);
+            }
+        }
+    }
+
     private class MntmPatchNotesActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             try {
-                Desktop.getDesktop().browse(
-                        new URI("https://github.com/iabarca/lawena-recording-tool/commits/master"));
+                String url = "https://github.com/iabarca/lawena-recording-tool/commits/master";
+                Desktop.getDesktop().browse(new URI(url));
             } catch (IOException | URISyntaxException e1) {
                 log.log(Level.INFO, "Could not open URL", e1);
             }
@@ -65,8 +76,8 @@ public class LawenaView extends JFrame {
     private class MntmProjectPageActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             try {
-                Desktop.getDesktop().browse(
-                        new URI("http://code.google.com/p/lawenarecordingtool/"));
+                String url = "http://code.google.com/p/lawenarecordingtool/";
+                Desktop.getDesktop().browse(new URI(url));
             } catch (IOException | URISyntaxException e1) {
                 log.log(Level.INFO, "Could not open URL", e1);
             }
@@ -76,8 +87,8 @@ public class LawenaView extends JFrame {
     private class MntmVdmTutorialActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             try {
-                Desktop.getDesktop().browse(
-                        new URI("http://code.google.com/p/lawenarecordingtool/wiki/VDMtutorial"));
+                String url = "http://code.google.com/p/lawenarecordingtool/wiki/VDMtutorial";
+                Desktop.getDesktop().browse(new URI(url));
             } catch (IOException | URISyntaxException e1) {
                 log.log(Level.INFO, "Could not open URL", e1);
             }
@@ -87,8 +98,8 @@ public class LawenaView extends JFrame {
     private class MntmInstructionsActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             try {
-                Desktop.getDesktop().browse(
-                        new URI("http://code.google.com/p/lawenarecordingtool/wiki/Instructions"));
+                String url = "http://code.google.com/p/lawenarecordingtool/wiki/Instructions";
+                Desktop.getDesktop().browse(new URI(url));
             } catch (IOException | URISyntaxException e1) {
                 log.log(Level.INFO, "Could not open URL", e1);
             }
@@ -116,7 +127,6 @@ public class LawenaView extends JFrame {
     private JButton btnStartTf;
     private JLabel lblResolution;
     private JLabel lblFrameRate;
-    private JButton btnSaveSettings;
     private JButton btnClearMovieFolder;
     private JPanel panelBottomLeft;
     private JLabel lblSkyboxPreview;
@@ -152,6 +162,9 @@ public class LawenaView extends JFrame {
     private JMenuItem mntmPatchNotes;
     private JSeparator separator_2;
     private JMenuItem mntmAbout;
+    private JMenuItem mntmRenderingTutorial;
+    private JButton btnOpenCustomFolder;
+    private JMenuItem mntmSaveSettings;
 
     /**
      * Create the frame.
@@ -174,6 +187,11 @@ public class LawenaView extends JFrame {
         separator = new JSeparator();
         mnFile.add(separator);
 
+        mntmSaveSettings = new JMenuItem("Save Settings");
+        mntmSaveSettings
+                .setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+        mnFile.add(mntmSaveSettings);
+
         mntmRevertToDefault = new JMenuItem("Revert to Default Settings");
         mnFile.add(mntmRevertToDefault);
 
@@ -193,6 +211,10 @@ public class LawenaView extends JFrame {
 
         mntmVdmTutorial = new JMenuItem("VDM Tutorial");
         mntmVdmTutorial.addActionListener(new MntmVdmTutorialActionListener());
+
+        mntmRenderingTutorial = new JMenuItem("Rendering Tutorial");
+        mntmRenderingTutorial.addActionListener(new MntmRenderingTutorialActionListener());
+        mnHelp.add(mntmRenderingTutorial);
         mnHelp.add(mntmVdmTutorial);
 
         mntmProjectPage = new JMenuItem("Project Page");
@@ -243,6 +265,8 @@ public class LawenaView extends JFrame {
         panelSettings.add(lblResolution, gbc_lblResolution);
 
         cmbResolution = new JComboBox<>();
+        cmbResolution
+                .setToolTipText("<html>Set the resolution for TF2, you can choose<br>an option or input a custom one.");
         cmbResolution.setModel(new DefaultComboBoxModel<String>(new String[] {
                 "640x360", "854x480", "1280x720", "1920x1080"
         }));
@@ -263,6 +287,8 @@ public class LawenaView extends JFrame {
         panelSettings.add(lblFrameRate, gbc_lblFrameRate);
 
         cmbFramerate = new JComboBox<>();
+        cmbFramerate
+                .setToolTipText("<html>Set the frames per second of the recording. This value can be<br>changed in-game with the up and down arrow keys. You can<br>also set a custom FPS value here.");
         cmbFramerate.setModel(new DefaultComboBoxModel<String>(new String[] {
                 "60", "120", "240", "480", "960", "1920", "3840"
         }));
@@ -275,8 +301,8 @@ public class LawenaView extends JFrame {
         panelSettings.add(cmbFramerate, gbc_cmbFramerate);
 
         panelCustomContent = new JPanel();
-        panelCustomContent.setBorder(new TitledBorder(null, "Custom Resources",
-                TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panelCustomContent.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"),
+                "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         GridBagConstraints gbc_panelCustomContent = new GridBagConstraints();
         gbc_panelCustomContent.insets = new Insets(0, 0, 5, 0);
         gbc_panelCustomContent.gridwidth = 2;
@@ -290,17 +316,19 @@ public class LawenaView extends JFrame {
                 0, 0
         };
         gbl_panelCustomContent.rowHeights = new int[] {
-                0, 0, 0
+                0, 0
         };
         gbl_panelCustomContent.columnWeights = new double[] {
                 1.0, Double.MIN_VALUE
         };
         gbl_panelCustomContent.rowWeights = new double[] {
-                1.0, 0.0, Double.MIN_VALUE
+                1.0, Double.MIN_VALUE
         };
         panelCustomContent.setLayout(gbl_panelCustomContent);
 
         scrollPane = new JScrollPane();
+        scrollPane
+                .setToolTipText("<html>Drag custom folders to this table or copy them<br>\r\nto lawena 'custom' folder to make them appear here.");
         GridBagConstraints gbc_scrollPane = new GridBagConstraints();
         gbc_scrollPane.fill = GridBagConstraints.BOTH;
         gbc_scrollPane.gridx = 0;
@@ -308,10 +336,11 @@ public class LawenaView extends JFrame {
         panelCustomContent.add(scrollPane, gbc_scrollPane);
 
         tableCustomContent = new JTable();
-        tableCustomContent.setTableHeader(null);
+        tableCustomContent.setShowVerticalLines(false);
         tableCustomContent.setGridColor(new Color(0, 0, 0, 30));
         tableCustomContent.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         tableCustomContent.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tableCustomContent.getTableHeader().setReorderingAllowed(false);
         scrollPane.setViewportView(tableCustomContent);
 
         JLabel lblHud = new JLabel("HUD:");
@@ -323,6 +352,7 @@ public class LawenaView extends JFrame {
         panelSettings.add(lblHud, gbc_lblHud);
 
         cmbHud = new JComboBox<>();
+        cmbHud.setToolTipText("<html>Select your preferred HUD here. You can also you use a custom HUD,<br>in which case you should put the HUD folder into lawena/custom folder<br>and then mark it in the Custom Resources sidebar.");
         cmbHud.setModel(new DefaultComboBoxModel<>(new String[] {
                 "Minimal (kill notices)", "Medic (hp, ubercharge, cp)", "Full", "Custom"
         }));
@@ -513,29 +543,29 @@ public class LawenaView extends JFrame {
         fl_panelBottomLeft.setHgap(0);
         GridBagConstraints gbc_panelBottomLeft = new GridBagConstraints();
         gbc_panelBottomLeft.anchor = GridBagConstraints.WEST;
-        gbc_panelBottomLeft.gridwidth = 3;
+        gbc_panelBottomLeft.gridwidth = 4;
         gbc_panelBottomLeft.insets = new Insets(0, 5, 5, 5);
         gbc_panelBottomLeft.fill = GridBagConstraints.VERTICAL;
         gbc_panelBottomLeft.gridx = 0;
         gbc_panelBottomLeft.gridy = 10;
         panelSettings.add(panelBottomLeft, gbc_panelBottomLeft);
 
-        btnSaveSettings = new JButton("Save Settings");
-        panelBottomLeft.add(btnSaveSettings);
-
         btnClearMovieFolder = new JButton("Clear Movie Files");
         panelBottomLeft.add(btnClearMovieFolder);
+
+        btnOpenCustomFolder = new JButton("Open Custom Folder");
+        panelBottomLeft.add(btnOpenCustomFolder);
 
         panelBottomRight = new JPanel();
         FlowLayout fl_panelBottomRight = (FlowLayout) panelBottomRight.getLayout();
         fl_panelBottomRight.setVgap(0);
         fl_panelBottomRight.setHgap(0);
         GridBagConstraints gbc_panelBottomRight = new GridBagConstraints();
-        gbc_panelBottomRight.gridwidth = 3;
+        gbc_panelBottomRight.gridwidth = 2;
         gbc_panelBottomRight.anchor = GridBagConstraints.EAST;
         gbc_panelBottomRight.insets = new Insets(0, 0, 5, 5);
         gbc_panelBottomRight.fill = GridBagConstraints.VERTICAL;
-        gbc_panelBottomRight.gridx = 3;
+        gbc_panelBottomRight.gridx = 4;
         gbc_panelBottomRight.gridy = 10;
         panelSettings.add(panelBottomRight, gbc_panelBottomRight);
 
@@ -665,10 +695,6 @@ public class LawenaView extends JFrame {
         return lblSkyboxPreview;
     }
 
-    public JButton getBtnSaveSettings() {
-        return btnSaveSettings;
-    }
-
     public JButton getBtnClearMovieFolder() {
         return btnClearMovieFolder;
     }
@@ -723,5 +749,13 @@ public class LawenaView extends JFrame {
 
     public JMenuItem getMntmAbout() {
         return mntmAbout;
+    }
+
+    public JButton getBtnOpenCustomFolder() {
+        return btnOpenCustomFolder;
+    }
+
+    public JMenuItem getMntmSaveSettings() {
+        return mntmSaveSettings;
     }
 }
