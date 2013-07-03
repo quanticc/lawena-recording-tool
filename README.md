@@ -1,59 +1,46 @@
 lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.png)](https://travis-ci.org/iabarca/lawena-recording-tool)
 =====================
 
-Simple Team Fortress 2 (TF2) movie recording tool. Original project by Montz at [Google Code](http://code.google.com/p/lawenarecordingtool/). The project source and issue tracking is now hosted here on GitHub. It requires [Java 1.7](http://www.java.com) and it's currently being maintained by [Quantic](http://steamcommunity.com/id/thepropane).
+A simple [Java 7](http://www.java.com/download/) tool which greatly enhances your TF2 image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.
 
-#### Download lawena (with auto-updates)
+Easy-to-use and no install required. This tool does not interfere with your regular TF2 configuration, HUD or launch options. Requires [Steam](https://steamcommunity.com/) in order to run.
+
+#### Download lawena
 - Get the [Launcher](http://code.google.com/p/lawenarecordingtool/downloads/detail?name=lawena-recording-tool.v4.zip)
-- Extract to any folder and run **lawena.exe**, on first run it will get all the base files and then it will update whenever a new version comes up.
+- Extract to any folder and run **lawena.exe**, the launcher will get all the required files and then start the tool.
 
-#### New features in this version
-- Renewed graphical user interface
-- Ability to load custom materials/models/skins/etc as folders or VPKs
-- Included PLDX enhanced particles
-- Many included resources are now packed into VPKs
-- Auto-updates using the launcher
-- Linux TF2 support
+#### Features
+- Insane max quality graphics configuration. 
+- Recorded files are saved to the directory of your choosing for comfort and order.
+- Options to enable/disable various game elements which may be unnecessary in the context of a movie.
+- Includes built-in moviehuds with different levels of simplicity.
+- Supports custom HUDs/materials/models/etc to add a personal touch to your movies.
+- Includes a set of built-in skyboxes, and supports custom skyboxes via simple drag-and-drop.
+- SteamPipe folder structure support.
+- [VDM](https://developer.valvesoftware.com/wiki/Demo_Recording_Tools) file support for automatizing your movie recording process.
+- Updates automatically, you can see the latest changes [here](https://github.com/iabarca/lawena-recording-tool/commits/master).
+- Windows, Linux and OSX support.
 
-#### Build from repository
-- Clone or download this repository
+#### Recommended links
+- [Instructions](http://code.google.com/p/lawenarecordingtool/wiki/Instructions) on how to use the tool, how to add custom resources, keybindings and Frequently Asked Questions.
+- [VDM Tutorial](http://code.google.com/p/lawenarecordingtool/wiki/VDMtutorial) to automate your recording process
+- [Rendering Tutorial](http://code.google.com/p/lawenarecordingtool/wiki/RenderingTutorial) using [VirtualDub](http://www.virtualdub.org/)
+- [Issues](https://github.com/iabarca/lawena-recording-tool/issues) to report anything wrong and also to suggest new features.
+
+#### Contributing
+- Clone or download this repository.
 - Use [Gradle](http://www.gradle.org/) to build the jar with the ``gradle jar`` command, then you can double-click **lawena.jar**
 - Alternatively, on Windows you can build it with "build.bat", and on Linux using "build.sh". You can then run the tool using "lawena.bat" or "lawena.sh" respectively.
-- Updates using ``git pull``
+- You'll need to use ``git pull`` command to stay up to date.
 
-#### Instructions
-- Run lawena.exe, the updater should run and it will automatically launch the tool
-- Your TF2 directory should be auto-detected (you can always change it from the "File" menu in the UI)
-- Choose your moviefile directory, where the tool will store everything you record
-- Configure it as you like, also you can save settings to a file and edit them later
-- Start TF2, lawena will make a backup of your cfg and custom folder while TF2 is running
-- Load a demo and press P to start recording
-- When you close TF2, your files should be restored (there should be no "lwrt" folders inside your tf folder)
-
-#### Adding custom resources
-- This version will detect all VPKs and folders inside your "tf/custom" folder, so just by having your files there you'll have the option to load them when lawena launches TF2
-- You can also use the "custom" folder of lawena, where some default VPK were included to show how it works
-- If you select your custom HUD in the custom resources list, you'll have to select "Custom" as your selected HUD option or there could be conflicts
-- If you want to add extra skyboxes, put the .vtf files (not the .vmt) inside the "skybox" folder of lawena and it will load along the included
-
-#### Troubleshooting
-- If lawena is not closed properly, running it once should restore all folders. Your files are inside the "lwrtcfg" and "lwrtcustom" folders
-- Please report any [issue](https://github.com/iabarca/lawena-recording-tool/issues) you might find. Also you can use that same page to suggest new features.
-
-#### Keybindings
-- **N** - Locks viewmodels so that if they were enabled when you press the key, they stay on and can't be disabled, and viceversa
-- **M** - Locks default crosshair so that it cannot be changed
-- **R** - Enables/disables ragdolls
-- **UP ARROW** - Increases the recording frame rate
-- **DOWN ARROW** - Decreases the recording frame rate
-- **P** - Starts recording a series of .tga files and their respective .wav file. Each series is named XY_ where X is a letter and Y is a number between 1 and 15
-- **NumPad Keys** - Third-person camera control (angle, position, distance). More details in the included README.txt file.
-
-#### Credits and Thanks
-- Montz - original lawena developer.
-- Chris Down - configs.
-- Broesel, m0re, povohat and Barrakketh - HUDs.
-- Komaokc - skyboxes.
+#### Credits
+- Original project by Montz at [Google Code](http://code.google.com/p/lawenarecordingtool/)
+- Current maintainer: [Quantic](http://steamcommunity.com/id/thepropane)
+- Graphical .cfg files based on those made by Chris Down.
+- HUDs based on broesel's Medic Movie HUD, m0rehud and Barrakketh's PVHUD.
+- Skyboxes made by komaokc from GameBanana.
+- Includes some content used in PLDX recording tool.
+- Valve - Team Fortress and Team Fortress logo.
 
 
 [![githalytics.com alpha](https://cruel-carlota.pagodabox.com/f54384a134a114f62e4ff6f8bdd2561d "githalytics.com")](http://githalytics.com/iabarca/lawena-recording-tool)
