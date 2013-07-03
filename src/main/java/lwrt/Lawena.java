@@ -301,10 +301,18 @@ public class Lawena {
                 startTfTask = null;
                 setCurrentWorker(null, false);
                 view.getBtnStartTf().setEnabled(false);
-                if (!files.restoreAll()) {
-                    status.info("Your files will be restored once you close lawena or run TF2 again");
-                } else {
-                    status.info("TF2 has finished running. All files restored");
+                boolean ranTf2Correctly = false;
+                try {
+                    ranTf2Correctly = get();
+                } catch (InterruptedException | ExecutionException e) {
+                }
+                boolean restoredAllFiles = files.restoreAll();
+                if (ranTf2Correctly) {
+                    if (restoredAllFiles) {
+                        status.info("TF2 has finished running. All files restored");
+                    } else {
+                        status.info("Your files will be restored once you close lawena or run TF2 again");
+                    }
                 }
                 cl.setSystemDxLevel(oDxlevel);
                 view.getBtnStartTf().setText("Start Team Fortress 2");

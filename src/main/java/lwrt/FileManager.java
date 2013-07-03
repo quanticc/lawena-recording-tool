@@ -83,6 +83,9 @@ public class FileManager {
         if (!Files.exists(customBackupPath)) {
             try {
                 log.fine("Making a backup of your custom files");
+                if (!Files.exists(customPath) || !Files.isDirectory(customPath)) {
+                    Files.createDirectory(customPath);
+                }
                 customPath.toFile().setWritable(true);
                 Files.move(customPath, customBackupPath);
             } catch (IOException e) {

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -239,6 +240,8 @@ public class CustomPathList extends AbstractTableModel {
             for (Path path : stream) {
                 addPath(path);
             }
+        } catch (NoSuchFileException e) {
+            log.fine(dir + " does not exist, not scanning this path");
         } catch (IOException e) {
             log.log(Level.FINE, "Problem while loading custom paths", e);
         }
