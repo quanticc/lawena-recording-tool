@@ -2,7 +2,6 @@
 package lwrt;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
@@ -11,6 +10,8 @@ import java.util.logging.Level;
 
 public class CLWindows extends CommandLine {
 
+    private String hl2 = "hl2.exe";
+
     @Override
     public ProcessBuilder getBuilderStartTF2() {
         return new ProcessBuilder(getSteamPath() + "/steam.exe");
@@ -18,7 +19,7 @@ public class CLWindows extends CommandLine {
 
     @Override
     public ProcessBuilder getBuilderTF2ProcessKiller() {
-        return new ProcessBuilder("taskkill", "/F", "/IM", "hl2.exe");
+        return new ProcessBuilder("taskkill", "/F", "/IM", hl2);
     }
 
     @Override
@@ -39,24 +40,21 @@ public class CLWindows extends CommandLine {
 
     @Override
     public boolean isRunningTF2() {
-        String processName = "hl2.exe";
         boolean found = false;
         try {
-            ProcessBuilder pb = new ProcessBuilder("cscript", "//NoLogo", new File(
-                    "batch\\procchk.vbs").getPath(), processName);
-            Process pr = pb.start();
-            BufferedReader input =
-                    new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;
-            line = input.readLine();
-            if (line != null) {
-                if (line.equals(processName)) {
-                    found = true;
+            Process p = new ProcessBuilder("tasklist", "/fi", "\"imagename eq " + hl2 + "\"",
+                    "/nh", "/fo", "csv").start();
+            BufferedReader input =
+                    new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while ((line = input.readLine()) != null) {
+                if (line.startsWith("\"" + hl2 + "\"")) {
+                    return true;
                 }
             }
             input.close();
         } catch (IOException e) {
-            log.log(Level.INFO, "", e);
+            log.log(Level.INFO, "[tasklist] Problem while finding if TF2 is running", e);
         }
         return found;
     }
