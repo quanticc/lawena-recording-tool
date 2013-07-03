@@ -183,7 +183,9 @@ public class Lawena {
                 // Checking if the user selects "Custom" HUD in the dropdown,
                 // he or she also selects a "hud" in the sidebar
                 if (!verifyCustomHud()) {
-                    status.info("Please select a custom HUD to the right and retry");
+                    JOptionPane.showMessageDialog(view,
+                            "Please select a custom HUD in the\nCustom Resources table and retry",
+                            "Custom HUD", JOptionPane.INFORMATION_MESSAGE);
                     log.info("Launch aborted because the custom HUD to use was not specified");
                     return false;
                 }
@@ -238,9 +240,9 @@ public class Lawena {
                 setProgress(0);
                 status.info("Waiting for TF2 to start...");
                 while (!cl.isRunningTF2() && timeout < maxtimeout) {
+                    ++timeout;
                     setProgress((int) ((double) timeout / maxtimeout * 100));
                     Thread.sleep(millis);
-                    ++timeout;
                 }
 
                 if (timeout >= maxtimeout) {
@@ -281,6 +283,7 @@ public class Lawena {
         private boolean verifyCustomHud() {
             if (view.getCmbHud().getSelectedItem().equals("Custom")) {
                 for (CustomPath cp : customPaths.getList()) {
+                    customPaths.update(cp);
                     EnumSet<PathContents> set = cp.getContents();
                     if (cp.isSelected() && set.contains(PathContents.HUD)) {
                         return true;
@@ -846,7 +849,6 @@ public class Lawena {
         view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
         view.getDisableHitSounds().setSelected(!settings.getHitsounds());
         view.getDisableVoiceChat().setSelected(!settings.getVoice());
-        view.getChckbxUsecondebug().setSelected(settings.getCondebug());
     }
 
     private void saveSettings() {
@@ -874,7 +876,6 @@ public class Lawena {
         settings.setHitsounds(!view.getDisableHitSounds().isSelected());
         settings.setVoice(!view.getDisableVoiceChat().isSelected());
         settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
-        settings.setCondebug(view.getChckbxUsecondebug().isSelected());
         Path tfpath = settings.getTfPath();
         List<String> selected = new ArrayList<>();
         for (CustomPath cp : customPaths.getList()) {

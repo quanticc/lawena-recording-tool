@@ -149,8 +149,6 @@ public class LawenaView extends JFrame {
     private Component horizontalStrut;
     private JPanel panelBottomRight;
     private JProgressBar progressBar;
-    private JPanel panelLogBottom;
-    private JCheckBox chckbxUsecondebug;
     private JSeparator separator;
     private JMenuItem mntmRevertToDefault;
     private JSeparator separator_1;
@@ -301,10 +299,8 @@ public class LawenaView extends JFrame {
         panelSettings.add(cmbFramerate, gbc_cmbFramerate);
 
         panelCustomContent = new JPanel();
-        panelCustomContent.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"),
-                "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         GridBagConstraints gbc_panelCustomContent = new GridBagConstraints();
-        gbc_panelCustomContent.insets = new Insets(0, 0, 5, 0);
+        gbc_panelCustomContent.insets = new Insets(5, 0, 5, 5);
         gbc_panelCustomContent.gridwidth = 2;
         gbc_panelCustomContent.gridheight = 10;
         gbc_panelCustomContent.fill = GridBagConstraints.BOTH;
@@ -574,25 +570,33 @@ public class LawenaView extends JFrame {
 
         JPanel panelLog = new JPanel();
         tabbedPane.addTab("Log", null, panelLog, null);
-        panelLog.setLayout(new BorderLayout(0, 0));
+        GridBagLayout gbl_panelLog = new GridBagLayout();
+        gbl_panelLog.columnWidths = new int[] {
+                719, 0
+        };
+        gbl_panelLog.rowHeights = new int[] {
+                320, 0
+        };
+        gbl_panelLog.columnWeights = new double[] {
+                1.0, Double.MIN_VALUE
+        };
+        gbl_panelLog.rowWeights = new double[] {
+                1.0, Double.MIN_VALUE
+        };
+        panelLog.setLayout(gbl_panelLog);
 
         scrollPane_2 = new JScrollPane();
-        panelLog.add(scrollPane_2, BorderLayout.CENTER);
+        GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
+        gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane_2.insets = new Insets(5, 5, 5, 5);
+        gbc_scrollPane_2.gridx = 0;
+        gbc_scrollPane_2.gridy = 0;
+        panelLog.add(scrollPane_2, gbc_scrollPane_2);
 
         textAreaLog = new JTextArea();
         textAreaLog.setFont(new Font("Tahoma", Font.PLAIN, 10));
         textAreaLog.setEditable(false);
         scrollPane_2.setViewportView(textAreaLog);
-
-        panelLogBottom = new JPanel();
-        FlowLayout flowLayout = (FlowLayout) panelLogBottom.getLayout();
-        flowLayout.setVgap(0);
-        flowLayout.setHgap(0);
-        flowLayout.setAlignment(FlowLayout.LEADING);
-        panelLog.add(panelLogBottom, BorderLayout.SOUTH);
-
-        chckbxUsecondebug = new JCheckBox("Use -condebug at launch");
-        panelLogBottom.add(chckbxUsecondebug);
 
         panelStatusbar = new JPanel();
         contentPane.add(panelStatusbar, BorderLayout.SOUTH);
@@ -733,10 +737,6 @@ public class LawenaView extends JFrame {
 
     public JProgressBar getProgressBar() {
         return progressBar;
-    }
-
-    public JCheckBox getChckbxUsecondebug() {
-        return chckbxUsecondebug;
     }
 
     public JMenuItem getMntmRevertToDefault() {

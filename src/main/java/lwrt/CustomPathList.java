@@ -167,13 +167,13 @@ public class CustomPathList extends AbstractTableModel {
                 Files.walkFileTree(path, set, 3, visitor);
                 return visitor.getFiles();
             } catch (IllegalArgumentException | IOException e) {
-                log.log(Level.FINER, "Could not walk through the file tree", e);
+                log.log(Level.FINE, "Could not walk through the file tree", e);
             }
         }
         return Collections.emptyList();
     }
 
-    private void update(CustomPath cp) {
+    public void update(CustomPath cp) {
         EnumSet<PathContents> c = cp.getContents();
         Path path = cp.getPath();
         if (!c.contains(PathContents.READONLY)) {
@@ -270,8 +270,10 @@ public class CustomPathList extends AbstractTableModel {
             // don't remove "default" or "readonly" resources
             EnumSet<PathContents> set = toremove.getContents();
             if (!set.contains(PathContents.DEFAULT) && !set.contains(PathContents.READONLY)) {
-                toremove.setSelected(false);
-                fireTableCellUpdated(i, Column.SELECTED.ordinal());
+                if (toremove.isSelected()) {
+                    toremove.setSelected(false);
+                    fireTableCellUpdated(i, Column.SELECTED.ordinal());
+                }
                 list.remove(i);
                 fireTableRowsDeleted(i, i);
             }
