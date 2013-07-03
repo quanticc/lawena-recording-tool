@@ -300,7 +300,7 @@ public class LawenaView extends JFrame {
 
         panelCustomContent = new JPanel();
         GridBagConstraints gbc_panelCustomContent = new GridBagConstraints();
-        gbc_panelCustomContent.insets = new Insets(5, 0, 5, 5);
+        gbc_panelCustomContent.insets = new Insets(5, 0, 8, 5);
         gbc_panelCustomContent.gridwidth = 2;
         gbc_panelCustomContent.gridheight = 10;
         gbc_panelCustomContent.fill = GridBagConstraints.BOTH;
