@@ -124,7 +124,11 @@ public class Lawena {
                             break;
                         }
                         path.toFile().setWritable(true);
-                        Files.delete(path);
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            log.log(Level.INFO, "Could not delete a file", e);
+                        }
                         publish(path);
                     }
 
