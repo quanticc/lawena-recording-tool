@@ -30,15 +30,14 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
             throws IOException {
-        if (filter != null && filter.accept(dir)) {
-            Path targetPath = toPath.resolve(fromPath.relativize(dir));
-            if (!Files.exists(targetPath)) {
-                Files.createDirectory(targetPath);
-            }
-            return FileVisitResult.CONTINUE;
-        } else {
+        if (filter != null && !filter.accept(dir)) {
             return FileVisitResult.SKIP_SUBTREE;
         }
+        Path targetPath = toPath.resolve(fromPath.relativize(dir));
+        if (!Files.exists(targetPath)) {
+            Files.createDirectory(targetPath);
+        }
+        return FileVisitResult.CONTINUE;
     }
 
     @Override
