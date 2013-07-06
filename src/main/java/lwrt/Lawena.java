@@ -592,7 +592,7 @@ public class Lawena {
                 System.exit(1);
             }
         }
-        movies = new MovieManager(moviepath.toString());
+        movies = new MovieManager(settings);
         settings.setMoviePath(moviepath);
 
         settings.save();
