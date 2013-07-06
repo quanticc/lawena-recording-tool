@@ -272,7 +272,7 @@ public abstract class CommandLine {
             BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;
             while ((line = input.readLine()) != null) {
-                log.fine("[steam] " + line);
+                log.finer("[steam] " + line);
             }
             pr.waitFor();
         } catch (InterruptedException | IOException e) {
