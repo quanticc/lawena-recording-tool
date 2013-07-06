@@ -892,6 +892,7 @@ public class Lawena {
         view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
         view.getDisableHitSounds().setSelected(!settings.getHitsounds());
         view.getDisableVoiceChat().setSelected(!settings.getVoice());
+        view.getUseHudMinmode().setSelected(settings.getHudMinmode());
     }
 
     private void saveSettings() {
@@ -930,6 +931,7 @@ public class Lawena {
             }
         }
         settings.setCustomResources(selected);
+        settings.setHudMinmode(view.getUseHudMinmode().isSelected());
         settings.save();
         log.fine("Settings saved");
     }

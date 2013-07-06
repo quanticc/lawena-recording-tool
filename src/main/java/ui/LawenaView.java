@@ -163,6 +163,7 @@ public class LawenaView extends JFrame {
     private JMenuItem mntmRenderingTutorial;
     private JButton btnOpenCustomFolder;
     private JMenuItem mntmSaveSettings;
+    private JCheckBox useHudMinmode;
 
     /**
      * Create the frame.
@@ -478,13 +479,13 @@ public class LawenaView extends JFrame {
                 0, 0, 0
         };
         gbl_panelCheckboxes.rowHeights = new int[] {
-                0, 0, 0, 0
+                0, 0, 0, 0, 0
         };
         gbl_panelCheckboxes.columnWeights = new double[] {
                 1.0, 1.0, Double.MIN_VALUE
         };
         gbl_panelCheckboxes.rowWeights = new double[] {
-                0.0, 0.0, 0.0, Double.MIN_VALUE
+                0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE
         };
         panelCheckboxes.setLayout(gbl_panelCheckboxes);
 
@@ -532,6 +533,16 @@ public class LawenaView extends JFrame {
         gbc_disableCrosshairSwitch.gridx = 1;
         gbc_disableCrosshairSwitch.gridy = 2;
         panelCheckboxes.add(disableCrosshairSwitch, gbc_disableCrosshairSwitch);
+
+        useHudMinmode = new JCheckBox("Use HUD Minmode");
+        useHudMinmode
+                .setToolTipText("<html>The minmode version of a HUD primarily reduces the size of the<br>health and ammo displays, moving them closer to the centre of<br>the screen. Ticking this option will add \"cl_hud_minmode 1\" to<br>the config.");
+        GridBagConstraints gbc_chckbxUseHudMin = new GridBagConstraints();
+        gbc_chckbxUseHudMin.anchor = GridBagConstraints.WEST;
+        gbc_chckbxUseHudMin.insets = new Insets(0, 0, 0, 5);
+        gbc_chckbxUseHudMin.gridx = 0;
+        gbc_chckbxUseHudMin.gridy = 3;
+        panelCheckboxes.add(useHudMinmode, gbc_chckbxUseHudMin);
 
         panelBottomLeft = new JPanel();
         FlowLayout fl_panelBottomLeft = (FlowLayout) panelBottomLeft.getLayout();
@@ -631,7 +642,7 @@ public class LawenaView extends JFrame {
         panelStatusbar.add(progressBar, gbc_progressBar);
 
         pack();
-        setMinimumSize(new Dimension(750, 400));
+        setMinimumSize(new Dimension(750, 420));
         setLocationByPlatform(true);
     }
 
@@ -757,5 +768,9 @@ public class LawenaView extends JFrame {
 
     public JMenuItem getMntmSaveSettings() {
         return mntmSaveSettings;
+    }
+
+    public JCheckBox getUseHudMinmode() {
+        return useHudMinmode;
     }
 }

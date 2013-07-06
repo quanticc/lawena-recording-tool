@@ -40,7 +40,8 @@ public class SettingsManager {
         Hitsounds(false),
         Voice(false),
         SteamCloud(false),
-        Condebug(true);
+        Condebug(true),
+        HudMinmode(true);
 
         private Object value;
         private List<String> allowedValues;
@@ -203,7 +204,7 @@ public class SettingsManager {
         settings.println("alias cl_showfps \"\"");
         settings.println("volume 0.5");
         settings.println("hud_fastswitch 1");
-        settings.println("cl_hud_minmode 1");
+        settings.println("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
         settings.close();
     }
 
@@ -341,6 +342,10 @@ public class SettingsManager {
         }
     }
 
+    public void setHudMinmode(boolean value) {
+        setBoolean(Key.HudMinmode, value);
+    }
+
     public int getHeight() {
         return getInt(Key.Height);
     }
@@ -425,4 +430,9 @@ public class SettingsManager {
         }
         return list;
     }
+
+    public boolean getHudMinmode() {
+        return getBoolean(Key.HudMinmode);
+    }
+    
 }
