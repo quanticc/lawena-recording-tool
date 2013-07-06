@@ -31,7 +31,8 @@ public class TooltipRenderer extends DefaultTableCellRenderer {
         sb.append("<html>Filename: <b>");
         sb.append(cp.getPath().getFileName());
         sb.append("</b><br>Location: ");
-        sb.append((path.startsWith(tfpath) ? "TF2 Path: " + tfpath.relativize(path) : path).toString());
+        sb.append((path.startsWith(tfpath) ? "TF2 Path: " + tfpath.relativize(path) : path)
+                .toString());
         setToolTipText(sb.toString());
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }

@@ -11,8 +11,8 @@ import javax.swing.SwingUtilities;
 import lwrt.Lawena;
 
 public class LwrtGUI {
-    
-    private static final Logger log = Logger.getLogger("lawena");    
+
+    private static final Logger log = Logger.getLogger("lawena");
 
     public static void main(String[] args) throws Exception {
         new StartLogger("lawena").toConsole(Level.FINER).toFile(Level.FINE);
