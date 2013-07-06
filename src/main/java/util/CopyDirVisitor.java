@@ -2,6 +2,7 @@
 package util;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,20 +15,30 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
     private Path fromPath;
     private Path toPath;
     private StandardCopyOption copyOption = StandardCopyOption.REPLACE_EXISTING;
+    private Filter<Path> filter;
 
     public CopyDirVisitor(Path from, Path to) {
         fromPath = from;
         toPath = to;
     }
 
+    public CopyDirVisitor(Path from, Path to, Filter<Path> filter) {
+        this(from, to);
+        this.filter = filter;
+    }
+
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
             throws IOException {
-        Path targetPath = toPath.resolve(fromPath.relativize(dir));
-        if (!Files.exists(targetPath)) {
-            Files.createDirectory(targetPath);
+        if (filter != null && filter.accept(dir)) {
+            Path targetPath = toPath.resolve(fromPath.relativize(dir));
+            if (!Files.exists(targetPath)) {
+                Files.createDirectory(targetPath);
+            }
+            return FileVisitResult.CONTINUE;
+        } else {
+            return FileVisitResult.SKIP_SUBTREE;
         }
-        return FileVisitResult.CONTINUE;
     }
 
     @Override

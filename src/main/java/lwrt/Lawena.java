@@ -352,6 +352,44 @@ public class Lawena {
         }
     }
 
+    public class PathCopyTask extends SwingWorker<Boolean, Void> {
+
+        private Path from;
+
+        public PathCopyTask(Path from) {
+            this.from = from;
+        }
+
+        @Override
+        protected Boolean doInBackground() throws Exception {
+            status.info("Copying " + from + " into lawena custom folder...");
+            return files.copyToCustom(from);
+        }
+
+        @Override
+        protected void done() {
+            boolean result = false;
+            try {
+                result = get();
+            } catch (CancellationException | InterruptedException | ExecutionException e) {
+                log.log(Level.FINE, "Custom path copy task was cancelled", e);
+            }
+            if (!result) {
+                try {
+                    customPaths.addPath(from);
+                    log.info(from + " added to custom resource list");
+                } catch (IOException e) {
+                    log.log(Level.FINE, "Problem while loading a custom path", e);
+                }
+            } else {
+                log.info(from + " copied to custom resource folder");
+            }
+            status.info(from.getFileName() + " was added"
+                    + (result ? " to lawena custom folder" : " to custom resource list"));
+        }
+
+    }
+
     public class SkyboxPreviewTask extends SwingWorker<Map<String, ImageIcon>, Void> {
 
         private List<String> data;
@@ -691,18 +729,11 @@ public class Lawena {
                         fileList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
                         if (fileList.size() > 0) {
                             table.clearSelection();
-                            Point point = dtde.getLocation();
-                            int row = table.rowAtPoint(point);
-                            CustomPathList model = (CustomPathList) table.getModel();
                             for (Object value : fileList) {
                                 if (value instanceof File) {
                                     File f = (File) value;
-                                    if (row < 0) {
-                                        model.addPath(f.toPath());
-                                    } else {
-                                        model.insertPath(row, f.toPath());
-                                        row++;
-                                    }
+                                    log.info("Attempting to copy " + f.toPath());
+                                    new PathCopyTask(f.toPath()).execute();
                                 }
                             }
                         }

@@ -7,6 +7,7 @@ import util.LawenaException;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -34,6 +35,10 @@ public class FileManager {
 
     private Path copy(Path from, Path to) throws IOException {
         return Files.walkFileTree(from, new CopyDirVisitor(from, to));
+    }
+
+    private Path copy(Path from, Path to, Filter<Path> filter) throws IOException {
+        return Files.walkFileTree(from, new CopyDirVisitor(from, to, filter));
     }
 
     private Path delete(Path dir) throws IOException {
@@ -272,5 +277,27 @@ public class FileManager {
             log.info("Your files will be restored once you close lawena or run TF2");
         }
         return restoreComplete;
+    }
+
+    public boolean copyToCustom(final Path path) {
+        Path localCustomPath = Paths.get("custom");
+        try {
+            copy(path, localCustomPath.resolve(path.getFileName()), new Filter<Path>() {
+
+                @Override
+                public boolean accept(Path entry) throws IOException {
+                    if (entry.getParent().equals(path)) {
+                        String f = entry.getFileName().toString();
+                        return f.matches("^(resource|scripts|cfg|materials|addons|sound)$");
+                    } else {
+                        return true;
+                    }
+                }
+            });
+            return true;
+        } catch (IOException e) {
+            log.log(Level.FINE, "Failed to copy folder to lawena's custom files", e);
+        }
+        return false;
     }
 }
