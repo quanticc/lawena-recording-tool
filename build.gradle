@@ -32,7 +32,8 @@ jar {
             'Main-Class': mainClassName,
             'Implementation-Title': 'lawena Recording Tool',
             'Implementation-Version': version,
-            'Implementation-Build': ext.buildTime 
+            'Implementation-Build': ext.buildTime,
+            'SplashScreen-Image': 'ui/splash.png'
         )
     }
 }
