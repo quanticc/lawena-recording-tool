@@ -288,7 +288,7 @@ public class FileManager {
                 public boolean accept(Path entry) throws IOException {
                     if (entry.getParent().equals(path)) {
                         String f = entry.getFileName().toString();
-                        return f.matches("^(resource|scripts|cfg|materials|addons|sound)$");
+                        return f.matches("^(resource|scripts|cfg|materials|addons|sound|particles)$");
                     } else {
                         return true;
                     }
