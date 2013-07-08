@@ -169,10 +169,12 @@ public class FileManager {
                             if (!selected.contains("*")) {
                                 contents.retainAll(selected);
                             }
-                            log.fine("Copying enhanced particles: " + contents);
-                            Files.createDirectories(customParticlesPath);
-                            cl.extractIfNeeded(tfpath, cp.getPath().toString(),
-                                    customParticlesPath.getParent(), contents);
+                            if (!contents.isEmpty()) {
+                                log.fine("Copying enhanced particles: " + contents);
+                                Files.createDirectories(customParticlesPath);
+                                cl.extractIfNeeded(tfpath, cp.getPath().toString(),
+                                        customParticlesPath.getParent(), contents);
+                            }
                         } else if (source.getFileName().toString().endsWith(".vpk")) {
                             log.fine("Copying custom VPK: " + cp.getPath());
                             Path dest = customPath.resolve(source.getFileName());
