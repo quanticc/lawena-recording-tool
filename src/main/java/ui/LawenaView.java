@@ -164,6 +164,8 @@ public class LawenaView extends JFrame {
     private JButton btnOpenCustomFolder;
     private JMenuItem mntmSaveSettings;
     private JCheckBox useHudMinmode;
+    private JMenu mnAdvanced;
+    private JMenuItem mntmSelectEnhancedParticles;
 
     /**
      * Create the frame.
@@ -200,6 +202,12 @@ public class LawenaView extends JFrame {
         mntmExit = new JMenuItem("Exit");
         mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_MASK));
         mnFile.add(mntmExit);
+
+        mnAdvanced = new JMenu(" Advanced ");
+        menuBar.add(mnAdvanced);
+
+        mntmSelectEnhancedParticles = new JMenuItem("Select Enhanced Particles...");
+        mnAdvanced.add(mntmSelectEnhancedParticles);
 
         mnHelp = new JMenu(" Help ");
         menuBar.add(mnHelp);
@@ -350,8 +358,8 @@ public class LawenaView extends JFrame {
 
         cmbHud = new JComboBox<>();
         cmbHud.setToolTipText("<html>Select your preferred HUD here. You can also you use a custom HUD,<br>in which case you should put the HUD folder into lawena/custom folder<br>and then mark it in the Custom Resources sidebar.");
-        cmbHud.setModel(new DefaultComboBoxModel<>(new String[] {
-                "Minimal (kill notices)", "Medic (hp, ubercharge, cp)", "Full", "Custom"
+        cmbHud.setModel(new DefaultComboBoxModel<String>(new String[] {
+                "Minimal (kill notices)", "Medic (hp, ubercharge, cp)", "Full", "Default", "Custom"
         }));
         GridBagConstraints gbc_cmbHud = new GridBagConstraints();
         gbc_cmbHud.fill = GridBagConstraints.HORIZONTAL;
@@ -772,5 +780,9 @@ public class LawenaView extends JFrame {
 
     public JCheckBox getUseHudMinmode() {
         return useHudMinmode;
+    }
+
+    public JMenuItem getMntmSelectEnhancedParticles() {
+        return mntmSelectEnhancedParticles;
     }
 }

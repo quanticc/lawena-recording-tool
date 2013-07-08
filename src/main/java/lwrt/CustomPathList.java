@@ -44,6 +44,11 @@ public class CustomPathList extends AbstractTableModel {
     private static final Map<Path, CustomPath> defaultPaths = new LinkedHashMap<>();
     private static final List<Path> ignoredPaths = new ArrayList<>();
 
+    public static final CustomPath particles = new CustomPath(
+            Paths.get("custom/pldx_particles.vpk"),
+            "Enable enhanced particles", EnumSet
+                    .of(PathContents.READONLY));
+
     {
         List<CustomPath> list = new ArrayList<>();
         list.add(new CustomPath(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet
@@ -54,8 +59,7 @@ public class CustomPathList extends AbstractTableModel {
                 "Disable applause sounds"));
         list.add(new CustomPath(Paths.get("custom/no_domination_sounds.vpk"),
                 "Disable domination/revenge sounds"));
-        list.add(new CustomPath(Paths.get("custom/pldx_particles.vpk"),
-                "Enable enhanced particles"));
+        list.add(particles);
         for (CustomPath path : list) {
             path.getContents().add(PathContents.DEFAULT);
             defaultPaths.put(path.getPath(), path);

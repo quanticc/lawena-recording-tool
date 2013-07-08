@@ -19,6 +19,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
     public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
         try {
             path.toFile().setWritable(true);
+            log.finer("Deleting file: " + path);
             Files.delete(path);
         } catch (NoSuchFileException e) {
         } catch (IOException e) {
@@ -31,6 +32,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
         if (exc == null) {
             try {
+                log.finer("Deleting folder: " + dir);
                 Files.delete(dir);
             } catch (NoSuchFileException e) {
             } catch (IOException e) {

@@ -125,7 +125,7 @@ public abstract class CommandLine {
      * @throws IOException If an error occurred while creating the destination
      *             folder
      */
-    public void extractIfNeeded(Path tfpath, String vpkname, Path dest, String... files)
+    public void extractIfNeeded(Path tfpath, String vpkname, Path dest, Iterable<String> files)
             throws IOException {
         List<String> fileList = new ArrayList<>();
         for (String file : files) {

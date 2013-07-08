@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class SettingsManager {
         Height(720, 360, Integer.MAX_VALUE),
         Framerate(120, 24, Integer.MAX_VALUE),
         DxLevel("98", "80", "81", "90", "95", "98"),
-        Hud("medic", "killnotices", "medic", "full", "custom"),
+        Hud("medic", "killnotices", "medic", "full", "default", "custom"),
         Skybox("Default"),
         CustomResources("no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"),
         ViewmodelSwitch("on", "on", "off", "default"),
@@ -41,7 +42,11 @@ public class SettingsManager {
         Voice(false),
         SteamCloud(false),
         Condebug(true),
-        HudMinmode(true);
+        HudMinmode(true),
+        Particles(""),
+        LogConsoleLevel("FINER"),
+        LogFileLevel("FINE"),
+        LogUiLevel("FINE");
 
         private Object value;
         private List<String> allowedValues;
@@ -90,6 +95,9 @@ public class SettingsManager {
 
     private String filename;
     private Properties properties;
+
+    // transient property, do not save to file
+    private String demoname;
 
     public SettingsManager(String settingsFile) {
         filename = settingsFile;
@@ -206,6 +214,14 @@ public class SettingsManager {
         settings.println("hud_fastswitch 1");
         settings.println("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
         settings.close();
+
+        if (demoname != null) {
+            PrintWriter playdemo = new PrintWriter(new FileWriter("cfg/lawena.cfg"));
+            playdemo.println("playdemo \"" + demoname + "\"");
+            playdemo.close();
+        } else {
+            Files.deleteIfExists(Paths.get("cfg/lawena.cfg"));
+        }
     }
 
     private void setString(Key key, String value) {
@@ -346,6 +362,29 @@ public class SettingsManager {
         setBoolean(Key.HudMinmode, value);
     }
 
+    public void setDemoname(String demoname) {
+        this.demoname = demoname;
+    }
+
+    public void setParticles(List<String> values) {
+        Key key = Key.Particles;
+        setString(key, listToString(values, '|'));
+    }
+
+    public void setLogConsoleLevel(String value) {
+        setString(Key.LogConsoleLevel, value);
+    }
+
+    public void setLogFileLevel(String value) {
+        setString(Key.LogFileLevel, value);
+    }
+
+    public void setLogUiLevel(String value) {
+        setString(Key.LogUiLevel, value);
+    }
+
+    // Getters
+
     public int getHeight() {
         return getInt(Key.Height);
     }
@@ -420,8 +459,7 @@ public class SettingsManager {
         return getBoolean(Key.Condebug);
     }
 
-    public List<String> getCustomResources() {
-        Key key = Key.CustomResources;
+    private List<String> getList(Key key) {
         String value = getString(key);
         List<String> list = new ArrayList<>();
         if (!value.isEmpty()) {
@@ -431,8 +469,44 @@ public class SettingsManager {
         return list;
     }
 
+    public List<String> getCustomResources() {
+        return getList(Key.CustomResources);
+    }
+
     public boolean getHudMinmode() {
         return getBoolean(Key.HudMinmode);
     }
-    
+
+    public String getDemoname() {
+        return demoname;
+    }
+
+    public List<String> getParticles() {
+        return getList(Key.Particles);
+    }
+
+    public Level getLogConsoleLevel() {
+        try {
+            return Level.parse(getString(Key.LogConsoleLevel));
+        } catch (IllegalArgumentException e) {
+            return Level.FINER;
+        }
+    }
+
+    public Level getLogFileLevel() {
+        try {
+            return Level.parse(getString(Key.LogFileLevel));
+        } catch (IllegalArgumentException e) {
+            return Level.FINE;
+        }
+    }
+
+    public Level getLogUiLevel() {
+        try {
+            return Level.parse(getString(Key.LogUiLevel));
+        } catch (IllegalArgumentException e) {
+            return Level.FINE;
+        }
+    }
+
 }

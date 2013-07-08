@@ -9,8 +9,11 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.logging.Logger;
 
 public class CopyDirVisitor extends SimpleFileVisitor<Path> {
+
+    private static final Logger log = Logger.getLogger("lawena");
 
     private Path fromPath;
     private Path toPath;
@@ -35,6 +38,7 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
         }
         Path targetPath = toPath.resolve(fromPath.relativize(dir));
         if (!Files.exists(targetPath)) {
+            log.finer("Creating directory: " + targetPath);
             Files.createDirectory(targetPath);
         }
         return FileVisitResult.CONTINUE;
@@ -42,7 +46,9 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        Path target = Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOption);
+        Path dest = toPath.resolve(fromPath.relativize(file));
+        log.finer("Copying file: " + file + " -> " + dest);
+        Path target = Files.copy(file, dest, copyOption);
         target.toFile().setWritable(false);
         return FileVisitResult.CONTINUE;
     }

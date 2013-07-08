@@ -13,7 +13,9 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,7 +73,6 @@ public class FileManager {
         Path customPath = tfpath.resolve("custom");
         Path configBackupPath = tfpath.resolve("lwrtcfg");
         Path configPath = tfpath.resolve("cfg");
-        Path localCustomPath = Paths.get("custom");
 
         if (!Files.exists(configBackupPath)) {
             try {
@@ -132,45 +133,59 @@ public class FileManager {
             }
             // Copy selected custom files
             if (customPathList != null) {
-                log.fine("Copying selected custom vpks and folders");
-                for (CustomPath cp : customPathList.getList()) {
-                    if (cp.isSelected()) {
-                        Path source;
-                        if (cp.getPath().startsWith(customPath)) {
-                            source = customBackupPath.resolve(cp.getPath().getFileName());
-                        } else if (cp.getPath().startsWith(localCustomPath)) {
-                            source = localCustomPath.resolve(cp.getPath().getFileName());
-                        } else {
-                            log.info("Skipping custom file with wrong path: "
-                                    + cp.getPath());
-                            continue;
-                        }
-                        if (Files.exists(source)) {
-                            if (Files.isDirectory(source)) {
-                                try {
-                                    Path dest = customPath.resolve(source.getFileName());
-                                    copy(source, dest);
-                                } catch (IOException e) {
-                                    log.log(Level.INFO,
-                                            "Could not copy custom folder: " + source.getFileName(),
-                                            e);
-                                }
-                            } else if (source.getFileName().toString().endsWith(".vpk")) {
-                                try {
-                                    Path dest = customPath.resolve(source.getFileName());
-                                    Files.copy(source, dest);
-                                } catch (IOException e) {
-                                    log.log(Level.INFO,
-                                            "Could not copy custom vpk: " + source.getFileName(), e);
-                                }
-                            } else {
-                                log.info("Not copying this custom file: " + source.getFileName());
+                copyCustomFiles();
+            }
+        }
+    }
+
+    private void copyCustomFiles() {
+        Path tfpath = cfg.getTfPath();
+        Path customBackupPath = tfpath.resolve("lwrtcustom");
+        Path customPath = tfpath.resolve("custom");
+        Path localCustomPath = Paths.get("custom");
+        Path customParticlesPath = customPath.resolve("lawena/particles");
+
+        log.fine("Copying selected custom vpks and folders");
+        for (CustomPath cp : customPathList.getList()) {
+            try {
+                if (cp.isSelected()) {
+                    Path source;
+                    if (cp.getPath().startsWith(customPath)) {
+                        source = customBackupPath.resolve(cp.getPath().getFileName());
+                    } else if (cp.getPath().startsWith(localCustomPath)) {
+                        source = localCustomPath.resolve(cp.getPath().getFileName());
+                    } else {
+                        log.info("Skipping custom file with wrong path: " + cp.getPath());
+                        continue;
+                    }
+                    if (Files.exists(source)) {
+                        if (Files.isDirectory(source)) {
+                            log.fine("Copying custom folder");
+                            Path dest = customPath.resolve(source.getFileName());
+                            copy(source, dest);
+                        } else if (cp == CustomPathList.particles) {
+                            List<String> contents = cl.getVpkContents(tfpath, cp.getPath());
+                            List<String> selected = cfg.getParticles();
+                            if (!selected.contains("*")) {
+                                contents.retainAll(selected);
                             }
+                            log.fine("Copying enhanced particles: " + contents);
+                            Files.createDirectories(customParticlesPath);
+                            cl.extractIfNeeded(tfpath, cp.getPath().toString(),
+                                    customParticlesPath.getParent(), contents);
+                        } else if (source.getFileName().toString().endsWith(".vpk")) {
+                            log.fine("Copying custom VPK: " + cp.getPath());
+                            Path dest = customPath.resolve(source.getFileName());
+                            Files.copy(source, dest);
                         } else {
-                            log.info("Custom file does not exist: " + source);
+                            log.info("Not copying: " + source.getFileName());
                         }
+                    } else {
+                        log.info("Does not exist: " + source);
                     }
                 }
+            } catch (IOException e) {
+                log.log(Level.INFO, "Could not copy custom file: " + cp.getPath(), e);
             }
         }
     }
@@ -198,7 +213,7 @@ public class FileManager {
         for (String pathStr : cl.getVpkContents(tfpath, Paths.get(skyboxVpk))) {
             Path path = Paths.get("skybox", pathStr);
             if (pathStr.endsWith(".vmt")) {
-                cl.extractIfNeeded(tfpath, skyboxVpk, Paths.get("skybox"), pathStr);
+                cl.extractIfNeeded(tfpath, skyboxVpk, Paths.get("skybox"), Arrays.asList(pathStr));
                 Files.copy(path, skyboxPath.resolve(pathStr), StandardCopyOption.REPLACE_EXISTING);
                 vmtPaths.add(path);
             }
@@ -217,8 +232,8 @@ public class FileManager {
                         || (vtf.endsWith("ft.vtf") && vmt.endsWith("ft.vmt"))
                         || (vtf.endsWith("lf.vtf") && vmt.endsWith("lf.vmt"))
                         || (vtf.endsWith("rt.vtf") && vmt.endsWith("rt.vmt"))) {
-                    cl.extractIfNeeded(tfpath, skyboxVpk, Paths.get("skybox"), vtfPath
-                            .getFileName().toString());
+                    cl.extractIfNeeded(tfpath, skyboxVpk, Paths.get("skybox"),
+                            Arrays.asList(vtfPath.getFileName().toString()));
                     Files.copy(vtfPath,
                             skyboxPath.resolve(vmt.substring(0, vmt.indexOf(".vmt")) + ".vtf"));
                 }

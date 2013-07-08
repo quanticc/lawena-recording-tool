@@ -9,13 +9,16 @@ import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 
 import lwrt.Lawena;
+import lwrt.SettingsManager;
 
 public class LwrtGUI {
 
     private static final Logger log = Logger.getLogger("lawena");
 
     public static void main(String[] args) throws Exception {
-        new StartLogger("lawena").toConsole(Level.FINER).toFile(Level.FINE);
+        SettingsManager cfg = new SettingsManager("settings.lwf");
+        new StartLogger("lawena").toConsole(cfg.getLogConsoleLevel()).toFile(cfg.getLogFileLevel());
+        final Lawena lawena = new Lawena(cfg);
 
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, final Throwable e) {
@@ -25,7 +28,6 @@ public class LwrtGUI {
 
         SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
-                Lawena lawena = new Lawena();
                 try {
                     lawena.start();
                 } catch (Exception e) {

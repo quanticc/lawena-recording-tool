@@ -3,6 +3,7 @@ package lwrt;
 
 import ui.AboutDialog;
 import ui.LawenaView;
+import ui.ParticlesDialog;
 import ui.TooltipRenderer;
 import util.LawenaException;
 import util.StartLogger;
@@ -37,6 +38,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -65,6 +67,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
@@ -412,7 +415,7 @@ public class Lawena {
                     if (!Files.exists(Paths.get(img))) {
                         String filename = skybox + "up.vtf";
                         cl.extractIfNeeded(settings.getTfPath(), "custom/skybox.vpk",
-                                Paths.get("skybox"), filename);
+                                Paths.get("skybox"), Arrays.asList(filename));
                         cl.generatePreview(filename);
                     }
                     ImageIcon icon = createPreviewIcon(img);
@@ -537,6 +540,7 @@ public class Lawena {
     private CommandLine cl;
     private CustomPathList customPaths;
     private AboutDialog dialog;
+    private ParticlesDialog particles;
 
     private HashMap<String, ImageIcon> skyboxMap;
     private JFileChooser choosemovie;
@@ -549,7 +553,7 @@ public class Lawena {
     private String version = "4.0-SNAPSHOT";
     private String build;
 
-    public Lawena() {
+    public Lawena(SettingsManager cfg) {
         String impl = this.getClass().getPackage().getImplementationVersion();
         if (impl != null) {
             version = impl;
@@ -567,7 +571,7 @@ public class Lawena {
         }
         cl.setLookAndFeel();
 
-        settings = new SettingsManager("settings.lwf");
+        settings = cfg;
         oDxlevel = cl.getSystemDxLevel();
         steampath = cl.getSteamPath();
         Path tfpath = settings.getTfPath();
@@ -648,16 +652,21 @@ public class Lawena {
         return "custom." + defaultValue;
     }
 
+    private String shortver() {
+        String[] arr = version.split("-");
+        return arr[0] + (arr.length > 1 ? "-" + arr[1] : "");
+    }
+
     public void start() {
         view = new LawenaView();
 
-        new StartLogger("lawena").toTextComponent(Level.FINE, view.getTextAreaLog());
+        new StartLogger("lawena").toTextComponent(settings.getLogUiLevel(), view.getTextAreaLog());
         new StartLogger("status").toLabel(Level.FINE, view.getLblStatus());
-        log.fine("Started lawena Recording Tool " + version + " build " + build);
+        log.fine("Lawena Recording Tool " + version + " build " + build);
         log.fine("TF2 path: " + settings.getTfPath());
         log.fine("Movie path: " + settings.getMoviePath());
 
-        view.setTitle("lawena Recording Tool");
+        view.setTitle("Lawena Recording Tool " + shortver());
         try {
             view.setIconImage(new ImageIcon(Lawena.class.getClassLoader()
                     .getResource("ui/tf2.png"))
@@ -684,6 +693,13 @@ public class Lawena {
                 dialog.setVisible(true);
             }
         });
+        view.getMntmSelectEnhancedParticles().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startParticlesDialog();
+            }
+        });
 
         final JTable table = view.getTableCustomContent();
         table.setModel(customPaths);
@@ -700,6 +716,9 @@ public class Lawena {
                     CustomPath cp = (CustomPath) model.getValueAt(row,
                             CustomPathList.Column.PATH.ordinal());
                     checkCustomHud(cp);
+                    if (cp == CustomPathList.particles && cp.isSelected()) {
+                        startParticlesDialog();
+                    }
                 }
             }
         });
@@ -833,6 +852,82 @@ public class Lawena {
 
         view.getTabbedPane().addTab("VDM", null, vdm.start());
         view.setVisible(true);
+    }
+
+    private void startParticlesDialog() {
+        if (particles == null) {
+            particles = new ParticlesDialog();
+            particles.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            particles.setModalityType(ModalityType.APPLICATION_MODAL);
+            DefaultTableModel dtm = new DefaultTableModel(0, 2) {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return column == 0;
+                }
+
+                @Override
+                public java.lang.Class<?> getColumnClass(int columnIndex) {
+                    return columnIndex == 0 ? Boolean.class : String.class;
+                };
+
+                @Override
+                public String getColumnName(int column) {
+                    return column == 0 ? "" : "Particle filename";
+                }
+            };
+            final JTable tableParticles = particles.getTableParticles();
+            particles.getOkButton().addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    List<String> selected = new ArrayList<>();
+                    int selectCount = 0;
+                    for (int i = 0; i < tableParticles.getRowCount(); i++) {
+                        if ((boolean) tableParticles.getValueAt(i, 0)) {
+                            selectCount++;
+                            selected.add((String) tableParticles.getValueAt(i, 1));
+                        }
+                    }
+                    if (selectCount == 0) {
+                        settings.setParticles(Arrays.asList(""));
+                    } else if (selectCount == tableParticles.getRowCount()) {
+                        settings.setParticles(Arrays.asList("*"));
+                    } else {
+                        settings.setParticles(selected);
+                    }
+                    log.finer("Particles: " + settings.getParticles());
+                    particles.setVisible(false);
+                }
+            });
+            particles.getCancelButton().addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    List<String> selected = settings.getParticles();
+                    boolean selectAll = selected.contains("*");
+                    for (int i = 0; i < tableParticles.getRowCount(); i++) {
+                        tableParticles.setValueAt(
+                                selectAll || selected.contains(tableParticles.getValueAt(i, 1)), i,
+                                0);
+                    }
+                    log.finer("Particles: " + selected);
+                    particles.setVisible(false);
+                }
+            });
+            tableParticles.setModel(dtm);
+            tableParticles.getColumnModel().getColumn(0).setMaxWidth(20);
+            List<String> selected = settings.getParticles();
+            boolean selectAll = selected.contains("*");
+            for (String particle : cl.getVpkContents(settings.getTfPath(),
+                    CustomPathList.particles.getPath())) {
+                dtm.addRow(new Object[] {
+                        selectAll || selected.contains(particle), particle
+                });
+            }
+        }
+        particles.setVisible(true);
     }
 
     private boolean checkCustomHud(CustomPath cp) {
