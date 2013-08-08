@@ -12,19 +12,18 @@ sourceSets {
 }
 
 jar {
+    new ByteArrayOutputStream().withStream { execOS ->
+        exec {
+            executable = 'git'
+            args = [ 'describe', '--tags' ]
+            standardOutput = execOS
+        }
+        def buildVersion = execOS.toString().trim()
+        version buildVersion
+    }
     archiveName = 'lawena.jar'
     destinationDir = null
     manifest {
-        new ByteArrayOutputStream().withStream { execOS ->
-            exec {
-                executable = 'git'
-                args = [ 'describe', '--tags' ]
-                standardOutput = execOS
-            }
-            def buildVersion = execOS.toString().trim()
-            version buildVersion
-        }
-        
         ext.buildTime = new Date().format("yyyyMMddHHmmss")
         file('version.txt').write ext.buildTime
         
