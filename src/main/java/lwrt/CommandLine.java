@@ -258,6 +258,10 @@ public abstract class CommandLine {
                     Arrays.asList("-applaunch", "440", "-dxlevel", dxlevel, "-novid", "-noborder",
                             "-noforcedmparms", "-noforcemaccel", "-noforcemspd", "-console",
                             "-high", "-noipx", "-nojoy", "-sw", "-w", width, "-h", height));
+            if (cfg.getInsecure()) {
+                log.fine("Using -insecure in launch options");
+                pb.command().add("-insecure");
+            }
             if (cfg.getCondebug()) {
                 pb.command().add("-condebug");
                 Path logpath = cfg.getTfPath().resolve("console.log");

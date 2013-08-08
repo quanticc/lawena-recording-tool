@@ -47,7 +47,8 @@ public class SettingsManager {
         LogConsoleLevel("FINER"),
         LogFileLevel("FINE"),
         LogUiLevel("FINE"),
-        LaunchTimeout(120, 0, Integer.MAX_VALUE);
+        LaunchTimeout(120, 0, Integer.MAX_VALUE),
+        Insecure(false);
 
         private Object value;
         private List<String> allowedValues;
@@ -383,6 +384,14 @@ public class SettingsManager {
     public void setLogUiLevel(String value) {
         setString(Key.LogUiLevel, value);
     }
+    
+    public void setLaunchTimeout(int value) {
+        setInt(Key.LaunchTimeout, value);
+    }
+    
+    public void setInsecure(boolean value) {
+        setBoolean(Key.Insecure, value);
+    }
 
     // Getters
 
@@ -512,6 +521,10 @@ public class SettingsManager {
     
     public int getLaunchTimeout() {
         return getInt(Key.LaunchTimeout);
+    }
+    
+    public boolean getInsecure() {
+        return getBoolean(Key.Insecure);
     }
 
 }
