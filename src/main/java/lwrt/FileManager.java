@@ -160,7 +160,7 @@ public class FileManager {
                     }
                     if (Files.exists(source)) {
                         if (Files.isDirectory(source)) {
-                            log.fine("Copying custom folder");
+                            log.fine("Copying custom folder: " + source.getFileName());
                             Path dest = customPath.resolve(source.getFileName());
                             copy(source, dest);
                         } else if (cp == CustomPathList.particles) {
@@ -174,6 +174,8 @@ public class FileManager {
                                 Files.createDirectories(customParticlesPath);
                                 cl.extractIfNeeded(tfpath, cp.getPath().toString(),
                                         customParticlesPath.getParent(), contents);
+                            } else {
+                                log.fine("No enhanced particles were selected");
                             }
                         } else if (source.getFileName().toString().endsWith(".vpk")) {
                             log.fine("Copying custom VPK: " + cp.getPath());

@@ -246,7 +246,11 @@ public class Lawena {
                 int maxtimeout = cfgtimeout / (millis / 1000);
                 setProgress(0);
                 status.info("Waiting for TF2 to start...");
-                log.fine("TF2 launch timeout: around " + cfgtimeout + " seconds");
+                if (cfgtimeout > 0) {
+                    log.fine("TF2 launch timeout: around " + cfgtimeout + " seconds");
+                } else {
+                    log.fine("TF2 launch timeout disabled");
+                }
                 while (!cl.isRunningTF2() && (cfgtimeout == 0 || timeout < maxtimeout)) {
                     ++timeout;
                     if (cfgtimeout > 0) {
