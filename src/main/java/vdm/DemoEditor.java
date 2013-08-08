@@ -95,8 +95,7 @@ public class DemoEditor {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (model.getRowCount() > 0) {
-                vdmgenerator = new VDMGenerator(model.getTickList(), settings.getTfPath());
-
+                vdmgenerator = new VDMGenerator(model.getTickList(), settings);
                 try {
                     final List<Path> paths = vdmgenerator.generate();
                     status.info("VDM generated: " + paths.size()
@@ -254,6 +253,14 @@ public class DemoEditor {
                 for (int i = 0; i < numRows; i++) {
                     model.removeTick(view.getTableTicks().getSelectedRow());
                 }
+            }
+        });
+        view.getChckbxSrcDemoFix().setSelected(settings.getVdmSrcDemoFix());
+        view.getChckbxSrcDemoFix().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                settings.setVdmSrcDemoFix(view.getChckbxSrcDemoFix().isSelected());
             }
         });
 

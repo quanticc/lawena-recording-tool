@@ -12,16 +12,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import lwrt.SettingsManager;
+
 public class VDMGenerator {
 
     private static final Logger log = Logger.getLogger("lawena");
 
     private List<Tick> ticklist;
-    private Path tfpath;
+    private SettingsManager cfg;
 
-    public VDMGenerator(List<Tick> ticklist, Path tfpath) {
+    public VDMGenerator(List<Tick> ticklist, SettingsManager cfg) {
         this.ticklist = ticklist;
-        this.tfpath = tfpath;
+        this.cfg = cfg;
     }
 
     public List<Path> generate() throws IOException {
@@ -48,15 +50,20 @@ public class VDMGenerator {
 
         for (Entry<String, List<Tick>> e : demomap.entrySet()) {
             String demo = e.getKey();
-            log.finer("creating vdm for demo: " + demo);
+            log.finer("Creating VDM file for demo: " + demo);
             List<String> lines = new ArrayList<>();
             lines.add("demoactions\n{");
             int count = 1;
             int previousEndTick = 0;
             for (Tick tick : e.getValue()) {
-                lines.add(segment(count++, "SkipAhead", "skip",
-                        "starttick \"" + (previousEndTick + 1) + "\"",
-                        "skiptotick \"" + (tick.getStart() - 1) + "\""));
+                if (cfg.getVdmSrcDemoFix()) {
+                    lines.add(segment(count++, "SkipAhead", "skip",
+                            "starttick \"" + (previousEndTick + 1) + "\""));
+                } else {
+                    lines.add(segment(count++, "SkipAhead", "skip",
+                            "starttick \"" + (previousEndTick + 1) + "\"",
+                            "skiptotick \"" + (tick.getStart() - 1) + "\""));
+                }
                 lines.add(segment(count++, "PlayCommands", "startrec",
                         "starttick \"" + tick.getStart() + "\"",
                         "commands \"startrecording\""));
@@ -78,8 +85,8 @@ public class VDMGenerator {
             lines.add("}\n");
 
             Path added = Files.write(
-                    tfpath.resolve(demo.substring(0, demo.indexOf(".dem")) + ".vdm"), lines,
-                    Charset.defaultCharset());
+                    cfg.getTfPath().resolve(demo.substring(0, demo.indexOf(".dem")) + ".vdm"),
+                    lines, Charset.defaultCharset());
             paths.add(added);
             log.fine("VDM file written to " + added);
 

@@ -48,7 +48,8 @@ public class SettingsManager {
         LogFileLevel("FINE"),
         LogUiLevel("FINE"),
         LaunchTimeout(120, 0, Integer.MAX_VALUE),
-        Insecure(false);
+        Insecure(false),
+        VdmSrcDemoFix(false);
 
         private Object value;
         private List<String> allowedValues;
@@ -393,6 +394,10 @@ public class SettingsManager {
         setBoolean(Key.Insecure, value);
     }
 
+    public void setVdmSrcDemoFix(boolean value) {
+        setBoolean(Key.VdmSrcDemoFix, value);
+    }
+
     // Getters
 
     public int getHeight() {
@@ -525,6 +530,10 @@ public class SettingsManager {
 
     public boolean getInsecure() {
         return getBoolean(Key.Insecure);
+    }
+
+    public boolean getVdmSrcDemoFix() {
+        return getBoolean(Key.VdmSrcDemoFix);
     }
 
 }
