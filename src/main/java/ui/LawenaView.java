@@ -46,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JCheckBoxMenuItem;
 
 public class LawenaView extends JFrame {
 
@@ -161,11 +162,16 @@ public class LawenaView extends JFrame {
     private JSeparator separator_2;
     private JMenuItem mntmAbout;
     private JMenuItem mntmRenderingTutorial;
-    private JButton btnOpenCustomFolder;
     private JMenuItem mntmSaveSettings;
     private JCheckBox useHudMinmode;
     private JMenu mnAdvanced;
     private JMenuItem mntmSelectEnhancedParticles;
+    private JCheckBoxMenuItem chckbxmntmInsecure;
+    private JMenuItem mntmChangeTfLaunch;
+    private JSeparator separator_3;
+    private JMenuItem mntmOpenCustomFolder;
+    private JMenuItem mntmOpenMovieFolder;
+    private JSeparator separator_4;
 
     /**
      * Create the frame.
@@ -184,6 +190,15 @@ public class LawenaView extends JFrame {
 
         mntmChangeMovieDirectory = new JMenuItem("Change Movie Folder...");
         mnFile.add(mntmChangeMovieDirectory);
+
+        separator_4 = new JSeparator();
+        mnFile.add(separator_4);
+
+        mntmOpenMovieFolder = new JMenuItem("Open Movie Folder");
+        mnFile.add(mntmOpenMovieFolder);
+
+        mntmOpenCustomFolder = new JMenuItem("Open Custom Folder");
+        mnFile.add(mntmOpenCustomFolder);
 
         separator = new JSeparator();
         mnFile.add(separator);
@@ -208,6 +223,15 @@ public class LawenaView extends JFrame {
 
         mntmSelectEnhancedParticles = new JMenuItem("Select Enhanced Particles...");
         mnAdvanced.add(mntmSelectEnhancedParticles);
+
+        separator_3 = new JSeparator();
+        mnAdvanced.add(separator_3);
+
+        chckbxmntmInsecure = new JCheckBoxMenuItem("Use -insecure in launch options");
+        mnAdvanced.add(chckbxmntmInsecure);
+
+        mntmChangeTfLaunch = new JMenuItem("Change TF2 launch timeout...");
+        mnAdvanced.add(mntmChangeTfLaunch);
 
         mnHelp = new JMenu(" Help ");
         menuBar.add(mnHelp);
@@ -565,11 +589,8 @@ public class LawenaView extends JFrame {
         gbc_panelBottomLeft.gridy = 10;
         panelSettings.add(panelBottomLeft, gbc_panelBottomLeft);
 
-        btnClearMovieFolder = new JButton("Clear Movie Files");
+        btnClearMovieFolder = new JButton("Clear Movie Files...");
         panelBottomLeft.add(btnClearMovieFolder);
-
-        btnOpenCustomFolder = new JButton("Open Custom Folder");
-        panelBottomLeft.add(btnOpenCustomFolder);
 
         panelBottomRight = new JPanel();
         FlowLayout fl_panelBottomRight = (FlowLayout) panelBottomRight.getLayout();
@@ -770,10 +791,6 @@ public class LawenaView extends JFrame {
         return mntmAbout;
     }
 
-    public JButton getBtnOpenCustomFolder() {
-        return btnOpenCustomFolder;
-    }
-
     public JMenuItem getMntmSaveSettings() {
         return mntmSaveSettings;
     }
@@ -784,5 +801,21 @@ public class LawenaView extends JFrame {
 
     public JMenuItem getMntmSelectEnhancedParticles() {
         return mntmSelectEnhancedParticles;
+    }
+
+    public JMenuItem getMntmOpenMovieFolder() {
+        return mntmOpenMovieFolder;
+    }
+
+    public JMenuItem getMntmOpenCustomFolder() {
+        return mntmOpenCustomFolder;
+    }
+
+    public JMenuItem getMntmLaunchTimeout() {
+        return mntmChangeTfLaunch;
+    }
+
+    public JCheckBoxMenuItem getChckbxmntmInsecure() {
+        return chckbxmntmInsecure;
     }
 }

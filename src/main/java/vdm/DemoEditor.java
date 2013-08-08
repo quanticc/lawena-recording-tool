@@ -232,7 +232,12 @@ public class DemoEditor {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ClearVdmFilesTask().execute();
+                int answer = JOptionPane.showConfirmDialog(view,
+                        "Are you sure you want to clear all .vdm files in your TF2 folder?",
+                        "Clear VDM Files", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (answer == JOptionPane.YES_OPTION) {
+                    new ClearVdmFilesTask().execute();
+                }
             }
         });
         view.getBtnDeleteSelectedTick().addActionListener(new ActionListener() {

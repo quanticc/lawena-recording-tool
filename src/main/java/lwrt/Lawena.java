@@ -842,10 +842,26 @@ public class Lawena {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ClearMoviesTask().execute();
+                int answer = JOptionPane.showConfirmDialog(view,
+                        "Are you sure you want to clear all movie files?", "Clearing Movie Files",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (answer == JOptionPane.YES_NO_OPTION) {
+                    new ClearMoviesTask().execute();
+                }
             }
         });
-        view.getBtnOpenCustomFolder().addActionListener(new ActionListener() {
+        view.getMntmOpenMovieFolder().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Desktop.getDesktop().open(settings.getMoviePath().toFile());
+                } catch (IOException ex) {
+                    log.log(Level.FINE, "Could not open custom folder", ex);
+                }
+            }
+        });
+        view.getMntmOpenCustomFolder().addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -853,6 +869,34 @@ public class Lawena {
                     Desktop.getDesktop().open(Paths.get("custom").toFile());
                 } catch (IOException ex) {
                     log.log(Level.FINE, "Could not open custom folder", ex);
+                }
+            }
+        });
+        view.getChckbxmntmInsecure().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
+            }
+        });
+        view.getMntmLaunchTimeout().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object answer = JOptionPane.showInputDialog(view,
+                        "Enter the number of seconds to wait\n"
+                                + "before interrupting TF2 launch.\n"
+                                + "Enter 0 to disable timeout.", "Launch Timeout",
+                        JOptionPane.PLAIN_MESSAGE, null, null, settings.getLaunchTimeout());
+                if (answer != null) {
+                    try {
+                        int value = Integer.parseInt(answer.toString());
+                        settings.setLaunchTimeout(value);
+                    } catch (IllegalArgumentException ex) {
+                        JOptionPane.showMessageDialog(view,
+                                "Invalid value, must be 0 or higher integer.", "Launch Options",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
                 }
             }
         });
@@ -995,6 +1039,7 @@ public class Lawena {
         view.getDisableHitSounds().setSelected(!settings.getHitsounds());
         view.getDisableVoiceChat().setSelected(!settings.getVoice());
         view.getUseHudMinmode().setSelected(settings.getHudMinmode());
+        view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
     }
 
     private void saveSettings() {
@@ -1034,6 +1079,7 @@ public class Lawena {
         }
         settings.setCustomResources(selected);
         settings.setHudMinmode(view.getUseHudMinmode().isSelected());
+        settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
         settings.save();
         log.fine("Settings saved");
     }
