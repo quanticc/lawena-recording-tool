@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.html.HTMLDocument;
@@ -38,13 +39,18 @@ public class AboutDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     private class AboutTextPaneHyperlinkListener implements HyperlinkListener {
-        public void hyperlinkUpdate(HyperlinkEvent e) {
+        public void hyperlinkUpdate(final HyperlinkEvent e) {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                try {
-                    Desktop.getDesktop().browse(e.getURL().toURI());
-                } catch (IOException | URISyntaxException e1) {
-                    log.log(Level.FINE, "Could not open URL", e1);
-                }
+                new SwingWorker<Void, Void>() {
+                    protected Void doInBackground() throws Exception {
+                        try {
+                            Desktop.getDesktop().browse(e.getURL().toURI());
+                        } catch (IOException | URISyntaxException e1) {
+                            log.log(Level.FINE, "Could not open URL", e1);
+                        }
+                        return null;
+                    }
+                }.execute();
             }
         }
     }

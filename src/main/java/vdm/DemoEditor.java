@@ -98,11 +98,17 @@ public class DemoEditor {
                 vdmgenerator = new VDMGenerator(model.getTickList(), settings.getTfPath());
 
                 try {
-                    List<Path> paths = vdmgenerator.generate();
+                    final List<Path> paths = vdmgenerator.generate();
                     status.info("VDM generated: " + paths.size()
                             + (paths.size() == 1 ? " new file" : " new files")
                             + " in TF2 directory");
-                    cl.openFolder(paths.get(0));
+                    new SwingWorker<Void, Void>() {
+                        protected Void doInBackground() throws Exception {
+                            cl.openFolder(paths.get(0));
+                            return null;
+                        }
+                    }.execute();
+
                 } catch (IOException e1) {
                     log.warning("A problem occurred while generating the VDM: " + e1);
                     status.info("Problem occurred while generating the VDM files");

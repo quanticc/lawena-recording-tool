@@ -31,6 +31,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -46,6 +47,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.JCheckBoxMenuItem;
 
 public class LawenaView extends JFrame {
@@ -54,56 +56,81 @@ public class LawenaView extends JFrame {
 
     private class MntmRenderingTutorialActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            try {
-                String url = "http://code.google.com/p/lawenarecordingtool/wiki/RenderingTutorial";
-                Desktop.getDesktop().browse(new URI(url));
-            } catch (IOException | URISyntaxException e1) {
-                log.log(Level.INFO, "Could not open URL", e1);
-            }
+            new SwingWorker<Void, Void>() {
+                protected Void doInBackground() throws Exception {
+                    try {
+                        String url = "http://code.google.com/p/lawenarecordingtool/wiki/RenderingTutorial";
+                        Desktop.getDesktop().browse(new URI(url));
+                    } catch (IOException | URISyntaxException e1) {
+                        log.log(Level.INFO, "Could not open URL", e1);
+                    }
+                    return null;
+                }
+            }.execute();
         }
     }
 
     private class MntmPatchNotesActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            try {
-                String url = "https://github.com/iabarca/lawena-recording-tool/commits/master";
-                Desktop.getDesktop().browse(new URI(url));
-            } catch (IOException | URISyntaxException e1) {
-                log.log(Level.INFO, "Could not open URL", e1);
-            }
+            new SwingWorker<Void, Void>() {
+                protected Void doInBackground() throws Exception {
+                    try {
+                        String url = "https://github.com/iabarca/lawena-recording-tool/commits/master";
+                        Desktop.getDesktop().browse(new URI(url));
+                    } catch (IOException | URISyntaxException e1) {
+                        log.log(Level.INFO, "Could not open URL", e1);
+                    }
+                    return null;
+                }
+            }.execute();
         }
     }
 
     private class MntmProjectPageActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            try {
-                String url = "http://code.google.com/p/lawenarecordingtool/";
-                Desktop.getDesktop().browse(new URI(url));
-            } catch (IOException | URISyntaxException e1) {
-                log.log(Level.INFO, "Could not open URL", e1);
-            }
+            new SwingWorker<Void, Void>() {
+                protected Void doInBackground() throws Exception {
+                    try {
+                        String url = "http://code.google.com/p/lawenarecordingtool/";
+                        Desktop.getDesktop().browse(new URI(url));
+                    } catch (IOException | URISyntaxException e1) {
+                        log.log(Level.INFO, "Could not open URL", e1);
+                    }
+                    return null;
+                }
+            }.execute();
         }
     }
 
     private class MntmVdmTutorialActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            try {
-                String url = "http://code.google.com/p/lawenarecordingtool/wiki/VDMtutorial";
-                Desktop.getDesktop().browse(new URI(url));
-            } catch (IOException | URISyntaxException e1) {
-                log.log(Level.INFO, "Could not open URL", e1);
-            }
+            new SwingWorker<Void, Void>() {
+                protected Void doInBackground() throws Exception {
+                    try {
+                        String url = "http://code.google.com/p/lawenarecordingtool/wiki/VDMtutorial";
+                        Desktop.getDesktop().browse(new URI(url));
+                    } catch (IOException | URISyntaxException e1) {
+                        log.log(Level.INFO, "Could not open URL", e1);
+                    }
+                    return null;
+                }
+            }.execute();
         }
     }
 
     private class MntmInstructionsActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            try {
-                String url = "http://code.google.com/p/lawenarecordingtool/wiki/Instructions";
-                Desktop.getDesktop().browse(new URI(url));
-            } catch (IOException | URISyntaxException e1) {
-                log.log(Level.INFO, "Could not open URL", e1);
-            }
+            new SwingWorker<Void, Void>() {
+                protected Void doInBackground() throws Exception {
+                    try {
+                        String url = "http://code.google.com/p/lawenarecordingtool/wiki/Instructions";
+                        Desktop.getDesktop().browse(new URI(url));
+                    } catch (IOException | URISyntaxException e1) {
+                        log.log(Level.INFO, "Could not open URL", e1);
+                    }
+                    return null;
+                }
+            }.execute();
         }
     }
 
@@ -486,7 +513,8 @@ public class LawenaView extends JFrame {
         gbc_spinnerViewmodelFov.gridx = 1;
         gbc_spinnerViewmodelFov.gridy = 4;
         panelSettings.add(spinnerViewmodelFov, gbc_spinnerViewmodelFov);
-        spinnerViewmodelFov.setModel(new SpinnerNumberModel(70, 55, 90, 1));
+        spinnerViewmodelFov.setModel(new SpinnerNumberModel(new Integer(70), null, null,
+                new Integer(1)));
 
         verticalStrut = Box.createVerticalStrut(22);
         GridBagConstraints gbc_verticalStrut = new GridBagConstraints();

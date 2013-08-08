@@ -854,22 +854,32 @@ public class Lawena {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    Desktop.getDesktop().open(settings.getMoviePath().toFile());
-                } catch (IOException ex) {
-                    log.log(Level.FINE, "Could not open custom folder", ex);
-                }
+                new SwingWorker<Void, Void>() {
+                    protected Void doInBackground() throws Exception {
+                        try {
+                            Desktop.getDesktop().open(settings.getMoviePath().toFile());
+                        } catch (IOException ex) {
+                            log.log(Level.FINE, "Could not open custom folder", ex);
+                        }
+                        return null;
+                    }
+                }.execute();
             }
         });
         view.getMntmOpenCustomFolder().addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    Desktop.getDesktop().open(Paths.get("custom").toFile());
-                } catch (IOException ex) {
-                    log.log(Level.FINE, "Could not open custom folder", ex);
-                }
+                new SwingWorker<Void, Void>() {
+                    protected Void doInBackground() throws Exception {
+                        try {
+                            Desktop.getDesktop().open(Paths.get("custom").toFile());
+                        } catch (IOException ex) {
+                            log.log(Level.FINE, "Could not open custom folder", ex);
+                        }
+                        return null;
+                    }
+                }.execute();
             }
         });
         view.getChckbxmntmInsecure().addActionListener(new ActionListener() {
