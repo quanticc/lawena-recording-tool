@@ -240,19 +240,22 @@ public class Lawena {
                 });
                 setProgress(100);
 
-                // Waiting up to 2 minutes for TF2 to start
                 int timeout = 0;
-                int maxtimeout = 40;
+                int cfgtimeout = settings.getLaunchTimeout();
                 int millis = 3000;
+                int maxtimeout = cfgtimeout / (millis / 1000);
                 setProgress(0);
                 status.info("Waiting for TF2 to start...");
-                while (!cl.isRunningTF2() && timeout < maxtimeout) {
+                log.fine("TF2 launch timeout: around " + cfgtimeout + " seconds");
+                while (!cl.isRunningTF2() && (cfgtimeout == 0 || timeout < maxtimeout)) {
                     ++timeout;
-                    setProgress((int) ((double) timeout / maxtimeout * 100));
+                    if (cfgtimeout > 0) {
+                        setProgress((int) ((double) timeout / maxtimeout * 100));
+                    }
                     Thread.sleep(millis);
                 }
 
-                if (timeout >= maxtimeout) {
+                if (cfgtimeout > 0 && timeout >= maxtimeout) {
                     int s = timeout * (millis / 1000);
                     log.info("TF2 launch timed out after " + s + " seconds");
                     status.info("TF2 did not start after " + s + " seconds");

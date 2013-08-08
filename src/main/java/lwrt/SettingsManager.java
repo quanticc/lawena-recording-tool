@@ -46,7 +46,8 @@ public class SettingsManager {
         Particles(""),
         LogConsoleLevel("FINER"),
         LogFileLevel("FINE"),
-        LogUiLevel("FINE");
+        LogUiLevel("FINE"),
+        LaunchTimeout(120, 0, Integer.MAX_VALUE);
 
         private Object value;
         private List<String> allowedValues;
@@ -507,6 +508,10 @@ public class SettingsManager {
         } catch (IllegalArgumentException e) {
             return Level.FINE;
         }
+    }
+    
+    public int getLaunchTimeout() {
+        return getInt(Key.LaunchTimeout);
     }
 
 }
