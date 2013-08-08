@@ -16,7 +16,7 @@ jar {
     destinationDir = null
     manifest {
         new ByteArrayOutputStream().withStream { execOS ->
-            def result = exec {
+            exec {
                 executable = 'git'
                 args = [ 'describe', '--tags' ]
                 standardOutput = execOS
