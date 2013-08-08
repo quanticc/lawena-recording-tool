@@ -33,7 +33,7 @@ public class SettingsManager {
         Skybox("Default"),
         CustomResources("no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"),
         ViewmodelSwitch("on", "on", "off", "default"),
-        ViewmodelFov(70, 55, 90),
+        ViewmodelFov(70, Integer.MIN_VALUE, Integer.MAX_VALUE),
         MotionBlur(true),
         Crosshair(false),
         CrosshairSwitch(false),
@@ -384,11 +384,11 @@ public class SettingsManager {
     public void setLogUiLevel(String value) {
         setString(Key.LogUiLevel, value);
     }
-    
+
     public void setLaunchTimeout(int value) {
         setInt(Key.LaunchTimeout, value);
     }
-    
+
     public void setInsecure(boolean value) {
         setBoolean(Key.Insecure, value);
     }
@@ -518,11 +518,11 @@ public class SettingsManager {
             return Level.FINE;
         }
     }
-    
+
     public int getLaunchTimeout() {
         return getInt(Key.LaunchTimeout);
     }
-    
+
     public boolean getInsecure() {
         return getBoolean(Key.Insecure);
     }

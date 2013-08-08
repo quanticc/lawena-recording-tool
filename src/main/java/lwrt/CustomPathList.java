@@ -85,11 +85,23 @@ public class CustomPathList extends AbstractTableModel {
         return Collections.unmodifiableList(list);
     }
 
+    private boolean isCustomHudSelected() {
+        for (CustomPath cp : list) {
+            if (cp.getContents().contains(PathContents.HUD) && cp.isSelected()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean isCellEditable(int row, int column) {
         CustomPath cp = list.get(row);
-        return !cp.getContents().contains(PathContents.READONLY)
-                && column == Column.SELECTED.ordinal();
+        EnumSet<PathContents> conts = cp.getContents();
+        boolean readonly = conts.contains(PathContents.READONLY);
+        boolean hud = conts.contains(PathContents.HUD);
+        return !readonly && column == Column.SELECTED.ordinal()
+                && !(isCustomHudSelected() && hud && !cp.isSelected());
     }
 
     @Override
