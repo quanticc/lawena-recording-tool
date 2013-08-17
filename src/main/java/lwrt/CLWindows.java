@@ -84,11 +84,16 @@ public class CLWindows extends CommandLine {
             log.log(Level.INFO, "", e);
         }
 
-        if (mode == 0)
-            return result.substring(result.lastIndexOf("0x") + 2,
-                    result.indexOf('\n', result.lastIndexOf("0x")));
-        return result.substring(result.lastIndexOf(":") - 1,
-                result.indexOf('\n', result.lastIndexOf(":")));
+        try {
+            if (mode == 0) {
+                return result.substring(result.lastIndexOf("0x") + 2,
+                        result.indexOf('\n', result.lastIndexOf("0x")));
+            }
+            return result.substring(result.lastIndexOf(":") - 1,
+                    result.indexOf('\n', result.lastIndexOf(":")));
+        } catch (IndexOutOfBoundsException e) {
+            return "98";
+        }
     }
 
     @Override
