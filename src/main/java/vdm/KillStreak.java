@@ -14,14 +14,14 @@ public class KillStreak {
 
     public KillStreak(String line) {
         String[] tokens = line.split(" \\(\"|\\)|\" at |\\] |\\[");
-        if (tokens.length < 4) {
+        if (tokens.length < 5) {
             log.finer("Some fields unparsed: " + line);
         }
         try {
-            date = tokens[0];
-            description = tokens[1];
-            demoname = tokens[2];
-            tick = Integer.parseInt(tokens[3]);
+            date = tokens[1];
+            description = tokens[2];
+            demoname = tokens[3] + ".dem";
+            tick = Integer.parseInt(tokens[4]);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException x) {
         }
     }

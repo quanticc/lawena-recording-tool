@@ -50,6 +50,7 @@ public class DemoTableModel extends AbstractTableModel {
                             + streak.getDescription() + ", tick: " + streak.getTick());
                     for (Demo demo : list) {
                         if (demo.getPath().getFileName().toString().equals(streak.getDemoname())) {
+                            log.finer("adding streak: " + streak);
                             demo.getStreaks().add(streak);
                             break;
                         }
