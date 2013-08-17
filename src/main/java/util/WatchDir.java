@@ -45,12 +45,21 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 
-public abstract class WatchDir {
+public class WatchDir {
+
+    public abstract static class WatchAction {
+        public abstract void entryDeleted(Path child);
+
+        public abstract void entryModified(Path child);
+
+        public abstract void entryCreated(Path child);
+    }
 
     private static final Logger log = Logger.getLogger("lawena");
 
     private final WatchService watcher;
     private final Map<WatchKey, Path> keys;
+    private final Map<Path, WatchAction> actions;
     private final boolean recursive;
 
     @SuppressWarnings("unchecked")
@@ -61,21 +70,22 @@ public abstract class WatchDir {
     /**
      * Register the given directory with the WatchService
      */
-    private void register(Path dir) throws IOException {
+    public void register(Path dir, WatchAction action) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
         keys.put(key, dir);
+        actions.put(dir, action);
     }
 
     /**
      * Register the given directory, and all its sub-directories, with the
      * WatchService.
      */
-    private void registerAll(final Path start) throws IOException {
+    public void registerAll(final Path start, final WatchAction action) throws IOException {
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                     throws IOException {
-                register(dir);
+                register(dir, action);
                 return FileVisitResult.CONTINUE;
             }
         });
@@ -84,15 +94,23 @@ public abstract class WatchDir {
     /**
      * Creates a WatchService and registers the given directory
      */
-    public WatchDir(Path dir, boolean recursive) throws IOException {
+    public WatchDir(boolean recursive, Path dir, WatchAction action) throws IOException {
+        this(recursive);
+        if (recursive) {
+            registerAll(dir, action);
+        } else {
+            register(dir, action);
+        }
+    }
+
+    /**
+     * Creates a WatchService
+     */
+    public WatchDir(boolean recursive) throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<>();
+        this.actions = new HashMap<>();
         this.recursive = recursive;
-        if (recursive) {
-            registerAll(dir);
-        } else {
-            register(dir);
-        }
     }
 
     /**
@@ -106,7 +124,7 @@ public abstract class WatchDir {
             } catch (InterruptedException x) {
                 return;
             }
-            Path dir = keys.get(key);
+            final Path dir = keys.get(key);
             if (dir == null) {
                 continue;
             }
@@ -124,18 +142,18 @@ public abstract class WatchDir {
                     @Override
                     public void run() {
                         if (kind == ENTRY_CREATE) {
-                            entryCreated(child);
+                            actions.get(dir).entryCreated(child);
                         } else if (kind == ENTRY_MODIFY) {
-                            entryModified(child);
+                            actions.get(dir).entryModified(child);
                         } else if (kind == ENTRY_DELETE) {
-                            entryDeleted(child);
+                            actions.get(dir).entryDeleted(child);
                         }
                     }
                 });
                 if (recursive && (kind == ENTRY_CREATE)) {
                     try {
                         if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
-                            registerAll(child);
+                            registerAll(child, actions.get(dir));
                         }
                     } catch (IOException x) {
                     }
@@ -150,11 +168,5 @@ public abstract class WatchDir {
             }
         }
     }
-
-    public abstract void entryDeleted(Path child);
-
-    public abstract void entryModified(Path child);
-
-    public abstract void entryCreated(Path child);
 
 }

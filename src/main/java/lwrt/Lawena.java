@@ -8,6 +8,7 @@ import ui.TooltipRenderer;
 import util.LawenaException;
 import util.StartLogger;
 import util.WatchDir;
+import util.WatchDir.WatchAction;
 import vdm.DemoEditor;
 
 import java.awt.Color;
@@ -341,7 +342,7 @@ public class Lawena {
         protected Void doInBackground() throws Exception {
             try {
                 scan();
-                watcher.start();
+                watcherThread.start();
             } catch (Exception e) {
                 log.log(Level.INFO, "Problem while scanning custom paths", e);
             }
@@ -554,7 +555,8 @@ public class Lawena {
     private JFileChooser choosedir;
     private Path steampath;
     private String oDxlevel;
-    private Thread watcher;
+    private Thread watcherThread;
+    private WatchDir watcher;
     private Object lastHud;
 
     private String version = "4.0-SNAPSHOT";
@@ -612,40 +614,42 @@ public class Lawena {
         customPaths = new CustomPathList(settings, cl);
         files.setCustomPathList(customPaths);
 
-        watcher = new Thread(new Runnable() {
+        try {
+            watcher = new WatchDir(false);
+            watcher.register(Paths.get("custom"), new WatchAction() {
+
+                @Override
+                public void entryCreated(Path child) {
+                    try {
+                        customPaths.addPath(child);
+                    } catch (IOException e) {
+                        log.log(Level.FINE, "Could not add custom path", e);
+                    }
+                }
+
+                @Override
+                public void entryModified(Path child) {
+                    customPaths.updatePath(child);
+                };
+
+                @Override
+                public void entryDeleted(Path child) {
+                    customPaths.removePath(child);
+                }
+            });
+        } catch (IOException e) {
+            log.log(Level.FINE, "Could not register directory with watcher", e);
+        }
+        watcherThread = new Thread(new Runnable() {
 
             @Override
             public void run() {
-                try {
-                    WatchDir w = new WatchDir(Paths.get("custom"), false) {
-                        @Override
-                        public void entryCreated(Path child) {
-                            try {
-                                customPaths.addPath(child);
-                            } catch (IOException e) {
-                                log.log(Level.FINE, "Could not add custom path", e);
-                            }
-                        }
-
-                        @Override
-                        public void entryModified(Path child) {
-                            customPaths.updatePath(child);
-                        };
-
-                        @Override
-                        public void entryDeleted(Path child) {
-                            customPaths.removePath(child);
-                        }
-                    };
-                    w.processEvents();
-                } catch (IOException e) {
-                    log.log(Level.FINE, "Problem while watching directory", e);
-                }
+                watcher.processEvents();
             }
         }, "FolderWatcher");
-        watcher.setDaemon(true);
+        watcherThread.setDaemon(true);
 
-        vdm = new DemoEditor(settings, cl);
+        vdm = new DemoEditor(settings, cl, watcher);
     }
 
     private String getManifestString(String key, String defaultValue) {
