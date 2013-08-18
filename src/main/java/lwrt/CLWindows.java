@@ -41,7 +41,6 @@ public class CLWindows extends CommandLine {
 
     @Override
     public boolean isRunningTF2() {
-        boolean found = false;
         String line;
         ProcessBuilder[] builders = {
                 new ProcessBuilder("tasklist", "/fi", "\"imagename eq " + hl2 + "\"",
@@ -54,9 +53,11 @@ public class CLWindows extends CommandLine {
                 Process p = pb.start();
                 BufferedReader input =
                         new BufferedReader(new InputStreamReader(p.getInputStream()));
+                log.finer("Detecting TF2 process: " + pb.command().get(0));
                 while ((line = input.readLine()) != null) {
                     log.finer("[" + pb.command().get(0) + "] " + line);
                     if (line.contains(hl2)) {
+                        log.finer("TF2 process detected");
                         return true;
                     }
                 }
@@ -65,7 +66,7 @@ public class CLWindows extends CommandLine {
                 log.log(Level.INFO, "Problem while finding if TF2 is running", e);
             }
         }
-        return found;
+        return false;
     }
 
     private void regedit(String key, String value, String content) {
