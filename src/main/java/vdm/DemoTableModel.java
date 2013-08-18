@@ -78,7 +78,7 @@ public class DemoTableModel extends AbstractTableModel {
         Columns c = Columns.values()[columnIndex];
         switch (c) {
             case DEMONAME:
-                return demo.getPath().getFileName();
+                return demo;
             case MAP:
                 return demo.getMapName();
             case PLAYER:
@@ -97,6 +97,17 @@ public class DemoTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return false;
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        Columns c = Columns.values()[columnIndex];
+        switch (c) {
+            case DEMONAME:
+                return Demo.class;
+            default:
+                return String.class;
+        }
     }
 
     @Override

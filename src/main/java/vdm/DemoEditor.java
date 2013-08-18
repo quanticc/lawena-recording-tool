@@ -8,6 +8,8 @@ import util.WatchDir.WatchAction;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -244,6 +246,13 @@ public class DemoEditor {
         view.getTableDemos().setModel(demoModel);
         view.getTableDemos().getSelectionModel()
                 .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        view.getTableDemos().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        view.getTableDemos().getColumnModel().getColumn(0).setPreferredWidth(300);
+        view.getTableDemos().getColumnModel().getColumn(1).setPreferredWidth(100);
+        view.getTableDemos().getColumnModel().getColumn(2).setPreferredWidth(100);
+        view.getTableDemos().getColumnModel().getColumn(3).setPreferredWidth(75);
+        view.getTableDemos().getColumnModel().getColumn(4).setPreferredWidth(75);
+        view.getTableDemos().getColumnModel().getColumn(5).setPreferredWidth(150);
         view.getTableDemos().setFillsViewportHeight(true);
 
         view.getBtnAdd().addActionListener(new VdmAddTick());
@@ -283,17 +292,27 @@ public class DemoEditor {
         view.getCmbSegmentType().setModel(new DefaultComboBoxModel<>(new String[] {
                 "Custom Segment"
         }));
+        view.getCmbSegmentType().addItemListener(new ItemListener() {
+            
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                // TODO Auto-generated method stub
+                
+            }
+        });
         view.getTableDemos().getSelectionModel()
                 .addListSelectionListener(new ListSelectionListener() {
 
                     @Override
                     public void valueChanged(ListSelectionEvent e) {
-                        if (e.getFirstIndex() >= 0) {
+                        log.finer(e.toString());
+                        if (e.getFirstIndex() >= 0 && !e.getValueIsAdjusting()) {
                             Demo demo = (Demo) demoModel.getDemo(e.getFirstIndex());
                             List<KillStreak> streaks = demo.getStreaks();
                             DefaultComboBoxModel m = new DefaultComboBoxModel<>();
                             m.addElement("Custom Segment");
                             for (KillStreak streak : streaks) {
+                                log.finer("adding element: " + streak.getDescription() + " at " + streak.getTick());
                                 m.addElement(streak.getDescription() + " at " + streak.getTick());
                             }
                             view.getCmbSegmentType().setModel(m);

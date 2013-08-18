@@ -1,6 +1,7 @@
 
 package ui;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -17,7 +18,9 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+
 import java.awt.Component;
+
 import javax.swing.Box;
 
 public class DemoEditorView extends JPanel {
@@ -76,22 +79,23 @@ public class DemoEditorView extends JPanel {
 
         tableDemos = new JTable();
         tableDemos.setShowVerticalLines(false);
+        tableDemos.setGridColor(new Color(0, 0, 0, 30));
         scrollPane_2.setViewportView(tableDemos);
-                
-                panelButtonsCenterLeft = new JPanel();
-                FlowLayout flowLayout = (FlowLayout) panelButtonsCenterLeft.getLayout();
-                flowLayout.setHgap(0);
-                flowLayout.setAlignment(FlowLayout.LEADING);
-                flowLayout.setVgap(0);
-                GridBagConstraints gbc_panelButtonsCenterLeft = new GridBagConstraints();
-                gbc_panelButtonsCenterLeft.insets = new Insets(0, 5, 5, 5);
-                gbc_panelButtonsCenterLeft.fill = GridBagConstraints.BOTH;
-                gbc_panelButtonsCenterLeft.gridx = 0;
-                gbc_panelButtonsCenterLeft.gridy = 2;
-                add(panelButtonsCenterLeft, gbc_panelButtonsCenterLeft);
-        
-                cmbSegmentType = new JComboBox();
-                panelButtonsCenterLeft.add(cmbSegmentType);
+
+        panelButtonsCenterLeft = new JPanel();
+        FlowLayout flowLayout = (FlowLayout) panelButtonsCenterLeft.getLayout();
+        flowLayout.setHgap(0);
+        flowLayout.setAlignment(FlowLayout.LEADING);
+        flowLayout.setVgap(0);
+        GridBagConstraints gbc_panelButtonsCenterLeft = new GridBagConstraints();
+        gbc_panelButtonsCenterLeft.insets = new Insets(0, 5, 5, 5);
+        gbc_panelButtonsCenterLeft.fill = GridBagConstraints.BOTH;
+        gbc_panelButtonsCenterLeft.gridx = 0;
+        gbc_panelButtonsCenterLeft.gridy = 2;
+        add(panelButtonsCenterLeft, gbc_panelButtonsCenterLeft);
+
+        cmbSegmentType = new JComboBox();
+        panelButtonsCenterLeft.add(cmbSegmentType);
 
         lblStartTick = new JLabel(" Start: ");
         panelButtonsCenterLeft.add(lblStartTick);
@@ -99,25 +103,25 @@ public class DemoEditorView extends JPanel {
         txtStarttick = new JTextField();
         panelButtonsCenterLeft.add(txtStarttick);
         txtStarttick.setColumns(5);
-                
-                        lblEndTick = new JLabel(" End: ");
-                        panelButtonsCenterLeft.add(lblEndTick);
-        
-                txtEndtick = new JTextField();
-                panelButtonsCenterLeft.add(txtEndtick);
-                txtEndtick.setColumns(5);
-                        
-                        horizontalStrut = Box.createHorizontalStrut(10);
-                        panelButtonsCenterLeft.add(horizontalStrut);
-                
-                        btnAdd = new JButton("Add Segment");
-                        panelButtonsCenterLeft.add(btnAdd);
-                        
-                                btnDeleteSelectedTick = new JButton("Delete Segment");
-                                panelButtonsCenterLeft.add(btnDeleteSelectedTick);
-                                
-                                        btnClearTickList = new JButton("Clear List");
-                                        panelButtonsCenterLeft.add(btnClearTickList);
+
+        lblEndTick = new JLabel(" End: ");
+        panelButtonsCenterLeft.add(lblEndTick);
+
+        txtEndtick = new JTextField();
+        panelButtonsCenterLeft.add(txtEndtick);
+        txtEndtick.setColumns(5);
+
+        horizontalStrut = Box.createHorizontalStrut(10);
+        panelButtonsCenterLeft.add(horizontalStrut);
+
+        btnAdd = new JButton("Add Segment");
+        panelButtonsCenterLeft.add(btnAdd);
+
+        btnDeleteSelectedTick = new JButton("Delete Segment");
+        panelButtonsCenterLeft.add(btnDeleteSelectedTick);
+
+        btnClearTickList = new JButton("Clear List");
+        panelButtonsCenterLeft.add(btnClearTickList);
 
         scrollPane_1 = new JScrollPane();
         GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
@@ -129,6 +133,7 @@ public class DemoEditorView extends JPanel {
 
         tableTicks = new JTable();
         tableTicks.setShowVerticalLines(false);
+        tableTicks.setGridColor(new Color(0, 0, 0, 30));
         scrollPane_1.setViewportView(tableTicks);
 
         panelButtonsBottomLeft = new JPanel();

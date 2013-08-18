@@ -120,8 +120,8 @@ public class Demo extends RandomAccessFile {
         return gameDirectory;
     }
 
-    public double getPlaybackTime() {
-        return playbackTime;
+    public String getPlaybackTime() {
+        return formatSeconds(playbackTime);
     }
 
     public String getServerName() {
@@ -149,17 +149,7 @@ public class Demo extends RandomAccessFile {
 
     @Override
     public String toString() {
-        String str = "";
-        str += "Stamp: " + demoStamp;
-        str += "\nDemoProtocol: " + demoProtocol;
-        str += "\nNetworkProtocol: " + networkProtocol;
-        str += "\nGameDirectory: " + gameDirectory;
-        str += "\nPlaybackTime: " + formatSeconds(playbackTime);
-        str += "\nServer: " + serverName;
-        str += "\nPlayer: " + playerName;
-        str += "\nMap: " + mapName;
-        str += "\nTicks: " + tickNumber;
-        return str;
+        return getPath().getFileName().toString();
     }
 
 }
