@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 
 public class DemoTableModel extends AbstractTableModel {
@@ -29,7 +30,7 @@ public class DemoTableModel extends AbstractTableModel {
         list = new ArrayList<>();
     }
 
-    public DemoTableModel(Path path) {
+    public DemoTableModel(final Path path) {
         this();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(
                 path, "*.dem")) {
@@ -41,25 +42,28 @@ public class DemoTableModel extends AbstractTableModel {
         } catch (IOException e) {
             log.log(Level.INFO, "Problem while scanning .dem files", e);
         }
-        try {
-            for (String line : Files.readAllLines(path.resolve("KillStreaks.txt"),
-                    Charset.defaultCharset())) {
-                if (!line.isEmpty()) {
-                    KillStreak streak = new KillStreak(line);
-                    log.finer("demo: " + streak.getDemoname() + ", type: "
-                            + streak.getDescription() + ", tick: " + streak.getTick());
-                    for (Demo demo : list) {
-                        if (demo.getPath().getFileName().toString().equals(streak.getDemoname())) {
-                            log.finer("adding streak: " + streak);
-                            demo.getStreaks().add(streak);
-                            break;
+        new SwingWorker<Void, Void>() {
+            protected Void doInBackground() throws Exception {
+                try {
+                    for (String line : Files.readAllLines(path.resolve("KillStreaks.txt"),
+                            Charset.defaultCharset())) {
+                        if (!line.isEmpty()) {
+                            KillStreak streak = new KillStreak(line);
+                            for (Demo demo : list) {
+                                if (demo.getPath().getFileName().toString()
+                                        .equals(streak.getDemoname())) {
+                                    demo.getStreaks().add(streak);
+                                    break;
+                                }
+                            }
                         }
                     }
+                } catch (IOException e) {
+                    log.log(Level.FINER, "Problem while reading KillStreaks.txt", e);
                 }
-            }
-        } catch (IOException e) {
-            log.log(Level.FINER, "Problem while reading KillStreaks.txt", e);
-        }
+                return null;
+            };
+        }.execute();
     }
 
     @Override

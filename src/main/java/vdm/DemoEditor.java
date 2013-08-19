@@ -2,6 +2,7 @@
 package vdm;
 
 import ui.DemoEditorView;
+import ui.DemoRenderer;
 import util.WatchDir;
 import util.WatchDir.WatchAction;
 
@@ -252,8 +253,10 @@ public class DemoEditor {
         view.getTableDemos().getColumnModel().getColumn(2).setPreferredWidth(100);
         view.getTableDemos().getColumnModel().getColumn(3).setPreferredWidth(75);
         view.getTableDemos().getColumnModel().getColumn(4).setPreferredWidth(75);
-        view.getTableDemos().getColumnModel().getColumn(5).setPreferredWidth(150);
+        view.getTableDemos().getColumnModel().getColumn(5).setPreferredWidth(200);
+        view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         view.getTableDemos().setFillsViewportHeight(true);
+        view.getTableDemos().setDefaultRenderer(Demo.class, new DemoRenderer());
 
         view.getBtnAdd().addActionListener(new VdmAddTick());
         // view.getBtnBrowse().addActionListener(new VdmBrowseDemo());
@@ -293,11 +296,26 @@ public class DemoEditor {
                 "Custom Segment"
         }));
         view.getCmbSegmentType().addItemListener(new ItemListener() {
-            
+
             @Override
             public void itemStateChanged(ItemEvent e) {
-                // TODO Auto-generated method stub
-                
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String[] tokens = e.getItem().toString().split(" at ");
+                    if (tokens.length == 2) {
+                        try {
+                            view.getTxtStarttick().setText(Integer.parseInt(tokens[1]) - 500 + "");
+                        } catch (NumberFormatException ex) {
+                            view.getTxtStarttick().setText("");
+                        }
+                        view.getTxtEndtick().setText("");
+                    } else {
+                        view.getTxtStarttick().setText("");
+                        view.getTxtEndtick().setText("");
+                    }
+                } else {
+                    view.getTxtStarttick().setText("");
+                    view.getTxtEndtick().setText("");
+                }
             }
         });
         view.getTableDemos().getSelectionModel()
@@ -305,18 +323,27 @@ public class DemoEditor {
 
                     @Override
                     public void valueChanged(ListSelectionEvent e) {
-                        log.finer(e.toString());
-                        if (e.getFirstIndex() >= 0 && !e.getValueIsAdjusting()) {
-                            Demo demo = (Demo) demoModel.getDemo(e.getFirstIndex());
-                            List<KillStreak> streaks = demo.getStreaks();
-                            DefaultComboBoxModel m = new DefaultComboBoxModel<>();
-                            m.addElement("Custom Segment");
-                            for (KillStreak streak : streaks) {
-                                log.finer("adding element: " + streak.getDescription() + " at " + streak.getTick());
-                                m.addElement(streak.getDescription() + " at " + streak.getTick());
+                        if (e.getFirstIndex() >= 0) {
+                            if (!e.getValueIsAdjusting()) {
+                                Demo demo = (Demo) demoModel.getDemo(view.getTableDemos()
+                                        .getSelectedRow());
+                                List<KillStreak> streaks = demo.getStreaks();
+                                DefaultComboBoxModel<String> m = new DefaultComboBoxModel<>();
+                                m.addElement("Custom Segment");
+                                for (KillStreak streak : streaks) {
+                                    m.addElement(streak.getDescription() + " at "
+                                            + streak.getTick());
+                                }
+                                view.getCmbSegmentType().setModel(m);
                             }
-                            view.getCmbSegmentType().setModel(m);
+                        } else {
+                            view.getCmbSegmentType().setModel(
+                                    new DefaultComboBoxModel<>(new String[] {
+                                            "Custom Segment"
+                                    }));
                         }
+                        view.getTxtStarttick().setText("");
+                        view.getTxtEndtick().setText("");
                     }
                 });
 

@@ -2,26 +2,21 @@
 package ui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-
-import java.awt.Component;
-
-import javax.swing.Box;
 
 public class DemoEditorView extends JPanel {
 
@@ -45,7 +40,7 @@ public class DemoEditorView extends JPanel {
     private JCheckBox chckbxAutoplayFirstDemo;
     private JLabel lblStartTick;
     private JLabel lblEndTick;
-    private JComboBox cmbSegmentType;
+    private JComboBox<String> cmbSegmentType;
     private JPanel panelButtonsCenterLeft;
     private Component horizontalStrut;
 
@@ -204,7 +199,7 @@ public class DemoEditorView extends JPanel {
         return tableDemos;
     }
 
-    public JComboBox getCmbSegmentType() {
+    public JComboBox<String> getCmbSegmentType() {
         return cmbSegmentType;
     }
 }
