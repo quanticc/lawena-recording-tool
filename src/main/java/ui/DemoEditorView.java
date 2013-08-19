@@ -4,9 +4,12 @@ package ui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -43,6 +46,7 @@ public class DemoEditorView extends JPanel {
     private JComboBox<String> cmbSegmentType;
     private JPanel panelButtonsCenterLeft;
     private Component horizontalStrut;
+    private JTextField txtFilterDemos;
 
     /**
      * Create the panel.
@@ -53,23 +57,52 @@ public class DemoEditorView extends JPanel {
                 0
         };
         gbl_panelVdm.rowHeights = new int[] {
-                0, 0, 0, 0, 0, 0
+                0, 0, 0, 0, 0, 0, 0
         };
         gbl_panelVdm.columnWeights = new double[] {
                 1.0
         };
         gbl_panelVdm.rowWeights = new double[] {
-                1.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE
+                0.0, 1.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE
         };
         setLayout(gbl_panelVdm);
+
+        txtFilterDemos = new JTextField() {
+            private static final long serialVersionUID = 1L;
+            private String placeholder = "Search";
+
+            @Override
+            protected void paintComponent(final Graphics pG) {
+                super.paintComponent(pG);
+
+                if (placeholder.length() == 0 || getText().length() > 0) {
+                    return;
+                }
+
+                final Graphics2D g = (Graphics2D) pG;
+                g.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setColor(getDisabledTextColor());
+                g.drawString(placeholder, getInsets().left, pG.getFontMetrics()
+                        .getMaxAscent() + getInsets().top);
+            }
+        };
+        GridBagConstraints gbc_txtFilterDemos = new GridBagConstraints();
+        gbc_txtFilterDemos.insets = new Insets(5, 5, 5, 5);
+        gbc_txtFilterDemos.fill = GridBagConstraints.HORIZONTAL;
+        gbc_txtFilterDemos.gridx = 0;
+        gbc_txtFilterDemos.gridy = 0;
+        add(txtFilterDemos, gbc_txtFilterDemos);
+        txtFilterDemos.setColumns(10);
 
         scrollPane_2 = new JScrollPane();
         GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
         gbc_scrollPane_2.gridheight = 2;
-        gbc_scrollPane_2.insets = new Insets(5, 5, 5, 5);
+        gbc_scrollPane_2.insets = new Insets(0, 5, 5, 5);
         gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
         gbc_scrollPane_2.gridx = 0;
-        gbc_scrollPane_2.gridy = 0;
+        gbc_scrollPane_2.gridy = 1;
         add(scrollPane_2, gbc_scrollPane_2);
 
         tableDemos = new JTable();
@@ -86,10 +119,10 @@ public class DemoEditorView extends JPanel {
         gbc_panelButtonsCenterLeft.insets = new Insets(0, 5, 5, 5);
         gbc_panelButtonsCenterLeft.fill = GridBagConstraints.BOTH;
         gbc_panelButtonsCenterLeft.gridx = 0;
-        gbc_panelButtonsCenterLeft.gridy = 2;
+        gbc_panelButtonsCenterLeft.gridy = 3;
         add(panelButtonsCenterLeft, gbc_panelButtonsCenterLeft);
 
-        cmbSegmentType = new JComboBox();
+        cmbSegmentType = new JComboBox<String>();
         panelButtonsCenterLeft.add(cmbSegmentType);
 
         lblStartTick = new JLabel(" Start: ");
@@ -123,7 +156,7 @@ public class DemoEditorView extends JPanel {
         gbc_scrollPane_1.insets = new Insets(0, 5, 5, 5);
         gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
         gbc_scrollPane_1.gridx = 0;
-        gbc_scrollPane_1.gridy = 3;
+        gbc_scrollPane_1.gridy = 4;
         add(scrollPane_1, gbc_scrollPane_1);
 
         tableTicks = new JTable();
@@ -140,7 +173,7 @@ public class DemoEditorView extends JPanel {
         gbc_panelButtonsBottomLeft.fill = GridBagConstraints.HORIZONTAL;
         gbc_panelButtonsBottomLeft.insets = new Insets(0, 5, 4, 5);
         gbc_panelButtonsBottomLeft.gridx = 0;
-        gbc_panelButtonsBottomLeft.gridy = 4;
+        gbc_panelButtonsBottomLeft.gridy = 5;
         add(panelButtonsBottomLeft, gbc_panelButtonsBottomLeft);
 
         btnCreateVdmFiles = new JButton("Create VDM Files");
@@ -201,5 +234,9 @@ public class DemoEditorView extends JPanel {
 
     public JComboBox<String> getCmbSegmentType() {
         return cmbSegmentType;
+    }
+
+    public JTextField getTxtFilterDemos() {
+        return txtFilterDemos;
     }
 }

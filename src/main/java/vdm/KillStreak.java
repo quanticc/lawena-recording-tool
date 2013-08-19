@@ -1,11 +1,7 @@
 
 package vdm;
 
-import java.util.logging.Logger;
-
 public class KillStreak {
-
-    private static final Logger log = Logger.getLogger("lawena");
 
     private String date;
     private String description;
@@ -15,7 +11,7 @@ public class KillStreak {
     public KillStreak(String line) {
         String[] tokens = line.split(" \\(\"|\\)|\" at |\\] |\\[");
         if (tokens.length < 5) {
-            log.finer("[KillStreak] Problem while parsing: " + line);
+            throw new IllegalArgumentException("Could not parse all fields from: " + line);
         }
         try {
             date = tokens[1];

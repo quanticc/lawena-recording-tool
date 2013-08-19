@@ -21,7 +21,7 @@ public class DemoTableModel extends AbstractTableModel {
     private static final Logger log = Logger.getLogger("lawena");
 
     public enum Columns {
-        DEMONAME, MAP, PLAYER, TICKS, TIME, SERVER;
+        DEMONAME, MAP, PLAYER, TICKS, TIME, SERVER, STREAKS;
     }
 
     private List<Demo> list;
@@ -45,18 +45,24 @@ public class DemoTableModel extends AbstractTableModel {
         new SwingWorker<Void, Void>() {
             protected Void doInBackground() throws Exception {
                 try {
+                    int lineNumber = 1;
                     for (String line : Files.readAllLines(path.resolve("KillStreaks.txt"),
                             Charset.defaultCharset())) {
                         if (!line.isEmpty()) {
-                            KillStreak streak = new KillStreak(line);
-                            for (Demo demo : list) {
-                                if (demo.getPath().getFileName().toString()
-                                        .equals(streak.getDemoname())) {
-                                    demo.getStreaks().add(streak);
-                                    break;
+                            try {
+                                KillStreak streak = new KillStreak(line);
+                                for (Demo demo : list) {
+                                    if (demo.getPath().getFileName().toString()
+                                            .equals(streak.getDemoname())) {
+                                        demo.getStreaks().add(streak);
+                                        break;
+                                    }
                                 }
+                            } catch (IllegalArgumentException e) {
+                                log.finer("[KillStreaks] Problem on line " + lineNumber);
                             }
                         }
+                        lineNumber++;
                     }
                 } catch (IOException e) {
                     log.log(Level.FINER, "Problem while reading KillStreaks.txt", e);
@@ -93,6 +99,8 @@ public class DemoTableModel extends AbstractTableModel {
                 return demo.getTickNumber();
             case TIME:
                 return demo.getPlaybackTime();
+            case STREAKS:
+                return demo.getStreaks().toString().replaceAll("\\[|\\]", "");
             default:
                 return "";
         }
@@ -130,6 +138,8 @@ public class DemoTableModel extends AbstractTableModel {
                 return "Total Ticks";
             case TIME:
                 return "Total Time";
+            case STREAKS:
+                return "Killstreaks";
         }
         return super.getColumnName(column);
     }
