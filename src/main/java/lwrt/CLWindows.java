@@ -53,7 +53,7 @@ public class CLWindows extends CommandLine {
                 Process p = pb.start();
                 BufferedReader input =
                         new BufferedReader(new InputStreamReader(p.getInputStream()));
-                log.finer("Detecting TF2 process: " + pb.command().get(0));
+                log.finer("Detecting TF2 process using " + pb.command().get(0));
                 while ((line = input.readLine()) != null) {
                     log.finer("[" + pb.command().get(0) + "] " + line);
                     if (line.contains(hl2)) {
