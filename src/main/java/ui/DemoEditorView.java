@@ -239,4 +239,7 @@ public class DemoEditorView extends JPanel {
     public JTextField getTxtFilterDemos() {
         return txtFilterDemos;
     }
+    public JCheckBox getChckbxAutoplayFirstDemo() {
+        return chckbxAutoplayFirstDemo;
+    }
 }

@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -218,13 +219,24 @@ public class SettingsManager {
         settings.println("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
         settings.close();
 
-        if (demoname != null) {
-            PrintWriter playdemo = new PrintWriter(new FileWriter("cfg/lawena.cfg"));
-            playdemo.println("playdemo \"" + demoname + "\"");
-            playdemo.close();
-        } else {
-            Files.deleteIfExists(Paths.get("cfg/lawena.cfg"));
+        boolean playdemo = (demoname != null && !demoname.isEmpty());
+        List<String> commands = Arrays.asList("sv_cheats 1", "exec recording.cfg",
+                "exec recbindings.cfg", "exec settings.cfg");
+        List<String> prevAutoexec = Files.readAllLines(Paths.get("cfg/autoexec.cfg"),
+                Charset.defaultCharset());
+        PrintWriter autoexec = new PrintWriter(new FileWriter("cfg/autoexec.cfg"));
+        for (String command : commands) {
+            autoexec.println(command);
         }
+        if (playdemo) {
+            autoexec.println("playdemo \"" + demoname + "\"");
+        }
+        for (String command : prevAutoexec) {
+            if (!commands.contains(command) && !command.startsWith("playdemo")) {
+                autoexec.println(command);
+            }
+        }
+        autoexec.close();
     }
 
     private void setString(Key key, String value) {

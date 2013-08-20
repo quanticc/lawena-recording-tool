@@ -1094,6 +1094,11 @@ public class Lawena {
         settings.setCustomResources(selected);
         settings.setHudMinmode(view.getUseHudMinmode().isSelected());
         settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
+        if (vdm.isAutoplay()) {
+            settings.setDemoname(vdm.getDemoname());
+        } else {
+            settings.setDemoname("");
+        }
         settings.save();
         log.fine("Settings saved");
     }

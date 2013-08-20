@@ -79,6 +79,7 @@ public class DemoEditor {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            String currentdemo;
             if (!Files.exists(settings.getTfPath().resolve(
                     demoModel.getDemo(view.getTableDemos().getSelectedRow()).getPath()
                             .getFileName().toString()))) {
@@ -204,7 +205,6 @@ public class DemoEditor {
     private TickTableModel tickModel;
     private SettingsManager settings;
     private CommandLine cl;
-    private String currentdemo;
     private DemoTableModel demoModel;
 
     public DemoEditor(SettingsManager settings, CommandLine cl, WatchDir watcher) {
@@ -302,9 +302,11 @@ public class DemoEditor {
                 settings.setVdmSrcDemoFix(view.getChckbxSrcDemoFix().isSelected());
             }
         });
-        view.getCmbSegmentType().setModel(new DefaultComboBoxModel<>(new String[] {
-                "Custom Segment"
-        }));
+        final DefaultComboBoxModel<String> defaultSegmentModel = new DefaultComboBoxModel<>(
+                new String[] {
+                        "Record Segment", "Go to Segment"
+                });
+        view.getCmbSegmentType().setModel(defaultSegmentModel);
         view.getCmbSegmentType().addItemListener(new ItemListener() {
 
             @Override
@@ -334,7 +336,8 @@ public class DemoEditor {
                                         .convertRowIndexToModel(index));
                                 List<KillStreak> streaks = demo.getStreaks();
                                 DefaultComboBoxModel<String> m = new DefaultComboBoxModel<>();
-                                m.addElement("Custom Segment");
+                                m.addElement("Record Segment");
+                                m.addElement("Go to Segment");
                                 for (KillStreak streak : streaks) {
                                     m.addElement(streak.getDescription() + " at "
                                             + streak.getTick());
@@ -342,10 +345,7 @@ public class DemoEditor {
                                 view.getCmbSegmentType().setModel(m);
                             }
                         } else {
-                            view.getCmbSegmentType().setModel(
-                                    new DefaultComboBoxModel<>(new String[] {
-                                            "Custom Segment"
-                                    }));
+                            view.getCmbSegmentType().setModel(defaultSegmentModel);
                         }
                         view.getTxtStarttick().setText("");
                         view.getTxtEndtick().setText("");
@@ -355,5 +355,16 @@ public class DemoEditor {
                 .addDocumentListener(new RegexFilterDocumentListener());
 
         return view;
+    }
+
+    public String getDemoname() {
+        if (!tickModel.getTickList().isEmpty()) {
+            return tickModel.getTickList().get(0).getDemoname();
+        }
+        return "";
+    }
+
+    public boolean isAutoplay() {
+        return view.getChckbxAutoplayFirstDemo().isSelected();
     }
 }
