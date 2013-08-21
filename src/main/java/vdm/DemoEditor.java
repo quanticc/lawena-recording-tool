@@ -302,9 +302,10 @@ public class DemoEditor {
                 settings.setVdmSrcDemoFix(view.getChckbxSrcDemoFix().isSelected());
             }
         });
+
         final DefaultComboBoxModel<String> defaultSegmentModel = new DefaultComboBoxModel<>(
                 new String[] {
-                        "Record Segment", "Go to Segment"
+                    "Record Segment"
                 });
         view.getCmbSegmentType().setModel(defaultSegmentModel);
         view.getCmbSegmentType().addItemListener(new ItemListener() {
@@ -314,7 +315,8 @@ public class DemoEditor {
                 view.getTxtStarttick().setText("");
                 view.getTxtEndtick().setText("");
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    String[] tokens = e.getItem().toString().split(" at ");
+                    String selected = e.getItem().toString();
+                    String[] tokens = selected.split(" at ");
                     if (tokens.length == 2) {
                         try {
                             view.getTxtStarttick().setText(Integer.parseInt(tokens[1]) - 500 + "");
@@ -336,8 +338,9 @@ public class DemoEditor {
                                         .convertRowIndexToModel(index));
                                 List<KillStreak> streaks = demo.getStreaks();
                                 DefaultComboBoxModel<String> m = new DefaultComboBoxModel<>();
-                                m.addElement("Record Segment");
-                                m.addElement("Go to Segment");
+                                for (int i = 0; i < defaultSegmentModel.getSize(); i++) {
+                                    m.addElement(defaultSegmentModel.getElementAt(i));
+                                }
                                 for (KillStreak streak : streaks) {
                                     m.addElement(streak.getDescription() + " at "
                                             + streak.getTick());

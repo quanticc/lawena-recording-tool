@@ -2,20 +2,15 @@
 package ui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.RenderingHints;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -27,8 +22,8 @@ public class DemoEditorView extends JPanel {
      * 
      */
     private static final long serialVersionUID = 1L;
-    private JTextField txtStarttick;
-    private JTextField txtEndtick;
+    private JTextFieldPlaceholder txtStarttick;
+    private JTextFieldPlaceholder txtEndtick;
     private JButton btnAdd;
     private JPanel panelButtonsBottomLeft;
     private JButton btnClearTickList;
@@ -41,12 +36,10 @@ public class DemoEditorView extends JPanel {
     private JScrollPane scrollPane_2;
     private JTable tableDemos;
     private JCheckBox chckbxAutoplayFirstDemo;
-    private JLabel lblStartTick;
-    private JLabel lblEndTick;
     private JComboBox<String> cmbSegmentType;
     private JPanel panelButtonsCenterLeft;
-    private Component horizontalStrut;
-    private JTextField txtFilterDemos;
+    private JTextFieldPlaceholder txtFilterDemos;
+    private Box horizontalBox;
 
     /**
      * Create the panel.
@@ -67,27 +60,8 @@ public class DemoEditorView extends JPanel {
         };
         setLayout(gbl_panelVdm);
 
-        txtFilterDemos = new JTextField() {
-            private static final long serialVersionUID = 1L;
-            private String placeholder = "Search";
-
-            @Override
-            protected void paintComponent(final Graphics pG) {
-                super.paintComponent(pG);
-
-                if (placeholder.length() == 0 || getText().length() > 0) {
-                    return;
-                }
-
-                final Graphics2D g = (Graphics2D) pG;
-                g.setRenderingHint(
-                        RenderingHints.KEY_ANTIALIASING,
-                        RenderingHints.VALUE_ANTIALIAS_ON);
-                g.setColor(getDisabledTextColor());
-                g.drawString(placeholder, getInsets().left, pG.getFontMetrics()
-                        .getMaxAscent() + getInsets().top);
-            }
-        };
+        txtFilterDemos = new JTextFieldPlaceholder();
+        txtFilterDemos.setPlaceholder("Search");
         GridBagConstraints gbc_txtFilterDemos = new GridBagConstraints();
         gbc_txtFilterDemos.insets = new Insets(5, 5, 5, 5);
         gbc_txtFilterDemos.fill = GridBagConstraints.HORIZONTAL;
@@ -112,7 +86,6 @@ public class DemoEditorView extends JPanel {
 
         panelButtonsCenterLeft = new JPanel();
         FlowLayout flowLayout = (FlowLayout) panelButtonsCenterLeft.getLayout();
-        flowLayout.setHgap(0);
         flowLayout.setAlignment(FlowLayout.LEADING);
         flowLayout.setVgap(0);
         GridBagConstraints gbc_panelButtonsCenterLeft = new GridBagConstraints();
@@ -125,31 +98,27 @@ public class DemoEditorView extends JPanel {
         cmbSegmentType = new JComboBox<String>();
         panelButtonsCenterLeft.add(cmbSegmentType);
 
-        lblStartTick = new JLabel(" Start: ");
-        panelButtonsCenterLeft.add(lblStartTick);
-
-        txtStarttick = new JTextField();
+        txtStarttick = new JTextFieldPlaceholder();
+        txtStarttick.setPlaceholder("Start at");
         panelButtonsCenterLeft.add(txtStarttick);
         txtStarttick.setColumns(5);
 
-        lblEndTick = new JLabel(" End: ");
-        panelButtonsCenterLeft.add(lblEndTick);
-
-        txtEndtick = new JTextField();
+        txtEndtick = new JTextFieldPlaceholder();
+        txtEndtick.setPlaceholder("Stop at");
         panelButtonsCenterLeft.add(txtEndtick);
         txtEndtick.setColumns(5);
 
-        horizontalStrut = Box.createHorizontalStrut(10);
-        panelButtonsCenterLeft.add(horizontalStrut);
+        horizontalBox = Box.createHorizontalBox();
+        panelButtonsCenterLeft.add(horizontalBox);
 
         btnAdd = new JButton("Add Segment");
-        panelButtonsCenterLeft.add(btnAdd);
+        horizontalBox.add(btnAdd);
 
         btnDeleteSelectedTick = new JButton("Delete Segment");
-        panelButtonsCenterLeft.add(btnDeleteSelectedTick);
+        horizontalBox.add(btnDeleteSelectedTick);
 
         btnClearTickList = new JButton("Clear List");
-        panelButtonsCenterLeft.add(btnClearTickList);
+        horizontalBox.add(btnClearTickList);
 
         scrollPane_1 = new JScrollPane();
         GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
@@ -192,11 +161,11 @@ public class DemoEditorView extends JPanel {
 
     }
 
-    public JTextField getTxtStarttick() {
+    public JTextFieldPlaceholder getTxtStarttick() {
         return txtStarttick;
     }
 
-    public JTextField getTxtEndtick() {
+    public JTextFieldPlaceholder getTxtEndtick() {
         return txtEndtick;
     }
 
@@ -239,7 +208,9 @@ public class DemoEditorView extends JPanel {
     public JTextField getTxtFilterDemos() {
         return txtFilterDemos;
     }
+
     public JCheckBox getChckbxAutoplayFirstDemo() {
         return chckbxAutoplayFirstDemo;
     }
+
 }
