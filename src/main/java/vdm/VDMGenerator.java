@@ -62,7 +62,7 @@ public class VDMGenerator {
                 } else {
                     lines.add(segment(count++, "SkipAhead", "skip",
                             "starttick \"" + (previousEndTick + 1) + "\"",
-                            "skiptotick \"" + (tick.getStart() - 1) + "\""));
+                            "skiptotick \"" + (tick.getStart() - 500) + "\""));
                 }
                 lines.add(segment(count++, "PlayCommands", "startrec",
                         "starttick \"" + tick.getStart() + "\"",
