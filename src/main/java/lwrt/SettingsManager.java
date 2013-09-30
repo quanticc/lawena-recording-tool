@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,13 +16,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SettingsManager {
+import javax.swing.DefaultComboBoxModel;
 
+public class SettingsManager extends DefaultComboBoxModel<String> {
+
+    private static final long serialVersionUID = 1L;
     private static final Logger log = Logger.getLogger("lawena");
 
     public enum Key {
@@ -45,7 +52,7 @@ public class SettingsManager {
         Condebug(true),
         HudMinmode(true),
         Particles(""),
-        LogConsoleLevel("FINER"),
+        LogConsoleLevel("ALL"),
         LogFileLevel("FINE"),
         LogUiLevel("FINE"),
         LaunchTimeout(120, 0, Integer.MAX_VALUE),
@@ -97,25 +104,173 @@ public class SettingsManager {
 
     }
 
-    private String filename;
+    private String selectedProfile;
     private Properties properties;
+    private Set<String> profiles = new LinkedHashSet<>();
 
     // transient property, do not save to file
     private String demoname;
 
-    public SettingsManager(String settingsFile) {
-        filename = settingsFile;
+    public SettingsManager() {
+        Path profilePath = Paths.get("profiles");
+        try {
+            Files.createDirectory(profilePath);
+        } catch (FileAlreadyExistsException x) {
+        } catch (IOException e) {
+            log.log(Level.FINE, "Could not create directory", e);
+        }
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(profilePath, "*.lwf")) {
+            for (Path path : stream) {
+                String name = path.getFileName().toString();
+                addProfile(name.substring(0, name.lastIndexOf(".lwf")));
+            }
+        } catch (IOException e) {
+            log.log(Level.INFO, "Problem while loading skyboxes", e);
+        }
+        Properties settings = new Properties();
+        try {
+            settings.load(new FileReader("settings.lwf"));
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+            log.log(Level.INFO, "Problem while loading settings", e);
+        }
         properties = new Properties();
+        if (!settings.containsKey("Profile")) {
+            addProfile("Profile");
+            properties = settings;
+            selectedProfile = "Profile";
+            for (Key key : Key.values()) {
+                if (!properties.containsKey(key.toString())) {
+                    properties.setProperty(key.toString(), key.value + "");
+                }
+            }
+            save();
+        } else {
+            for (Key key : Key.values()) {
+                properties.setProperty(key.toString(), key.value + "");
+            }
+            selectedProfile = settings.get("Profile").toString();
+            load();
+        }
+    }
+
+    private void addProfile(String name) {
+        if (profiles.add(name)) {
+            addElement(name);
+        }
+    }
+
+    public String create(String profileNameToCreate) {
+        String name = profileNameToCreate;
+        String[] tokens = name.split("-");
+        int counter = 1;
+        if (tokens.length > 1) {
+            try {
+                counter = Integer.parseInt(tokens[tokens.length - 1]);
+            } catch (NumberFormatException x) {
+            }
+        }
+        while (profiles.contains(name)) {
+            name = name.replaceAll("^(.*-)([0-9]+)$", "\\1" + counter++);
+            log.finer("Attempting to create profile with name: " + name);
+        }
+        addProfile(name);
+        log.fine("Created profile: " + name);
+        storeProfile(name);
+        return name;
+    }
+
+    public boolean delete(String profileNameToDelete) {
+        if (profiles.remove(profileNameToDelete)) {
+            removeElement(profileNameToDelete);
+            log.fine("Deleted profile: " + profileNameToDelete);
+            try {
+                Files.deleteIfExists(Paths.get("profiles", profileNameToDelete + ".lwf"));
+            } catch (IOException e) {
+                log.log(Level.FINE, "Problem while deleting profile", e);
+            }
+            if (selectedProfile.equals(profileNameToDelete)) {
+                selectedProfile = "Default";
+                loadDefaults();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean rename(String profileOriginalName, String profileNewName) {
+        if (profiles.contains(profileOriginalName)) {
+            Properties temp = getPropertiesFromProfile(profileOriginalName);
+            boolean wasSelected = selectedProfile.equals(profileOriginalName);
+            delete(profileOriginalName);
+            profileNewName = create(profileNewName);
+            try {
+                PrintWriter pw = new PrintWriter(new FileWriter("profiles/" + profileNewName
+                        + ".lwf"));
+                temp.store(pw, "Lawena profile");
+            } catch (IOException e) {
+                log.log(Level.INFO, "Settings could not be saved", e);
+            }
+            if (wasSelected) {
+                selectedProfile = profileNewName;
+                if (load()) {
+                    addProfile(selectedProfile);
+                }
+            }
+            return true;
+        } else {
+            log.info("Cannot rename profile " + profileOriginalName + " because it does not exists");
+        }
+        return false;
+    }
+
+    public boolean select(String profileNameToSelect) {
+        if (!selectedProfile.equals(profileNameToSelect)) {
+            if (profiles.contains(profileNameToSelect)) {
+                selectedProfile = profileNameToSelect;
+                load();
+                return true;
+            } else {
+                log.info("Cannot select profile " + profileNameToSelect
+                        + " because it does not exists");
+            }
+        }
+        return false;
+    }
+
+    public boolean update(String profileNameToUpdate) {
+        if (selectedProfile.equals(profileNameToUpdate)) {
+            load();
+            return true;
+        }
+        return false;
+    }
+
+    private Properties getPropertiesFromProfile(String profile) {
+        Properties p = new Properties();
         for (Key key : Key.values()) {
-            properties.setProperty(key.toString(), key.value + "");
+            p.setProperty(key.toString(), key.value + "");
         }
         try {
-            properties.load(new FileReader(filename));
+            p.load(new FileReader("profiles/" + selectedProfile + ".lwf"));
         } catch (FileNotFoundException e) {
-            // do nothing, will load defaults
         } catch (IOException e) {
             log.log(Level.INFO, "Problem while loading settings, reverting to defaults", e);
         }
+        return p;
+    }
+
+    public boolean load() {
+        try {
+            properties.load(new FileReader("profiles/" + selectedProfile + ".lwf"));
+            log.log(Level.FINE,
+                    "Properties loaded from " + selectedProfile + ".lwf: " + properties.toString());
+            return true;
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+            log.log(Level.INFO, "Problem while loading settings, reverting to defaults", e);
+        }
+        return false;
     }
 
     public void loadDefaults() {
@@ -124,12 +279,24 @@ public class SettingsManager {
         }
     }
 
-    public void save() {
+    private void storeProfile(String profileName) {
         try {
-            PrintWriter pw = new PrintWriter(new FileWriter(filename));
-            properties.store(pw, "lawena settings");
+            PrintWriter pw = new PrintWriter(new FileWriter("profiles/" + profileName + ".lwf"));
+            properties.store(pw, "Lawena profile");
         } catch (IOException e) {
             log.log(Level.INFO, "Settings could not be saved", e);
+        }
+    }
+
+    public void save() {
+        storeProfile(selectedProfile);
+        Properties settings = new Properties();
+        settings.put("Profile", selectedProfile);
+        try {
+            PrintWriter pw = new PrintWriter(new FileWriter("settings.lwf"));
+            settings.store(pw, "Selected Profile");
+        } catch (IOException e) {
+            log.log(Level.INFO, "Selected profile could not be saved", e);
         }
     }
 
@@ -278,7 +445,7 @@ public class SettingsManager {
     }
 
     public void setFilename(String filename) {
-        this.filename = filename;
+        this.selectedProfile = filename;
     }
 
     public void setHeight(int value) {
@@ -516,7 +683,7 @@ public class SettingsManager {
         try {
             return Level.parse(getString(Key.LogConsoleLevel));
         } catch (IllegalArgumentException e) {
-            return Level.FINER;
+            return Level.ALL;
         }
     }
 

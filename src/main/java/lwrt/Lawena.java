@@ -25,6 +25,8 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -104,7 +106,7 @@ public class Lawena {
 
                 @Override
                 public void run() {
-                    view.getBtnClearMovieFolder().setEnabled(false);
+                    view.getMntmClearMovieFiles().setEnabled(false);
                 }
             });
             if (clearMoviesTask == null) {
@@ -118,8 +120,8 @@ public class Lawena {
 
                         @Override
                         public void run() {
-                            view.getBtnClearMovieFolder().setEnabled(true);
-                            view.getBtnClearMovieFolder().setText("Stop Clearing");
+                            view.getMntmClearMovieFiles().setEnabled(true);
+                            view.getMntmClearMovieFiles().setText("Stop Clearing Files");
                         }
                     });
 
@@ -164,8 +166,8 @@ public class Lawena {
                 } else {
                     log.fine("Movie folder already clean, no files deleted");
                 }
-                view.getBtnClearMovieFolder().setEnabled(true);
-                view.getBtnClearMovieFolder().setText("Clear Movie Files");
+                view.getMntmClearMovieFiles().setEnabled(true);
+                view.getMntmClearMovieFiles().setText("Clear Movie Files...");
                 status.info("");
             }
         };
@@ -637,6 +639,35 @@ public class Lawena {
                     customPaths.removePath(child);
                 }
             });
+            watcher.register(Paths.get("profiles"), new WatchAction() {
+
+                private String getProfileName(Path child) {
+
+                    String filename = child.getFileName().toString();
+                    int idx = filename.lastIndexOf(".lwf");
+                    return filename.substring(0, idx > 0 ? idx : filename.length() - 1);
+                }
+
+                @Override
+                public void entryCreated(Path child) {
+                    settings.create(getProfileName(child));
+                }
+
+                @Override
+                public void entryDeleted(Path child) {
+                    settings.delete(getProfileName(child));
+                }
+
+                @Override
+                public void entryModified(Path child) {
+                    String profile = getProfileName(child);
+                    if (settings.update(profile)) {
+                        status.info("Profile updated: " + profile);
+                        loadSettings();
+                    }
+                }
+
+            });
         } catch (IOException e) {
             log.log(Level.FINE, "Could not register directory with watcher", e);
         }
@@ -804,6 +835,10 @@ public class Lawena {
             };
         }.execute();
 
+        registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
+                view.getLblResolution());
+        registerValidation(view.getCmbFramerate(), "[1-9][0-9]*",
+                view.getLblFrameRate());
         loadSettings();
 
         view.getMntmChangeTfDirectory().addActionListener(new Tf2FolderChange());
@@ -812,6 +847,8 @@ public class Lawena {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                // TODO: do this routine for every profile change instead of
+                // just when setting defaults
                 Path movies = settings.getMoviePath();
                 settings.loadDefaults();
                 settings.setMoviePath(movies);
@@ -842,7 +879,7 @@ public class Lawena {
                 new StartTfTask().execute();
             }
         });
-        view.getBtnClearMovieFolder().addActionListener(new ActionListener() {
+        view.getMntmClearMovieFiles().addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -911,6 +948,107 @@ public class Lawena {
                                 "Invalid value, must be 0 or higher integer.", "Launch Options",
                                 JOptionPane.WARNING_MESSAGE);
                     }
+                }
+            }
+        });
+        view.getCmbLogFileLevel().addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String selected = e.getItem().toString();
+                    log.setLevel(Level.parse(selected));
+                    log.config("Changing file log level to: " + selected);
+                }
+            }
+        });
+        view.getCmbLogUiLevel().addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String selected = e.getItem().toString();
+                    log.setLevel(Level.parse(selected));
+                    log.config("Changing interface log level to: " + selected);
+                }
+            }
+        });
+        view.getBtnOpenLogFile().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new SwingWorker<Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground() throws Exception {
+
+                        try (DirectoryStream<Path> stream = Files.newDirectoryStream(
+                                Paths.get("."),
+                                "lawena.*.log")) {
+                            for (Path path : stream) {
+                                Desktop.getDesktop().edit(path.toFile());
+                                break;
+                            }
+                        }
+                        return null;
+                    }
+
+                }.execute();
+            }
+        });
+        view.getCmbProfiles().setModel(settings);
+        view.getCmbProfiles().addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String profile = (String) view.getCmbProfiles().getSelectedItem();
+                    saveSettings();
+                    if (settings.select(profile)) {
+                        status.info("Profile selected: " + profile);
+                        loadSettings();
+                    }
+                }
+            }
+        });
+        view.getBtnCreateProfile().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveSettings();
+                String name = JOptionPane.showInputDialog(view, "Enter the new profile name",
+                        "Creating Profile",
+                        JOptionPane.INFORMATION_MESSAGE);
+                name = settings.create(name);
+                view.getCmbProfiles().setSelectedItem(name);
+                loadSettings();
+            }
+        });
+        view.getBtnDeleteProfile().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selected = (String) view.getCmbProfiles().getSelectedItem();
+                int answer = JOptionPane.showConfirmDialog(view,
+                        "Are you sure you want to delete "
+                                + selected, "Deleting Profile", JOptionPane.YES_NO_OPTION);
+                if (answer == JOptionPane.YES_OPTION) {
+                    if (settings.delete(selected)) {
+                        loadSettings();
+                    }
+                }
+            }
+        });
+        view.getBtnRenameProfile().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveSettings();
+                String selected = (String) view.getCmbProfiles().getSelectedItem();
+                String name = JOptionPane.showInputDialog(view, "Enter the new profile name",
+                        "Renaming Profile", JOptionPane.INFORMATION_MESSAGE);
+                if (name != null && settings.rename(selected, name)) {
+                    loadSettings();
                 }
             }
         });
@@ -1029,10 +1167,6 @@ public class Lawena {
     }
 
     private void loadSettings() {
-        registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
-                view.getLblResolution());
-        registerValidation(view.getCmbFramerate(), "[1-9][0-9]*",
-                view.getLblFrameRate());
         selectComboItem(view.getCmbHud(), settings.getHud(),
                 Key.Hud.getAllowedValues());
         selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
@@ -1054,6 +1188,8 @@ public class Lawena {
         view.getDisableVoiceChat().setSelected(!settings.getVoice());
         view.getUseHudMinmode().setSelected(settings.getHudMinmode());
         view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
+        view.getCmbLogFileLevel().setSelectedItem(settings.getLogFileLevel().toString());
+        view.getCmbLogUiLevel().setSelectedItem(settings.getLogUiLevel().toString());
     }
 
     private void saveSettings() {
@@ -1099,6 +1235,8 @@ public class Lawena {
         } else {
             settings.setDemoname("");
         }
+        settings.setLogFileLevel(view.getCmbLogFileLevel().getSelectedItem().toString());
+        settings.setLogUiLevel(view.getCmbLogUiLevel().getSelectedItem().toString());
         settings.save();
         log.fine("Settings saved");
     }

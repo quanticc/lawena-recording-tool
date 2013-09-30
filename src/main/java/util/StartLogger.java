@@ -167,7 +167,8 @@ public class StartLogger {
     public StartLogger toConsole(Level level) {
         ConsoleHandler localConsoleHandler = new ConsoleHandler();
         localConsoleHandler.setFormatter(new LogFormatter().fullTraces());
-        localConsoleHandler.setLevel(level);
+        localConsoleHandler.setLevel(Level.ALL);
+        logger.setLevel(level);
         logger.addHandler(localConsoleHandler);
         return this;
     }
@@ -181,7 +182,8 @@ public class StartLogger {
             }
             FileHandler localFileHandler = new FileHandler(pattern, 1024000, 3, true);
             localFileHandler.setFormatter(new LogFormatter().dateFormat(DATETIME).fullTraces());
-            localFileHandler.setLevel(level);
+            localFileHandler.setLevel(Level.ALL);
+            logger.setLevel(level);
             logger.addHandler(localFileHandler);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Unable to start logging to file", e);
@@ -193,7 +195,8 @@ public class StartLogger {
         TextAreaHandler textAreaHandler = new TextAreaHandler(component);
         try {
             textAreaHandler.setFormatter(new LogFormatter());
-            textAreaHandler.setLevel(level);
+            textAreaHandler.setLevel(Level.ALL);
+            logger.setLevel(level);
             logger.addHandler(textAreaHandler);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Unable to start logging to textComponent", e);
@@ -205,7 +208,8 @@ public class StartLogger {
         LabelTextHandler labelTextHandler = new LabelTextHandler(label);
         try {
             labelTextHandler.setFormatter(new LogFormatter().dateFormat(null));
-            labelTextHandler.setLevel(level);
+            labelTextHandler.setLevel(Level.ALL);
+            logger.setLevel(level);
             logger.addHandler(labelTextHandler);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Unable to start logging to textComponent", e);
