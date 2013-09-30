@@ -216,6 +216,7 @@ public class SettingsManager {
         settings.println("volume 0.5");
         settings.println("hud_fastswitch 1");
         settings.println("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
+        settings.println("cl_hud_playerclass_playermodel_showed_confirm_dialog 1");
         settings.close();
 
         if (demoname != null) {
