@@ -51,6 +51,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
+import javax.swing.ScrollPaneConstants;
 
 public class LawenaView extends JFrame {
 
@@ -690,6 +691,7 @@ public class LawenaView extends JFrame {
         panelLog.setLayout(gbl_panelLog);
 
         scrollPane_2 = new JScrollPane();
+        scrollPane_2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
         gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
         gbc_scrollPane_2.insets = new Insets(5, 5, 5, 5);

@@ -3,7 +3,6 @@ package lwrt;
 
 import ui.AboutDialog;
 import ui.LawenaView;
-import ui.ParticlesDialog;
 import ui.TooltipRenderer;
 import util.LawenaException;
 import util.StartLogger;
@@ -70,7 +69,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
@@ -331,7 +329,7 @@ public class Lawena {
                         status.info("Your files will be restored once you close lawena or run TF2 again");
                     }
                 }
-                cl.setSystemDxLevel(oDxlevel);
+                cl.setSystemDxLevel(originalDxLevel);
                 view.getBtnStartTf().setText("Start Team Fortress 2");
                 view.getBtnStartTf().setEnabled(true);
             }
@@ -550,13 +548,12 @@ public class Lawena {
     private CommandLine cl;
     private CustomPathList customPaths;
     private AboutDialog dialog;
-    private ParticlesDialog particles;
+    private ParticlesManager particles;
 
     private HashMap<String, ImageIcon> skyboxMap;
     private JFileChooser choosemovie;
     private JFileChooser choosedir;
-    private Path steampath;
-    private String oDxlevel;
+    private String originalDxLevel;
     private Thread watcherThread;
     private WatchDir watcher;
     private Object lastHud;
@@ -565,6 +562,7 @@ public class Lawena {
     private String build;
 
     public Lawena(SettingsManager cfg) {
+        log.finer("Getting debug version data");
         String impl = this.getClass().getPackage().getImplementationVersion();
         if (impl != null) {
             version = impl;
@@ -580,14 +578,14 @@ public class Lawena {
         } else {
             throw new UnsupportedOperationException("OS not supported");
         }
+        log.finer("Setting look and feel");
         cl.setLookAndFeel();
 
         settings = cfg;
-        oDxlevel = cl.getSystemDxLevel();
-        steampath = cl.getSteamPath();
+        originalDxLevel = cl.getSystemDxLevel();
         Path tfpath = settings.getTfPath();
         if (tfpath == null || tfpath.toString().isEmpty()) {
-            tfpath = steampath.resolve("SteamApps/common/Team Fortress 2/tf");
+            tfpath = cl.getSteamPath().resolve("SteamApps/common/Team Fortress 2/tf");
         }
         if (!Files.exists(tfpath)) {
             tfpath = getChosenTfPath();
@@ -597,6 +595,8 @@ public class Lawena {
             }
         }
         settings.setTfPath(tfpath);
+
+        log.finer("Starting FileManager");
         files = new FileManager(settings, cl);
 
         Path moviepath = settings.getMoviePath();
@@ -607,15 +607,19 @@ public class Lawena {
                 System.exit(1);
             }
         }
+
+        log.finer("Starting MovieManager");
         movies = new MovieManager(settings);
         settings.setMoviePath(moviepath);
 
         settings.save();
         files.restoreAll();
 
+        log.finer("Starting CustomPathManager");
         customPaths = new CustomPathList(settings, cl);
         files.setCustomPathList(customPaths);
 
+        log.finer("Launching FolderWatcher thread");
         try {
             watcher = new WatchDir(false);
             watcher.register(Paths.get("custom"), new WatchAction() {
@@ -680,7 +684,11 @@ public class Lawena {
         }, "FolderWatcher");
         watcherThread.setDaemon(true);
 
+        log.finer("Starting DemoEditor");
         vdm = new DemoEditor(settings, cl, watcher);
+
+        log.finer("Starting ParticlesManager");
+        particles = new ParticlesManager(settings, cl);
     }
 
     private String getManifestString(String key, String defaultValue) {
@@ -739,7 +747,7 @@ public class Lawena {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                startParticlesDialog();
+                particles.showDialog();
             }
         });
 
@@ -759,7 +767,7 @@ public class Lawena {
                             CustomPathList.Column.PATH.ordinal());
                     checkCustomHud(cp);
                     if (cp == CustomPathList.particles && cp.isSelected()) {
-                        startParticlesDialog();
+                        particles.showDialog();
                     }
                 }
             }
@@ -847,8 +855,6 @@ public class Lawena {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO: do this routine for every profile change instead of
-                // just when setting defaults
                 Path movies = settings.getMoviePath();
                 settings.loadDefaults();
                 settings.setMoviePath(movies);
@@ -1019,9 +1025,11 @@ public class Lawena {
                 String name = JOptionPane.showInputDialog(view, "Enter the new profile name",
                         "Creating Profile",
                         JOptionPane.INFORMATION_MESSAGE);
-                name = settings.create(name);
-                view.getCmbProfiles().setSelectedItem(name);
-                loadSettings();
+                if (name != null) {
+                    name = settings.create(name);
+                    view.getCmbProfiles().setSelectedItem(name);
+                    loadSettings();
+                }
             }
         });
         view.getBtnDeleteProfile().addActionListener(new ActionListener() {
@@ -1055,82 +1063,6 @@ public class Lawena {
 
         view.getTabbedPane().addTab("VDM", null, vdm.start());
         view.setVisible(true);
-    }
-
-    private void startParticlesDialog() {
-        if (particles == null) {
-            particles = new ParticlesDialog();
-            particles.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            particles.setModalityType(ModalityType.APPLICATION_MODAL);
-            DefaultTableModel dtm = new DefaultTableModel(0, 2) {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return column == 0;
-                }
-
-                @Override
-                public java.lang.Class<?> getColumnClass(int columnIndex) {
-                    return columnIndex == 0 ? Boolean.class : String.class;
-                };
-
-                @Override
-                public String getColumnName(int column) {
-                    return column == 0 ? "" : "Particle filename";
-                }
-            };
-            final JTable tableParticles = particles.getTableParticles();
-            particles.getOkButton().addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    List<String> selected = new ArrayList<>();
-                    int selectCount = 0;
-                    for (int i = 0; i < tableParticles.getRowCount(); i++) {
-                        if ((boolean) tableParticles.getValueAt(i, 0)) {
-                            selectCount++;
-                            selected.add((String) tableParticles.getValueAt(i, 1));
-                        }
-                    }
-                    if (selectCount == 0) {
-                        settings.setParticles(Arrays.asList(""));
-                    } else if (selectCount == tableParticles.getRowCount()) {
-                        settings.setParticles(Arrays.asList("*"));
-                    } else {
-                        settings.setParticles(selected);
-                    }
-                    log.finer("Particles: " + settings.getParticles());
-                    particles.setVisible(false);
-                }
-            });
-            particles.getCancelButton().addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    List<String> selected = settings.getParticles();
-                    boolean selectAll = selected.contains("*");
-                    for (int i = 0; i < tableParticles.getRowCount(); i++) {
-                        tableParticles.setValueAt(
-                                selectAll || selected.contains(tableParticles.getValueAt(i, 1)), i,
-                                0);
-                    }
-                    log.finer("Particles: " + selected);
-                    particles.setVisible(false);
-                }
-            });
-            tableParticles.setModel(dtm);
-            tableParticles.getColumnModel().getColumn(0).setMaxWidth(20);
-            List<String> selected = settings.getParticles();
-            boolean selectAll = selected.contains("*");
-            for (String particle : cl.getVpkContents(settings.getTfPath(),
-                    CustomPathList.particles.getPath())) {
-                dtm.addRow(new Object[] {
-                        selectAll || selected.contains(particle), particle
-                });
-            }
-        }
-        particles.setVisible(true);
     }
 
     private boolean checkCustomHud(CustomPath cp) {
@@ -1328,7 +1260,7 @@ public class Lawena {
             choosedir = new JFileChooser();
             choosedir.setDialogTitle("Choose your \"tf\" directory");
             choosedir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            choosedir.setCurrentDirectory(steampath.toFile());
+            choosedir.setCurrentDirectory(cl.getSteamPath().toFile());
             choosedir.setFileHidingEnabled(false);
             ret = choosedir.showOpenDialog(null);
             if (ret == JFileChooser.APPROVE_OPTION) {

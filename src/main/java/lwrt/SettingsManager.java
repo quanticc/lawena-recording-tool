@@ -57,7 +57,8 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
         LogUiLevel("FINE"),
         LaunchTimeout(120, 0, Integer.MAX_VALUE),
         Insecure(false),
-        VdmSrcDemoFix(false);
+        VdmSrcDemoFix(false),
+        KillStreaks(true);
 
         private Object value;
         private List<String> allowedValues;
@@ -577,6 +578,10 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
         setBoolean(Key.VdmSrcDemoFix, value);
     }
 
+    public void setKillStreaks(boolean value) {
+        setBoolean(Key.KillStreaks, value);
+    }
+
     // Getters
 
     public int getHeight() {
@@ -713,6 +718,10 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
 
     public boolean getVdmSrcDemoFix() {
         return getBoolean(Key.VdmSrcDemoFix);
+    }
+
+    public boolean getKillStreaks() {
+        return getBoolean(Key.KillStreaks);
     }
 
 }

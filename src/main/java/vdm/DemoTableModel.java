@@ -42,9 +42,11 @@ public class DemoTableModel extends AbstractTableModel {
         } catch (IOException e) {
             log.log(Level.INFO, "Problem while scanning .dem files", e);
         }
+        // TODO: Make KillStreak loading optional e.g. tie it to a setting.
         new SwingWorker<Void, Void>() {
             protected Void doInBackground() throws Exception {
                 try {
+                    log.finer("Starting KillStreak loading task");
                     int lineNumber = 1;
                     for (String line : Files.readAllLines(path.resolve("KillStreaks.txt"),
                             Charset.defaultCharset())) {

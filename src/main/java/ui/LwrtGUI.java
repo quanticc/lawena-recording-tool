@@ -17,6 +17,9 @@ public class LwrtGUI {
 
     public static void main(String[] args) throws Exception {
         new StartLogger("lawena").toConsole(Level.ALL).toFile(Level.FINER);
+        log.finer("-----------------------------------");
+        log.finer("   Lawena Recording Tool Started   ");
+        log.finer("-----------------------------------");
         SettingsManager cfg = new SettingsManager();
 
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -25,8 +28,10 @@ public class LwrtGUI {
             }
         });
 
+        log.finer("Starting Lawena instance");
         final Lawena lawena = new Lawena(cfg);
 
+        log.finer("Starting User Interface");
         SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
                 try {
