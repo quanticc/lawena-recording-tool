@@ -304,9 +304,10 @@ public class CustomPathList extends AbstractTableModel {
     public void validateRequired() {
         for (CustomPath cp : defaultPaths.values()) {
             if (cp.getContents().contains(PathContents.DEFAULT) && !list.contains(cp)) {
-                Path filename = cp.getPath().getFileName();
                 Path destdir = Paths.get("custom");
-                unpackFileFromJar(Paths.get("lwrtvpks.jar"), filename.toString(), destdir);
+                Path filename = cp.getPath().getFileName();
+                unpackFileFromJar(Paths.get("lwrtvpks.jar"), "custom/" + filename.toString(),
+                        destdir);
                 if (Files.exists(destdir.resolve(filename))) {
                     addRow(cp);
                 }
