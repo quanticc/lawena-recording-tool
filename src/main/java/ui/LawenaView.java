@@ -44,6 +44,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
@@ -51,7 +52,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
-import javax.swing.ScrollPaneConstants;
 
 public class LawenaView extends JFrame {
 
@@ -158,7 +158,6 @@ public class LawenaView extends JFrame {
     private JButton btnStartTf;
     private JLabel lblResolution;
     private JLabel lblFrameRate;
-    private JPanel panelProfileOptions;
     private JLabel lblSkyboxPreview;
     private JTable tableCustomContent;
     private JScrollPane scrollPane;
@@ -172,7 +171,6 @@ public class LawenaView extends JFrame {
     private JPanel panelStatusbar;
     private JLabel lblStatus;
     private JPanel panelCheckboxes;
-    private JPanel panelCustomContent;
     private JComboBox<String> cmbViewmodel;
     private Component verticalStrut;
     private JLabel lblPreview;
@@ -211,8 +209,8 @@ public class LawenaView extends JFrame {
     private JMenuItem mntmClearMovieFiles;
     private JButton btnCreateProfile;
     private JButton btnRenameProfile;
-    private JLabel lblProfile;
-    private JButton btnDeleteProfile;
+    private JPanel panel_1;
+    private JTabbedPane sideTabbedPane;
 
     /**
      * Create the frame.
@@ -318,66 +316,25 @@ public class LawenaView extends JFrame {
         tabbedPane.addTab("Settings", null, panelSettings, null);
         GridBagLayout gbl_panelSettings = new GridBagLayout();
         gbl_panelSettings.columnWidths = new int[] {
-                0, 1, 0, 1, 1, 0
+                0, 1, 1, 0, 1, 1, 0
         };
         gbl_panelSettings.rowHeights = new int[] {
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
         gbl_panelSettings.columnWeights = new double[] {
-                0.0, 1.0, 0.0, 1.0, 10.0
+                0.0, 1.0, 5.0, 0.0, 5.0, 50.0
         };
         gbl_panelSettings.rowWeights = new double[] {
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE
         };
         panelSettings.setLayout(gbl_panelSettings);
 
-        lblProfile = new JLabel("Profile:");
-        GridBagConstraints gbc_lblProfile = new GridBagConstraints();
-        gbc_lblProfile.anchor = GridBagConstraints.EAST;
-        gbc_lblProfile.insets = new Insets(5, 5, 5, 5);
-        gbc_lblProfile.gridx = 0;
-        gbc_lblProfile.gridy = 0;
-        panelSettings.add(lblProfile, gbc_lblProfile);
-
-        cmbProfiles = new JComboBox<>();
-        GridBagConstraints gbc_cmbProfiles = new GridBagConstraints();
-        gbc_cmbProfiles.fill = GridBagConstraints.HORIZONTAL;
-        gbc_cmbProfiles.insets = new Insets(5, 0, 5, 5);
-        gbc_cmbProfiles.gridx = 1;
-        gbc_cmbProfiles.gridy = 0;
-        panelSettings.add(cmbProfiles, gbc_cmbProfiles);
-
-        panelProfileOptions = new JPanel();
-        FlowLayout fl_panelProfileOptions = (FlowLayout) panelProfileOptions.getLayout();
-        fl_panelProfileOptions.setVgap(0);
-        fl_panelProfileOptions.setHgap(0);
-        GridBagConstraints gbc_panelProfileOptions = new GridBagConstraints();
-        gbc_panelProfileOptions.fill = GridBagConstraints.VERTICAL;
-        gbc_panelProfileOptions.anchor = GridBagConstraints.WEST;
-        gbc_panelProfileOptions.gridwidth = 2;
-        gbc_panelProfileOptions.insets = new Insets(5, 0, 0, 5);
-        gbc_panelProfileOptions.gridx = 2;
-        gbc_panelProfileOptions.gridy = 0;
-        panelSettings.add(panelProfileOptions, gbc_panelProfileOptions);
-
-        btnCreateProfile = new JButton("New");
-        btnCreateProfile.setPreferredSize(new Dimension(53, 21));
-        panelProfileOptions.add(btnCreateProfile);
-
-        btnRenameProfile = new JButton("Edit");
-        btnRenameProfile.setPreferredSize(new Dimension(51, 21));
-        panelProfileOptions.add(btnRenameProfile);
-
-        btnDeleteProfile = new JButton("Delete");
-        btnDeleteProfile.setPreferredSize(new Dimension(63, 21));
-        panelProfileOptions.add(btnDeleteProfile);
-
         lblResolution = new JLabel("Resolution:");
         GridBagConstraints gbc_lblResolution = new GridBagConstraints();
-        gbc_lblResolution.insets = new Insets(0, 5, 5, 5);
+        gbc_lblResolution.insets = new Insets(5, 5, 5, 5);
         gbc_lblResolution.anchor = GridBagConstraints.EAST;
         gbc_lblResolution.gridx = 0;
-        gbc_lblResolution.gridy = 1;
+        gbc_lblResolution.gridy = 0;
         panelSettings.add(lblResolution, gbc_lblResolution);
 
         cmbResolution = new JComboBox<>();
@@ -388,18 +345,19 @@ public class LawenaView extends JFrame {
         }));
         cmbResolution.setEditable(true);
         GridBagConstraints gbc_cmbResolution = new GridBagConstraints();
+        gbc_cmbResolution.gridwidth = 2;
         gbc_cmbResolution.fill = GridBagConstraints.HORIZONTAL;
-        gbc_cmbResolution.insets = new Insets(0, 0, 5, 5);
+        gbc_cmbResolution.insets = new Insets(5, 0, 5, 5);
         gbc_cmbResolution.gridx = 1;
-        gbc_cmbResolution.gridy = 1;
+        gbc_cmbResolution.gridy = 0;
         panelSettings.add(cmbResolution, gbc_cmbResolution);
 
         lblFrameRate = new JLabel("FPS:");
         GridBagConstraints gbc_lblFrameRate = new GridBagConstraints();
         gbc_lblFrameRate.anchor = GridBagConstraints.EAST;
-        gbc_lblFrameRate.insets = new Insets(0, 0, 5, 5);
-        gbc_lblFrameRate.gridx = 2;
-        gbc_lblFrameRate.gridy = 1;
+        gbc_lblFrameRate.insets = new Insets(5, 0, 5, 5);
+        gbc_lblFrameRate.gridx = 3;
+        gbc_lblFrameRate.gridy = 0;
         panelSettings.add(lblFrameRate, gbc_lblFrameRate);
 
         cmbFramerate = new JComboBox<>();
@@ -411,43 +369,24 @@ public class LawenaView extends JFrame {
         cmbFramerate.setEditable(true);
         GridBagConstraints gbc_cmbFramerate = new GridBagConstraints();
         gbc_cmbFramerate.fill = GridBagConstraints.HORIZONTAL;
-        gbc_cmbFramerate.insets = new Insets(0, 0, 5, 5);
-        gbc_cmbFramerate.gridx = 3;
-        gbc_cmbFramerate.gridy = 1;
+        gbc_cmbFramerate.insets = new Insets(5, 0, 5, 5);
+        gbc_cmbFramerate.gridx = 4;
+        gbc_cmbFramerate.gridy = 0;
         panelSettings.add(cmbFramerate, gbc_cmbFramerate);
 
-        panelCustomContent = new JPanel();
-        GridBagConstraints gbc_panelCustomContent = new GridBagConstraints();
-        gbc_panelCustomContent.insets = new Insets(5, 0, 5, 5);
-        gbc_panelCustomContent.gridwidth = 2;
-        gbc_panelCustomContent.gridheight = 11;
-        gbc_panelCustomContent.fill = GridBagConstraints.BOTH;
-        gbc_panelCustomContent.gridx = 4;
-        gbc_panelCustomContent.gridy = 0;
-        panelSettings.add(panelCustomContent, gbc_panelCustomContent);
-        GridBagLayout gbl_panelCustomContent = new GridBagLayout();
-        gbl_panelCustomContent.columnWidths = new int[] {
-                0, 0
-        };
-        gbl_panelCustomContent.rowHeights = new int[] {
-                0, 0
-        };
-        gbl_panelCustomContent.columnWeights = new double[] {
-                1.0, Double.MIN_VALUE
-        };
-        gbl_panelCustomContent.rowWeights = new double[] {
-                1.0, Double.MIN_VALUE
-        };
-        panelCustomContent.setLayout(gbl_panelCustomContent);
+        sideTabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+        GridBagConstraints gbc_sideTabbedPane = new GridBagConstraints();
+        gbc_sideTabbedPane.fill = GridBagConstraints.BOTH;
+        gbc_sideTabbedPane.gridheight = 10;
+        gbc_sideTabbedPane.insets = new Insets(5, 0, 5, 5);
+        gbc_sideTabbedPane.gridx = 5;
+        gbc_sideTabbedPane.gridy = 0;
+        panelSettings.add(sideTabbedPane, gbc_sideTabbedPane);
 
         scrollPane = new JScrollPane();
+        sideTabbedPane.addTab("Custom Folders", null, scrollPane, null);
         scrollPane
                 .setToolTipText("<html>Drag custom folders to this table or copy them<br>\r\nto lawena 'custom' folder to make them appear here.");
-        GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-        gbc_scrollPane.fill = GridBagConstraints.BOTH;
-        gbc_scrollPane.gridx = 0;
-        gbc_scrollPane.gridy = 0;
-        panelCustomContent.add(scrollPane, gbc_scrollPane);
 
         tableCustomContent = new JTable();
         tableCustomContent.setShowVerticalLines(false);
@@ -462,7 +401,7 @@ public class LawenaView extends JFrame {
         gbc_lblHud.anchor = GridBagConstraints.EAST;
         gbc_lblHud.insets = new Insets(0, 5, 5, 5);
         gbc_lblHud.gridx = 0;
-        gbc_lblHud.gridy = 2;
+        gbc_lblHud.gridy = 1;
         panelSettings.add(lblHud, gbc_lblHud);
 
         cmbHud = new JComboBox<>();
@@ -471,18 +410,19 @@ public class LawenaView extends JFrame {
                 "Minimal (kill notices)", "Medic (hp, ubercharge, cp)", "Full", "Default", "Custom"
         }));
         GridBagConstraints gbc_cmbHud = new GridBagConstraints();
+        gbc_cmbHud.gridwidth = 2;
         gbc_cmbHud.fill = GridBagConstraints.HORIZONTAL;
         gbc_cmbHud.insets = new Insets(0, 0, 5, 5);
         gbc_cmbHud.gridx = 1;
-        gbc_cmbHud.gridy = 2;
+        gbc_cmbHud.gridy = 1;
         panelSettings.add(cmbHud, gbc_cmbHud);
 
         JLabel lblDxLevel = new JLabel("Quality:");
         GridBagConstraints gbc_lblDxLevel = new GridBagConstraints();
         gbc_lblDxLevel.anchor = GridBagConstraints.EAST;
         gbc_lblDxLevel.insets = new Insets(0, 5, 5, 5);
-        gbc_lblDxLevel.gridx = 2;
-        gbc_lblDxLevel.gridy = 2;
+        gbc_lblDxLevel.gridx = 3;
+        gbc_lblDxLevel.gridy = 1;
         panelSettings.add(lblDxLevel, gbc_lblDxLevel);
 
         cmbQuality = new JComboBox<>();
@@ -493,8 +433,8 @@ public class LawenaView extends JFrame {
         GridBagConstraints gbc_cmbQuality = new GridBagConstraints();
         gbc_cmbQuality.fill = GridBagConstraints.HORIZONTAL;
         gbc_cmbQuality.insets = new Insets(0, 0, 5, 5);
-        gbc_cmbQuality.gridx = 3;
-        gbc_cmbQuality.gridy = 2;
+        gbc_cmbQuality.gridx = 4;
+        gbc_cmbQuality.gridy = 1;
         panelSettings.add(cmbQuality, gbc_cmbQuality);
 
         JLabel lblSkybox = new JLabel("Skybox:");
@@ -502,23 +442,24 @@ public class LawenaView extends JFrame {
         gbc_lblSkybox.anchor = GridBagConstraints.EAST;
         gbc_lblSkybox.insets = new Insets(0, 5, 5, 5);
         gbc_lblSkybox.gridx = 0;
-        gbc_lblSkybox.gridy = 3;
+        gbc_lblSkybox.gridy = 2;
         panelSettings.add(lblSkybox, gbc_lblSkybox);
 
         cmbSkybox = new JComboBox<>();
         GridBagConstraints gbc_cmbSkybox = new GridBagConstraints();
+        gbc_cmbSkybox.gridwidth = 2;
         gbc_cmbSkybox.fill = GridBagConstraints.HORIZONTAL;
         gbc_cmbSkybox.insets = new Insets(0, 0, 5, 5);
         gbc_cmbSkybox.gridx = 1;
-        gbc_cmbSkybox.gridy = 3;
+        gbc_cmbSkybox.gridy = 2;
         panelSettings.add(cmbSkybox, gbc_cmbSkybox);
 
         lblPreview = new JLabel("");
         GridBagConstraints gbc_lblPreview = new GridBagConstraints();
         gbc_lblPreview.anchor = GridBagConstraints.EAST;
         gbc_lblPreview.insets = new Insets(0, 0, 5, 5);
-        gbc_lblPreview.gridx = 2;
-        gbc_lblPreview.gridy = 3;
+        gbc_lblPreview.gridx = 3;
+        gbc_lblPreview.gridy = 2;
         panelSettings.add(lblPreview, gbc_lblPreview);
 
         lblSkyboxPreview = new JLabel("");
@@ -526,8 +467,8 @@ public class LawenaView extends JFrame {
         gbc_lblSkyboxPreview.anchor = GridBagConstraints.NORTHWEST;
         gbc_lblSkyboxPreview.gridheight = 4;
         gbc_lblSkyboxPreview.insets = new Insets(0, 0, 5, 5);
-        gbc_lblSkyboxPreview.gridx = 3;
-        gbc_lblSkyboxPreview.gridy = 3;
+        gbc_lblSkyboxPreview.gridx = 4;
+        gbc_lblSkyboxPreview.gridy = 2;
         panelSettings.add(lblSkyboxPreview, gbc_lblSkyboxPreview);
 
         JLabel lblViewmodels = new JLabel("Viewmodels:");
@@ -535,7 +476,7 @@ public class LawenaView extends JFrame {
         gbc_lblViewmodels.anchor = GridBagConstraints.EAST;
         gbc_lblViewmodels.insets = new Insets(0, 5, 5, 5);
         gbc_lblViewmodels.gridx = 0;
-        gbc_lblViewmodels.gridy = 4;
+        gbc_lblViewmodels.gridy = 3;
         panelSettings.add(lblViewmodels, gbc_lblViewmodels);
 
         cmbViewmodel = new JComboBox<>();
@@ -543,17 +484,18 @@ public class LawenaView extends JFrame {
                 "On", "Off", "Default"
         }));
         GridBagConstraints gbc_cmbViewmodel = new GridBagConstraints();
+        gbc_cmbViewmodel.gridwidth = 2;
         gbc_cmbViewmodel.insets = new Insets(0, 0, 5, 5);
         gbc_cmbViewmodel.fill = GridBagConstraints.HORIZONTAL;
         gbc_cmbViewmodel.gridx = 1;
-        gbc_cmbViewmodel.gridy = 4;
+        gbc_cmbViewmodel.gridy = 3;
         panelSettings.add(cmbViewmodel, gbc_cmbViewmodel);
 
         horizontalStrut = Box.createHorizontalStrut(24);
         GridBagConstraints gbc_horizontalStrut = new GridBagConstraints();
         gbc_horizontalStrut.insets = new Insets(0, 0, 5, 5);
-        gbc_horizontalStrut.gridx = 2;
-        gbc_horizontalStrut.gridy = 4;
+        gbc_horizontalStrut.gridx = 3;
+        gbc_horizontalStrut.gridy = 3;
         panelSettings.add(horizontalStrut, gbc_horizontalStrut);
 
         JLabel lblViewmodelFov = new JLabel("Viewmodel FOV:");
@@ -561,15 +503,15 @@ public class LawenaView extends JFrame {
         gbc_lblViewmodelFov.anchor = GridBagConstraints.EAST;
         gbc_lblViewmodelFov.insets = new Insets(0, 5, 5, 5);
         gbc_lblViewmodelFov.gridx = 0;
-        gbc_lblViewmodelFov.gridy = 5;
+        gbc_lblViewmodelFov.gridy = 4;
         panelSettings.add(lblViewmodelFov, gbc_lblViewmodelFov);
 
         spinnerViewmodelFov = new JSpinner();
         GridBagConstraints gbc_spinnerViewmodelFov = new GridBagConstraints();
-        gbc_spinnerViewmodelFov.anchor = GridBagConstraints.WEST;
+        gbc_spinnerViewmodelFov.fill = GridBagConstraints.HORIZONTAL;
         gbc_spinnerViewmodelFov.insets = new Insets(0, 0, 5, 5);
         gbc_spinnerViewmodelFov.gridx = 1;
-        gbc_spinnerViewmodelFov.gridy = 5;
+        gbc_spinnerViewmodelFov.gridy = 4;
         panelSettings.add(spinnerViewmodelFov, gbc_spinnerViewmodelFov);
         spinnerViewmodelFov.setModel(new SpinnerNumberModel(new Integer(70), null, null,
                 new Integer(1)));
@@ -578,7 +520,7 @@ public class LawenaView extends JFrame {
         GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
         gbc_verticalStrut.insets = new Insets(0, 0, 5, 5);
         gbc_verticalStrut.gridx = 0;
-        gbc_verticalStrut.gridy = 6;
+        gbc_verticalStrut.gridy = 5;
         panelSettings.add(verticalStrut, gbc_verticalStrut);
 
         panelCheckboxes = new JPanel();
@@ -587,10 +529,10 @@ public class LawenaView extends JFrame {
         GridBagConstraints gbc_panelCheckboxes = new GridBagConstraints();
         gbc_panelCheckboxes.insets = new Insets(0, 0, 5, 5);
         gbc_panelCheckboxes.gridheight = 4;
-        gbc_panelCheckboxes.gridwidth = 4;
+        gbc_panelCheckboxes.gridwidth = 5;
         gbc_panelCheckboxes.fill = GridBagConstraints.BOTH;
         gbc_panelCheckboxes.gridx = 0;
-        gbc_panelCheckboxes.gridy = 7;
+        gbc_panelCheckboxes.gridy = 6;
         panelSettings.add(panelCheckboxes, gbc_panelCheckboxes);
         GridBagLayout gbl_panelCheckboxes = new GridBagLayout();
         gbl_panelCheckboxes.columnWidths = new int[] {
@@ -669,8 +611,8 @@ public class LawenaView extends JFrame {
         GridBagConstraints gbc_panelBottomRight = new GridBagConstraints();
         gbc_panelBottomRight.anchor = GridBagConstraints.EAST;
         gbc_panelBottomRight.fill = GridBagConstraints.VERTICAL;
-        gbc_panelBottomRight.gridx = 5;
-        gbc_panelBottomRight.gridy = 11;
+        gbc_panelBottomRight.gridx = 6;
+        gbc_panelBottomRight.gridy = 10;
         panelSettings.add(panelBottomRight, gbc_panelBottomRight);
 
         JPanel panelLog = new JPanel();
@@ -745,39 +687,62 @@ public class LawenaView extends JFrame {
         contentPane.add(panelStatusbar, BorderLayout.SOUTH);
         GridBagLayout gbl_panelStatusbar = new GridBagLayout();
         gbl_panelStatusbar.columnWidths = new int[] {
-                31, 0, 0, 0, 0
+                0, 31, 0, 0, 0, 0
         };
         gbl_panelStatusbar.rowHeights = new int[] {
                 12, 0
         };
         gbl_panelStatusbar.columnWeights = new double[] {
-                0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE
+                0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE
         };
         gbl_panelStatusbar.rowWeights = new double[] {
-                0.0, Double.MIN_VALUE
+                1.0, Double.MIN_VALUE
         };
         panelStatusbar.setLayout(gbl_panelStatusbar);
 
+        panel_1 = new JPanel();
+        FlowLayout flowLayout_1 = (FlowLayout) panel_1.getLayout();
+        flowLayout_1.setHgap(2);
+        flowLayout_1.setVgap(0);
+        GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+        gbc_panel_1.insets = new Insets(2, 2, 2, 5);
+        gbc_panel_1.fill = GridBagConstraints.HORIZONTAL;
+        gbc_panel_1.gridx = 0;
+        gbc_panel_1.gridy = 0;
+        panelStatusbar.add(panel_1, gbc_panel_1);
+
+        cmbProfiles = new JComboBox<>();
+        panel_1.add(cmbProfiles);
+
+        btnCreateProfile = new JButton("New");
+        btnCreateProfile.setPreferredSize(new Dimension(53, 22));
+        panel_1.add(btnCreateProfile);
+
+        btnRenameProfile = new JButton("Edit");
+        btnRenameProfile.setPreferredSize(new Dimension(51, 22));
+        panel_1.add(btnRenameProfile);
+
         lblStatus = new JLabel("Status");
         GridBagConstraints gbc_lblStatus = new GridBagConstraints();
-        gbc_lblStatus.insets = new Insets(0, 5, 0, 5);
+        gbc_lblStatus.insets = new Insets(2, 5, 2, 5);
         gbc_lblStatus.anchor = GridBagConstraints.WEST;
-        gbc_lblStatus.gridx = 0;
+        gbc_lblStatus.gridx = 1;
         gbc_lblStatus.gridy = 0;
         panelStatusbar.add(lblStatus, gbc_lblStatus);
 
         progressBar = new JProgressBar();
         progressBar.setPreferredSize(new Dimension(120, 14));
         GridBagConstraints gbc_progressBar = new GridBagConstraints();
-        gbc_progressBar.insets = new Insets(0, 0, 0, 5);
+        gbc_progressBar.insets = new Insets(2, 0, 2, 5);
         gbc_progressBar.anchor = GridBagConstraints.EAST;
-        gbc_progressBar.gridx = 2;
+        gbc_progressBar.gridx = 3;
         gbc_progressBar.gridy = 0;
         panelStatusbar.add(progressBar, gbc_progressBar);
 
         btnStartTf = new JButton("Start Team Fortress 2");
         GridBagConstraints gbc_btnStartTf = new GridBagConstraints();
-        gbc_btnStartTf.gridx = 3;
+        gbc_btnStartTf.insets = new Insets(2, 0, 2, 2);
+        gbc_btnStartTf.gridx = 4;
         gbc_btnStartTf.gridy = 0;
         panelStatusbar.add(btnStartTf, gbc_btnStartTf);
 
@@ -954,7 +919,7 @@ public class LawenaView extends JFrame {
         return mntmClearMovieFiles;
     }
 
-    public JButton getBtnDeleteProfile() {
-        return btnDeleteProfile;
+    public JTabbedPane getSideTabbedPane() {
+        return sideTabbedPane;
     }
 }

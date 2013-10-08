@@ -78,6 +78,22 @@ import lwrt.SettingsManager.Key;
 
 public class Lawena {
 
+    public class DeleteProfile implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String selected = (String) view.getCmbProfiles().getSelectedItem();
+            int answer = JOptionPane.showConfirmDialog(view,
+                    "Are you sure you want to delete "
+                            + selected, "Deleting Profile", JOptionPane.YES_NO_OPTION);
+            if (answer == JOptionPane.YES_OPTION) {
+                if (settings.delete(selected)) {
+                    loadSettings();
+                }
+            }
+        }
+    }
+
     public class MovieFolderChange implements ActionListener {
 
         @Override
@@ -646,7 +662,6 @@ public class Lawena {
             watcher.register(Paths.get("profiles"), new WatchAction() {
 
                 private String getProfileName(Path child) {
-
                     String filename = child.getFileName().toString();
                     int idx = filename.lastIndexOf(".lwf");
                     return filename.substring(0, idx > 0 ? idx : filename.length() - 1);
@@ -743,13 +758,6 @@ public class Lawena {
                 dialog.setVisible(true);
             }
         });
-        view.getMntmSelectEnhancedParticles().addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                particles.showDialog();
-            }
-        });
 
         final JTable table = view.getTableCustomContent();
         table.setModel(customPaths);
@@ -766,9 +774,6 @@ public class Lawena {
                     CustomPath cp = (CustomPath) model.getValueAt(row,
                             CustomPathList.Column.PATH.ordinal());
                     checkCustomHud(cp);
-                    if (cp == CustomPathList.particles && cp.isSelected()) {
-                        particles.showDialog();
-                    }
                 }
             }
         });
@@ -1032,21 +1037,6 @@ public class Lawena {
                 }
             }
         });
-        view.getBtnDeleteProfile().addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String selected = (String) view.getCmbProfiles().getSelectedItem();
-                int answer = JOptionPane.showConfirmDialog(view,
-                        "Are you sure you want to delete "
-                                + selected, "Deleting Profile", JOptionPane.YES_NO_OPTION);
-                if (answer == JOptionPane.YES_OPTION) {
-                    if (settings.delete(selected)) {
-                        loadSettings();
-                    }
-                }
-            }
-        });
         view.getBtnRenameProfile().addActionListener(new ActionListener() {
 
             @Override
@@ -1061,7 +1051,8 @@ public class Lawena {
             }
         });
 
-        view.getTabbedPane().addTab("VDM", null, vdm.start());
+        view.getTabbedPane().addTab("VDM", vdm.start());
+        view.getSideTabbedPane().addTab("Particles", particles.start());
         view.setVisible(true);
     }
 
@@ -1169,6 +1160,7 @@ public class Lawena {
         }
         settings.setLogFileLevel(view.getCmbLogFileLevel().getSelectedItem().toString());
         settings.setLogUiLevel(view.getCmbLogUiLevel().getSelectedItem().toString());
+        settings.setParticles(particles.getSelectedParticles());
         settings.save();
         log.fine("Settings saved");
     }

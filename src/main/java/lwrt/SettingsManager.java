@@ -171,10 +171,11 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
             } catch (NumberFormatException x) {
             }
         }
-        while (profiles.contains(name)) {
-            name = name.replaceAll("^(.*-)([0-9]+)$", "\\1" + counter++);
-            log.finer("Attempting to create profile with name: " + name);
-        }
+        log.finer(profiles.toString());
+//        while (profiles.contains(name)) {
+//            name = name.replaceAll("^(.*-)([0-9]+)$", "\\1" + counter++);
+//            log.finer("Attempting to create profile with name: " + name);
+//        }
         addProfile(name);
         log.fine("Created profile: " + name);
         storeProfile(name);
@@ -225,11 +226,23 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
         return false;
     }
 
+    private void logChanges(Properties older) {
+        for (Key key : Key.values()) {
+            Object oldvalue = older.get(key.toString());
+            Object newvalue = properties.get(key.toString());
+            if (!oldvalue.equals(newvalue)) {
+                log.fine("Setting changed " + key + " = " + oldvalue + " => " + newvalue);
+            }
+        }
+    }
+
     public boolean select(String profileNameToSelect) {
         if (!selectedProfile.equals(profileNameToSelect)) {
             if (profiles.contains(profileNameToSelect)) {
                 selectedProfile = profileNameToSelect;
+                Properties temp = properties;
                 load();
+                logChanges(temp);
                 return true;
             } else {
                 log.info("Cannot select profile " + profileNameToSelect
@@ -264,8 +277,7 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
     public boolean load() {
         try {
             properties.load(new FileReader("profiles/" + selectedProfile + ".lwf"));
-            log.log(Level.FINE,
-                    "Properties loaded from " + selectedProfile + ".lwf: " + properties.toString());
+            log.fine("Properties loaded from file: " + selectedProfile + ".lwf");
             return true;
         } catch (FileNotFoundException e) {
         } catch (IOException e) {
