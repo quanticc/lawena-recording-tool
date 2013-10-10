@@ -199,6 +199,7 @@ public class LawenaView extends JFrame {
     private JMenuItem mntmOpenCustomFolder;
     private JMenuItem mntmOpenMovieFolder;
     private JSeparator separator_4;
+    private JCheckBox usePlayerModel;
 
     /**
      * Create the frame.
@@ -604,6 +605,15 @@ public class LawenaView extends JFrame {
         gbc_chckbxUseHudMin.gridy = 3;
         panelCheckboxes.add(useHudMinmode, gbc_chckbxUseHudMin);
 
+        usePlayerModel = new JCheckBox("Use Player Model in HUD");
+        usePlayerModel
+                .setToolTipText("<html>\r\nUse player model in player class HUD, selecting this option<br>\r\nwill add \"cl_hud_playerclass_use_playermodel 1\" to the config.<br>\r\nThis option is useful if you use Custom HUDs.");
+        GridBagConstraints gbc_usePlayerModel = new GridBagConstraints();
+        gbc_usePlayerModel.anchor = GridBagConstraints.WEST;
+        gbc_usePlayerModel.gridx = 1;
+        gbc_usePlayerModel.gridy = 3;
+        panelCheckboxes.add(usePlayerModel, gbc_usePlayerModel);
+
         panelBottomLeft = new JPanel();
         FlowLayout fl_panelBottomLeft = (FlowLayout) panelBottomLeft.getLayout();
         fl_panelBottomLeft.setVgap(0);
@@ -845,5 +855,9 @@ public class LawenaView extends JFrame {
 
     public JCheckBoxMenuItem getChckbxmntmInsecure() {
         return chckbxmntmInsecure;
+    }
+
+    public JCheckBox getUsePlayerModel() {
+        return usePlayerModel;
     }
 }

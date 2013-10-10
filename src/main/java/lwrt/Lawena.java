@@ -1050,6 +1050,7 @@ public class Lawena {
         view.getDisableVoiceChat().setSelected(!settings.getVoice());
         view.getUseHudMinmode().setSelected(settings.getHudMinmode());
         view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
+        view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
     }
 
     private void saveSettings() {
@@ -1090,6 +1091,7 @@ public class Lawena {
         settings.setCustomResources(selected);
         settings.setHudMinmode(view.getUseHudMinmode().isSelected());
         settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
+        settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
         settings.save();
         log.fine("Settings saved");
     }
