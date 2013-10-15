@@ -196,6 +196,9 @@ public class Lawena {
                     log.info("Launch aborted because the custom HUD to use was not specified");
                     return false;
                 }
+                
+                status.info("Scanning for open handles");
+                cl.closeHandles(settings.getTfPath());
 
                 // Restoring user files
                 status.info("Restoring your files");

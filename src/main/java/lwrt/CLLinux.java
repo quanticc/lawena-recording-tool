@@ -106,4 +106,9 @@ public class CLLinux extends CommandLine {
         // use java default: Nimbus
     }
 
+    @Override
+    public void closeHandles(Path path) {
+
+    }
+
 }

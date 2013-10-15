@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.logging.Level;
 
 public class CLWindows extends CommandLine {
@@ -126,4 +127,22 @@ public class CLWindows extends CommandLine {
             super.openFolder(dir);
         }
     }
+
+    @Override
+    public void closeHandles(Path path) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", path.toString());
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                String[] columns = line.split("pid: |type: |:");
+                log.fine("[handle] " + Arrays.asList(columns));
+            }
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.log(Level.INFO, "", e);
+        }
+    }
+
 }

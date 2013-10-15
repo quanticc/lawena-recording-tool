@@ -112,6 +112,8 @@ public abstract class CommandLine {
      * @param dxlevel the user-specified DirectX level
      */
     public abstract void setSystemDxLevel(String dxlevel);
+    
+    public abstract void closeHandles(Path path);
 
     /**
      * Extracts VPK-packed files to a specified path only if they not exist in
