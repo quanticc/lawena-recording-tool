@@ -2,6 +2,7 @@
 package ui;
 
 import util.StartLogger;
+import util.UpdaterUtil;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,5 +36,10 @@ public class LwrtGUI {
                 }
             }
         });
+
+        UpdaterUtil uu = new UpdaterUtil();
+        uu.updateLauncher();
+        uu.cleanupUnusedFiles();
     }
+
 }
