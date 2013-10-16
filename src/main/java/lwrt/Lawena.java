@@ -7,6 +7,7 @@ import ui.ParticlesDialog;
 import ui.TooltipRenderer;
 import util.LawenaException;
 import util.StartLogger;
+import util.UpdateHelper;
 import util.WatchDir;
 import vdm.DemoEditor;
 
@@ -196,7 +197,7 @@ public class Lawena {
                     log.info("Launch aborted because the custom HUD to use was not specified");
                     return false;
                 }
-                
+
                 status.info("Scanning for open handles");
                 cl.closeHandles(settings.getTfPath());
 
@@ -562,6 +563,7 @@ public class Lawena {
 
     private String version = "4.0-SNAPSHOT";
     private String build;
+    private UpdateHelper updater;
 
     public Lawena(SettingsManager cfg) {
         String impl = this.getClass().getPackage().getImplementationVersion();
@@ -580,6 +582,12 @@ public class Lawena {
             throw new UnsupportedOperationException("OS not supported");
         }
         cl.setLookAndFeel();
+
+        // Perform after-update checks
+        updater = new UpdateHelper();
+        updater.updateLauncher();
+        updater.cleanupUnusedFiles();
+        updater.loadChannels();
 
         settings = cfg;
         oDxlevel = cl.getSystemDxLevel();
@@ -699,6 +707,13 @@ public class Lawena {
                     dialog = new AboutDialog(version, build);
                     dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
                     dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+                    dialog.getBtnUpdater().addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            updater.showSwitchUpdateChannelDialog();
+                        }
+                    });
                 }
                 dialog.setVisible(true);
             }

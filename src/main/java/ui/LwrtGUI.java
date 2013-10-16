@@ -2,7 +2,6 @@
 package ui;
 
 import util.StartLogger;
-import util.UpdaterUtil;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,14 +18,12 @@ public class LwrtGUI {
     public static void main(String[] args) throws Exception {
         SettingsManager cfg = new SettingsManager("settings.lwf");
         new StartLogger("lawena").toConsole(cfg.getLogConsoleLevel()).toFile(cfg.getLogFileLevel());
-        final Lawena lawena = new Lawena(cfg);
-
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, final Throwable e) {
                 log.log(Level.SEVERE, "Unexpected problem in " + t, e);
             }
         });
-
+        final Lawena lawena = new Lawena(cfg);
         SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
                 try {
@@ -37,9 +34,6 @@ public class LwrtGUI {
             }
         });
 
-        UpdaterUtil uu = new UpdaterUtil();
-        uu.updateLauncher();
-        uu.cleanupUnusedFiles();
     }
 
 }
