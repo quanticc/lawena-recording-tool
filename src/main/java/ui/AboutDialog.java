@@ -109,6 +109,7 @@ public class AboutDialog extends JDialog {
                         + "Most Skyboxes are from GameBanana, made by <a href=\"http://gamebanana.com/members/submissions/textures/289553\">komaokc</a>, and the rest are from the PLDX recording tool.<br>"
                         + "Enhanced particles included are also from PLDX recording tool.<br>"
                         + "Self-Updating mechanism is possible thanks to <a href=\"http://code.google.com/p/getdown/\">Getdown</a>, developed by Third Rings Design, Inc.<br>"
+                        + "Microsoft Sysinternals' <a href=\"http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx\">Handle</a> utility by Mark Russinovich.<br>"
                         + "TF2 icon modification made by <a href=\"http://hackcypher.deviantart.com/art/Team-Fortress-2-Icons-87662784\">hackcypher</a>.<br>"
                         + "Team Fortress and the Team Fortress logo are trademarks of <a href=\"http://www.valvesoftware.com\">Valve Corporation</a>.<br>");
         contentPanel.add(aboutTextPane, BorderLayout.SOUTH);

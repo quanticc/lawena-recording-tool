@@ -198,13 +198,14 @@ public class Lawena {
                     return false;
                 }
 
-                status.info("Scanning for open handles");
+                setProgress(20);
+                status.info("Closing open handles in TF2 folder...");
                 cl.closeHandles(settings.getTfPath());
 
                 // Restoring user files
                 status.info("Restoring your files");
                 files.restoreAll();
-                setProgress(25);
+                setProgress(40);
 
                 // Saving ui settings to cfg files
                 status.info("Saving settings and generating cfg files");
@@ -218,7 +219,7 @@ public class Lawena {
                     status.info("Failed to save lawena settings to file");
                     return false;
                 }
-                setProgress(50);
+                setProgress(60);
 
                 // Backing up user files and copying lawena files
                 status.info("Copying lawena files to cfg and custom...");
@@ -228,7 +229,7 @@ public class Lawena {
                     status.info(e.getMessage());
                     return false;
                 }
-                setProgress(75);
+                setProgress(80);
 
                 // Launching process
                 status.info("Launching TF2 process");
@@ -246,7 +247,7 @@ public class Lawena {
 
                 int timeout = 0;
                 int cfgtimeout = settings.getLaunchTimeout();
-                int millis = 3000;
+                int millis = 5000;
                 int maxtimeout = cfgtimeout / (millis / 1000);
                 setProgress(0);
                 status.info("Waiting for TF2 to start...");
@@ -283,13 +284,20 @@ public class Lawena {
                     Thread.sleep(millis);
                 }
 
+                Thread.sleep(5000);
+                status.info("Closing open handles in TF2 folder...");
+                cl.closeHandles(settings.getTfPath());
+
             } else {
                 if (cl.isRunningTF2()) {
                     status.info("Attempting to finish TF2 process...");
                     cl.killTf2Process();
+                    Thread.sleep(5000);
                     if (!cl.isRunningTF2()) {
                         startTfTask.cancel(true);
                     }
+                    status.info("Closing open handles in TF2 folder...");
+                    cl.closeHandles(settings.getTfPath());
                 } else {
                     status.info("TF2 was not running, cancelling");
                 }

@@ -128,6 +128,27 @@ public class CLWindows extends CommandLine {
         }
     }
 
+    private void closeHandle(String pid, String handle) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", "-c", handle, "-p", pid,
+                    "-y");
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            int count = 0;
+            while ((line = input.readLine()) != null) {
+                if (count > 4) {
+                    log.finer("[handle] " + line);
+                }
+                count++;
+            }
+            log.info("[handle] " + line);
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.log(Level.INFO, "", e);
+        }
+    }
+
     @Override
     public void closeHandles(Path path) {
         try {
@@ -135,14 +156,24 @@ public class CLWindows extends CommandLine {
             Process pr = pb.start();
             BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;
+            int count = 0;
             while ((line = input.readLine()) != null) {
-                String[] columns = line.split("pid: |type: |:");
-                log.fine("[handle] " + Arrays.asList(columns));
+                if (count > 4) {
+                    String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
+                    log.finer("[handle] " + Arrays.asList(columns));
+                    if (columns.length == 4) {
+                        log.info("[handle] Closing handle " + columns[3] + " opened by "
+                                + columns[0]);
+                        closeHandle(columns[1], columns[2]);
+                    } else {
+                        log.info("[handle] " + line);
+                    }
+                }
+                count++;
             }
             pr.waitFor();
         } catch (InterruptedException | IOException e) {
             log.log(Level.INFO, "", e);
         }
     }
-
 }
