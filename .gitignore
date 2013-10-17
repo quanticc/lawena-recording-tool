@@ -6,7 +6,6 @@
 *.ear
 
 *.lwf
-*.exe
 *.log
 cfg/mov/*.cfg
 target/
