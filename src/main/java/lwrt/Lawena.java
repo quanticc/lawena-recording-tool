@@ -302,7 +302,7 @@ public class Lawena {
 
             return true;
         }
-        
+
         private void closeTf2Handles() {
             status.info("Closing open handles in TF2 'cfg' folder...");
             cl.closeHandles(settings.getTfPath().resolve("cfg"));
@@ -695,7 +695,7 @@ public class Lawena {
         log.fine("Lawena Recording Tool " + version + " build " + build);
         log.fine("TF2 path: " + settings.getTfPath());
         log.fine("Movie path: " + settings.getMoviePath());
-        log.fine("Lawena path: " + Paths.get("."));
+        log.fine("Lawena path: " + Paths.get(".").toAbsolutePath());
 
         view.setTitle("Lawena Recording Tool " + shortver());
         try {
