@@ -73,12 +73,17 @@ public class UpdateHelper {
             Class<?> cls = cl.loadClass("com.threerings.getdown.util.LaunchUtil");
             Method upgradeLauncher = cls.getMethod("upgradeGetdown", File.class, File.class,
                     File.class);
-            File oldLauncher = new File("../lawena-old.exe");
-            File curLauncher = new File("../lawena.exe");
-            File newLauncher = new File("code/lawena-new.exe");
             Logger logger = Logger.getLogger("com.threerings.getdown");
             logger.setParent(Logger.getLogger("lawena"));
-            upgradeLauncher.invoke(null, oldLauncher, curLauncher, newLauncher);
+            String[] executables = {
+                    "lawena", "lawena-no-updates"
+            };
+            for (String exe : executables) {
+                File oldLauncher = new File("../" + exe + "-old.exe");
+                File curLauncher = new File("../" + exe + ".exe");
+                File newLauncher = new File("code/" + exe + "-new.exe");
+                upgradeLauncher.invoke(null, oldLauncher, curLauncher, newLauncher);
+            }
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
                 | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             log.log(Level.INFO, "Could not update launcher executable", e);
