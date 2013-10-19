@@ -199,8 +199,7 @@ public class Lawena {
                 }
 
                 setProgress(20);
-                status.info("Closing open handles in TF2 folder...");
-                cl.closeHandles(settings.getTfPath());
+                closeTf2Handles();
 
                 // Restoring user files
                 status.info("Restoring your files");
@@ -285,8 +284,7 @@ public class Lawena {
                 }
 
                 Thread.sleep(5000);
-                status.info("Closing open handles in TF2 folder...");
-                cl.closeHandles(settings.getTfPath());
+                closeTf2Handles();
 
             } else {
                 if (cl.isRunningTF2()) {
@@ -296,14 +294,20 @@ public class Lawena {
                     if (!cl.isRunningTF2()) {
                         startTfTask.cancel(true);
                     }
-                    status.info("Closing open handles in TF2 folder...");
-                    cl.closeHandles(settings.getTfPath());
+                    closeTf2Handles();
                 } else {
                     status.info("TF2 was not running, cancelling");
                 }
             }
 
             return true;
+        }
+        
+        private void closeTf2Handles() {
+            status.info("Closing open handles in TF2 'cfg' folder...");
+            cl.closeHandles(settings.getTfPath().resolve("cfg"));
+            status.info("Closing open handles in TF2 'custom' folder...");
+            cl.closeHandles(settings.getTfPath().resolve("custom"));
         }
 
         private boolean verifyCustomHud() {
@@ -691,6 +695,7 @@ public class Lawena {
         log.fine("Lawena Recording Tool " + version + " build " + build);
         log.fine("TF2 path: " + settings.getTfPath());
         log.fine("Movie path: " + settings.getMoviePath());
+        log.fine("Lawena path: " + Paths.get("."));
 
         view.setTitle("Lawena Recording Tool " + shortver());
         try {

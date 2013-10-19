@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.logging.Level;
 
 public class CLWindows extends CommandLine {
@@ -137,12 +136,11 @@ public class CLWindows extends CommandLine {
             String line;
             int count = 0;
             while ((line = input.readLine()) != null) {
-                if (count > 4) {
-                    log.finer("[handle] " + line);
+                if (count > 7) {
+                    log.info("[handle] " + line);
                 }
                 count++;
             }
-            log.info("[handle] " + line);
             pr.waitFor();
         } catch (InterruptedException | IOException e) {
             log.log(Level.INFO, "", e);
@@ -160,7 +158,6 @@ public class CLWindows extends CommandLine {
             while ((line = input.readLine()) != null) {
                 if (count > 4) {
                     String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
-                    log.finer("[handle] " + Arrays.asList(columns));
                     if (columns.length == 4) {
                         log.info("[handle] Closing handle " + columns[3] + " opened by "
                                 + columns[0]);
