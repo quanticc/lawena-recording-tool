@@ -75,7 +75,7 @@ public class LawenaView extends JFrame {
             new SwingWorker<Void, Void>() {
                 protected Void doInBackground() throws Exception {
                     try {
-                        String url = "https://github.com/iabarca/lawena-recording-tool/commits/master";
+                        String url = "https://github.com/iabarca/lawena-recording-tool/releases";
                         Desktop.getDesktop().browse(new URI(url));
                     } catch (IOException | URISyntaxException e1) {
                         log.log(Level.INFO, "Could not open URL", e1);
