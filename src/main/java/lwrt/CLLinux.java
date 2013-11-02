@@ -108,7 +108,12 @@ public class CLLinux extends CommandLine {
 
     @Override
     public void closeHandles(Path path) {
+        // no need to implement this yet
+    }
 
+    @Override
+    public void delete(Path path) {
+        // no need to implement this yet
     }
 
 }

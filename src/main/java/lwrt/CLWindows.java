@@ -173,4 +173,20 @@ public class CLWindows extends CommandLine {
             log.log(Level.INFO, "", e);
         }
     }
+
+    @Override
+    public void delete(Path path) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("del", "/f", "/s", "/q", "/a", path.toString());
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                log.info("[delete] " + line);
+            }
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.log(Level.INFO, "", e);
+        }
+    }
 }
