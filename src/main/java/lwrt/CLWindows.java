@@ -53,11 +53,10 @@ public class CLWindows extends CommandLine {
                 Process p = pb.start();
                 BufferedReader input =
                         new BufferedReader(new InputStreamReader(p.getInputStream()));
-                log.finer("Detecting TF2 process using " + pb.command().get(0));
                 while ((line = input.readLine()) != null) {
-                    log.finer("[" + pb.command().get(0) + "] " + line);
+                    log.finest("[" + pb.command().get(0) + "] " + line);
                     if (line.contains(hl2)) {
-                        log.finer("TF2 process detected");
+                        log.finer("TF2 process detected by " + pb.command().get(0));
                         return true;
                     }
                 }
@@ -66,6 +65,7 @@ public class CLWindows extends CommandLine {
                 log.log(Level.INFO, "Problem while finding if TF2 is running", e);
             }
         }
+        log.finer("TF2 process not detected");
         return false;
     }
 
