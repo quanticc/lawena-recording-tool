@@ -16,14 +16,22 @@ public class LwrtGUI {
     private static final Logger log = Logger.getLogger("lawena");
 
     public static void main(String[] args) throws Exception {
-        SettingsManager cfg = new SettingsManager("settings.lwf");
-        new StartLogger("lawena").toConsole(cfg.getLogConsoleLevel()).toFile(cfg.getLogFileLevel());
+        new StartLogger("lawena").toConsole(Level.ALL).toFile(Level.FINER);
+        log.finer("-----------------------------------");
+        log.finer("   Lawena Recording Tool Started   ");
+        log.finer("-----------------------------------");
+        SettingsManager cfg = new SettingsManager();
+
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, final Throwable e) {
                 log.log(Level.SEVERE, "Unexpected problem in " + t, e);
             }
         });
+
+        log.finer("Starting Lawena instance");
         final Lawena lawena = new Lawena(cfg);
+
+        log.finer("Starting User Interface");
         SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
                 try {

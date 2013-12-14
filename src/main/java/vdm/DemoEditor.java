@@ -2,27 +2,38 @@
 package vdm;
 
 import ui.DemoEditorView;
-import util.DemoPreview;
+import ui.DemoRenderer;
+import util.WatchDir;
+import util.WatchDir.WatchAction;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.PatternSyntaxException;
 
-import javax.swing.JFileChooser;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import lwrt.CommandLine;
 import lwrt.SettingsManager;
@@ -32,18 +43,53 @@ public class DemoEditor {
     private static final Logger log = Logger.getLogger("lawena");
     private static final Logger status = Logger.getLogger("status");
 
-    public class VdmAddTick implements ActionListener {
+    public class RegexFilterDocumentListener implements DocumentListener {
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            updateFilter();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            updateFilter();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            updateFilter();
+        }
+
+        private void updateFilter() {
+            TableRowSorter<? extends TableModel> sorter = (TableRowSorter<? extends TableModel>) view
+                    .getTableDemos().getRowSorter();
+            RowFilter<TableModel, Object> rf = null;
+            String input = view.getTxtFilterDemos().getText();
+            try {
+                rf = RowFilter.regexFilter(input);
+            } catch (PatternSyntaxException e) {
+                return;
+            }
+            sorter.setRowFilter(rf);
+        }
+
+    }
+
+    public class AddSegment implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (!Files.exists(settings.getTfPath().resolve(view.getTxtDemofile().getText()))) {
+            String currentdemo;
+            if (!Files.exists(settings.getTfPath().resolve(
+                    demoModel.getDemo(view.getTableDemos().getSelectedRow()).getPath()
+                            .getFileName().toString()))) {
                 JOptionPane.showMessageDialog(view,
                         "Please fill the required demo file field with a valid demo file", "Error",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             } else {
-                currentdemo = view.getTxtDemofile().getText();
-                updateDemoDetails();
+                currentdemo = demoModel.getDemo(view.getTableDemos().getSelectedRow()).getPath()
+                        .getFileName().toString();
             }
 
             try {
@@ -52,7 +98,7 @@ public class DemoEditor {
                 if (tick1 >= tick2) {
                     throw new NumberFormatException();
                 }
-                model.addTick(new Tick(currentdemo, tick1, tick2));
+                tickModel.addTick(new Tick(currentdemo, tick1, tick2));
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(view,
                         "Please fill the required tick fields with valid numbers", "Error",
@@ -62,42 +108,23 @@ public class DemoEditor {
 
     }
 
-    public class VdmBrowseDemo implements ActionListener {
+    public class ClearSegments implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            int returnVal = choosedemo.showOpenDialog(view);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                currentdemo = choosedemo.getSelectedFile().getName();
-                if (Files.exists(choosedemo.getSelectedFile().toPath())) {
-                    view.getTxtDemofile().setText(currentdemo);
-                    updateDemoDetails();
-                } else {
-                    JOptionPane.showMessageDialog(view, "The selected file does not exist.",
-                            "Browse", JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
+            tickModel.clear();
         }
 
     }
 
-    public class VdmClearTicks implements ActionListener {
+    public class CreateVdmFiles implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            model.clear();
-        }
-
-    }
-
-    public class VdmCreateFile implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (model.getRowCount() > 0) {
-                vdmgenerator = new VDMGenerator(model.getTickList(), settings);
+            if (tickModel.getRowCount() > 0) {
                 try {
-                    final List<Path> paths = vdmgenerator.generate();
+                    final List<Path> paths = new VDMGenerator(tickModel.getTickList(), settings)
+                            .generate();
                     status.info("VDM generated: " + paths.size()
                             + (paths.size() == 1 ? " new file" : " new files")
                             + " in TF2 directory");
@@ -116,7 +143,7 @@ public class DemoEditor {
         }
     }
 
-    public class ClearVdmFilesTask extends SwingWorker<Void, Path> {
+    public class DeleteVdmFiles extends SwingWorker<Void, Path> {
 
         private int count = 0;
 
@@ -175,52 +202,48 @@ public class DemoEditor {
     }
 
     private DemoEditorView view;
-    private JFileChooser choosedemo = new JFileChooser();
-    private TickTableModel model;
+    private TickTableModel tickModel;
     private SettingsManager settings;
     private CommandLine cl;
-    private String currentdemo;
-    private VDMGenerator vdmgenerator;
+    private DemoTableModel demoModel;
 
-    public DemoEditor(SettingsManager settings, CommandLine cl) {
+    public DemoEditor(SettingsManager settings, CommandLine cl, WatchDir watcher) {
         this.settings = settings;
         this.cl = cl;
-        choosedemo.setDialogTitle("Choose a demo file");
-        choosedemo.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        choosedemo.setFileFilter(new FileNameExtensionFilter("Demo files", new String[] {
-                "DEM"
-        }));
-        choosedemo.setCurrentDirectory(settings.getTfPath().toFile());
+        demoModel = new DemoTableModel(settings.getTfPath());
+        try {
+            watcher.register(settings.getTfPath(), new WatchAction() {
 
-        model = new TickTableModel();
-    }
-
-    public void updateDemoDetails() {
-        new SwingWorker<String, Void>() {
-
-            @Override
-            protected String doInBackground() throws Exception {
-                try (DemoPreview dp = new DemoPreview(settings.getTfPath().resolve(currentdemo))) {
-                    return dp.toString();
+                @Override
+                public void entryModified(Path child) {
+                    // TODO: handle case when user renames .dem file
                 }
-            }
 
-            protected void done() {
-                try {
-                    view.getTxtrDemodetails().setText(get());
-                } catch (InterruptedException | ExecutionException e) {
-                    view.getTxtrDemodetails()
-                            .setText("Could not retrieve demo details");
+                @Override
+                public void entryDeleted(Path child) {
+                    if (child.endsWith(".dem")) {
+                        demoModel.removeDemo(child);
+                    }
                 }
-            };
 
-        }.execute();
+                @Override
+                public void entryCreated(Path child) {
+                    if (child.endsWith(".dem")) {
+                        demoModel.addDemo(child);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            log.log(Level.INFO, "", e);
+        }
+
+        tickModel = new TickTableModel();
     }
 
     public Component start() {
         view = new DemoEditorView();
 
-        view.getTableTicks().setModel(model);
+        view.getTableTicks().setModel(tickModel);
         view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         int vColIndex = 0;
         TableColumn col = view.getTableTicks().getColumnModel().getColumn(vColIndex);
@@ -229,10 +252,26 @@ public class DemoEditor {
         view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         view.getTableTicks().setFillsViewportHeight(true);
 
-        view.getBtnAdd().addActionListener(new VdmAddTick());
-        view.getBtnBrowse().addActionListener(new VdmBrowseDemo());
-        view.getBtnClearTickList().addActionListener(new VdmClearTicks());
-        view.getBtnCreateVdmFiles().addActionListener(new VdmCreateFile());
+        view.getTableDemos().setModel(demoModel);
+        view.getTableDemos().getSelectionModel()
+                .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        view.getTableDemos().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        view.getTableDemos().getColumnModel().getColumn(0).setPreferredWidth(300);
+        view.getTableDemos().getColumnModel().getColumn(1).setPreferredWidth(125);
+        view.getTableDemos().getColumnModel().getColumn(2).setPreferredWidth(100);
+        view.getTableDemos().getColumnModel().getColumn(3).setPreferredWidth(75);
+        view.getTableDemos().getColumnModel().getColumn(4).setPreferredWidth(75);
+        view.getTableDemos().getColumnModel().getColumn(5).setPreferredWidth(150);
+        view.getTableDemos().getColumnModel().getColumn(6).setPreferredWidth(300);
+        view.getTableDemos().setFillsViewportHeight(true);
+        view.getTableDemos().setDefaultRenderer(Demo.class, new DemoRenderer());
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(view.getTableDemos()
+                .getModel());
+        view.getTableDemos().setRowSorter(sorter);
+
+        view.getBtnAdd().addActionListener(new AddSegment());
+        view.getBtnClearTickList().addActionListener(new ClearSegments());
+        view.getBtnCreateVdmFiles().addActionListener(new CreateVdmFiles());
         view.getBtnDeleteVdmFiles().addActionListener(new ActionListener() {
 
             @Override
@@ -241,7 +280,7 @@ public class DemoEditor {
                         "Are you sure you want to clear all .vdm files in your TF2 folder?",
                         "Clear VDM Files", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (answer == JOptionPane.YES_OPTION) {
-                    new ClearVdmFilesTask().execute();
+                    new DeleteVdmFiles().execute();
                 }
             }
         });
@@ -251,7 +290,7 @@ public class DemoEditor {
             public void actionPerformed(ActionEvent e) {
                 int numRows = view.getTableTicks().getSelectedRowCount();
                 for (int i = 0; i < numRows; i++) {
-                    model.removeTick(view.getTableTicks().getSelectedRow());
+                    tickModel.removeTick(view.getTableTicks().getSelectedRow());
                 }
             }
         });
@@ -264,7 +303,71 @@ public class DemoEditor {
             }
         });
 
+        final DefaultComboBoxModel<String> defaultSegmentModel = new DefaultComboBoxModel<>(
+                new String[] {
+                    "Record Segment"
+                });
+        view.getCmbSegmentType().setModel(defaultSegmentModel);
+        view.getCmbSegmentType().addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                view.getTxtStarttick().setText("");
+                view.getTxtEndtick().setText("");
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String selected = e.getItem().toString();
+                    String[] tokens = selected.split(" at ");
+                    if (tokens.length == 2) {
+                        try {
+                            view.getTxtStarttick().setText(Integer.parseInt(tokens[1]) - 500 + "");
+                        } catch (NumberFormatException x) {
+                        }
+                    }
+                }
+            }
+        });
+        view.getTableDemos().getSelectionModel()
+                .addListSelectionListener(new ListSelectionListener() {
+
+                    @Override
+                    public void valueChanged(ListSelectionEvent e) {
+                        int index = view.getTableDemos().getSelectedRow();
+                        if (index >= 0) {
+                            if (!e.getValueIsAdjusting()) {
+                                Demo demo = (Demo) demoModel.getDemo(view.getTableDemos()
+                                        .convertRowIndexToModel(index));
+                                List<KillStreak> streaks = demo.getStreaks();
+                                DefaultComboBoxModel<String> m = new DefaultComboBoxModel<>();
+                                for (int i = 0; i < defaultSegmentModel.getSize(); i++) {
+                                    m.addElement(defaultSegmentModel.getElementAt(i));
+                                }
+                                for (KillStreak streak : streaks) {
+                                    m.addElement(streak.getDescription() + " at "
+                                            + streak.getTick());
+                                }
+                                view.getCmbSegmentType().setModel(m);
+                            }
+                        } else {
+                            view.getCmbSegmentType().setModel(defaultSegmentModel);
+                        }
+                        view.getTxtStarttick().setText("");
+                        view.getTxtEndtick().setText("");
+                    }
+                });
+        view.getTxtFilterDemos().getDocument()
+                .addDocumentListener(new RegexFilterDocumentListener());
+
         return view;
     }
 
+    public String getDemoname() {
+        if (!tickModel.getTickList().isEmpty()) {
+            return tickModel.getTickList().get(0).getDemoname();
+        }
+        return "";
+    }
+
+    public boolean isAutoplay() {
+        return view.getChckbxAutoplayFirstDemo().isSelected();
+    }
 }

@@ -1,19 +1,22 @@
 
-package util;
+package vdm;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DemoPreview extends RandomAccessFile {
+public class Demo extends RandomAccessFile {
 
     private static final Logger log = Logger.getLogger("lawena");
+    private static final int maxStringLength = 260;
 
-    private final int maxStringLength = 260;
+    private Path path;
     private int demoProtocol;
     private int networkProtocol;
     private String demoStamp;
@@ -23,9 +26,11 @@ public class DemoPreview extends RandomAccessFile {
     private String gameDirectory;
     private double playbackTime;
     private int tickNumber;
+    private List<KillStreak> streaks;
 
-    public DemoPreview(String demoName) throws FileNotFoundException {
-        super(demoName, "r");
+    public Demo(Path demopath) throws FileNotFoundException {
+        super(demopath.toString(), "r");
+        path = demopath;
         try {
             demoStamp = readString(8);
             demoProtocol = readIntBackwards();
@@ -39,10 +44,6 @@ public class DemoPreview extends RandomAccessFile {
         } catch (Exception e) {
             log.log(Level.FINE, "Could not retrieve demo details", e);
         }
-    }
-
-    public DemoPreview(Path demopath) throws FileNotFoundException {
-        this(demopath.toString());
     }
 
     private String readString(int length) {
@@ -98,20 +99,57 @@ public class DemoPreview extends RandomAccessFile {
                 TimeUnit.SECONDS.toSeconds(s)
                         - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(s)));
     }
+    
+    public Path getPath() {
+        return path;
+    }
+
+    public String getDemoStamp() {
+        return demoStamp;
+    }
+
+    public int getDemoProtocol() {
+        return demoProtocol;
+    }
+
+    public int getNetworkProtocol() {
+        return networkProtocol;
+    }
+
+    public String getGameDirectory() {
+        return gameDirectory;
+    }
+
+    public String getPlaybackTime() {
+        return formatSeconds(playbackTime);
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public int getTickNumber() {
+        return tickNumber;
+    }
+    
+    public List<KillStreak> getStreaks() {
+        if (streaks == null) {
+            streaks = new ArrayList<>();
+        }
+        return streaks;
+    }
 
     @Override
     public String toString() {
-        String str = "";
-        str += "Stamp: " + demoStamp;
-        str += "\nDemoProtocol: " + demoProtocol;
-        str += "\nNetworkProtocol: " + networkProtocol;
-        str += "\nGameDirectory: " + gameDirectory;
-        str += "\nPlaybackTime: " + formatSeconds(playbackTime);
-        str += "\nServer: " + serverName;
-        str += "\nPlayer: " + playerName;
-        str += "\nMap: " + mapName;
-        str += "\nTicks: " + tickNumber;
-        return str;
+        return getPath().getFileName().toString();
     }
 
 }
