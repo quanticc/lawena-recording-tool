@@ -114,6 +114,22 @@ public abstract class CommandLine {
     public abstract void setSystemDxLevel(String dxlevel);
 
     /**
+     * Closes all open handles matching this path. This is useful to unlock
+     * files that some process can hold preventing the restore/replace file
+     * mechanism to work correctly.
+     * 
+     * @param path the directory where handles are being closed
+     */
+    public abstract void closeHandles(Path path);
+
+    /**
+     * Deletes a file using OS-level commands.
+     * 
+     * @param path the path to delete
+     */
+    public abstract void delete(Path path);
+
+    /**
      * Extracts VPK-packed files to a specified path only if they not exist in
      * the destination path.
      * 

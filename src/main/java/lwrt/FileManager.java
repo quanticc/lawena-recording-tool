@@ -44,7 +44,7 @@ public class FileManager {
     }
 
     private Path delete(Path dir) throws IOException {
-        return Files.walkFileTree(dir, new DeleteDirVisitor());
+        return Files.walkFileTree(dir, new DeleteDirVisitor(cl));
     }
 
     private boolean isEmpty(Path dir) {

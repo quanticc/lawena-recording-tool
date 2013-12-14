@@ -106,4 +106,14 @@ public class CLOSX extends CommandLine {
         // use java default: Nimbus
     }
 
+    @Override
+    public void closeHandles(Path path) {
+        // no need to implement this yet
+    }
+
+    @Override
+    public void delete(Path path) {
+        // no need to implement this yet
+    }
+
 }

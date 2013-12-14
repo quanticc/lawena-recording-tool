@@ -2,6 +2,7 @@
 package lwrt;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
@@ -40,23 +41,32 @@ public class CLWindows extends CommandLine {
 
     @Override
     public boolean isRunningTF2() {
-        boolean found = false;
-        try {
-            String line;
-            Process p = new ProcessBuilder("tasklist", "/fi", "\"imagename eq " + hl2 + "\"",
-                    "/nh", "/fo", "csv").start();
-            BufferedReader input =
-                    new BufferedReader(new InputStreamReader(p.getInputStream()));
-            while ((line = input.readLine()) != null) {
-                if (line.startsWith("\"" + hl2 + "\"")) {
-                    return true;
+        String line;
+        ProcessBuilder[] builders = {
+                new ProcessBuilder("tasklist", "/fi", "\"imagename eq " + hl2 + "\"",
+                        "/nh", "/fo", "csv"),
+                new ProcessBuilder("cscript", "//NoLogo",
+                        new File("batch\\procchk.vbs").getPath(), hl2)
+        };
+        for (ProcessBuilder pb : builders) {
+            try {
+                Process p = pb.start();
+                BufferedReader input =
+                        new BufferedReader(new InputStreamReader(p.getInputStream()));
+                while ((line = input.readLine()) != null) {
+                    log.finest("[" + pb.command().get(0) + "] " + line);
+                    if (line.contains(hl2)) {
+                        log.finer("TF2 process detected by " + pb.command().get(0));
+                        return true;
+                    }
                 }
+                input.close();
+            } catch (IOException e) {
+                log.log(Level.INFO, "Problem while finding if TF2 is running", e);
             }
-            input.close();
-        } catch (IOException e) {
-            log.log(Level.INFO, "[tasklist] Problem while finding if TF2 is running", e);
         }
-        return found;
+        log.finer("TF2 process not detected");
+        return false;
     }
 
     private void regedit(String key, String value, String content) {
@@ -84,11 +94,16 @@ public class CLWindows extends CommandLine {
             log.log(Level.INFO, "", e);
         }
 
-        if (mode == 0)
-            return result.substring(result.lastIndexOf("0x") + 2,
-                    result.indexOf('\n', result.lastIndexOf("0x")));
-        return result.substring(result.lastIndexOf(":") - 1,
-                result.indexOf('\n', result.lastIndexOf(":")));
+        try {
+            if (mode == 0) {
+                return result.substring(result.lastIndexOf("0x") + 2,
+                        result.indexOf('\n', result.lastIndexOf("0x")));
+            }
+            return result.substring(result.lastIndexOf(":") - 1,
+                    result.indexOf('\n', result.lastIndexOf(":")));
+        } catch (IndexOutOfBoundsException e) {
+            return "98";
+        }
     }
 
     @Override
@@ -109,6 +124,69 @@ public class CLWindows extends CommandLine {
         } catch (IOException | InterruptedException e) {
             // fallback to Java desktop API
             super.openFolder(dir);
+        }
+    }
+
+    private void closeHandle(String pid, String handle) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", "-c", handle, "-p", pid,
+                    "-y");
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            int count = 0;
+            while ((line = input.readLine()) != null) {
+                if (count > 7) {
+                    log.info("[handle] " + line);
+                }
+                count++;
+            }
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.log(Level.INFO, "", e);
+        }
+    }
+
+    @Override
+    public void closeHandles(Path path) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", path.toString());
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            int count = 0;
+            while ((line = input.readLine()) != null) {
+                if (count > 4) {
+                    String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
+                    if (columns.length == 4) {
+                        log.info("[handle] Closing handle " + columns[3] + " opened by "
+                                + columns[0]);
+                        closeHandle(columns[1], columns[2]);
+                    } else {
+                        log.info("[handle] " + line);
+                    }
+                }
+                count++;
+            }
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.log(Level.INFO, "", e);
+        }
+    }
+
+    @Override
+    public void delete(Path path) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("del", "/f", "/s", "/q", "/a", path.toString());
+            Process pr = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                log.info("[delete] " + line);
+            }
+            pr.waitFor();
+        } catch (InterruptedException | IOException e) {
+            log.log(Level.INFO, "", e);
         }
     }
 }

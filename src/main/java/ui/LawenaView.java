@@ -78,7 +78,7 @@ public class LawenaView extends JFrame {
             new SwingWorker<Void, Void>() {
                 protected Void doInBackground() throws Exception {
                     try {
-                        String url = "https://github.com/iabarca/lawena-recording-tool/commits/master";
+                        String url = "https://github.com/iabarca/lawena-recording-tool/releases";
                         Desktop.getDesktop().browse(new URI(url));
                     } catch (IOException | URISyntaxException e1) {
                         log.log(Level.INFO, "Could not open URL", e1);
@@ -211,6 +211,7 @@ public class LawenaView extends JFrame {
     private JButton btnRenameProfile;
     private JPanel panel_1;
     private JTabbedPane sideTabbedPane;
+    private JCheckBox usePlayerModel;
 
     /**
      * Create the frame.
@@ -604,6 +605,15 @@ public class LawenaView extends JFrame {
         gbc_chckbxUseHudMin.gridy = 3;
         panelCheckboxes.add(useHudMinmode, gbc_chckbxUseHudMin);
 
+        usePlayerModel = new JCheckBox("Use Player Model in HUD");
+        usePlayerModel
+                .setToolTipText("<html>Use player model in player class HUD, selecting this option<br>will add \"cl_hud_playerclass_use_playermodel 1\" to the config.<br>This option is useful if you use Custom HUDs.");
+        GridBagConstraints gbc_chckbxUsePlayerModel = new GridBagConstraints();
+        gbc_chckbxUsePlayerModel.anchor = GridBagConstraints.WEST;
+        gbc_chckbxUsePlayerModel.gridx = 1;
+        gbc_chckbxUsePlayerModel.gridy = 3;
+        panelCheckboxes.add(usePlayerModel, gbc_chckbxUsePlayerModel);
+
         panelBottomRight = new JPanel();
         FlowLayout fl_panelBottomRight = (FlowLayout) panelBottomRight.getLayout();
         fl_panelBottomRight.setVgap(0);
@@ -921,5 +931,9 @@ public class LawenaView extends JFrame {
 
     public JTabbedPane getSideTabbedPane() {
         return sideTabbedPane;
+    }
+
+    public JCheckBox getUsePlayerModel() {
+        return usePlayerModel;
     }
 }

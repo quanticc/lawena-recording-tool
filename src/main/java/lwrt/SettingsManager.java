@@ -51,6 +51,7 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
         SteamCloud(false),
         Condebug(true),
         HudMinmode(true),
+        HudPlayerModel(false),
         Particles(""),
         LogConsoleLevel("ALL"),
         LogFileLevel("FINE"),
@@ -172,10 +173,10 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
             }
         }
         log.finer(profiles.toString());
-//        while (profiles.contains(name)) {
-//            name = name.replaceAll("^(.*-)([0-9]+)$", "\\1" + counter++);
-//            log.finer("Attempting to create profile with name: " + name);
-//        }
+        // while (profiles.contains(name)) {
+        // name = name.replaceAll("^(.*-)([0-9]+)$", "\\1" + counter++);
+        // log.finer("Attempting to create profile with name: " + name);
+        // }
         addProfile(name);
         log.fine("Created profile: " + name);
         storeProfile(name);
@@ -397,6 +398,9 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
         settings.println("volume 0.5");
         settings.println("hud_fastswitch 1");
         settings.println("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
+        settings.println("cl_hud_playerclass_playermodel_showed_confirm_dialog 1");
+        settings.println("cl_hud_playerclass_use_playermodel " + (getHudPlayerModel() ? "1" : "0"));
+        settings.println("tf_training_has_prompted_for_loadout 1");
         settings.close();
 
         boolean playdemo = (demoname != null && !demoname.isEmpty());
@@ -594,6 +598,10 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
         setBoolean(Key.KillStreaks, value);
     }
 
+    public void setHudPlayerModel(boolean value) {
+        setBoolean(Key.HudPlayerModel, value);
+    }
+
     // Getters
 
     public int getHeight() {
@@ -734,6 +742,10 @@ public class SettingsManager extends DefaultComboBoxModel<String> {
 
     public boolean getKillStreaks() {
         return getBoolean(Key.KillStreaks);
+    }
+
+    public boolean getHudPlayerModel() {
+        return getBoolean(Key.HudPlayerModel);
     }
 
 }
