@@ -9,6 +9,7 @@
 *.log
 cfg/mov/*.cfg
 target/
+custom/*
 version.txt
 skybox/
 *.lck
