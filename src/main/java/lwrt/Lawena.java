@@ -1075,6 +1075,7 @@ public class Lawena {
         }
         view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
         view.getDisableCombatText().setSelected(!settings.getCombattext());
+        view.getDisableHealingNumbers().setSelected(!settings.getHealingText());
         view.getDisableCrosshair().setSelected(!settings.getCrosshair());
         view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
         view.getDisableHitSounds().setSelected(!settings.getHitsounds());
@@ -1104,6 +1105,7 @@ public class Lawena {
                 view.getCmbQuality().getSelectedIndex()));
         settings.setMotionBlur(view.getEnableMotionBlur().isSelected());
         settings.setCombattext(!view.getDisableCombatText().isSelected());
+        settings.setHealingText(!view.getDisableHealingNumbers().isSelected());
         settings.setCrosshair(!view.getDisableCrosshair().isSelected());
         settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
         settings.setHitsounds(!view.getDisableHitSounds().isSelected());
