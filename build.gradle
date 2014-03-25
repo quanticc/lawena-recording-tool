@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'eclipse'
 
 mainClassName = 'ui.LwrtGUI'
 
@@ -9,6 +10,26 @@ sourceSets {
             exclude '**/*.db'
         }
     }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'org.swinglabs.swingx:swingx-core:1.6.5-1'
+    compile 'org.swinglabs.swingx:swingx-autocomplete:1.6.5-1'
+    compile 'org.swinglabs.swingx:swingx-common:1.6.5-1'
+    compile 'org.swinglabs.swingx:swingx-action:1.6.5-1'
+    compile 'org.swinglabs.swingx:swingx-plaf:1.6.5-1'
+    compile 'org.swinglabs.swingx:swingx-graphics:1.6.5-1'
+    compile 'org.swinglabs.swingx:swingx-painters:1.6.5-1'
+    testCompile 'junit:junit:4.10'
+}
+
+test {
+    testLogging.showStandardStreams = true
 }
 
 new ByteArrayOutputStream().withStream { execOS ->

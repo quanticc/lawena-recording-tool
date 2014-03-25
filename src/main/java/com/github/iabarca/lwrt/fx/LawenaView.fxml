@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.iabarca.lwrt.fx.LawenaController">
+<center><TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+  <tabs>
+    <Tab text="Settings">
+<content>
+<SplitPane>
+<items><Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
+  <panes>
+    <TitledPane text="Launch Options">
+<content>
+<ScrollPane>
+<content><GridPane hgap="5.0">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" />
+    <ColumnConstraints hgrow="SOMETIMES" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+<children><Label text="Resolution:" /><ComboBox editable="true" prefWidth="150.0" GridPane.columnIndex="1" /><Label text="DirectX Level:" GridPane.rowIndex="1" /><ChoiceBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+</children>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding>
+</GridPane>
+</content>
+</ScrollPane>
+</content>
+    </TitledPane>
+    <TitledPane text="Recording Options">
+<content>
+<ScrollPane>
+<content><GridPane hgap="5.0">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" />
+    <ColumnConstraints hgrow="SOMETIMES" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+<children><Label text="Recording Frame Rate:" /><ComboBox editable="true" prefWidth="150.0" GridPane.columnIndex="1" /><Label text="Viewmodels:" GridPane.rowIndex="1" /><ChoiceBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" /><Label text="Viewmodel FOV:" GridPane.rowIndex="2" /><TextField GridPane.columnIndex="1" GridPane.rowIndex="2" />
+</children>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding>
+</GridPane>
+</content>
+</ScrollPane>
+</content>
+    </TitledPane>
+    <TitledPane text="Game Options">
+<content>
+<ScrollPane>
+<content><GridPane>
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+</GridPane>
+</content>
+</ScrollPane>
+</content>
+    </TitledPane>
+  </panes>
+</Accordion><TitledPane animated="false" collapsible="false" prefHeight="625.0" prefWidth="636.0" text="Custom Content">
+<content><BorderPane>
+<bottom><HBox BorderPane.alignment="CENTER">
+<children><Button mnemonicParsing="false" text="Paths..." />
+</children>
+<BorderPane.margin>
+<Insets />
+</BorderPane.margin></HBox>
+</bottom>
+<center><TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+  <columns>
+    <TableColumn prefWidth="75.0" text="C1" />
+    <TableColumn prefWidth="75.0" text="C2" />
+  </columns>
+<BorderPane.margin>
+<Insets bottom="5.0" />
+</BorderPane.margin>
+</TableView>
+</center></BorderPane>
+</content>
+</TitledPane>
+</items>
+</SplitPane>
+</content>
+    </Tab>
+    <Tab text="Custom">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+      </content>
+    </Tab>
+  </tabs>
+</TabPane>
+</center>
+<bottom><AnchorPane layoutX="-13.0" layoutY="-100.0" BorderPane.alignment="CENTER">
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding>
+<children><Button alignment="CENTER_RIGHT" mnemonicParsing="false" text="Launch Game" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+</children></AnchorPane>
+</bottom>
+<top><AnchorPane BorderPane.alignment="CENTER">
+<children><HBox>
+<children><MenuButton mnemonicParsing="false" text="Lawena">
+  <items>
+    <MenuItem mnemonicParsing="false" text="Action 1" />
+    <MenuItem mnemonicParsing="false" text="Action 2" />
+  </items>
+</MenuButton>
+</children>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding></HBox><HBox spacing="5.0" AnchorPane.rightAnchor="0.0">
+<children><ChoiceBox prefWidth="150.0" /><Button mnemonicParsing="false" text="Profiles..." />
+</children>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding></HBox>
+</children></AnchorPane>
+</top></BorderPane>

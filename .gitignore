@@ -11,6 +11,7 @@ cfg/mov/*.cfg
 target/
 version.txt
 skybox/
+custom/*
 *.lck
 
 # NetBeans #
@@ -62,3 +63,4 @@ Icon
 !.gitignore
 !.travis.yml
 *~
+/bin
