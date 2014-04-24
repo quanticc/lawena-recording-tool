@@ -1,19 +1,18 @@
-
 package util;
 
 public class LawenaException extends Exception {
 
-    /**
+  /**
      * 
      */
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    public LawenaException(String msg) {
-        super(msg);
-    }
+  public LawenaException(String msg) {
+    super(msg);
+  }
 
-    public LawenaException(String msg, Throwable t) {
-        super(msg, t);
-    }
+  public LawenaException(String msg, Throwable t) {
+    super(msg, t);
+  }
 
 }

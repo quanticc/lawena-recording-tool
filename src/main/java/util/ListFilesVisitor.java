@@ -1,4 +1,3 @@
-
 package util;
 
 import java.io.IOException;
@@ -11,28 +10,28 @@ import java.util.List;
 
 public class ListFilesVisitor extends SimpleFileVisitor<Path> {
 
-    private List<String> files = new ArrayList<>();
-    private Path start;
+  private List<String> files = new ArrayList<>();
+  private Path start;
 
-    public ListFilesVisitor(Path start) {
-        this.start = start;
-    }
+  public ListFilesVisitor(Path start) {
+    this.start = start;
+  }
 
-    public List<String> getFiles() {
-        return files;
-    }
+  public List<String> getFiles() {
+    return files;
+  }
 
-    @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        String str = start.toAbsolutePath().relativize(file.toAbsolutePath()).toString()
-                .replace('\\', '/');
-        files.add(str);
-        return FileVisitResult.CONTINUE;
-    }
+  @Override
+  public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+    String str =
+        start.toAbsolutePath().relativize(file.toAbsolutePath()).toString().replace('\\', '/');
+    files.add(str);
+    return FileVisitResult.CONTINUE;
+  }
 
-    @Override
-    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-        return FileVisitResult.TERMINATE;
-    }
+  @Override
+  public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+    return FileVisitResult.TERMINATE;
+  }
 
 }
