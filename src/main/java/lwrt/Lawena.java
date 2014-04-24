@@ -491,21 +491,16 @@ public class Lawena {
     private static StartTfTask startTfTask = null;
     private static ClearMoviesTask clearMoviesTask = null;
 
-    private static ImageIcon createPreviewIcon(String imageName) {
+    private static ImageIcon createPreviewIcon(String imageName) throws IOException {
         int size = 96;
         BufferedImage image;
         File input = new File(imageName);
         image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-        try {
-            image.createGraphics()
-                    .drawImage(
-                            ImageIO.read(input).getScaledInstance(size, size, Image.SCALE_SMOOTH),
-                            0, 0, null);
-            return new ImageIcon(image);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        image.createGraphics()
+                .drawImage(
+                        ImageIO.read(input).getScaledInstance(size, size, Image.SCALE_SMOOTH),
+                        0, 0, null);
+        return new ImageIcon(image);
     }
 
     private static void registerValidation(JComboBox<String> combo, final String validationRegex,
@@ -1151,23 +1146,24 @@ public class Lawena {
             } catch (IOException e) {
                 log.log(Level.INFO, "Problem while loading skyboxes", e);
             }
-        }
-        Path vpk = Paths.get("custom/skybox.vpk");
-        if (Files.exists(vpk)) {
-            log.finer("Searching for skyboxes in " + vpk);
-            for (String file : cl.getVpkContents(settings.getTfPath(), vpk)) {
-                if (file.endsWith("up.vtf")) {
-                    log.finer("[skybox.vpk] Skybox found at: " + file);
-                    String skybox = file;
-                    skybox = skybox.substring(0, skybox.indexOf("up.vtf"));
-                    if (!data.contains(skybox)) {
-                        data.add(skybox);
-                    } else {
-                        log.finer("Not adding because it already exists: " + skybox);
-                    }
-                }
-            }
-        }
+        }        
+        // Path deprecated in favor of skybox folder inside lwrtresources.jar after 4.0.10-7
+//        Path vpk = Paths.get("custom/skybox.vpk");
+//        if (Files.exists(vpk)) {
+//            log.finer("Searching for skyboxes in " + vpk);
+//            for (String file : cl.getVpkContents(settings.getTfPath(), vpk)) {
+//                if (file.endsWith("up.vtf")) {
+//                    log.finer("[skybox.vpk] Skybox found at: " + file);
+//                    String skybox = file;
+//                    skybox = skybox.substring(0, skybox.indexOf("up.vtf"));
+//                    if (!data.contains(skybox)) {
+//                        data.add(skybox);
+//                    } else {
+//                        log.finer("Not adding because it already exists: " + skybox);
+//                    }
+//                }
+//            }
+//        }
         skyboxMap = new HashMap<>(data.size());
         new SkyboxPreviewTask(new ArrayList<>(data)).execute();
         data.add(0, (String) Key.Skybox.defValue());

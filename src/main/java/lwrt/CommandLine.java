@@ -140,7 +140,9 @@ public abstract class CommandLine {
      * @param files The filenames included in the VPK that might be extracted
      * @throws IOException If an error occurred while creating the destination
      *             folder
+     * @deprecated VPK utility might crash so this method is not completely reliable.
      */
+    @Deprecated
     public void extractIfNeeded(Path tfpath, String vpkname, Path dest, Iterable<String> files)
             throws IOException {
         List<String> fileList = new ArrayList<>();
