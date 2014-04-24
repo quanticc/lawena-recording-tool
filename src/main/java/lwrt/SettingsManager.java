@@ -38,7 +38,6 @@ public class SettingsManager {
         Crosshair(false),
         CrosshairSwitch(false),
         CombatText(false),
-        HealingText(false),
         Hitsounds(false),
         Voice(false),
         SteamCloud(false),
@@ -202,7 +201,7 @@ public class SettingsManager {
         settings.println((crosshairswitch ? "//" : "") + "lockcrosshair");
         settings.println("crosshair " + (getCrosshair() ? "1" : "0"));
         settings.println("hud_combattext " + (getCombattext() ? "1" : "0"));
-        settings.println("hud_combattext_healing " + (getHealingText() ? "1" : "0"));
+        settings.println("hud_combattext_healing " + (getCombattext() ? "1" : "0"));
         settings.println("tf_dingalingaling " + (getHitsounds() ? "1" : "0"));
         settings.println("voice_enable " + (getVoice() ? "1" : "0"));
         settings.println("alias voice_enable \"\"");
@@ -312,10 +311,6 @@ public class SettingsManager {
 
     public void setCombattext(boolean value) {
         setBoolean(Key.CombatText, value);
-    }
-    
-    public void setHealingText(boolean value) {
-    	setBoolean(Key.HealingText, value);
     }
 
     public void setHitsounds(boolean value) {
@@ -451,10 +446,6 @@ public class SettingsManager {
 
     public boolean getCombattext() {
         return getBoolean(Key.CombatText);
-    }
-    
-    public boolean getHealingText() {
-    	return getBoolean(Key.HealingText);
     }
 
     public boolean getHitsounds() {
