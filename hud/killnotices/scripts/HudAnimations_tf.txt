@@ -229,8 +229,6 @@ event HudHealthDyingPulse
 {
 	Animate	PlayerStatusHealthBonusImage 	Alpha		"255"		Linear 0.0 0.075
 	Animate	PlayerStatusHealthBonusImage 	Alpha		"0"			Linear 0.125 0.075
-
-	Animate	PlayerStatusHealthValue	FgColor		"TanLight"			Linear 0.0 0.0
 	
 	RunEvent HudHealthDyingPulseLoop	0.25
 }
@@ -245,9 +243,6 @@ event HudHealthDyingPulseStop
 {
 	StopEvent HudHealthDyingPulse 0.0
 	StopEvent HudHealthDyingPulseLoop 0.0
-
-	Animate	PlayerStatusHealthValue	FgColor		"TanDark"			Linear 0.0 0.0
-
 }
 
 //===========================================
@@ -274,15 +269,15 @@ event HudLowAmmoPulseStop
 
 //===========================================
 
-//event ControlPointIconShrink
-//{
-//	Animate HudControlPointIcons icon_expand "0" Linear 0.0 0.2
-//}
+event ControlPointIconShrink
+{
+	Animate HudControlPointIcons icon_expand "0" Linear 0.0 0.2
+}
 
-//event ControlPointIconGrow
-//{
-//	Animate HudControlPointIcons icon_expand "4" Linear 0.0 0.2
-//}
+event ControlPointIconGrow
+{
+	Animate HudControlPointIcons icon_expand "4" Linear 0.0 0.2
+}
 
 // Metal Account
 
@@ -384,6 +379,30 @@ event HudSnapShotReminderIn
 	Animate ScreenshotPanel		Position	"c-83 13"	Spline 0.001 0.2
 }
 
+event HudReplayReminderIn	// Places the replay reminder in the same place as the snapshot reminder
+{
+	Animate ReplayReminder		Position	"c-83 -50"	Linear 0.0 0.001
+	Animate ReplayReminder		Position	"c-83 13"	Spline 0.001 0.2
+}
+
+event HudReplayReminderIn2	// Puts the panel below the snapshot panel
+{
+	Animate ReplayReminder		Position	"c-83 -50"	Linear 0.0 0.001
+	Animate ReplayReminder		Position	"c-83 53"	Spline 0.001 0.2
+}
+
+event HudReplayTipIn
+{
+	Animate ReplayTip			Position	"10 -100"	Linear 0.0 0.001
+	Animate ReplayTip			Position	"10 6"		Spline 0.001 0.1
+}
+
+event HudReplayTipOut
+{
+	Animate ReplayTip			Position	"10 6"		Linear 0.0 0.001
+	Animate ReplayTip			Position	"10 -100"	Spline 0.001 0.1
+}
+
 event HudTournamentSetupPanelOpen
 {
 	Animate HudTournamentSetup	Position	"c-90 -70"	Linear 0.0 0.001
@@ -403,13 +422,13 @@ event HudTournamentSetupPanelClose
 
 event HudMedicCharged
 {
-	Animate	ChargeLabel 	FgColor		"255 255 255 255"		Linear 0.0 0.1
-	Animate	ChargeLabel 	FgColor		"86 83 82 255"		Linear 0.3 0.4
+	Animate	ChargeLabel 	FgColor		"TanLight"		Linear 0.0 0.1
+	Animate	ChargeLabel 	FgColor		"TanDarker"		Linear 0.3 0.4
 	
-	Animate	ChargeMeter 	FgColor		"255 255 255 255"		Linear 0.0 0.1
-	Animate	ChargeMeter 	FgColor		"86 83 82 255"		Linear 0.3 0.4
+	Animate	ChargeMeter 	FgColor		"TanLight"		Linear 0.0 0.1
+	Animate	ChargeMeter 	FgColor		"TanDarker"		Linear 0.3 0.4
 
-	RunEvent HudMedicChargedStop	0.6
+	RunEvent HudMedicChargedLoop	0.6
 }
 
 // call to loop HudHealthBonusPulse
@@ -423,8 +442,8 @@ event HudMedicChargedStop
 	StopEvent HudMedicCharged 0.0
 	StopEvent HudMedicChargedLoop 0.0
 	
-	Animate	ChargeLabel 	FgColor		"255 255 255 255"		Linear 0.0 0.0001
-	Animate	ChargeMeter 	FgColor		"255 255 255 255"		Linear 0.0 0.0001
+	Animate	ChargeLabel 	FgColor		"TanLight"		Linear 0.0 0.0001
+	Animate	ChargeMeter 	FgColor		"TanLight"		Linear 0.0 0.0001
 }
 
 //====================================
@@ -592,18 +611,48 @@ event IntroMovieContinueBlinkStop
 
 //===========================================
 
+event HasMOTDBlink
+{
+	Animate	MOTD_ShowButtonPanel_SB 	Alpha		"255"		Linear 0.0 0.1
+	Animate	MOTD_ShowButtonPanel_SB 	Alpha		"0"			Linear 0.2 0.1
+		
+	Animate	MOTD_ShowButtonPanel_SB 	Alpha		"255"		Linear 0.4 0.1
+	Animate	MOTD_ShowButtonPanel_SB 	Alpha		"0"			Linear 0.6 0.1
+	
+	Animate	MOTD_ShowButtonPanel_SB 	Alpha		"255"		Linear 0.8 0.1
+	Animate	MOTD_ShowButtonPanel_SB 	Alpha		"0"			Linear 1.0 0.1
+	
+	Animate	MOTD_ShowButtonPanel_SB 	Alpha		"255"		Linear 1.2 0.1
+
+	RunEvent HasMOTDBlinkLoop		2.0
+}
+
+event HasMOTDBlinkLoop
+{
+	RunEvent HasMOTDBlink			0.0
+}
+
+event HasMOTDBlinkStop
+{
+	StopEvent HasMOTDBlink				0.0
+	StopEvent HasMOTDBlinkLoop 		0.0
+	Animate	MOTD_ShowButtonPanel_SB 	Alpha		"255"		Linear 0.0 0.1
+}
+
+//===========================================
+
 event HasNotificationsBlink
 {
-	Animate	NotificationsShowButton 	Alpha		"255"		Linear 0.0 0.1
-	Animate	NotificationsShowButton 	Alpha		"0"			Linear 0.2 0.1
+	Animate	Notifications_ShowButtonPanel_SB 	Alpha		"255"		Linear 0.0 0.1
+	Animate	Notifications_ShowButtonPanel_SB 	Alpha		"0"			Linear 0.2 0.1
 		
-	Animate	NotificationsShowButton 	Alpha		"255"		Linear 0.4 0.1
-	Animate	NotificationsShowButton 	Alpha		"0"			Linear 0.6 0.1
+	Animate	Notifications_ShowButtonPanel_SB 	Alpha		"255"		Linear 0.4 0.1
+	Animate	Notifications_ShowButtonPanel_SB 	Alpha		"0"			Linear 0.6 0.1
 	
-	Animate	NotificationsShowButton 	Alpha		"255"		Linear 0.8 0.1
-	Animate	NotificationsShowButton 	Alpha		"0"			Linear 1.0 0.1
+	Animate	Notifications_ShowButtonPanel_SB 	Alpha		"255"		Linear 0.8 0.1
+	Animate	Notifications_ShowButtonPanel_SB 	Alpha		"0"			Linear 1.0 0.1
 	
-	Animate	NotificationsShowButton 	Alpha		"255"		Linear 1.2 0.1
+	Animate	Notifications_ShowButtonPanel_SB 	Alpha		"255"		Linear 1.2 0.1
 
 	RunEvent HasNotificationsBlinkLoop		2.0
 }
@@ -617,7 +666,7 @@ event HasNotificationsBlinkStop
 {
 	StopEvent HasNotificationsBlink				0.0
 	StopEvent HasNotificationsBlinkLoop 		0.0
-	Animate	NotificationsShowButton 	Alpha		"255"		Linear 0.0 0.1
+	Animate	Notifications_ShowButtonPanel_SB 	Alpha		"255"		Linear 0.0 0.1
 }
 
 //===========================================
@@ -671,3 +720,99 @@ event NotificationsPresentBlinkStop
 	StopEvent NotificationsPresentBlinkLoop 		0.0
 	Animate	NotificationsPresentPanel 	Alpha		"255"		Linear 0.0 0.1
 }
+
+//===========================================
+
+event DamagedPlayer
+{
+	// empty
+}
+
+//===========================================
+
+event SpyWarningFlash
+{
+	Animate	EnemyCountImageBG	BgColor	"RedSolid"		Linear 0.0 0.01
+	Animate	EnemyCountImageBG	BgColor	"TanLight"		Linear 0.21 0.01
+	
+	RunEvent	SpyWarningFlashLoop		0.42
+}
+
+event SpyWarningFlashLoop
+{
+	RunEvent SpyWarningFlash			0.0
+}
+ 
+event SpyWarningFlashEnd
+{
+	StopEvent SpyWarningFlash			0.0
+	StopEvent SpyWarningFlashLoop		0.0
+}
+
+event HudReadyPulse
+{
+	Animate	TournamentInstructionsLabel 	FgColor		"TanLight"		Linear 0.0 0.1
+	Animate	TournamentInstructionsLabel 	FgColor		"RedSolid"		Linear 0.3 0.4
+
+	RunEvent HudReadyPulseLoop	0.5
+}
+
+event HudReadyPulseLoop
+{
+	RunEvent HudReadyPulse			0.0
+}
+
+event HudReadyPulseEnd
+{
+	Animate	TournamentInstructionsLabel 	FgColor		"TanLight"		Linear 0.0 0.1
+	
+	StopEvent HudReadyPulse			0.0
+	StopEvent HudReadyPulseLoop		0.0
+}
+
+// Respec in Win
+event RespecEarnedPulse
+{
+	Animate	RespecTextLabelWin	FgColor	"TanLight"		Linear 0.0 0.1
+	Animate	RespecTextLabelWin	FgColor	"RedSolid"		Linear 0.3 0.4
+	
+	RunEvent RespecEarnedPulseLoop		0.5
+}
+
+event RespecEarnedPulseLoop
+{
+	RunEvent RespecEarnedPulse			0.0
+}
+
+event RespecEarnedPulseEnd
+{
+	Animate	RespecTextLabelWin 	FgColor		"TanLight"		Linear 0.0 0.1
+	
+	StopEvent RespecEarnedPulse			0.0
+	StopEvent RespecEarnedPulseLoop		0.0
+}
+
+// Respec on Loss
+event RespecEarnedPulseLoss
+{
+	Animate	RespecTextLabelLoss	FgColor	"TanLight"		Linear 0.0 0.1
+	Animate	RespecTextLabelLoss	FgColor	"RedSolid"		Linear 0.3 0.4
+	
+	RunEvent RespecEarnedPulseLoopLoss		0.5
+}
+
+event RespecEarnedPulseLoopLoss
+{
+	RunEvent RespecEarnedPulseLoss			0.0
+}
+
+event RespecEarnedPulseEndLoss
+{
+	Animate	RespecTextLabelLoss FgColor		"TanLight"		Linear 0.0 0.1
+	Animate	RespecTextLabelLoss FgColor		"TanLight"		Linear 0.0 0.1
+	
+	StopEvent RespecEarnedPulseLoss		0.0
+	StopEvent RespecEarnedPulseLoopLoss	0.0
+}
+
+//

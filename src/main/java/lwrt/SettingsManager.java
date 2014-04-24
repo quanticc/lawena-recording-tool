@@ -29,7 +29,7 @@ public class SettingsManager {
         Height(720, 360, Integer.MAX_VALUE),
         Framerate(120, 24, Integer.MAX_VALUE),
         DxLevel("98", "80", "81", "90", "95", "98"),
-        Hud("medic", "killnotices", "medic", "full", "default", "custom"),
+        Hud("medic", "killnotices", "medic", "default", "custom"),
         Skybox("Default"),
         CustomResources("no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"),
         ViewmodelSwitch("on", "on", "off", "default"),
