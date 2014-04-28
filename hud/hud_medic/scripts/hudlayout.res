@@ -1118,9 +1118,9 @@
 		"visible"				"1"
 		"enabled"				"1"
 		"xpos"					"c-320"
-		"ypos"					"300"
-		"wide"					"640"
-		"tall"					"100"
+		"ypos"					"r-100"
+		"wide"					"0"
+		"tall"					"0"
 	}
 
 	AchievementNotificationPanel	
