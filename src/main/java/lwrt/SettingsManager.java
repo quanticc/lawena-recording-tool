@@ -198,6 +198,7 @@ public class SettingsManager {
     settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_scale 32");
     settings.println((crosshairswitch ? "//" : "") + "cl_crosshairalpha 200");
     settings.println((crosshairswitch ? "//" : "") + "lockcrosshair");
+    settings.println((crosshairswitch ? "//" : "") + "alias toggle \"\"");
     settings.println("crosshair " + (getCrosshair() ? "1" : "0"));
     settings.println("hud_combattext " + (getCombattext() ? "1" : "0"));
     settings.println("hud_combattext_healing " + (getCombattext() ? "1" : "0"));
