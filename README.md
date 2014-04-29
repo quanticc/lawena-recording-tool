@@ -1,4 +1,4 @@
-lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.png)](https://travis-ci.org/iabarca/lawena-recording-tool)
+Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.png)](https://travis-ci.org/iabarca/lawena-recording-tool)
 =====================
 
 A simple [Java 7](http://www.java.com/download/) tool which greatly enhances your TF2 image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.
@@ -8,6 +8,7 @@ Easy-to-use and no install required. This tool does not interfere with your regu
 #### Download lawena
 - Get the [Launcher](http://code.google.com/p/lawenarecordingtool/downloads/detail?name=lawena-recording-tool.v4.zip)
 - Extract to any folder and run **lawena.exe**, the launcher will get all the required files and then start the tool.
+- You can also download this repository and execute via batch file, but you'll miss out on auto-updating features.
 
 #### Features
 - Insane max quality graphics configuration. 
@@ -37,7 +38,7 @@ Easy-to-use and no install required. This tool does not interfere with your regu
 - Original project by Montz at [Google Code](http://code.google.com/p/lawenarecordingtool/)
 - Current maintainer: [Quantic](http://steamcommunity.com/id/thepropane)
 - Graphical .cfg files based on those made by Chris Down.
-- HUDs based on broesel's Medic Movie HUD, m0rehud and Barrakketh's PVHUD.
+- Built-in Killnotices and Medic HUD made by [mih](http://steamcommunity.com/profiles/76561198023136325) [[repo](https://github.com/Kuw/recordinghuds)]
 - Skyboxes made by komaokc from GameBanana.
 - Includes some content used in PLDX recording tool.
 - Valve - Team Fortress and Team Fortress logo.

@@ -32,24 +32,25 @@ lawena Recording Tool
    * R - Enables/disables ragdolls
    * UP ARROW - Increases the recording frame rate
    * DOWN ARROW - Decreases the recording frame rate
-   * P - Starts recording a series of .tga files and their respective .wav file. Each series is named XY_ where X is a letter and Y is a number between 1 and 15
+   * P - Starts recording a series of .tga files and their respective .wav file.
+     Each series is named XY_ where X is a letter and Y is a number between 1 and 15
    * Numpad Plus - Switch to third person
    * Numpad Minus - Switch back to first person
-   * Numpad 2 - Back view (only in third person)
-   * Numpad 8 - Front view (only in third person)
-   * Numpad 5 - Toggle camera distance (only in third person)
-   * Numpad 0 - Toggle camera pitch (only in third person)
-   * Numpad 1 - Back-Left view (only in third person)
-   * Numpad 4 - Left view (only in third person)
-   * Numpad 7 - Front-Left view (only in third person)
-   * Numpad 3 - Back-Right view (only in third person)
-   * Numpad 6 - Right view (only in third person)
-   * Numpad 9 - Front-Right view (only in third person) 
+   * Numpad 2 - Back view
+   * Numpad 8 - Front view
+   * Numpad 5 - Toggle camera distance
+   * Numpad 0 - Toggle camera pitch
+   * Numpad 1 - Back-Left view
+   * Numpad 4 - Left view
+   * Numpad 7 - Front-Left view
+   * Numpad 3 - Back-Right view
+   * Numpad 6 - Right view
+   * Numpad 9 - Front-Right view
 
 Credits and Thanks
 
    * Montz - original lawena developer.
    * Chris Down - configs.
-   * Broesel, m0re, povohat and Barrakketh - HUDs.
+   * mih - HUDs.
    * Komaokc - skyboxes.
 

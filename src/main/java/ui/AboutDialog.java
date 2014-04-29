@@ -100,13 +100,11 @@ public class AboutDialog extends JDialog {
     ((HTMLDocument) aboutTextPane.getDocument()).getStyleSheet().addRule(style);
     aboutTextPane
         .setText("Simple Team Fortress 2 (TF2) Recording Tool<br>"
-            + "Copyright 2011-2013 Montz, Quantic, contributors and others<br>"
+            + "Copyright 2011-2014 Montz, Quantic, contributors and others<br>"
             + "<a href=\"http://code.google.com/p/lawenarecordingtool/\">http://code.google.com/p/lawenarecordingtool/</a><br><br>"
             + "Lawena is free software; you can redistribute it and/or modify it under the terms of the <a href=\"https://github.com/iabarca/lawena-recording-tool/blob/master/LICENSE.txt\">GNU GPLv3</a>.<br>"
             + "Graphical .cfg files are almost entirely based on <a href=\"http://chrisdown.name/tf2/\">Chris' maxquality config</a>, with very slight tweaks.<br>"
-            + "Built-in HUDs are mostly based on broesel's <a href=\"http://code.google.com/p/broeselhud/downloads/detail?name=broesel%27s%20Medic%20Movie-HUD.zip\">Medic Movie-HUD</a> and his continuation of m0rehud,<br>"
-            + "Some HUD elements borrowed, some modified, some disabled altogether.<br>"
-            + "Some things borrowed from Barrakketh's continuation of <a href=\"http://ozfortress.com/showthread.php?t=42719\">PVHUD</a>.<br>"
+            + "Built-in Killnotices and Medic HUD were made by <a href=\"http://steamcommunity.com/profiles/76561198023136325\">mih</a>. Thanks! <3<br>"
             + "Most Skyboxes are from GameBanana, made by <a href=\"http://gamebanana.com/members/submissions/textures/289553\">komaokc</a>, and the rest are from the PLDX recording tool.<br>"
             + "Enhanced particles included are also from PLDX recording tool.<br>"
             + "Self-Updating mechanism is possible thanks to <a href=\"http://code.google.com/p/getdown/\">Getdown</a>, developed by Third Rings Design, Inc.<br>"
