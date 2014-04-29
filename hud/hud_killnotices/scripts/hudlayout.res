@@ -826,10 +826,10 @@
 	WinPanel
 	{
 		"fieldName"				"WinPanel"
-		"visible"				"1"
-		"enabled"				"1"
+		"visible"				"0"
+		"enabled"				"0"
 		"xpos"					"c-150"
-		"ypos"					"215"
+		"ypos"					"r-310"
 		"wide"					"300"
 		"tall"					"300"
 	}
@@ -840,7 +840,7 @@
 		"visible"				"1"
 		"enabled"				"1"
 		"xpos"					"c-225"
-		"ypos"					"250"
+		"ypos"					"r-250"
 		"wide"					"450"
 		"tall"					"218"
 	}
@@ -874,23 +874,23 @@
 	FreezePanel
 	{
 		"fieldName"				"FreezePanel"
-		"visible"				"1"
-		"enabled"				"1"
+		"visible"				"0"
+		"enabled"				"0"
 		"xpos"					"0"
 		"ypos"					"0"
-		"wide"					"f0"
-		"tall"					"480"
+		"wide"					"0"
+		"tall"					"0"
 	}
 
 	FreezePanelCallout
 	{
 		"fieldName"				"FreezePanelCallout"
-		"visible"				"1"
-		"enabled"				"1"
-		"xpos"					"200"
+		"visible"				"0"
+		"enabled"				""
+		"xpos"					"r-500"
 		"ypos"					"200"
-		"wide"					"100"
-		"tall"					"50"
+		"wide"					"0"
+		"tall"					"0"
 	}
 
 	AnnotationsPanelCallout
@@ -998,26 +998,24 @@
 	HudTeamGoal
 	{
 		"fieldName"				"HudTeamGoal"
-		"visible"				"1"
-		"enabled"				"1"
-		"xpos"					"c-160"
+		"visible"				"0"
+		"enabled"				"0"
+		"xpos"					"r-320"
 		"ypos"					"65"
-		"ypos_lodef"			"75"
-		"wide"					"320"
-		"tall"					"100"
+		"wide"					"0"
+		"tall"					"0"
 	}
 
 
 	HudTeamGoalTournament
 	{
 		"fieldName"				"HudTeamGoalTournament"
-		"visible"				"1"
-		"enabled"				"1"
-		"xpos"					"c-160"
+		"visible"				"0"
+		"enabled"				"0"
+		"xpos"					"r-320"
 		"ypos"					"15"
-		"ypos_lodef"			"75"
-		"wide"					"320"
-		"tall"					"245"
+		"wide"					"0"
+		"tall"					"0"
 	}
 
 	HudTeamSwitch
@@ -1027,8 +1025,6 @@
 		"enabled"				"1"
 		"xpos"					"c-160"
 		"ypos"					"75"
-		"ypos_hidef"				"90"
-		"ypos_lodef"			"90"
 		"wide"					"320"
 		"tall"					"100"
 	}
@@ -1211,12 +1207,12 @@
 	{
 		"fieldName"				"HudInspectPanel"
 		"visible"				"0"
-		"enabled"				"1"
-		"xpos"					"r270"
-		"ypos"					"300"
+		"enabled"				"0"
+		"xpos"					"r-500"
+		"ypos"					"r-500"
 		"zpos"					"10"
-		"wide"					"270"
-		"tall"					"180"
+		"wide"					"0"
+		"tall"					"0"
 	}
 	
 	HudTFCrosshair

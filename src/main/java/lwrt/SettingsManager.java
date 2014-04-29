@@ -220,6 +220,7 @@ public class SettingsManager {
     settings.println("cl_hud_playerclass_use_playermodel " + (getHudPlayerModel() ? "1" : "0"));
     settings.println("tf_training_has_prompted_for_loadout 1");
     settings.println("engine_no_focus_sleep 0");
+    settings.println("cl_spec_carrieditems 0");
     settings.close();
 
     if (demoname != null) {
