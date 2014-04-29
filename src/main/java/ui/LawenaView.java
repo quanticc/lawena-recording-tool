@@ -566,7 +566,7 @@ public class LawenaView extends JFrame {
     gbc_disableCrosshairSwitch.gridy = 2;
     panelCheckboxes.add(disableCrosshairSwitch, gbc_disableCrosshairSwitch);
 
-    useHudMinmode = new JCheckBox("Use HUD Minmode");
+    useHudMinmode = new JCheckBox("Minimal HUD");
     useHudMinmode
         .setToolTipText("<html>The minmode version of a HUD primarily reduces the size of the<br>health and ammo displays, moving them closer to the centre of<br>the screen. Ticking this option will add \"cl_hud_minmode 1\" to<br>the config.");
     GridBagConstraints gbc_chckbxUseHudMin = new GridBagConstraints();
@@ -576,7 +576,7 @@ public class LawenaView extends JFrame {
     gbc_chckbxUseHudMin.gridy = 3;
     panelCheckboxes.add(useHudMinmode, gbc_chckbxUseHudMin);
 
-    usePlayerModel = new JCheckBox("Use Player Model in HUD");
+    usePlayerModel = new JCheckBox("3D Player Model in HUD");
     usePlayerModel
         .setToolTipText("<html>\r\nUse player model in player class HUD, selecting this option<br>\r\nwill add \"cl_hud_playerclass_use_playermodel 1\" to the config.<br>\r\nThis option is useful if you use Custom HUDs.");
     GridBagConstraints gbc_usePlayerModel = new GridBagConstraints();
