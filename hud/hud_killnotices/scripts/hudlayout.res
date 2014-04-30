@@ -948,10 +948,10 @@
 	"HudMenuEngyBuild"
 	{
 		"fieldName" 	"HudMenuEngyBuild"
-		"visible" 		"1"
-		"enabled" 		"1"
+		"visible" 		"0"
+		"enabled" 		"0"
 		"xpos"			"c-225"
-		"ypos"			"c-55"
+		"ypos"			"r-205"
 		"wide"			"450"
 		"tall"			"195"
 		"PaintBackgroundType"	"0"
@@ -960,10 +960,10 @@
 	"HudMenuEngyDestroy"
 	{
 		"fieldName" 	"HudMenuEngyDestroy"
-		"visible" 		"1"
-		"enabled" 		"1"
+		"visible" 		"0"
+		"enabled" 		"0"
 		"xpos"			"c-225"
-		"ypos"			"c-59"
+		"ypos"			"r-400"
 		"wide"			"450"
 		"tall"			"200"
 		"PaintBackgroundType"	"0"
@@ -972,15 +972,12 @@
 	"HudMenuSpyDisguise"
 	{
 		"fieldName" 	"HudMenuSpyDisguise"
-		"visible" 		"1"
-		"enabled" 		"1"
-		"xpos"			"c-235"
-		"ypos"			"c-52"
-		"ypos_hidef"	"c-42"
-		"ypos_lodef"	"c-42"
-		"wide"			"470"
-		"tall"			"200"	[$WIN32]
-		"tall"			"180"	[$X360]
+		"visible" 		"0"
+		"enabled" 		"0"
+		"xpos"			"0"
+		"ypos"			"r-200"
+		"wide"			"400"
+		"tall"			"50"
 		"PaintBackgroundType"	"0"
 	}	
 	
@@ -1291,12 +1288,12 @@
 	"CHudVote"
 	{
 		"fieldName"		"CHudVote"
-		"xpos"			"0"			
+		"xpos"			"r-200"			
 		"ypos"			"0"
-		"wide"			"640"
-		"tall"			"480"
-		"visible"		"1"
-		"enabled"		"1"
+		"wide"			"0"
+		"tall"			"0"
+		"visible"		"0"
+		"enabled"		"0"
 		"bgcolor_override"	"0 0 0 0"
 		"PaintBackgroundType"	"0" // rounded corners
 	}

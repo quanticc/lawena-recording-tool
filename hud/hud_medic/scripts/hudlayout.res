@@ -833,10 +833,10 @@
 	WinPanel
 	{
 		"fieldName"				"WinPanel"
-		"visible"				"1"
-		"enabled"				"1"
+		"visible"				"0"
+		"enabled"				"0"
 		"xpos"					"c-150"
-		"ypos"					"215"
+		"ypos"					"r-310"
 		"wide"					"300"
 		"tall"					"300"
 	}
@@ -881,23 +881,23 @@
 	FreezePanel
 	{
 		"fieldName"				"FreezePanel"
-		"visible"				"1"
-		"enabled"				"1"
+		"visible"				"0"
+		"enabled"				"0"
 		"xpos"					"0"
 		"ypos"					"0"
-		"wide"					"f0"
-		"tall"					"480"
+		"wide"					"0"
+		"tall"					"0"
 	}
 
 	FreezePanelCallout
 	{
 		"fieldName"				"FreezePanelCallout"
-		"visible"				"1"
-		"enabled"				"1"
-		"xpos"					"200"
+		"visible"				"0"
+		"enabled"				""
+		"xpos"					"r-500"
 		"ypos"					"200"
-		"wide"					"100"
-		"tall"					"50"
+		"wide"					"0"
+		"tall"					"0"
 	}
 
 	AnnotationsPanelCallout
@@ -1218,12 +1218,12 @@
 	{
 		"fieldName"				"HudInspectPanel"
 		"visible"				"0"
-		"enabled"				"1"
-		"xpos"					"r270"
-		"ypos"					"300"
+		"enabled"				"0"
+		"xpos"					"r-500"
+		"ypos"					"r-500"
 		"zpos"					"10"
-		"wide"					"270"
-		"tall"					"180"
+		"wide"					"0"
+		"tall"					"0"
 	}
 	
 	HudTFCrosshair
@@ -1302,12 +1302,12 @@
 	"CHudVote"
 	{
 		"fieldName"		"CHudVote"
-		"xpos"			"0"			
+		"xpos"			"r-200"			
 		"ypos"			"0"
-		"wide"			"640"
-		"tall"			"480"
-		"visible"		"1"
-		"enabled"		"1"
+		"wide"			"0"
+		"tall"			"0"
+		"visible"		"0"
+		"enabled"		"0"
 		"bgcolor_override"	"0 0 0 0"
 		"PaintBackgroundType"	"0" // rounded corners
 	}
