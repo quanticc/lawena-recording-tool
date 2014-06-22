@@ -1023,7 +1023,7 @@ public class Lawena {
   }
 
   private SegmentsDialog newSegmentsDialog() {
-    SegmentsDialog d = new SegmentsDialog();
+    final SegmentsDialog d = new SegmentsDialog();
     d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     d.setModalityType(ModalityType.APPLICATION_MODAL);
     DefaultTableModel dtm = new DefaultTableModel(0, 2) {
@@ -1044,7 +1044,7 @@ public class Lawena {
         return column == 0 ? "" : "Segment";
       }
     };
-    final JTable tableSegments = segments.getTableSegments();
+    final JTable tableSegments = d.getTableSegments();
     d.getOkButton().addActionListener(new ActionListener() {
 
       @Override
@@ -1062,17 +1062,17 @@ public class Lawena {
         } else {
           log.info("No segments selected to remove");
         }
-        segments.setVisible(false);
+        d.setVisible(false);
       }
     });
-    segments.getCancelButton().addActionListener(new ActionListener() {
+    d.getCancelButton().addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
         // for (int i = 0; i < tableSegments.getRowCount(); i++) {
         // tableSegments.setValueAt(false, i, 0);
         // }
-        segments.setVisible(false);
+        d.setVisible(false);
       }
     });
     tableSegments.setModel(dtm);
