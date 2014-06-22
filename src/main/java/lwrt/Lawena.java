@@ -3,6 +3,7 @@ package lwrt;
 import ui.AboutDialog;
 import ui.LawenaView;
 import ui.ParticlesDialog;
+import ui.SegmentsDialog;
 import ui.TooltipRenderer;
 import util.LawenaException;
 import util.StartLogger;
@@ -96,6 +97,13 @@ public class Lawena {
   public class ClearMoviesTask extends SwingWorker<Void, Path> {
 
     private int count = 0;
+    private List<String> segmentsToDelete;
+
+    public ClearMoviesTask() {}
+
+    public ClearMoviesTask(List<String> segmentsToDelete) {
+      this.segmentsToDelete = segmentsToDelete;
+    }
 
     @Override
     protected Void doInBackground() throws Exception {
@@ -107,8 +115,14 @@ public class Lawena {
         }
       });
       if (clearMoviesTask == null) {
+        String segmentsGlob = "";
+        if (segmentsToDelete != null && segmentsToDelete.isEmpty()) {
+          segmentsGlob =
+              segmentsToDelete.toString().replace("[", "{").replace("]", "}").replace(" ", "");
+          log.info("Deleting segments: " + segmentsGlob);
+        }
         try (DirectoryStream<Path> stream =
-            Files.newDirectoryStream(settings.getMoviePath(), "*.{tga,wav}")) {
+            Files.newDirectoryStream(settings.getMoviePath(), segmentsGlob + "*.{tga,wav}")) {
 
           clearMoviesTask = this;
           setCurrentWorker(this, true);
@@ -554,6 +568,7 @@ public class Lawena {
   private CustomPathList customPaths;
   private AboutDialog dialog;
   private ParticlesDialog particles;
+  private SegmentsDialog segments;
 
   private HashMap<String, ImageIcon> skyboxMap;
   private JFileChooser choosemovie;
@@ -1004,6 +1019,103 @@ public class Lawena {
       }
     }
     particles.setVisible(true);
+  }
+
+  private SegmentsDialog newSegmentsDialog() {
+    SegmentsDialog d = new SegmentsDialog();
+    d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    d.setModalityType(ModalityType.APPLICATION_MODAL);
+    DefaultTableModel dtm = new DefaultTableModel(0, 2) {
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return column == 0;
+      }
+
+      @Override
+      public java.lang.Class<?> getColumnClass(int columnIndex) {
+        return columnIndex == 0 ? Boolean.class : String.class;
+      };
+
+      @Override
+      public String getColumnName(int column) {
+        return column == 0 ? "" : "Segment";
+      }
+    };
+    final JTable tableSegments = segments.getTableSegments();
+    d.getOkButton().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        List<String> selected = new ArrayList<>();
+        int selectCount = 0;
+        for (int i = 0; i < tableSegments.getRowCount(); i++) {
+          if ((boolean) tableSegments.getValueAt(i, 0)) {
+            selectCount++;
+            selected.add((String) tableSegments.getValueAt(i, 1));
+          }
+        }
+        if (selectCount == 0) {
+          settings.setParticles(Arrays.asList(""));
+        } else if (selectCount == tableSegments.getRowCount()) {
+          settings.setParticles(Arrays.asList("*"));
+        } else {
+          settings.setParticles(selected);
+        }
+        log.finer("Particles: " + settings.getParticles());
+        segments.setVisible(false);
+      }
+    });
+    segments.getCancelButton().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        // for (int i = 0; i < tableSegments.getRowCount(); i++) {
+        // tableSegments.setValueAt(false, i, 0);
+        // }
+        segments.setVisible(false);
+      }
+    });
+    tableSegments.setModel(dtm);
+    tableSegments.getColumnModel().getColumn(0).setMaxWidth(20);
+    return d;
+  }
+
+  private void startSegmentsDialog() {
+    if (segments == null) {
+      segments = newSegmentsDialog();
+    }
+    JTable t = segments.getTableSegments();
+    DefaultTableModel tmodel = (DefaultTableModel) t.getModel();
+    int rows = t.getRowCount();
+    for (int i = 0; i < rows; i++)
+      tmodel.removeRow(0);
+    List<String> segs = getExistingSegments();
+    if (segs.isEmpty()) {
+      JOptionPane.showMessageDialog(view, "There are no segments to delete", "Delete Segments",
+          JOptionPane.INFORMATION_MESSAGE);
+    } else {
+      for (String seg : segs) {
+        tmodel.addRow(new Object[] {false, seg});
+      }
+      segments.setVisible(true);
+    }
+  }
+
+  private List<String> getExistingSegments() {
+    List<String> existingSegments = new ArrayList<>();
+    try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getMoviePath(), "*.wav")) {
+      for (Path path : stream) {
+        String segname = path.getFileName().toString();
+        String key = segname.substring(0, segname.indexOf("_"));
+        if (!existingSegments.contains(key))
+          existingSegments.add(key);
+      }
+    } catch (IOException e) {
+      log.log(Level.INFO, "Problem while scanning movie folder", e);
+    }
+    return existingSegments;
   }
 
   private boolean checkCustomHud(CustomPath cp) {
