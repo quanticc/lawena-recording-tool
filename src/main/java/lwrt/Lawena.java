@@ -116,10 +116,18 @@ public class Lawena {
       });
       if (clearMoviesTask == null) {
         String segmentsGlob = "";
-        if (segmentsToDelete != null && segmentsToDelete.isEmpty()) {
+        if (segmentsToDelete != null && !segmentsToDelete.isEmpty()) {
           segmentsGlob =
               segmentsToDelete.toString().replace("[", "{").replace("]", "}").replace(" ", "");
           log.info("Deleting segments: " + segmentsGlob);
+        } else {
+          int answer =
+              JOptionPane.showConfirmDialog(view,
+                  "Are you sure you want to clear ALL movie files?", "Clearing Movie Files",
+                  JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+          if (answer != JOptionPane.YES_NO_OPTION) {
+            return null;
+          }
         }
         try (DirectoryStream<Path> stream =
             Files.newDirectoryStream(settings.getMoviePath(), segmentsGlob + "*.{tga,wav}")) {
@@ -1022,11 +1030,8 @@ public class Lawena {
     particles.setVisible(true);
   }
 
-  private SegmentsDialog newSegmentsDialog() {
-    final SegmentsDialog d = new SegmentsDialog();
-    d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-    d.setModalityType(ModalityType.APPLICATION_MODAL);
-    DefaultTableModel dtm = new DefaultTableModel(0, 2) {
+  private DefaultTableModel newSegmentsModel() {
+    return new DefaultTableModel(0, 2) {
       private static final long serialVersionUID = 1L;
 
       @Override
@@ -1044,6 +1049,13 @@ public class Lawena {
         return column == 0 ? "" : "Segment";
       }
     };
+  }
+
+  private SegmentsDialog newSegmentsDialog() {
+    final SegmentsDialog d = new SegmentsDialog();
+    d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    d.setModalityType(ModalityType.APPLICATION_MODAL);
+    DefaultTableModel dtm = newSegmentsModel();
     final JTable tableSegments = d.getTableSegments();
     d.getOkButton().addActionListener(new ActionListener() {
 
@@ -1084,11 +1096,8 @@ public class Lawena {
     if (segments == null) {
       segments = newSegmentsDialog();
     }
-    JTable t = segments.getTableSegments();
-    DefaultTableModel tmodel = (DefaultTableModel) t.getModel();
-    int rows = t.getRowCount();
-    for (int i = 0; i < rows; i++)
-      tmodel.removeRow(0);
+    DefaultTableModel tmodel = (DefaultTableModel) segments.getTableSegments().getModel();
+    tmodel.setRowCount(0);
     List<String> segs = getExistingSegments();
     if (segs.isEmpty()) {
       JOptionPane.showMessageDialog(view, "There are no segments to delete", "Delete Segments",
