@@ -876,12 +876,13 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        int answer =
-            JOptionPane.showConfirmDialog(view, "Are you sure you want to clear all movie files?",
-                "Clearing Movie Files", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (answer == JOptionPane.YES_NO_OPTION) {
-          new ClearMoviesTask().execute();
-        }
+        // int answer =
+        // JOptionPane.showConfirmDialog(view, "Are you sure you want to clear all movie files?",
+        // "Clearing Movie Files", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        // if (answer == JOptionPane.YES_NO_OPTION) {
+        // new ClearMoviesTask().execute();
+        // }
+        startSegmentsDialog();
       }
     });
     view.getMntmOpenMovieFolder().addActionListener(new ActionListener() {
@@ -1056,14 +1057,11 @@ public class Lawena {
             selected.add((String) tableSegments.getValueAt(i, 1));
           }
         }
-        if (selectCount == 0) {
-          settings.setParticles(Arrays.asList(""));
-        } else if (selectCount == tableSegments.getRowCount()) {
-          settings.setParticles(Arrays.asList("*"));
+        if (selectCount > 0) {
+          new ClearMoviesTask(selected).execute();
         } else {
-          settings.setParticles(selected);
+          log.info("No segments selected to remove");
         }
-        log.finer("Particles: " + settings.getParticles());
         segments.setVisible(false);
       }
     });

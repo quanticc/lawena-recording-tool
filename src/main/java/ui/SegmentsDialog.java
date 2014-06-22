@@ -22,16 +22,16 @@ public class SegmentsDialog extends JDialog {
 
   private class BtnSelectNoneActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-      for (int i = 0; i < tableParticles.getRowCount(); i++) {
-        tableParticles.setValueAt(false, i, 0);
+      for (int i = 0; i < tableSegments.getRowCount(); i++) {
+        tableSegments.setValueAt(false, i, 0);
       }
     }
   }
 
   private class BtnSelectAllActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-      for (int i = 0; i < tableParticles.getRowCount(); i++) {
-        tableParticles.setValueAt(true, i, 0);
+      for (int i = 0; i < tableSegments.getRowCount(); i++) {
+        tableSegments.setValueAt(true, i, 0);
       }
     }
   }
@@ -39,7 +39,7 @@ public class SegmentsDialog extends JDialog {
   private static final long serialVersionUID = 1L;
 
   private final JPanel contentPanel = new JPanel();
-  private JTable tableParticles;
+  private JTable tableSegments;
   private JButton okButton;
   private JButton cancelButton;
 
@@ -47,7 +47,7 @@ public class SegmentsDialog extends JDialog {
    * Create the dialog.
    */
   public SegmentsDialog() {
-    setTitle("Select Enhanced Particles");
+    setTitle("Select Segments to Delete");
     setModalityType(ModalityType.APPLICATION_MODAL);
     setBounds(100, 100, 450, 300);
     BorderLayout borderLayout = new BorderLayout();
@@ -62,7 +62,7 @@ public class SegmentsDialog extends JDialog {
     contentPanel.setLayout(gbl_contentPanel);
     {
       JLabel lblSelectWhatEnhanced =
-          new JLabel("Select what enhanced particles are being copied to your tf/custom folder.");
+          new JLabel("Select what recording segments will be deleted from your movie folder.");
       GridBagConstraints gbc_lblSelectWhatEnhanced = new GridBagConstraints();
       gbc_lblSelectWhatEnhanced.anchor = GridBagConstraints.WEST;
       gbc_lblSelectWhatEnhanced.insets = new Insets(0, 0, 5, 0);
@@ -78,13 +78,13 @@ public class SegmentsDialog extends JDialog {
       gbc_scrollPane.gridy = 1;
       contentPanel.add(scrollPane, gbc_scrollPane);
       {
-        tableParticles = new JTable();
-        tableParticles.setShowVerticalLines(false);
-        tableParticles.setGridColor(new Color(0, 0, 0, 30));
-        tableParticles.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-        tableParticles.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tableParticles.getTableHeader().setReorderingAllowed(false);
-        scrollPane.setViewportView(tableParticles);
+        tableSegments = new JTable();
+        tableSegments.setShowVerticalLines(false);
+        tableSegments.setGridColor(new Color(0, 0, 0, 30));
+        tableSegments.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        tableSegments.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tableSegments.getTableHeader().setReorderingAllowed(false);
+        scrollPane.setViewportView(tableSegments);
       }
     }
     {
@@ -142,7 +142,7 @@ public class SegmentsDialog extends JDialog {
   }
 
   public JTable getTableSegments() {
-    return tableParticles;
+    return tableSegments;
   }
 
   public JButton getOkButton() {
