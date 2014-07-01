@@ -764,7 +764,8 @@ public class Lawena {
         String previous = custom.getText();
         int result =
             JOptionPane.showConfirmDialog(view, getCustomSettingsScrollPane(),
-                "Configure Custom Settings", JOptionPane.OK_CANCEL_OPTION);
+                "Configure Custom Settings", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
           log.info("Saving custom settings change: " + custom.getText());
           saveSettings();
@@ -982,9 +983,9 @@ public class Lawena {
 
   private JTextArea getCustomSettingsTextArea() {
     if (customSettingsTextArea == null) {
-      customSettingsTextArea = new JTextArea();
+      customSettingsTextArea = new JTextArea(10, 40);
       customSettingsTextArea.setEditable(true);
-      customSettingsTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+      customSettingsTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
     }
     return customSettingsTextArea;
   }
