@@ -192,6 +192,7 @@ public class LawenaView extends JFrame {
   private JCheckBox useHudMinmode;
   private JMenu mnAdvanced;
   private JMenuItem mntmSelectEnhancedParticles;
+  private JMenuItem mntmAddCustomSettings;
   private JCheckBoxMenuItem chckbxmntmInsecure;
   private JMenuItem mntmChangeTfLaunch;
   private JSeparator separator_3;
@@ -249,6 +250,9 @@ public class LawenaView extends JFrame {
 
     mntmSelectEnhancedParticles = new JMenuItem("Select Enhanced Particles...");
     mnAdvanced.add(mntmSelectEnhancedParticles);
+
+    mntmAddCustomSettings = new JMenuItem("Custom Settings...");
+    mnAdvanced.add(mntmAddCustomSettings);
 
     separator_3 = new JSeparator();
     mnAdvanced.add(separator_3);
@@ -794,6 +798,10 @@ public class LawenaView extends JFrame {
 
   public JMenuItem getMntmSelectEnhancedParticles() {
     return mntmSelectEnhancedParticles;
+  }
+
+  public JMenuItem getMntmAddCustomSettings() {
+    return mntmAddCustomSettings;
   }
 
   public JMenuItem getMntmOpenMovieFolder() {

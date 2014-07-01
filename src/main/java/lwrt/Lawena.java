@@ -14,6 +14,7 @@ import vdm.DemoEditor;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
@@ -60,7 +61,9 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -574,9 +577,12 @@ public class Lawena {
   private DemoEditor vdm;
   private CommandLine cl;
   private CustomPathList customPaths;
+
   private AboutDialog dialog;
   private ParticlesDialog particles;
   private SegmentsDialog segments;
+  private JTextArea customSettingsTextArea;
+  private JScrollPane customSettingsScrollPane;
 
   private HashMap<String, ImageIcon> skyboxMap;
   private JFileChooser choosemovie;
@@ -748,6 +754,23 @@ public class Lawena {
       @Override
       public void actionPerformed(ActionEvent e) {
         startParticlesDialog();
+      }
+    });
+    view.getMntmAddCustomSettings().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JTextArea custom = getCustomSettingsTextArea();
+        String previous = custom.getText();
+        int result =
+            JOptionPane.showConfirmDialog(view, getCustomSettingsScrollPane(),
+                "Configure Custom Settings", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+          log.info("Saving custom settings change: " + custom.getText());
+          saveSettings();
+        } else {
+          custom.setText(previous);
+        }
       }
     });
 
@@ -955,6 +978,22 @@ public class Lawena {
 
     view.getTabbedPane().addTab("VDM", null, vdm.start());
     view.setVisible(true);
+  }
+
+  private JTextArea getCustomSettingsTextArea() {
+    if (customSettingsTextArea == null) {
+      customSettingsTextArea = new JTextArea();
+      customSettingsTextArea.setEditable(true);
+      customSettingsTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+    }
+    return customSettingsTextArea;
+  }
+
+  private JScrollPane getCustomSettingsScrollPane() {
+    if (customSettingsScrollPane == null) {
+      customSettingsScrollPane = new JScrollPane(getCustomSettingsTextArea());
+    }
+    return customSettingsScrollPane;
   }
 
   private void startParticlesDialog() {
@@ -1181,6 +1220,7 @@ public class Lawena {
     view.getUseHudMinmode().setSelected(settings.getHudMinmode());
     view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
     view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
+    getCustomSettingsTextArea().setText(settings.getCustomSettings());
   }
 
   private void saveSettings() {
@@ -1221,6 +1261,7 @@ public class Lawena {
     settings.setHudMinmode(view.getUseHudMinmode().isSelected());
     settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
     settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
+    settings.setCustomSettings(getCustomSettingsTextArea().getText());
     settings.save();
     log.fine("Settings saved");
   }

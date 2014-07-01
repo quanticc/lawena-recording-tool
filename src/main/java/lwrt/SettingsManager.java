@@ -49,7 +49,8 @@ public class SettingsManager {
     LogUiLevel("FINE"),
     LaunchTimeout(120, 0, Integer.MAX_VALUE),
     Insecure(false),
-    VdmSrcDemoFix(false);
+    VdmSrcDemoFix(false),
+    CustomSettings("// Custom User Settings");
 
     private Object value;
     private List<String> allowedValues;
@@ -188,8 +189,6 @@ public class SettingsManager {
     settings.println((getSteamCloud() ? "//" : "") + "cl_cloud_settings 0");
     settings.println((getCondebug() ? "" : "//") + "con_timestamp 1");
     settings.println("viewmodel_fov_demo " + getViewmodelFov());
-    settings.println((getViewmodelSwitch().equals("off") ? "//" : "") + "lockviewmodelson");
-    settings.println((getViewmodelSwitch().equals("on") ? "//" : "") + "lockviewmodelsoff");
     boolean crosshairswitch = getCrosshairSwitch();
     settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_file \"\"");
     settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_red 200");
@@ -197,8 +196,6 @@ public class SettingsManager {
     settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_blue 200");
     settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_scale 32");
     settings.println((crosshairswitch ? "//" : "") + "cl_crosshairalpha 200");
-    settings.println((crosshairswitch ? "//" : "") + "lockcrosshair");
-    settings.println((crosshairswitch ? "//" : "") + "alias toggle \"\"");
     settings.println("crosshair " + (getCrosshair() ? "1" : "0"));
     settings.println("hud_combattext " + (getCombattext() ? "1" : "0"));
     settings.println("hud_combattext_healing " + (getCombattext() ? "1" : "0"));
@@ -222,6 +219,11 @@ public class SettingsManager {
     settings.println("tf_training_has_prompted_for_loadout 1");
     settings.println("engine_no_focus_sleep 0");
     settings.println("cl_spec_carrieditems 0");
+    settings.println(getCustomSettings());
+    settings.println((getViewmodelSwitch().equals("off") ? "//" : "") + "lockviewmodelson");
+    settings.println((getViewmodelSwitch().equals("on") ? "//" : "") + "lockviewmodelsoff");
+    settings.println((crosshairswitch ? "//" : "") + "lockcrosshair");
+    settings.println((crosshairswitch ? "//" : "") + "alias toggle \"\"");
     settings.close();
 
     if (demoname != null) {
@@ -407,6 +409,10 @@ public class SettingsManager {
   public void setHudPlayerModel(boolean value) {
     setBoolean(Key.HudPlayerModel, value);
   }
+  
+  public void setCustomSettings(String value) {
+    setString(Key.CustomSettings, value);
+  }
 
   // Getters
 
@@ -548,6 +554,10 @@ public class SettingsManager {
 
   public boolean getHudPlayerModel() {
     return getBoolean(Key.HudPlayerModel);
+  }
+  
+  public String getCustomSettings() {
+    return getString(Key.CustomSettings);
   }
 
 }
