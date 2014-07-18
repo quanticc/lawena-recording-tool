@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -235,12 +236,19 @@ public class Lawena {
           saveSettings();
           settings.saveToCfg();
           movies.createMovienameCfgs();
-          movies.movieOffset();
         } catch (IOException e) {
           log.log(Level.WARNING, "Problem while saving settings to file", e);
           status.info("Failed to save lawena settings to file");
           return false;
         }
+        // Allow failing this without cancelling launch, notify user
+        // See https://github.com/iabarca/lawena-recording-tool/issues/36
+        try {
+          movies.movieOffset();
+        } catch (IOException e) {
+          log.info("Could not detect current movie slot");
+        }
+
         setProgress(60);
 
         // Backing up user files and copying lawena files
@@ -1159,6 +1167,9 @@ public class Lawena {
         if (!existingSegments.contains(key))
           existingSegments.add(key);
       }
+    } catch (NoSuchFileException e) {
+      // TODO: add a check for the reparse point (junction) to confirm it's SrcDemo2
+      log.info("Could not scan for existing segments. Is SrcDemo2 running?");
     } catch (IOException e) {
       log.log(Level.INFO, "Problem while scanning movie folder", e);
     }
