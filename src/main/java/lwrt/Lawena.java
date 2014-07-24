@@ -26,6 +26,8 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -916,12 +918,6 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        // int answer =
-        // JOptionPane.showConfirmDialog(view, "Are you sure you want to clear all movie files?",
-        // "Clearing Movie Files", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        // if (answer == JOptionPane.YES_NO_OPTION) {
-        // new ClearMoviesTask().execute();
-        // }
         startSegmentsDialog();
       }
     });
@@ -984,9 +980,39 @@ public class Lawena {
         }
       }
     });
+    view.getCmbViewmodel().addItemListener(new ItemListener() {
+
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+          checkViewmodelState();
+        }
+      }
+    });
+    view.getCmbSourceVideoFormat().addItemListener(new ItemListener() {
+
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+          checkFrameFormatState();
+        }
+      }
+    });
 
     view.getTabbedPane().addTab("VDM", null, vdm.start());
     view.setVisible(true);
+  }
+
+  private void checkViewmodelState() {
+    boolean e = view.getCmbViewmodel().getSelectedIndex() != 1;
+    view.getLblViewmodelFov().setEnabled(e);
+    view.getSpinnerViewmodelFov().setEnabled(e);
+  }
+
+  private void checkFrameFormatState() {
+    boolean e = view.getCmbSourceVideoFormat().getSelectedIndex() != 0;
+    view.getLblJpegQuality().setEnabled(e);
+    view.getSpinnerJpegQuality().setEnabled(e);
   }
 
   private JTextArea getCustomSettingsTextArea() {
@@ -1233,6 +1259,11 @@ public class Lawena {
     view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
     view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
     getCustomSettingsTextArea().setText(settings.getCustomSettings());
+    view.getCmbSourceVideoFormat().setSelectedItem(
+        settings.getString(Key.SourceRecorderVideoFormat).toUpperCase());
+    view.getSpinnerJpegQuality().setValue(settings.getInt(Key.SourceRecorderJpegQuality));
+    checkViewmodelState();
+    checkFrameFormatState();
   }
 
   private void saveSettings() {
@@ -1274,6 +1305,9 @@ public class Lawena {
     settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
     settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
     settings.setCustomSettings(getCustomSettingsTextArea().getText());
+    settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
+        .getSelectedItem().toString().toLowerCase());
+    settings.setInt(Key.SourceRecorderJpegQuality, (int) view.getSpinnerJpegQuality().getValue());
     settings.save();
     log.fine("Settings saved");
   }
@@ -1303,23 +1337,6 @@ public class Lawena {
         log.log(Level.INFO, "Problem while loading skyboxes", e);
       }
     }
-    // Path deprecated in favor of skybox folder inside lwrtresources.jar after 4.0.10-7
-    // Path vpk = Paths.get("custom/skybox.vpk");
-    // if (Files.exists(vpk)) {
-    // log.finer("Searching for skyboxes in " + vpk);
-    // for (String file : cl.getVpkContents(settings.getTfPath(), vpk)) {
-    // if (file.endsWith("up.vtf")) {
-    // log.finer("[skybox.vpk] Skybox found at: " + file);
-    // String skybox = file;
-    // skybox = skybox.substring(0, skybox.indexOf("up.vtf"));
-    // if (!data.contains(skybox)) {
-    // data.add(skybox);
-    // } else {
-    // log.finer("Not adding because it already exists: " + skybox);
-    // }
-    // }
-    // }
-    // }
     skyboxMap = new HashMap<>(data.size());
     new SkyboxPreviewTask(new ArrayList<>(data)).execute();
     data.add(0, (String) Key.Skybox.defValue());

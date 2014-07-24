@@ -7,6 +7,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import lwrt.SettingsManager.Key;
+
 public class MovieManager {
 
   private SettingsManager cfg;
@@ -41,9 +43,13 @@ public class MovieManager {
     String[] prefixes =
         {"a1", "b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9", "j10", "k11", "l12", "m13", "n14",
             "o15", "p16"};
+    String video = cfg.getString(Key.SourceRecorderVideoFormat);
+    String audio = cfg.getString(Key.SourceRecorderAudioFormat);
+    int quality = cfg.getInt(Key.SourceRecorderJpegQuality);
     for (String prefix : prefixes) {
       PrintWriter pw = new PrintWriter(new FileWriter("cfg/mov/" + prefix + ".cfg"));
-      pw.println("startmovie \"" + cfg.getMoviePath() + "/" + prefix + "_\"");
+      pw.println("startmovie \"" + cfg.getMoviePath() + "/" + prefix + "_\" " + video + " " + audio
+          + (video.equals("jpg") ? " jpeg_quality " + quality : ""));
       pw.close();
     }
   }

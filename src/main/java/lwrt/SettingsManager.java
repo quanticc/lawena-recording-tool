@@ -50,7 +50,10 @@ public class SettingsManager {
     LaunchTimeout(120, 0, Integer.MAX_VALUE),
     Insecure(false),
     VdmSrcDemoFix(false),
-    CustomSettings("// Custom User Settings");
+    CustomSettings("// Custom User Settings"),
+    SourceRecorderVideoFormat("tga", "tga", "jpg"),
+    SourceRecorderAudioFormat("wav", "wav", ""),
+    SourceRecorderJpegQuality(50, 1, 100);
 
     private Object value;
     private List<String> allowedValues;
@@ -235,7 +238,7 @@ public class SettingsManager {
     }
   }
 
-  private void setString(Key key, String value) {
+  public void setString(Key key, String value) {
     if (key.isValid(value)) {
       properties.setProperty(key.toString(), value);
     } else {
@@ -243,11 +246,11 @@ public class SettingsManager {
     }
   }
 
-  private String getString(Key key) {
+  public String getString(Key key) {
     return properties.getProperty(key.toString());
   }
 
-  private void setInt(Key key, int value) {
+  public void setInt(Key key, int value) {
     if (value >= key.min && value <= key.max) {
       properties.setProperty(key.toString(), value + "");
     } else {
@@ -255,7 +258,7 @@ public class SettingsManager {
     }
   }
 
-  private int getInt(Key key) {
+  public int getInt(Key key) {
     String value = properties.getProperty(key.toString());
     try {
       return Integer.parseInt(value);
@@ -265,12 +268,41 @@ public class SettingsManager {
     }
   }
 
-  private void setBoolean(Key key, boolean value) {
+  public void setBoolean(Key key, boolean value) {
     properties.setProperty(key.toString(), value + "");
   }
 
-  private boolean getBoolean(Key key) {
+  public boolean getBoolean(Key key) {
     return Boolean.parseBoolean(properties.getProperty(key.toString()));
+  }
+
+  public void setList(Key key, List<String> values) {
+    setString(key, listToString(values, '|'));
+  }
+
+  public List<String> getList(Key key) {
+    String value = getString(key);
+    List<String> list = new ArrayList<>();
+    if (!value.isEmpty()) {
+      String[] resources = getString(key).split("\\|");
+      Collections.addAll(list, resources);
+    }
+    return list;
+  }
+
+  private String listToString(List<String> list, char separator) {
+    Iterator<String> it = list.iterator();
+    if (!it.hasNext())
+      return "";
+  
+    StringBuilder sb = new StringBuilder();
+    for (;;) {
+      String e = it.next();
+      sb.append(e);
+      if (!it.hasNext())
+        return sb.toString();
+      sb.append(separator);
+    }
   }
 
   public void setFilename(String filename) {
@@ -352,21 +384,6 @@ public class SettingsManager {
   public void setCustomResources(List<String> values) {
     Key key = Key.CustomResources;
     setString(key, listToString(values, '|'));
-  }
-
-  private String listToString(List<String> list, char separator) {
-    Iterator<String> it = list.iterator();
-    if (!it.hasNext())
-      return "";
-
-    StringBuilder sb = new StringBuilder();
-    for (;;) {
-      String e = it.next();
-      sb.append(e);
-      if (!it.hasNext())
-        return sb.toString();
-      sb.append(separator);
-    }
   }
 
   public void setHudMinmode(boolean value) {
@@ -489,17 +506,7 @@ public class SettingsManager {
   public boolean getCondebug() {
     return getBoolean(Key.Condebug);
   }
-
-  private List<String> getList(Key key) {
-    String value = getString(key);
-    List<String> list = new ArrayList<>();
-    if (!value.isEmpty()) {
-      String[] resources = getString(key).split("\\|");
-      Collections.addAll(list, resources);
-    }
-    return list;
-  }
-
+  
   public List<String> getCustomResources() {
     return getList(Key.CustomResources);
   }
