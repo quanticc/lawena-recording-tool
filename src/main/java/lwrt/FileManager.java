@@ -243,7 +243,7 @@ public class FileManager {
         delete(customPath);
       } catch (NoSuchFileException e) {
       } catch (IOException e) {
-        log.log(Level.INFO, "Could not delete lawena custom files", e);
+        log.info("Could not delete lawena custom files: " + e);
       }
       try {
         if (isEmpty(customPath)) {
@@ -252,7 +252,7 @@ public class FileManager {
           restoreComplete = false;
         }
       } catch (IOException e) {
-        log.log(Level.INFO, "Could not restore custom files", e);
+        log.info("Could not restore custom files: " + e);
         restoreComplete = false;
       }
     }
@@ -262,7 +262,7 @@ public class FileManager {
         delete(configPath);
       } catch (NoSuchFileException e) {
       } catch (IOException e) {
-        log.log(Level.INFO, "Could not delete lawena cfg folder", e);
+        log.info("Could not delete lawena cfg folder: " + e);
       }
       try {
         if (isEmpty(configPath)) {
@@ -271,7 +271,7 @@ public class FileManager {
           restoreComplete = false;
         }
       } catch (IOException e) {
-        log.log(Level.INFO, "Could not restore cfg files", e);
+        log.info("Could not restore cfg files: " + e);
         restoreComplete = false;
       }
     }
@@ -279,24 +279,30 @@ public class FileManager {
       log.info("*** Restoring Failed: Some files could not be deleted and process was interrupted");
       log.info("*** Your files are still inside lwrtcfg and lwrtcustom folders. DO NOT delete them");
       log.info("*** Lawena will attempt to restore them again upon close or next launch,");
-      log.info("*** If it doesn't work, it might be caused by Windows locking font files");
+      log.info("*** If it doesn't work, it might be caused by Windows locking font files,");
       log.info("*** in a way that can only be unlocked through a restart or using Unlocker software :(");
-      Path zip = tfpath.resolve("lawena-userfiles-backup" + Util.now("yyyyMMddHHmmss") + ".zip");
+      Path zip = tfpath.resolve("lawena-user." + Util.now("yyMMddHHmmss") + ".bak.zip");
+      log.info("Creating a backup of your files in: " + zip);
       try {
         Zip.create(zip, Arrays.asList(configBackupPath, customBackupPath));
-        log.info("Creating a backup of your files in: " + zip);
       } catch (IOException e) {
-        log.log(Level.INFO, "Emergency backup could not be created", e);
+        log.info("Emergency backup could not be created: " + e);
       }
     } else {
-      log.info("Restoring OK: Cleaning up lwrt folders");
       try {
-        delete(configBackupPath);
-        delete(customBackupPath);
+        if (Files.exists(configBackupPath)) {
+          log.info("Restore OK: Cleaning up lwrtconfig folder");
+          delete(configBackupPath);
+        }
+        if (Files.exists(customBackupPath)) {
+          log.info("Restore OK: Cleaning up lwrtcustom folder");
+          delete(customBackupPath);
+        }
       } catch (IOException e) {
-        log.log(Level.INFO, "Could not delete lwrt folders", e);
+        log.info("Could not delete lwrt folders: " + e);
         restoreComplete = false;
       }
+      log.info("Restore and cleanup completed successfully");
     }
     return restoreComplete;
   }
@@ -318,7 +324,7 @@ public class FileManager {
       });
       return true;
     } catch (IOException e) {
-      log.log(Level.FINE, "Failed to copy folder to lawena's custom files", e);
+      log.fine("Failed to copy folder to lawena's custom files: " + e);
     }
     return false;
   }
