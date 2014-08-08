@@ -57,7 +57,7 @@ public class UpdateHelper {
       }
     } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
         | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-      log.log(Level.INFO, "Could not remove unused files", e);
+      log.info("Could not remove unused files: " + e);
     }
   }
 
@@ -80,7 +80,7 @@ public class UpdateHelper {
       }
     } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
         | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-      log.log(Level.INFO, "Could not update launcher executable", e);
+      log.info("Could not update launcher executable: " + e);
     }
   }
 
