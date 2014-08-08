@@ -8,6 +8,7 @@ import ui.TooltipRenderer;
 import util.LawenaException;
 import util.StartLogger;
 import util.UpdateHelper;
+import util.Util;
 import util.WatchDir;
 import vdm.DemoEditor;
 
@@ -41,10 +42,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -374,7 +373,7 @@ public class Lawena {
           if (restoredAllFiles) {
             status.info("TF2 has finished running. All files restored");
           } else {
-            status.info("Your files will be restored once you close lawena or run TF2 again");
+            status.info("Your files could not be restored correctly. Check log for details");
           }
         }
         cl.setSystemDxLevel(oDxlevel);
@@ -574,11 +573,6 @@ public class Lawena {
     }
   }
 
-  private static String now(String format) {
-    SimpleDateFormat sdf = new SimpleDateFormat(format);
-    return sdf.format(Calendar.getInstance().getTime());
-  }
-
   private LawenaView view;
 
   private SettingsManager settings;
@@ -611,7 +605,7 @@ public class Lawena {
     if (impl != null) {
       version = impl;
     }
-    build = getManifestString("Implementation-Build", now("yyyyMMddHHmmss"));
+    build = getManifestString("Implementation-Build", Util.now("yyyyMMddHHmmss"));
     String osname = System.getProperty("os.name");
     if (osname.contains("Windows")) {
       cl = new CLWindows();

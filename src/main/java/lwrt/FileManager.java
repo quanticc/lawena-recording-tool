@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +18,8 @@ import lwrt.SettingsManager.Key;
 import util.CopyDirVisitor;
 import util.DeleteDirVisitor;
 import util.LawenaException;
+import util.Util;
+import util.Zip;
 
 public class FileManager {
 
@@ -169,7 +171,7 @@ public class FileManager {
               if (!contents.isEmpty()) {
                 log.fine("Copying enhanced particles: " + contents);
                 Files.createDirectories(customParticlesPath);
-                // TODO: fix to avoid invoking vpk x 
+                // TODO: fix to avoid invoking vpk x
                 cl.extractIfNeeded(tfpath, cp.getPath().toString(),
                     customParticlesPath.getParent(), contents);
               } else {
@@ -235,25 +237,6 @@ public class FileManager {
     Path configPath = tfpath.resolve("cfg");
     boolean restoreComplete = true;
 
-    if (Files.exists(configBackupPath)) {
-      log.fine("Restoring all your config files");
-      try {
-        delete(configPath);
-      } catch (NoSuchFileException e) {
-      } catch (IOException e) {
-        log.log(Level.INFO, "Could not delete lawena cfg folder", e);
-      }
-      try {
-        if (isEmpty(configPath)) {
-          Files.move(configBackupPath, configPath, StandardCopyOption.REPLACE_EXISTING);
-        } else {
-          restoreComplete = false;
-        }
-      } catch (IOException e) {
-        log.log(Level.INFO, "Could not restore cfg files", e);
-        restoreComplete = false;
-      }
-    }
     if (Files.exists(customBackupPath)) {
       log.fine("Restoring all your custom files");
       try {
@@ -264,7 +247,7 @@ public class FileManager {
       }
       try {
         if (isEmpty(customPath)) {
-          Files.move(customBackupPath, customPath, StandardCopyOption.REPLACE_EXISTING);
+          copy(customBackupPath, customPath);
         } else {
           restoreComplete = false;
         }
@@ -273,9 +256,47 @@ public class FileManager {
         restoreComplete = false;
       }
     }
+    if (Files.exists(configBackupPath)) {
+      log.fine("Restoring all your config files");
+      try {
+        delete(configPath);
+      } catch (NoSuchFileException e) {
+      } catch (IOException e) {
+        log.log(Level.INFO, "Could not delete lawena cfg folder", e);
+      }
+      try {
+        if (isEmpty(configPath)) {
+          copy(configBackupPath, configPath);
+        } else {
+          restoreComplete = false;
+        }
+      } catch (IOException e) {
+        log.log(Level.INFO, "Could not restore cfg files", e);
+        restoreComplete = false;
+      }
+    }
     if (!restoreComplete) {
-      log.info("Some lawena files might still exist inside 'cfg' or 'custom'");
-      log.info("Your files will be restored once you close lawena or run TF2");
+      log.info("*** Restoring Failed: Some files could not be deleted and process was interrupted");
+      log.info("*** Your files are still inside lwrtcfg and lwrtcustom folders. DO NOT delete them");
+      log.info("*** Lawena will attempt to restore them again upon close or next launch,");
+      log.info("*** If it doesn't work, it might be caused by Windows locking font files");
+      log.info("*** in a way that can only be unlocked through a restart or using Unlocker software :(");
+      Path zip = tfpath.resolve("lawena-userfiles-backup" + Util.now("yyyyMMddHHmmss") + ".zip");
+      try {
+        Zip.create(zip, Arrays.asList(configBackupPath, customBackupPath));
+        log.info("Creating a backup of your files in: " + zip);
+      } catch (IOException e) {
+        log.log(Level.INFO, "Emergency backup could not be created", e);
+      }
+    } else {
+      log.info("Restoring OK: Cleaning up lwrt folders");
+      try {
+        delete(configBackupPath);
+        delete(customBackupPath);
+      } catch (IOException e) {
+        log.log(Level.INFO, "Could not delete lwrt folders", e);
+        restoreComplete = false;
+      }
     }
     return restoreComplete;
   }
