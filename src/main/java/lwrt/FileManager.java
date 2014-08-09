@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import lwrt.SettingsManager.Key;
@@ -73,67 +72,71 @@ public class FileManager {
     Path configBackupPath = tfpath.resolve("lwrtcfg");
     Path configPath = tfpath.resolve("cfg");
 
-    if (!Files.exists(configBackupPath)) {
-      try {
-        log.fine("Making a backup of your config files");
-        configPath.toFile().setWritable(true);
-        Files.move(configPath, configBackupPath);
-        Files.createDirectories(configPath);
-        copy(Paths.get("cfg"), configPath);
-      } catch (IOException e) {
-        log.log(Level.WARNING, "Could not replace cfg files", e);
-        throw new LawenaException("Failed to replace cfg files", e);
-      }
+    if (Files.exists(configBackupPath) || Files.exists(customBackupPath)) {
+      log.info("*** Backup lwrt folders are still present, not replacing files");
+      log.info("*** Your files are still in lwrtcfg and lwrtcustom folders");
+      log.info("*** Restart Lawena to attempt to restore your files again");
+      throw new LawenaException("Files not replaced due to backup folders still present");
     }
-    if (!Files.exists(customBackupPath)) {
+    try {
+      log.fine("Making a backup of your config files");
+      configPath.toFile().setWritable(true);
+      Files.move(configPath, configBackupPath);
+      Files.createDirectories(configPath);
+      copy(Paths.get("cfg"), configPath);
+    } catch (IOException e) {
+      log.info("Could not replace cfg files: " + e);
+      throw new LawenaException("Failed to replace cfg files", e);
+    }
+    try {
+      log.fine("Making a backup of your custom files");
+      if (!Files.exists(customPath) || !Files.isDirectory(customPath)) {
+        Files.createDirectory(customPath);
+      }
+      customPath.toFile().setWritable(true);
+      Files.move(customPath, customBackupPath);
+    } catch (IOException e) {
+      log.info("Could not backup custom folder: " + e);
+      throw new LawenaException("Failed to replace custom files", e);
+    }
+    // Copy hud files
+    try {
+      log.fine("Copying selected hud files");
+      Path resourcePath = tfpath.resolve("custom/lawena/resource");
+      Path scriptsPath = tfpath.resolve("custom/lawena/scripts");
+      Files.createDirectories(resourcePath);
+      Files.createDirectories(scriptsPath);
+      String hudName = cfg.getHud();
+      if (!hudName.equals("custom")) {
+        copy(Paths.get("hud", hudName, "resource"), resourcePath);
+        copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
+      }
+    } catch (IOException e) {
+      log.info("Could not replace hud files: " + e);
+      throw new LawenaException("Failed to replace hud files", e);
+    }
+    // Copy skybox files
+    Path skyboxPath = tfpath.resolve("custom/lawena/materials/skybox");
+    try {
+      String sky = cfg.getSkybox();
+      if (sky != null && !sky.isEmpty() && !sky.equals(Key.Skybox.defValue())) {
+        log.fine("Copying selected skybox files");
+        Files.createDirectories(skyboxPath);
+        replaceSkybox();
+      }
+    } catch (IOException e) {
+      log.info("Could not replace skybox files: " + e);
       try {
-        log.fine("Making a backup of your custom files");
-        if (!Files.exists(customPath) || !Files.isDirectory(customPath)) {
-          Files.createDirectory(customPath);
-        }
-        customPath.toFile().setWritable(true);
-        Files.move(customPath, customBackupPath);
-      } catch (IOException e) {
-        log.log(Level.WARNING, "Could not backup custom folder", e);
-        throw new LawenaException("Failed to replace custom files", e);
+        delete(skyboxPath);
+        log.fine("Skybox folder deleted, no skybox files were replaced");
+      } catch (IOException e1) {
+        log.info("Could not delete lawena skybox folder: " + e1);
       }
-      try {
-        log.fine("Copying selected hud files");
-        Path resourcePath = tfpath.resolve("custom/lawena/resource");
-        Path scriptsPath = tfpath.resolve("custom/lawena/scripts");
-        Files.createDirectories(resourcePath);
-        Files.createDirectories(scriptsPath);
-        String hudName = cfg.getHud();
-        if (!hudName.equals("custom")) {
-          copy(Paths.get("hud", hudName, "resource"), resourcePath);
-          copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
-        }
-      } catch (IOException e) {
-        log.log(Level.INFO, "Could not replace hud files", e);
-        throw new LawenaException("Failed to replace hud files", e);
-      }
-      Path skyboxPath = tfpath.resolve("custom/lawena/materials/skybox");
-      try {
-        String sky = cfg.getSkybox();
-        if (sky != null && !sky.isEmpty() && !sky.equals(Key.Skybox.defValue())) {
-          log.fine("Copying selected skybox files");
-          Files.createDirectories(skyboxPath);
-          replaceSkybox();
-        }
-      } catch (IOException e) {
-        log.log(Level.WARNING, "Could not replace skybox files", e);
-        try {
-          delete(skyboxPath);
-          log.fine("Skybox folder deleted, no skybox files were replaced");
-        } catch (IOException e1) {
-          log.log(Level.WARNING, "Could not delete lawena skybox folder", e1);
-        }
-        throw new LawenaException("Failed to replace skybox files", e);
-      }
-      // Copy selected custom files
-      if (customPathList != null) {
-        copyCustomFiles();
-      }
+      throw new LawenaException("Failed to replace skybox files", e);
+    }
+    // Copy selected custom files
+    if (customPathList != null) {
+      copyCustomFiles();
     }
   }
 
@@ -189,7 +192,7 @@ public class FileManager {
           }
         }
       } catch (IOException e) {
-        log.log(Level.INFO, "Could not copy custom file: " + cp.getPath(), e);
+        log.info("Could not copy custom file: " + e);
       }
     }
   }
@@ -278,7 +281,7 @@ public class FileManager {
     if (!restoreComplete) {
       log.info("*** Restoring Failed: Some files could not be deleted and process was interrupted");
       log.info("*** Your files are still inside lwrtcfg and lwrtcustom folders. DO NOT delete them");
-      log.info("*** Lawena will attempt to restore them again upon close or next launch,");
+      log.info("*** Lawena will attempt to restore them again upon close or next launch.");
       log.info("*** If it doesn't work, it might be caused by Windows locking font files,");
       log.info("*** in a way that can only be unlocked through a restart or using Unlocker software :(");
       Path zip = tfpath.resolve("lawena-user." + Util.now("yyMMddHHmmss") + ".bak.zip");
