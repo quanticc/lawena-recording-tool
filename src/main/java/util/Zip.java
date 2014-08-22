@@ -2,6 +2,7 @@ package util;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -225,7 +226,7 @@ public class Zip {
 
   private static FileSystem createZipFileSystem(Path path, boolean create) throws IOException {
     // convert the filename to a URI
-    final URI uri = URI.create("jar:file:" + path.toUri().getRawPath());
+    final URI uri = URI.create("jar:" + path.toUri());
 
     final Map<String, String> env = new HashMap<>();
     if (create) {
