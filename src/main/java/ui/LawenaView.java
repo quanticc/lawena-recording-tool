@@ -160,6 +160,7 @@ public class LawenaView extends JFrame {
   private JMenuItem mntmChangeTfLaunch;
   private JCheckBoxMenuItem chckbxmntmInsecure;
   private JMenuItem mntmRevertToDefault;
+  private JCheckBoxMenuItem chckbxmntmBackupMode;
 
   /**
    * Create the frame.
@@ -220,6 +221,10 @@ public class LawenaView extends JFrame {
 
     JCheckBoxMenuItem chckbxmntmInsecure = new JCheckBoxMenuItem("Use -insecure in Launch Options");
     mnAdvanced.add(chckbxmntmInsecure);
+
+    JCheckBoxMenuItem chckbxmntmBackupMode =
+        new JCheckBoxMenuItem("Delete Backup if Files were Restored");
+    mnAdvanced.add(chckbxmntmBackupMode);
 
     JSeparator separator_5 = new JSeparator();
     mnAdvanced.add(separator_5);
@@ -707,6 +712,7 @@ public class LawenaView extends JFrame {
     this.spinnerJpegQuality = spinnerJpegQuality;
     this.lblViewmodelFov = lblViewmodelFov;
     this.lblJpegQuality = lblJpegQuality;
+    this.chckbxmntmBackupMode = chckbxmntmBackupMode;
 
     pack();
     setMinimumSize(new Dimension(750, 420));
@@ -880,4 +886,9 @@ public class LawenaView extends JFrame {
   public JLabel getLblJpegQuality() {
     return lblJpegQuality;
   }
+
+  public JCheckBoxMenuItem getChckbxmntmBackupMode() {
+    return chckbxmntmBackupMode;
+  }
+
 }

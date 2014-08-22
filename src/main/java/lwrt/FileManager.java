@@ -34,11 +34,15 @@ public class FileManager {
   }
 
   private Path copy(Path from, Path to) throws IOException {
-    return Files.walkFileTree(from, new CopyDirVisitor(from, to));
+    return Files.walkFileTree(from, new CopyDirVisitor(from, to, false));
+  }
+
+  private Path copyReadOnly(Path from, Path to) throws IOException {
+    return Files.walkFileTree(from, new CopyDirVisitor(from, to, true));
   }
 
   private Path copy(Path from, Path to, Filter<Path> filter) throws IOException {
-    return Files.walkFileTree(from, new CopyDirVisitor(from, to, filter));
+    return Files.walkFileTree(from, new CopyDirVisitor(from, to, false, filter));
   }
 
   private Path delete(Path dir) throws IOException {
@@ -83,7 +87,7 @@ public class FileManager {
       configPath.toFile().setWritable(true);
       Files.move(configPath, configBackupPath);
       Files.createDirectories(configPath);
-      copy(Paths.get("cfg"), configPath);
+      copyReadOnly(Paths.get("cfg"), configPath);
     } catch (IOException e) {
       log.info("Could not replace cfg files: " + e);
       throw new LawenaException("Failed to replace cfg files", e);
@@ -108,8 +112,8 @@ public class FileManager {
       Files.createDirectories(scriptsPath);
       String hudName = cfg.getHud();
       if (!hudName.equals("custom")) {
-        copy(Paths.get("hud", hudName, "resource"), resourcePath);
-        copy(Paths.get("hud", hudName, "scripts"), scriptsPath);
+        copyReadOnly(Paths.get("hud", hudName, "resource"), resourcePath);
+        copyReadOnly(Paths.get("hud", hudName, "scripts"), scriptsPath);
       }
     } catch (IOException e) {
       log.info("Could not replace hud files: " + e);
@@ -164,7 +168,7 @@ public class FileManager {
             if (Files.isDirectory(source)) {
               log.fine("Copying custom folder: " + source.getFileName());
               Path dest = customPath.resolve(source.getFileName());
-              copy(source, dest);
+              copyReadOnly(source, dest);
             } else if (cp == CustomPathList.particles) {
               List<String> contents = cl.getVpkContents(tfpath, cp.getPath());
               List<String> selected = cfg.getParticles();
@@ -278,34 +282,50 @@ public class FileManager {
         restoreComplete = false;
       }
     }
-    if (!restoreComplete) {
-      log.info("*** Restoring Failed: Some files could not be deleted and process was interrupted");
-      log.info("*** Your files are still inside lwrtcfg and lwrtcustom folders. DO NOT delete them");
-      log.info("*** Lawena will attempt to restore them again upon close or next launch.");
-      log.info("*** If it doesn't work, it might be caused by Windows locking font files,");
-      log.info("*** in a way that can only be unlocked through a restart or using Unlocker software :(");
-      Path zip = tfpath.resolve("lawena-user." + Util.now("yyMMddHHmmss") + ".bak.zip");
+    // always make a backup, later decide if it's useful
+    Path zip = tfpath.resolve("lawena-user." + Util.now("yyMMddHHmmss") + ".bak.zip");
+    if (Files.exists(configBackupPath) || Files.exists(customBackupPath)) {
       log.info("Creating a backup of your files in: " + zip);
       try {
         Zip.create(zip, Arrays.asList(configBackupPath, customBackupPath));
       } catch (IOException e) {
         log.info("Emergency backup could not be created: " + e);
       }
-    } else {
+    }
+    if (restoreComplete) {
+      // at this stage, restore can still fail
       try {
         if (Files.exists(configBackupPath)) {
-          log.info("Restore OK: Cleaning up lwrtconfig folder");
+          log.info("Restoring: Deleting files inside lwrtcfg");
           delete(configBackupPath);
         }
         if (Files.exists(customBackupPath)) {
-          log.info("Restore OK: Cleaning up lwrtcustom folder");
+          log.info("Restoring: Deleting files inside lwrtcustom");
           delete(customBackupPath);
         }
       } catch (IOException e) {
-        log.info("Could not delete lwrt folders: " + e);
+        log.info("Could not delete one or both lwrt folders: " + e);
         restoreComplete = false;
       }
-      log.info("Restore and cleanup completed successfully");
+    }
+    if (!restoreComplete) {
+      log.info("*** Restoring Failed: Some files could not be deleted and process was interrupted");
+      log.info("*** Your files are still inside lwrtcfg and lwrtcustom folders. DO NOT delete them");
+      log.info("*** Lawena will attempt to restore them again upon close or next launch.");
+      log.info("*** If it doesn't work, it might be caused by Windows locking font files,");
+      log.info("*** in a way that can only be unlocked through a restart or using Unlocker software :(");
+    } else {
+      log.info("*** Restore and cleanup completed");
+      // Created zip file is safe to delete since the process was completed
+      if (cfg.getBoolean(Key.DeleteBackupsWhenRestoring)) {
+        try {
+          if (Files.deleteIfExists(zip)) {
+            log.info("Deleted last backup: " + zip);
+          }
+        } catch (IOException e) {
+          log.info("Could not delete backup zipfile: " + e);
+        }
+      }
     }
     return restoreComplete;
   }

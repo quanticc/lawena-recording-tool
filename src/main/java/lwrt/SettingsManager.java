@@ -53,7 +53,8 @@ public class SettingsManager {
     CustomSettings("// Custom User Settings"),
     SourceRecorderVideoFormat("tga", "tga", "jpg"),
     SourceRecorderAudioFormat("wav", "wav", ""),
-    SourceRecorderJpegQuality(50, 1, 100);
+    SourceRecorderJpegQuality(50, 1, 100),
+    DeleteBackupsWhenRestoring(true);
 
     private Object value;
     private List<String> allowedValues;

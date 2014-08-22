@@ -1251,6 +1251,7 @@ public class Lawena {
     view.getDisableVoiceChat().setSelected(!settings.getVoice());
     view.getUseHudMinmode().setSelected(settings.getHudMinmode());
     view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
+    view.getChckbxmntmBackupMode().setSelected(settings.getBoolean(Key.DeleteBackupsWhenRestoring));
     view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
     getCustomSettingsTextArea().setText(settings.getCustomSettings());
     view.getCmbSourceVideoFormat().setSelectedItem(
@@ -1297,6 +1298,8 @@ public class Lawena {
     settings.setCustomResources(selected);
     settings.setHudMinmode(view.getUseHudMinmode().isSelected());
     settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
+    settings
+        .setBoolean(Key.DeleteBackupsWhenRestoring, view.getChckbxmntmBackupMode().isSelected());
     settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
     settings.setCustomSettings(getCustomSettingsTextArea().getText());
     settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()

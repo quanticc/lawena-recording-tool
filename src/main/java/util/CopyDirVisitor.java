@@ -18,14 +18,16 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
   private Path toPath;
   private StandardCopyOption copyOption = StandardCopyOption.REPLACE_EXISTING;
   private Filter<Path> filter;
+  private boolean readOnly;
 
-  public CopyDirVisitor(Path from, Path to) {
-    fromPath = from;
-    toPath = to;
+  public CopyDirVisitor(Path from, Path to, boolean readOnly) {
+    this(from, to, readOnly, null);
   }
 
-  public CopyDirVisitor(Path from, Path to, Filter<Path> filter) {
-    this(from, to);
+  public CopyDirVisitor(Path from, Path to, boolean readOnly, Filter<Path> filter) {
+    this.fromPath = from;
+    this.toPath = to;
+    this.readOnly = readOnly;
     this.filter = filter;
   }
 
@@ -47,7 +49,7 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
     Path dest = toPath.resolve(fromPath.relativize(file));
     log.finer("Copying file: " + file + " -> " + dest);
     Path target = Files.copy(file, dest, copyOption);
-    target.toFile().setWritable(false);
+    target.toFile().setWritable(readOnly);
     return FileVisitResult.CONTINUE;
   }
 }
