@@ -49,7 +49,7 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
     Path dest = toPath.resolve(fromPath.relativize(file));
     log.finer("Copying file: " + file + " -> " + dest);
     Path target = Files.copy(file, dest, copyOption);
-    target.toFile().setWritable(readOnly);
+    target.toFile().setWritable(!readOnly);
     return FileVisitResult.CONTINUE;
   }
 }
