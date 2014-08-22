@@ -75,7 +75,6 @@ public class Zip {
           Path dest = zipFileSystem.getPath(root.toString(), src.getFileName().toString());
           Path parent = dest.getParent();
           if (Files.notExists(parent)) {
-            log.fine("[zip] Creating directory: " + parent);
             Files.createDirectories(parent);
           }
           Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
@@ -97,7 +96,6 @@ public class Zip {
               Path relativeDir = src.getFileName().resolve(src.relativize(dir));
               Path dirToCreate = zipFileSystem.getPath(root.toString(), relativeDir.toString());
               if (Files.notExists(dirToCreate)) {
-                log.fine("[zip] Creating directory: " + dirToCreate);
                 Files.createDirectories(dirToCreate);
               }
               return FileVisitResult.CONTINUE;
@@ -137,7 +135,6 @@ public class Zip {
   public static void unzip(Path zipFilename, final Path destDir) throws IOException {
     // if the destination doesn't exist, create it
     if (Files.notExists(destDir)) {
-      log.fine(destDir + " does not exist. Creating...");
       Files.createDirectories(destDir);
     }
 
@@ -149,7 +146,6 @@ public class Zip {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
           final Path destFile = Paths.get(destDir.toString(), file.toString());
-          log.fine("Extracting file " + file + " to " + destFile);
           Files.copy(file, destFile, StandardCopyOption.REPLACE_EXISTING);
           return FileVisitResult.CONTINUE;
         }
@@ -159,7 +155,6 @@ public class Zip {
             throws IOException {
           final Path dirToCreate = Paths.get(destDir.toString(), dir.toString());
           if (Files.notExists(dirToCreate)) {
-            log.fine("Creating directory " + dirToCreate);
             Files.createDirectory(dirToCreate);
           }
           return FileVisitResult.CONTINUE;
