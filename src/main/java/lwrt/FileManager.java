@@ -288,7 +288,8 @@ public class FileManager {
       log.info("Creating a backup of your files in: " + zip);
       try {
         Zip.create(zip, Arrays.asList(configBackupPath, customBackupPath));
-      } catch (IOException e) {
+      } catch (IllegalArgumentException | IOException e) {
+        // IllegalArgumentException can be caused by a bug in jdk versions 7u40 and older
         log.info("Emergency backup could not be created: " + e);
       }
     }
