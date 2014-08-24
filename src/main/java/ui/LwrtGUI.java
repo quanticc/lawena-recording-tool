@@ -1,7 +1,5 @@
 package ui;
 
-import util.StartLogger;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,13 +8,16 @@ import javax.swing.SwingUtilities;
 import lwrt.Lawena;
 import lwrt.SettingsManager;
 
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
 public class LwrtGUI {
 
   private static final Logger log = Logger.getLogger("lawena");
 
   public static void main(String[] args) throws Exception {
+    SLF4JBridgeHandler.removeHandlersForRootLogger();
+    SLF4JBridgeHandler.install();
     SettingsManager cfg = new SettingsManager("settings.lwf");
-    new StartLogger("lawena").toConsole(cfg.getLogConsoleLevel()).toFile(cfg.getLogFileLevel());
     Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
       public void uncaughtException(Thread t, final Throwable e) {
         log.log(Level.SEVERE, "Unexpected problem in " + t, e);

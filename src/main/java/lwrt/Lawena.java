@@ -1,17 +1,5 @@
 package lwrt;
 
-import ui.AboutDialog;
-import ui.LawenaView;
-import ui.ParticlesDialog;
-import ui.SegmentsDialog;
-import ui.TooltipRenderer;
-import util.LawenaException;
-import util.StartLogger;
-import util.UpdateHelper;
-import util.Util;
-import util.WatchDir;
-import vdm.DemoEditor;
-
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
@@ -80,6 +68,22 @@ import javax.swing.text.JTextComponent;
 
 import lwrt.CustomPath.PathContents;
 import lwrt.SettingsManager.Key;
+
+import org.slf4j.LoggerFactory;
+
+import ui.AboutDialog;
+import ui.LawenaView;
+import ui.ParticlesDialog;
+import ui.SegmentsDialog;
+import ui.TooltipRenderer;
+import util.LawenaException;
+import util.UpdateHelper;
+import util.WatchDir;
+import vdm.DemoEditor;
+
+import com.github.lawena.util.LoggingAppender;
+import com.github.lawena.util.StatusAppender;
+import com.github.lawena.util.Util;
 
 public class Lawena {
 
@@ -191,7 +195,7 @@ public class Lawena {
         }
         view.getBtnClearMovieFolder().setEnabled(true);
         view.getBtnClearMovieFolder().setText("Clear Movie Files");
-        status.info("");
+        status.info("Ready");
       }
     };
 
@@ -492,7 +496,7 @@ public class Lawena {
       } catch (CancellationException | InterruptedException | ExecutionException e) {
         log.info("Skybox preview generator task was cancelled");
       }
-      status.info("");
+      status.info("Ready");
       if (!isCancelled()) {
         setCurrentWorker(null, false);
       }
@@ -713,8 +717,13 @@ public class Lawena {
   public void start() {
     view = new LawenaView();
 
-    new StartLogger("lawena").toTextComponent(settings.getLogUiLevel(), view.getTextAreaLog());
-    new StartLogger("status").toLabel(Level.FINE, view.getLblStatus());
+    ch.qos.logback.classic.Logger lawenaLog =
+        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("lawena");
+    lawenaLog.addAppender(new LoggingAppender(view.getLogPane(), lawenaLog.getLoggerContext()));
+    ch.qos.logback.classic.Logger statusLog =
+        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("status");
+    statusLog.addAppender(new StatusAppender(view.getLblStatus(), statusLog.getLoggerContext()));
+
     log.fine("Lawena Recording Tool " + version + " build " + build);
     log.fine("TF2 path: " + settings.getTfPath());
     log.fine("Movie path: " + settings.getMoviePath());

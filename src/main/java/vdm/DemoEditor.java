@@ -162,7 +162,7 @@ public class DemoEditor {
           status.info(str);
         } else {
           log.fine("No VDM files were deleted");
-          status.info("");
+          status.info("Ready");
         }
         view.getBtnDeleteVdmFiles().setEnabled(true);
       }

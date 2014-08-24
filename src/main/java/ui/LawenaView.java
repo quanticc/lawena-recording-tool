@@ -10,11 +10,21 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,30 +34,18 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.JSeparator;
-import javax.swing.KeyStroke;
-
-import java.awt.event.KeyEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.swing.JCheckBoxMenuItem;
 
 public class LawenaView extends JFrame {
 
@@ -133,7 +131,6 @@ public class LawenaView extends JFrame {
   private JLabel lblFrameRate;
   private JLabel lblSkyboxPreview;
   private JButton btnClearMovieFolder;
-  private JTextArea textAreaLog;
   private JLabel lblStatus;
   private JComboBox<String> cmbViewmodel;
   private JLabel lblPreview;
@@ -161,6 +158,7 @@ public class LawenaView extends JFrame {
   private JCheckBoxMenuItem chckbxmntmInsecure;
   private JMenuItem mntmRevertToDefault;
   private JCheckBoxMenuItem chckbxmntmBackupMode;
+  private JTextPane logPane;
 
   /**
    * Create the frame.
@@ -633,18 +631,19 @@ public class LawenaView extends JFrame {
     gbl_panelLog.rowWeights = new double[] {1.0, Double.MIN_VALUE};
     panelLog.setLayout(gbl_panelLog);
 
-    JScrollPane scrollPane_2 = new JScrollPane();
+    JScrollPane logScroll = new JScrollPane();
     GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
     gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
     gbc_scrollPane_2.insets = new Insets(5, 5, 5, 5);
     gbc_scrollPane_2.gridx = 0;
     gbc_scrollPane_2.gridy = 0;
-    panelLog.add(scrollPane_2, gbc_scrollPane_2);
+    panelLog.add(logScroll, gbc_scrollPane_2);
 
-    JTextArea textAreaLog = new JTextArea();
-    textAreaLog.setFont(new Font("Tahoma", Font.PLAIN, 10));
-    textAreaLog.setEditable(false);
-    scrollPane_2.setViewportView(textAreaLog);
+    JTextPane logPane = new JTextPane();
+    logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    logPane.setFont(new Font("Tahoma", Font.PLAIN, 10));
+    logPane.setEditable(false);
+    logScroll.setViewportView(logPane);
 
     JPanel panelStatusbar = new JPanel();
     contentPane.add(panelStatusbar, BorderLayout.SOUTH);
@@ -687,7 +686,6 @@ public class LawenaView extends JFrame {
     this.lblFrameRate = lblFrameRate;
     this.lblSkyboxPreview = lblSkyboxPreview;
     this.btnClearMovieFolder = btnClearMovieFolder;
-    this.textAreaLog = textAreaLog;
     this.tableCustomContent = tableCustomContent;
     this.tabbedPane = tabbedPane;
     this.mntmChangeTfDirectory = mntmChangeTfDirectory;
@@ -713,6 +711,7 @@ public class LawenaView extends JFrame {
     this.lblViewmodelFov = lblViewmodelFov;
     this.lblJpegQuality = lblJpegQuality;
     this.chckbxmntmBackupMode = chckbxmntmBackupMode;
+    this.logPane = logPane;
 
     pack();
     setMinimumSize(new Dimension(750, 420));
@@ -787,8 +786,8 @@ public class LawenaView extends JFrame {
     return btnClearMovieFolder;
   }
 
-  public JTextArea getTextAreaLog() {
-    return textAreaLog;
+  public JTextPane getLogPane() {
+    return logPane;
   }
 
   public JTable getTableCustomContent() {
