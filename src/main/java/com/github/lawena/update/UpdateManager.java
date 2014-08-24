@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -91,7 +92,7 @@ public class UpdateManager {
       Resource res = new Resource(local.getName(), url, local, false);
       if (download(res)) {
         try {
-          for (String line : Files.readAllLines(local.toPath())) {
+          for (String line : Files.readAllLines(local.toPath(), Charset.defaultCharset())) {
             String[] data = line.split(";");
             set.add(new VersionInfo(data));
           }
