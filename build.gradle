@@ -55,11 +55,11 @@ jar {
     destinationDir = null
     manifest {
         attributes (
-            'Main-Class': 'ui.LwrtGUI',
+            'Main-Class': 'com.github.lawena.ui.LwrtGUI',
             'Implementation-Title': 'Lawena Recording Tool',
             'Implementation-Version': version,
             'Implementation-Build': buildtime,
-            'SplashScreen-Image': 'ui/splash.png'
+            'SplashScreen-Image': 'splash.png'
         )
     }
 }

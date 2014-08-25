@@ -6,6 +6,7 @@
 package com.github.lawena.util;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -59,8 +60,9 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
       if (doc.getStyle("Class") == null) {
         doc.addStyle("Normal", null);
-        StyleConstants.setForeground(doc.addStyle("Class", null), Color.blue);
-        StyleConstants.setForeground(doc.addStyle("Error", null), Color.red);
+        StyleConstants.setForeground(doc.addStyle("Class", null), Color.BLUE);
+        StyleConstants.setForeground(doc.addStyle("Error", null), Color.RED);
+        StyleConstants.setForeground(doc.addStyle("Debug", null), Color.GRAY);
         StyleConstants.setItalic(doc.addStyle("Level", null), true);
       }
     }
@@ -68,14 +70,19 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
     @Override
     public void run() {
       try {
+        // swallow status logger to avoid pollution
+        if (event.getLoggerName().equals("status"))
+          return;
         String message = event.getFormattedMessage().trim();
         if (name.trim().equals(""))
           return;
         Style msgStyle = null;
         if (event.getLevel().isGreaterOrEqual(Level.WARN)) {
           msgStyle = doc.getStyle("Error");
-        } else {
+        } else if (event.getLevel().isGreaterOrEqual(Level.INFO)) {
           msgStyle = doc.getStyle("Normal");
+        } else {
+          msgStyle = doc.getStyle("Debug");
         }
         doc.insertString(doc.getLength(), "\n", doc.getStyle("Normal"));
         int prevLength = doc.getLength();
