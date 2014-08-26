@@ -7,12 +7,11 @@ Easy-to-use and no install required. This tool does not interfere with your regu
 
 #### Install Lawena using the launcher
 - [Download the Launcher](http://code.google.com/p/lawenarecordingtool/downloads/detail?name=lawena-recording-tool.v4.zip) and extract it to any folder.
-- Extract to any folder and run **lawena.exe**.
-- The launcher will get the latest files and then start the program.
+- Run **lawena.exe** and the launcher will get the latest files and start the program.
 
 #### Install Lawena from this repository
 - [Download this repository](https://github.com/iabarca/lawena-recording-tool/archive/v4.x.zip) and extract it to any folder.
-- Double click **gradlew.bat** (Windows) or execute **gradlew** script (Unix) to run.
+- Run **gradlew.bat** (Windows) or **gradlew** script (Unix) to start the program.
 
 #### Features
 - Insane max quality graphics configuration. 
@@ -25,7 +24,7 @@ Easy-to-use and no install required. This tool does not interfere with your regu
 - [SrcDemo2](https://code.google.com/p/srcdemo2/) support to reduce drive usage and space.
 - [VDM](https://developer.valvesoftware.com/wiki/Demo_Recording_Tools) file support for automatizing your movie recording process.
 - Updates automatically, you can see the latest changes [here](https://github.com/iabarca/lawena-recording-tool/commits/v4.x).
-- Windows and experimental Linux/OSX support. (need more feedback!)
+- Windows and experimental Linux/OSX support. (needs more feedback!)
 
 #### Recommended links
 - [Instructions](http://code.google.com/p/lawenarecordingtool/wiki/Instructions) on how to use the tool, how to add custom resources, keybindings and Frequently Asked Questions.
