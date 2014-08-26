@@ -7,7 +7,7 @@ apply plugin: 'distribution'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-def mainClassName = 'com.github.lawena.ui.LwrtGUI'
+def mainClassName = 'com.github.lawena.app.Main'
 def buildtime = new Date().format("yyyyMMddHHmmss")
 
 defaultTasks 'clean', 'run'
@@ -45,25 +45,30 @@ sourceSets {
     }
 }
 
-new ByteArrayOutputStream().withStream { execOS ->
-    exec {
-        executable = 'git'
-        args = [ 'describe', '--tags', '--always' ]
-        standardOutput = execOS
+try {
+    new ByteArrayOutputStream().withStream { execOS ->
+        exec {
+            executable = 'git'
+            args = [ 'describe', '--tags', '--always' ]
+            standardOutput = execOS
+        }
+        def describe = execOS.toString().trim()
+        version describe
     }
-    def describe = execOS.toString().trim()
-    version describe
+} catch (Exception e) {
+    println "Could not retrieve version number"
 }
 
 jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     archiveName = 'lawena.jar'
     destinationDir = null
+    def implVersion = (version == null ? "v4" : version)
     manifest {
         attributes (
             'Main-Class': mainClassName,
             'Implementation-Title': 'Lawena Recording Tool',
-            'Implementation-Version': version,
+            'Implementation-Version': implVersion,
             'Implementation-Build': buildtime,
             'SplashScreen-Image': 'splash.png'
         )
@@ -162,7 +167,6 @@ task packSkyboxes(type: Zip) {
 
 task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
 }
-
 
 task deployStable(dependsOn: 
       ['copyGetdownClient', 'copyMainJar', 'pack',
