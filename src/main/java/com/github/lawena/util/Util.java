@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.jar.JarFile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +65,17 @@ public class Util {
   public static String now(String format) {
     SimpleDateFormat sdf = new SimpleDateFormat(format);
     return sdf.format(Calendar.getInstance().getTime());
+  }
+
+  public static String getManifestString(String key, String defaultValue) {
+    try (JarFile jar =
+        new JarFile(
+            new File(Util.class.getProtectionDomain().getCodeSource().getLocation().toURI()))) {
+      String value = jar.getManifest().getMainAttributes().getValue(key);
+      return (value == null ? "no-gradle " + defaultValue : value);
+    } catch (IOException | URISyntaxException e) {
+    }
+    return "no-jar " + defaultValue;
   }
 
 }

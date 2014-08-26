@@ -24,7 +24,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -39,7 +38,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.jar.JarFile;
 
 import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
@@ -67,6 +65,7 @@ import javax.swing.text.JTextComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.app.MainModel;
 import com.github.lawena.lwrt.CustomPath.PathContents;
 import com.github.lawena.lwrt.SettingsManager.Key;
 import com.github.lawena.ui.AboutDialog;
@@ -77,8 +76,6 @@ import com.github.lawena.ui.TooltipRenderer;
 import com.github.lawena.util.LawenaException;
 import com.github.lawena.util.LoggingAppender;
 import com.github.lawena.util.StatusAppender;
-import com.github.lawena.util.UpdateHelper;
-import com.github.lawena.util.Util;
 import com.github.lawena.util.WatchDir;
 import com.github.lawena.vdm.DemoEditor;
 
@@ -470,8 +467,6 @@ public class Lawena {
           String img = "skybox/" + skybox + "up.png";
           if (!Files.exists(Paths.get(img))) {
             String filename = skybox + "up.vtf";
-            cl.extractIfNeeded(settings.getTfPath(), "custom/skybox.vpk", Paths.get("skybox"),
-                Arrays.asList(filename));
             cl.generatePreview(filename);
           }
           ImageIcon icon = createPreviewIcon(img);
@@ -599,35 +594,19 @@ public class Lawena {
   private Thread watcher;
   private Object lastHud;
 
-  private String version = "4.0-SNAPSHOT";
-  private String build;
-  private UpdateHelper updater;
+  private MainModel model;
 
-  public Lawena(SettingsManager cfg) {
-    String impl = this.getClass().getPackage().getImplementationVersion();
-    if (impl != null) {
-      version = impl;
-    }
-    build = getManifestString("Implementation-Build", Util.now("yyyyMMddHHmmss"));
-    String osname = System.getProperty("os.name");
-    if (osname.contains("Windows")) {
-      cl = new CLWindows();
-    } else if (osname.contains("Linux")) {
-      cl = new CLLinux();
-    } else if (osname.contains("OS X")) {
-      cl = new CLOSX();
-    } else {
-      throw new UnsupportedOperationException("OS not supported");
-    }
-    cl.setLookAndFeel();
+  public Lawena(MainModel mainModel) {
+    model = mainModel;
+    cl = model.getOsInterface();
 
-    // Perform after-update checks
-    updater = new UpdateHelper();
-    updater.updateLauncher();
-    updater.cleanupUnusedFiles();
-    updater.loadChannels();
+    // // Perform after-update checks
+    // updater = new UpdateHelper();
+    // updater.updateLauncher();
+    // updater.cleanupUnusedFiles();
+    // updater.loadChannels();
 
-    settings = cfg;
+    settings = model.getSettings();
     oDxlevel = cl.getSystemDxLevel();
     steampath = cl.getSteamPath();
     Path tfpath = settings.getTfPath();
@@ -697,22 +676,6 @@ public class Lawena {
     vdm = new DemoEditor(settings, cl);
   }
 
-  private String getManifestString(String key, String defaultValue) {
-    try (JarFile jar =
-        new JarFile(new File(this.getClass().getProtectionDomain().getCodeSource().getLocation()
-            .toURI()))) {
-      String value = jar.getManifest().getMainAttributes().getValue(key);
-      return (value == null ? "bat." + defaultValue : value);
-    } catch (IOException | URISyntaxException e) {
-    }
-    return "custom." + defaultValue;
-  }
-
-  private String shortver() {
-    String[] arr = version.split("-");
-    return arr[0] + (arr.length > 1 ? "-" + arr[1] : "");
-  }
-
   public void start() {
     view = new LawenaView();
 
@@ -724,13 +687,11 @@ public class Lawena {
     statusLog.setAdditive(false);
     statusLog.addAppender(new StatusAppender(view.getLblStatus(), statusLog.getLoggerContext()));
 
-    log.info("Lawena Recording Tool {} build {}", version, build);
     log.debug("TF2 path: {}", settings.getTfPath());
     log.debug("Movie path: {}", settings.getMoviePath());
     log.debug("Lawena path: {}", Paths.get("").toAbsolutePath());
-    log.debug("Java version: {}", System.getProperty("java.version"));
 
-    view.setTitle("Lawena Recording Tool " + shortver());
+    view.setTitle("Lawena Recording Tool " + model.getShortVersion());
     try {
       view.setIconImage(new ImageIcon(getClass().getResource("tf2.png")).getImage());
     } catch (Exception e) {
@@ -749,16 +710,17 @@ public class Lawena {
       @Override
       public void actionPerformed(ActionEvent e) {
         if (dialog == null) {
-          dialog = new AboutDialog(version, build);
+          dialog = new AboutDialog(model.getFullVersion(), model.getBuildTime());
           dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
           dialog.setModalityType(ModalityType.APPLICATION_MODAL);
-          dialog.getBtnUpdater().addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              updater.showSwitchUpdateChannelDialog();
-            }
-          });
+          dialog.getBtnUpdater().setEnabled(false);
+          // dialog.getBtnUpdater().addActionListener(new ActionListener() {
+          //
+          // @Override
+          // public void actionPerformed(ActionEvent e) {
+          // updater.showSwitchUpdateChannelDialog();
+          // }
+          // });
         }
         dialog.setVisible(true);
       }

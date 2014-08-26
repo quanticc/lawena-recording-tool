@@ -1,4 +1,4 @@
-package com.github.lawena.ui;
+package com.github.lawena.app;
 
 import javax.swing.SwingUtilities;
 
@@ -9,9 +9,9 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import com.github.lawena.lwrt.Lawena;
 import com.github.lawena.lwrt.SettingsManager;
 
-public class LwrtGUI {
+public class Main {
 
-  private static final Logger log = LoggerFactory.getLogger(LwrtGUI.class);
+  private static final Logger log = LoggerFactory.getLogger(Main.class);
 
   public static void main(String[] args) throws Exception {
     SLF4JBridgeHandler.removeHandlersForRootLogger();
@@ -22,7 +22,7 @@ public class LwrtGUI {
         log.error("Unexpected problem in " + t, e);
       }
     });
-    final Lawena lawena = new Lawena(cfg);
+    final Lawena lawena = new Lawena(new MainModel(cfg));
     SwingUtilities.invokeAndWait(new Runnable() {
       public void run() {
         try {
@@ -32,7 +32,5 @@ public class LwrtGUI {
         }
       }
     });
-
   }
-
 }
