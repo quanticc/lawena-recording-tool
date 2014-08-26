@@ -1,8 +1,16 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'distribution'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
+
+def mainClassName = 'com.github.lawena.ui.LwrtGUI'
+def buildtime = new Date().format("yyyyMMddHHmmss")
+
+defaultTasks 'clean', 'run'
 
 eclipse {
     classpath {
@@ -37,8 +45,6 @@ sourceSets {
     }
 }
 
-def buildtime = new Date().format("yyyyMMddHHmmss")
-
 new ByteArrayOutputStream().withStream { execOS ->
     exec {
         executable = 'git'
@@ -55,11 +61,128 @@ jar {
     destinationDir = null
     manifest {
         attributes (
-            'Main-Class': 'com.github.lawena.ui.LwrtGUI',
+            'Main-Class': mainClassName,
             'Implementation-Title': 'Lawena Recording Tool',
             'Implementation-Version': version,
             'Implementation-Build': buildtime,
             'SplashScreen-Image': 'splash.png'
         )
     }
+}
+
+distributions {
+    main {}
+    stable {
+        contents {
+            from { 'src/main/dist' }
+            duplicatesStrategy = 'exclude'
+        }
+    }
+    preview {
+        contents {
+            from { 'src/main/dist' }
+            duplicatesStrategy = 'exclude'
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
+task buildLauncher {
+    inputs.file 'launcher/lawena-launcher.xml'
+    outputs.file 'launcher/lawena.exe'
+    doLast {
+        exec {
+            workingDir 'launcher'
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', launch4jPath, 'lawena-launcher.xml'
+            } else {
+                commandLine launch4jPath, 'lawena-launcher.xml'
+            }
+        }
+    }
+}
+
+task copyLauncher(type: Copy, dependsOn: 'buildLauncher') {
+    from 'launcher/lawena.exe'
+    into 'src/main/dist'
+}
+
+task copyLauncherExtra(type: Copy, dependsOn: 'copyLauncher') {
+    from 'launcher/lawena.exe'
+    into 'src/main/dist/lawena/code'
+    rename 'lawena.exe', 'lawena-new.exe'
+}
+
+task copyGetdownClient(type: Copy, dependsOn: 'copyLauncher') {
+    from 'launcher/getdown-client.jar'
+    into 'src/main/dist/lawena'
+}
+
+task copyGetdownClientExtra(type: Copy, dependsOn: 'copyGetdownClient') {
+    from 'launcher/getdown-client.jar'
+    into 'src/main/dist/lawena/code'
+    rename 'getdown-client.jar', 'getdown-client-new.jar'
+}
+
+task copyMainJar(type: Copy, dependsOn: 'jar') {
+    from 'lawena.jar'
+    into 'src/main/dist/lawena'
+}
+
+task packResources(type: Zip) {
+    archiveName = 'lwrtresources.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['cfg/**', 'hud/**']
+}
+
+task packVpks(type: Zip) {
+    archiveName = 'lwrtvpks.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['custom/**']
+}
+
+task packWinBatches(type: Zip) {
+    archiveName = 'lwrtwinstuff.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['batch/**', 'vtfcmd/**']
+}
+
+task packSkyboxes(type: Zip) {
+    archiveName = 'lwrtskybox.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['skybox/**']
+}
+
+task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
+}
+
+
+task deployStable(dependsOn: 
+      ['copyGetdownClient', 'copyMainJar', 'pack',
+      'cleanInstallStableDist', 'installStableDist']) {
+    doLast {
+        def getdown = file('build/install/lawena-stable/lawena/getdown.txt')
+        getdown.append '\nversion = ' + buildtime + '\n'
+        copy {
+            from fileTree('build/install/lawena-stable/lawena')
+            into file(stableDeployDir + '/client')
+        }
+        copy {
+            from fileTree('build/install/lawena-stable/lawena')
+            into file(stableDeployDir + '/' + buildtime)
+        }
+    }
+}
+
+task run(type: JavaExec, dependsOn: 'classes') {
+    description "Runs this project as a JVM application"
+    main mainClassName
+    classpath project.sourceSets.main.runtimeClasspath
 }

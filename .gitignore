@@ -115,6 +115,7 @@ hs_err_pid*
 .gradle
 build/
 gradle.properties
+!gradle/wrapper/*.jar
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -138,4 +139,4 @@ cfg/mov/*.cfg
 custom/*
 version.txt
 *.lck
-!launcher/getdown-client.jar
+!launcher/*.jar

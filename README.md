@@ -5,10 +5,14 @@ A simple [Java 7+](http://www.oracle.com/technetwork/java/javase/downloads/index
 
 Easy-to-use and no install required. This tool does not interfere with your regular TF2 configuration, HUD or launch options. Requires [Steam](https://steamcommunity.com/) in order to run.
 
-#### Download Lawena
-- Get the [Launcher](http://code.google.com/p/lawenarecordingtool/downloads/detail?name=lawena-recording-tool.v4.zip)
-- Extract to any folder and run **lawena.exe**, the launcher will get all the required files and then start the tool.
-- You can also download this repository and execute via [Gradle](http://www.gradle.org/) using ``gradle jar`` and then double clicking **lawena.jar**.
+#### Install Lawena using the launcher
+- [Download the Launcher](http://code.google.com/p/lawenarecordingtool/downloads/detail?name=lawena-recording-tool.v4.zip) and extract it to any folder.
+- Extract to any folder and run **lawena.exe**.
+- The launcher will get the latest files and then start the program.
+
+#### Install Lawena from this repository
+- [Download this repository](https://github.com/iabarca/lawena-recording-tool/archive/v4.x.zip) and extract it to any folder.
+- Double click **gradlew.bat** (Windows) or execute **gradlew** script (Unix) to run.
 
 #### Features
 - Insane max quality graphics configuration. 
