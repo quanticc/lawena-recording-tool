@@ -121,18 +121,18 @@ task copyLauncher(type: Copy, dependsOn: 'buildLauncher') {
     into 'src/main/dist'
 }
 
-task copyLauncherExtra(type: Copy, dependsOn: 'copyLauncher') {
+task copyLauncherNew(type: Copy, dependsOn: 'copyLauncher') {
     from 'launcher/lawena.exe'
     into 'src/main/dist/lawena/code'
     rename 'lawena.exe', 'lawena-new.exe'
 }
 
-task copyGetdownClient(type: Copy, dependsOn: 'copyLauncher') {
+task copyGetdownClient(type: Copy, dependsOn: 'copyLauncherNew') {
     from 'launcher/getdown-client.jar'
     into 'src/main/dist/lawena'
 }
 
-task copyGetdownClientExtra(type: Copy, dependsOn: 'copyGetdownClient') {
+task copyGetdownClientNew(type: Copy, dependsOn: 'copyGetdownClient') {
     from 'launcher/getdown-client.jar'
     into 'src/main/dist/lawena/code'
     rename 'getdown-client.jar', 'getdown-client-new.jar'
@@ -141,6 +141,9 @@ task copyGetdownClientExtra(type: Copy, dependsOn: 'copyGetdownClient') {
 task copyMainJar(type: Copy, dependsOn: 'jar') {
     from 'lawena.jar'
     into 'src/main/dist/lawena'
+}
+
+task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar']) {
 }
 
 task packResources(type: Zip) {
@@ -174,14 +177,18 @@ task packSkyboxes(type: Zip) {
 task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
 }
 
-// stable builds tasks
+// stable
 
 task setupGetdownStable(dependsOn: 
-      ['copyGetdownClient', 'copyMainJar', 'pack',
-      'cleanInstallStableDist', 'stableDistZip', 'installStableDist']) {
+      ['copyLibs', 'pack', 'cleanInstallStableDist', 'stableDistZip', 'installStableDist']) {
     doLast {
+        def base = file('build/install/lawena-stable/lawena/getdown.base.txt')
         def getdown = file('build/install/lawena-stable/lawena/getdown.txt')
-        getdown.append '\nversion = ' + buildtime + '\n'
+        getdown.withWriter { w ->
+            base.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'release') + System.getProperty("line.separator")
+            }
+        }
     }      
 }
 
@@ -226,14 +233,18 @@ task diffDeployStable(dependsOn: 'deployStable') {
     }
 }
 
-// preview builds tasks
+// preview
 
 task setupGetdownPreview(dependsOn: 
-      ['copyGetdownClient', 'copyMainJar', 'pack',
-      'cleanInstallPreviewDist', 'previewDistZip', 'installPreviewDist']) {
+      ['copyLibs', 'pack', 'cleanInstallPreviewDist', 'previewDistZip', 'installPreviewDist']) {
     doLast {
+        def base = file('build/install/lawena-preview/lawena/getdown.base.txt')
         def getdown = file('build/install/lawena-preview/lawena/getdown.txt')
-        getdown.append '\nversion = ' + buildtime + '\n'
+        getdown.withWriter { w ->
+            base.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'preview') + System.getProperty("line.separator")
+            }
+        }
     }      
 }
 
@@ -278,14 +289,18 @@ task diffDeployPreview(dependsOn: 'deployPreview') {
     }
 }
 
-//
+// snapshot
 
 task setupGetdownSnapshot(dependsOn: 
-      ['copyGetdownClient', 'copyMainJar', 'pack',
-      'cleanInstallSnapshotDist', 'snapshotDistZip', 'installSnapshotDist']) {
+      ['copyLibs', 'pack', 'cleanInstallSnapshotDist', 'snapshotDistZip', 'installSnapshotDist']) {
     doLast {
+        def base = file('build/install/lawena-snapshot/lawena/getdown.base.txt')
         def getdown = file('build/install/lawena-snapshot/lawena/getdown.txt')
-        getdown.append '\nversion = ' + buildtime + '\n'
+        getdown.withWriter { w ->
+            base.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'snapshot') + System.getProperty("line.separator")
+            }
+        }
     }      
 }
 
