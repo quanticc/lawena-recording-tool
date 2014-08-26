@@ -159,7 +159,7 @@ task packWinBatches(type: Zip) {
 }
 
 task packSkyboxes(type: Zip) {
-    archiveName = 'lwrtskybox.jar'
+    archiveName = 'skybox.jar'
     destinationDir = file('src/main/dist/lawena')
     from projectDir
     includes = ['skybox/**']
@@ -168,19 +168,52 @@ task packSkyboxes(type: Zip) {
 task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
 }
 
-task deployStable(dependsOn: 
+task setupGetdownStable(dependsOn: 
       ['copyGetdownClient', 'copyMainJar', 'pack',
       'cleanInstallStableDist', 'installStableDist']) {
     doLast {
         def getdown = file('build/install/lawena-stable/lawena/getdown.txt')
         getdown.append '\nversion = ' + buildtime + '\n'
+    }      
+}
+
+task digestStable(type: JavaExec, dependsOn: 'setupGetdownStable') {
+    main 'com.threerings.getdown.tools.Digester'
+    classpath 'launcher/getdown-client.jar'
+    args = [file('build/install/lawena-stable/lawena')]
+}
+
+task deployStable(dependsOn: 'digestStable') {
+    doLast {
         copy {
             from fileTree('build/install/lawena-stable/lawena')
-            into file(stableDeployDir + '/client')
+            into file(stableDeployDir + '/latest')
         }
         copy {
             from fileTree('build/install/lawena-stable/lawena')
             into file(stableDeployDir + '/' + buildtime)
+        }
+        def output = file(stableDeployDir + '/buildlist.txt')
+        output.append '\n' + buildtime + ';' + version
+    }
+}
+
+task diffDeployStable(dependsOn: 'deployStable') {
+    doLast {
+        def buildlist = []
+        file(stableDeployDir).eachDirMatch(~/^[0-9]+$/) { dir ->
+            buildlist.add dir.name
+        }
+        buildlist.sort(java.text.Collator.instance)
+        def latest = buildlist[buildlist.size() - 1]
+        buildlist = buildlist - latest
+        buildlist.each { s ->
+            println "Creating diff between " + s + " and latest build " + latest
+            javaexec {
+                main 'com.threerings.getdown.tools.Differ'
+                classpath 'launcher/getdown-client.jar'
+                args = [file(stableDeployDir + '/' + latest), file(stableDeployDir + '/' + s)]
+            }
         }
     }
 }
