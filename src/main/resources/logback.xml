@@ -33,6 +33,7 @@
 	<logger name="java.awt" level="INFO" />
 	<logger name="javax.swing" level="INFO" />
 	<logger name="sun.awt" level="INFO" />
+	<logger name="sun.net" level="INFO" />
 
 	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
 </configuration>

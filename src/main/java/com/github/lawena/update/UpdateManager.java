@@ -16,10 +16,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,67 +40,60 @@ import com.threerings.getdown.util.LaunchUtil;
 public class UpdateManager {
 
   private static final Logger log = LoggerFactory.getLogger(UpdateManager.class);
+  private static final String DEFAULT_CHANNELS =
+      "https://dl.dropboxusercontent.com/u/74380/lwrt/channels.json";
 
   private final Map<String, Object> getdown;
   private final Gson gson = new Gson();
   private List<Channel> channels;
 
-  public UpdateManager() throws IOException {
+  private long lastCheck = 0L;
+  private SortedSet<BuildInfo> buildList;
+
+  public UpdateManager() {
     this(Paths.get("getdown.txt"));
   }
 
-  public UpdateManager(Path getdownPath) throws IOException {
+  public UpdateManager(Path getdownPath) {
     this.getdown = parseConfig(getdownPath);
+    this.channels = loadChannels();
   }
 
-  private Map<String, Object> parseConfig(Path path) throws IOException {
-    return ConfigUtil.parseConfig(path.toFile(), false);
+  private Map<String, Object> parseConfig(Path path) {
+    try {
+      return ConfigUtil.parseConfig(path.toFile(), false);
+    } catch (IOException e) {
+      log.info("Application running in standalone mode");
+      return new HashMap<>();
+    }
   }
 
-  public boolean isLatestVersion() {
-    return isLatestVersion(getCurrentChannel(), getCurrentVersion());
-  }
-
-  boolean isLatestVersion(String channel, String version) {
-    Channel current = null;
-    for (Channel c : getChannels()) {
-      if (c.getId().equals(channel)) {
-        current = c;
+  private SortedSet<BuildInfo> getVersionList(String channelName) {
+    for (Channel channel : getChannels()) {
+      if (channel.getId().equals(channelName)) {
+        return getVersionList(channel);
       }
     }
-    if (current == null || version == null)
-      return true;
-    long v;
-    try {
-      v = Long.parseLong(version);
-    } catch (NumberFormatException e) {
-      log.warn("Invalid version number: {}", version);
-      return true;
-    }
-    SortedSet<VersionInfo> versions = getVersionList(current);
-    if (!versions.isEmpty()) {
-      return v < versions.last().getTimestamp();
-    }
-    log.warn("Could not retrieve latest version");
-    return true;
+    throw new IllegalArgumentException("Channel name not found");
   }
 
-  public SortedSet<VersionInfo> getVersionList(Channel current) {
-    String name = "buildlist";
-    SortedSet<VersionInfo> set = new TreeSet<VersionInfo>();
+  private SortedSet<BuildInfo> getVersionList(Channel channel) {
+    String name = "buildlist.txt";
+    SortedSet<BuildInfo> set = new TreeSet<BuildInfo>();
     try {
       File local = new File(name).getAbsoluteFile();
-      URL url = new URL(current.getUrl() + name);
+      URL url = new URL(channel.getUrl() + name);
       Resource res = new Resource(local.getName(), url, local, false);
       if (download(res)) {
         try {
           for (String line : Files.readAllLines(local.toPath(), Charset.defaultCharset())) {
             String[] data = line.split(";");
-            set.add(new VersionInfo(data));
+            set.add(new BuildInfo(data));
           }
         } catch (IOException e) {
           log.warn("Could not read lines from file: " + e);
         }
+        res.erase();
       }
     } catch (MalformedURLException e) {
       log.warn("Invalid URL: " + e);
@@ -109,39 +104,38 @@ public class UpdateManager {
   public String getCurrentChannel() {
     String[] value = ConfigUtil.getMultiValue(getdown, "channel");
     if (value == null)
-      return "none";
+      return "standalone";
     return value[0];
   }
 
-  public String getCurrentVersion() {
+  private String getCurrentVersion() {
     String[] value = ConfigUtil.getMultiValue(getdown, "version");
     if (value == null)
       return "0";
     return value[0];
   }
 
-  public void deleteDeprecatedResources() {
+  private void deleteDeprecatedResources() {
+    log.debug("Preparing to remove unused resources");
     String[] toDelete = ConfigUtil.getMultiValue(getdown, "delete");
     for (String path : toDelete) {
       try {
         if (Files.deleteIfExists(Paths.get(path))) {
-          log.info("Deleted deprecated file: " + path);
+          log.debug("Deleted deprecated file: " + path);
         }
       } catch (IOException e) {
-        log.info("Could not delete deprecated file at " + path + ": " + e);
+        log.warn("Could not delete deprecated file", e);
       }
     }
   }
 
-  public void upgradeLauncher() {
-    File oldgd = new File("../lawena-old.exe");
-    File curgd = new File("../lawena.exe");
-    File newgd = new File("code/lawena-new.exe");
+  private void upgrade(String desc, File oldgd, File curgd, File newgd) {
     if (!newgd.exists() || newgd.length() == curgd.length()
         || Util.compareCreationTime(newgd, curgd) == 0) {
+      log.debug("Resource {} is up to date", desc);
       return;
     }
-    log.info("Updating launcher with " + newgd + "...");
+    log.info("Upgrade {} with {}...", desc, newgd);
     if (oldgd.exists()) {
       oldgd.delete();
     }
@@ -151,7 +145,7 @@ public class UpdateManager {
         try {
           Util.copy(new FileInputStream(curgd), new FileOutputStream(newgd));
         } catch (IOException e) {
-          log.warn("Problem copying updated launcher back: " + e);
+          log.warn("Problem copying {} back: {}", desc, e);
         }
         return;
       }
@@ -168,14 +162,21 @@ public class UpdateManager {
     }
   }
 
-  public void upgradeGetdown() {
+  private void upgradeLauncher() {
+    File oldgd = new File("../lawena-old.exe");
+    File curgd = new File("../lawena.exe");
+    File newgd = new File("code/lawena-new.exe");
+    upgrade("Lawena launcher", oldgd, curgd, newgd);
+  }
+
+  private void upgradeGetdown() {
     File oldgd = new File("getdown-client-old.jar");
     File curgd = new File("getdown-client.jar");
     File newgd = new File("code/getdown-client-new.exe");
-    LaunchUtil.upgradeGetdown(oldgd, curgd, newgd);
+    upgrade("Lawena updater", oldgd, curgd, newgd);
   }
 
-  public List<Channel> getChannels() {
+  private List<Channel> getChannels() {
     List<Channel> newlist = loadChannels();
     if (channels == null || !newlist.isEmpty()) {
       channels = newlist;
@@ -184,7 +185,8 @@ public class UpdateManager {
   }
 
   private List<Channel> loadChannels() {
-    String url = "https://dl.dropboxusercontent.com/u/74380/lwrt/channels.json";
+    String[] value = ConfigUtil.getMultiValue(getdown, "channels");
+    String url = value != null ? value[0] : DEFAULT_CHANNELS;
     File file = new File("channels.json").getAbsoluteFile();
     try {
       Resource res = new Resource(file.getName(), new URL(url), file, false);
@@ -198,6 +200,7 @@ public class UpdateManager {
         } catch (FileNotFoundException e) {
           log.info("No latest version file found");
         }
+        res.erase();
       }
     } catch (MalformedURLException e) {
       log.warn("Invalid URL: " + e);
@@ -226,5 +229,45 @@ public class UpdateManager {
         log.warn("Download failed: {}", e.toString());
       }
     }).download();
+  }
+
+  public void cleanup() {
+    deleteDeprecatedResources();
+    upgradeLauncher();
+    upgradeGetdown();
+  }
+
+  public UpdateResult checkForUpdates(boolean force) {
+    long now = System.currentTimeMillis();
+    long delta = TimeUnit.MILLISECONDS.toHours(now - lastCheck);
+    if (force || delta >= 1 || buildList == null || buildList.isEmpty()) {
+      lastCheck = System.currentTimeMillis();
+      buildList = getVersionList(getCurrentChannel());
+    }
+    if (buildList.isEmpty()) {
+      return UpdateResult.notFound("No builds were found for this channel");
+    }
+    BuildInfo latest = buildList.last();
+    try {
+      long current = Long.parseLong(getCurrentVersion());
+      if (current < latest.getTimestamp()) {
+        return UpdateResult.found(latest);
+      } else {
+        return UpdateResult.latest("You already have the latest version");
+      }
+    } catch (NumberFormatException e) {
+      log.warn("Bad version format: {}", getCurrentVersion());
+      return UpdateResult.found(latest);
+    }
+  }
+
+  public boolean upgradeApplication(BuildInfo build) {
+    try {
+      return LaunchUtil.updateVersionAndRelaunch(new File(""), "getdown-client.jar",
+          build.getName());
+    } catch (IOException e) {
+      log.warn("Could not complete the upgrade", e);
+    }
+    return false;
   }
 }

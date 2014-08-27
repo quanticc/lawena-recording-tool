@@ -1,17 +1,17 @@
 package com.github.lawena.update;
 
-public class VersionInfo implements Comparable<VersionInfo> {
+public class BuildInfo implements Comparable<BuildInfo> {
 
   private String name;
   private String describe;
   private long timestamp;
 
-  public VersionInfo() {}
+  public BuildInfo() {}
 
-  public VersionInfo(String[] raw) {
+  public BuildInfo(String[] raw) {
     name = raw[0];
     describe = raw[1];
-    timestamp = Long.parseLong(raw[2]);
+    timestamp = Long.parseLong(raw[0]);
   }
 
   public String getName() {
@@ -33,7 +33,7 @@ public class VersionInfo implements Comparable<VersionInfo> {
   }
 
   @Override
-  public int compareTo(VersionInfo o) {
+  public int compareTo(BuildInfo o) {
     return Long.compare(timestamp, o.timestamp);
   }
 

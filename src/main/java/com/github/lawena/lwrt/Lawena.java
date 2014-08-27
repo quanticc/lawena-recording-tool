@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.lawena.app.MainModel;
+import com.github.lawena.app.Tasks;
 import com.github.lawena.lwrt.CustomPath.PathContents;
 import com.github.lawena.lwrt.SettingsManager.Key;
 import com.github.lawena.ui.AboutDialog;
@@ -595,18 +596,13 @@ public class Lawena {
   private Object lastHud;
 
   private MainModel model;
+  private Tasks tasks;
 
   public Lawena(MainModel mainModel) {
     model = mainModel;
     cl = model.getOsInterface();
-
-    // // Perform after-update checks
-    // updater = new UpdateHelper();
-    // updater.updateLauncher();
-    // updater.cleanupUnusedFiles();
-    // updater.loadChannels();
-
     settings = model.getSettings();
+
     oDxlevel = cl.getSystemDxLevel();
     steampath = cl.getSteamPath();
     Path tfpath = settings.getTfPath();
@@ -678,7 +674,9 @@ public class Lawena {
 
   public void start() {
     view = new LawenaView();
+    tasks = new Tasks(this);
 
+    // setup ui loggers
     ch.qos.logback.classic.Logger rootLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
     rootLog.addAppender(new LoggingAppender(view.getLogPane(), rootLog.getLoggerContext()));
@@ -687,9 +685,7 @@ public class Lawena {
     statusLog.setAdditive(false);
     statusLog.addAppender(new StatusAppender(view.getLblStatus(), statusLog.getLoggerContext()));
 
-    log.debug("TF2 path: {}", settings.getTfPath());
-    log.debug("Movie path: {}", settings.getMoviePath());
-    log.debug("Lawena path: {}", Paths.get("").toAbsolutePath());
+    tasks.new UpdaterTask().execute();
 
     view.setTitle("Lawena Recording Tool " + model.getShortVersion());
     try {
@@ -1387,6 +1383,14 @@ public class Lawena {
       }
     });
 
+  }
+
+  public MainModel getModel() {
+    return model;
+  }
+
+  public LawenaView getView() {
+    return view;
   }
 
 }

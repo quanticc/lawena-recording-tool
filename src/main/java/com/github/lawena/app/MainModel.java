@@ -1,5 +1,6 @@
 package com.github.lawena.app;
 
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import com.github.lawena.lwrt.CLOSX;
 import com.github.lawena.lwrt.CLWindows;
 import com.github.lawena.lwrt.CommandLine;
 import com.github.lawena.lwrt.SettingsManager;
+import com.github.lawena.update.UpdateManager;
 import com.github.lawena.util.Util;
 
 public class MainModel {
@@ -18,12 +20,14 @@ public class MainModel {
   private static final Logger log = LoggerFactory.getLogger(MainModel.class);
 
   private SettingsManager settings;
-  private Map<String, String> ver;
+  private Map<String, String> versionData;
   private CommandLine osInterface;
+  private UpdateManager updater;
 
   public MainModel(SettingsManager settingsManager) {
     this.settings = settingsManager;
-    this.ver = loadVersionData();
+    this.versionData = loadVersionData();
+    this.updater = new UpdateManager();
     logVMInfo();
     loadOsInterface();
   }
@@ -59,35 +63,41 @@ public class MainModel {
 
   private void logVMInfo() {
     // saving essential info to log for troubleshooting
-    log.debug("----------- Lawena Recording Tool -----------");
-    log.debug("Version: {} {}", getFullVersion(), getBuildTime());
-    log.debug("------------------ VM Info ------------------");
-    log.debug("OS name: {}", System.getProperty("os.name"));
-    log.debug("OS arch: {}", System.getProperty("os.arch"));
-    log.debug("OS vers: {}", System.getProperty("os.version"));
-    log.debug("Java vers: {}", System.getProperty("java.version"));
+    log.debug("----------------- Lawena Recording Tool -----------------");
+    log.debug("v {} {} [{}]", getFullVersion(), getBuildTime(), updater.getCurrentChannel());
+    log.debug("------------------------ VM Info ------------------------");
+    log.debug("OS name: {} {}", System.getProperty("os.name"), System.getProperty("os.arch"));
+    log.debug("Java version: {}", System.getProperty("java.version"));
     log.debug("Java home: {}", System.getProperty("java.home"));
-    log.debug("---------------------------------------------");
+    log.debug("------------------------ Folders ------------------------");
+    log.debug("Game: {}", settings.getTfPath());
+    log.debug("Segments: {}", settings.getMoviePath());
+    log.debug("Lawena: {}", Paths.get("").toAbsolutePath());
+    log.debug("---------------------------------------------------------");
   }
 
   public String getFullVersion() {
-    return ver.get("version");
+    return versionData.get("version");
   }
 
   public String getShortVersion() {
-    return ver.get("shortVersion");
+    return versionData.get("shortVersion");
   }
 
   public String getBuildTime() {
-    return ver.get("build");
+    return versionData.get("build");
   }
 
   public SettingsManager getSettings() {
     return settings;
   }
-  
+
   public CommandLine getOsInterface() {
     return osInterface;
+  }
+
+  public UpdateManager getUpdater() {
+    return updater;
   }
 
 }
