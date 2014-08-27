@@ -11,15 +11,15 @@ import java.nio.file.attribute.BasicFileAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.lwrt.CommandLine;
+import com.github.lawena.os.OSInterface;
 
 public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
 
   private static final Logger log = LoggerFactory.getLogger(DeleteDirVisitor.class);
 
-  private CommandLine cl;
+  private OSInterface cl;
 
-  public DeleteDirVisitor(CommandLine cl) {
+  public DeleteDirVisitor(OSInterface cl) {
     this.cl = cl;
   }
 

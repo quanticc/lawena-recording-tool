@@ -1,4 +1,4 @@
-package com.github.lawena.lwrt;
+package com.github.lawena.os;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;
@@ -16,15 +16,15 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.model.LwrtSettings;
+
 /**
  * This class lets you access to all values and actions that are OS-dependent, aiming to simplify
  * the porting of some features to all systems where TF2 can run (Windows, Linux and OSX)
- * 
- * @author iabarca "Quantic"
  */
-public abstract class CommandLine {
+public abstract class OSInterface {
 
-  private static final Logger log = LoggerFactory.getLogger(CommandLine.class);
+  private static final Logger log = LoggerFactory.getLogger(OSInterface.class);
 
   /**
    * Returns the necessary {@link ProcessBuilder} to launch TF2. It will be used when
@@ -241,7 +241,7 @@ public abstract class CommandLine {
    *        resolution
    * @see #getBuilderStartTF2()
    */
-  public void startTf(SettingsManager cfg) {
+  public void startTf(LwrtSettings cfg) {
     String dxlevel = cfg.getDxlevel();
     String width = cfg.getWidth() + "";
     String height = cfg.getHeight() + "";

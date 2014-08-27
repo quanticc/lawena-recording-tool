@@ -28,8 +28,7 @@ public class BuildInfo implements Comparable<BuildInfo> {
 
   @Override
   public String toString() {
-    return "VersionInfo [name=" + name + ", describe=" + describe + ", timestamp=" + timestamp
-        + "]";
+    return "Version " + describe + " built at " + name;
   }
 
   @Override

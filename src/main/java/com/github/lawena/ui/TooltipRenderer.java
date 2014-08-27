@@ -6,23 +6,23 @@ import java.nio.file.Path;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import com.github.lawena.lwrt.CustomPath;
-import com.github.lawena.lwrt.SettingsManager;
+import com.github.lawena.model.LwrtResource;
+import com.github.lawena.model.LwrtSettings;
 
 public class TooltipRenderer extends DefaultTableCellRenderer {
 
   private static final long serialVersionUID = 1L;
 
-  private SettingsManager cfg;
+  private LwrtSettings cfg;
 
-  public TooltipRenderer(SettingsManager cfg) {
+  public TooltipRenderer(LwrtSettings cfg) {
     this.cfg = cfg;
   }
 
   @Override
   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
       boolean hasFocus, int row, int column) {
-    CustomPath cp = (CustomPath) value;
+    LwrtResource cp = (LwrtResource) value;
     Path tfpath = cfg.getTfPath();
     Path path = cp.getPath();
     StringBuilder sb = new StringBuilder();

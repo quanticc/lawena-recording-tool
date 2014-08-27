@@ -43,6 +43,7 @@ public class UpdateManager {
   private static final String DEFAULT_CHANNELS =
       "https://dl.dropboxusercontent.com/u/74380/lwrt/channels.json";
 
+  private boolean standalone = false;
   private final Map<String, Object> getdown;
   private final Gson gson = new Gson();
   private List<Channel> channels;
@@ -63,7 +64,8 @@ public class UpdateManager {
     try {
       return ConfigUtil.parseConfig(path.toFile(), false);
     } catch (IOException e) {
-      log.info("Application running in standalone mode");
+      log.info("No updater configuration could be loaded at {}", path);
+      standalone = true;
       return new HashMap<>();
     }
   }
@@ -102,31 +104,38 @@ public class UpdateManager {
   }
 
   public String getCurrentChannel() {
-    String[] value = ConfigUtil.getMultiValue(getdown, "channel");
-    if (value == null)
+    String[] value = getMultiValue(getdown, "channel");
+    if (value.length == 0)
       return "standalone";
     return value[0];
   }
 
   private String getCurrentVersion() {
-    String[] value = ConfigUtil.getMultiValue(getdown, "version");
-    if (value == null)
+    String[] value = getMultiValue(getdown, "version");
+    if (value.length == 0)
       return "0";
     return value[0];
   }
 
-  private void deleteDeprecatedResources() {
-    log.debug("Preparing to remove unused resources");
-    String[] toDelete = ConfigUtil.getMultiValue(getdown, "delete");
+  private void deleteOutdatedResources() {
+    String[] toDelete = getMultiValue(getdown, "delete");
     for (String path : toDelete) {
       try {
         if (Files.deleteIfExists(Paths.get(path))) {
-          log.debug("Deleted deprecated file: " + path);
+          log.debug("Deleted outdated file: " + path);
         }
       } catch (IOException e) {
-        log.warn("Could not delete deprecated file", e);
+        log.warn("Could not delete outdated file", e);
       }
     }
+  }
+
+  private String[] getMultiValue(Map<String, Object> data, String name) {
+    // safe way to call this and avoid NPEs
+    String[] array = ConfigUtil.getMultiValue(data, name);
+    if (array == null)
+      return new String[0];
+    return array;
   }
 
   private void upgrade(String desc, File oldgd, File curgd, File newgd) {
@@ -185,8 +194,11 @@ public class UpdateManager {
   }
 
   private List<Channel> loadChannels() {
-    String[] value = ConfigUtil.getMultiValue(getdown, "channels");
-    String url = value != null ? value[0] : DEFAULT_CHANNELS;
+    // don't load channels in standalone mode
+    if (standalone)
+      return Collections.emptyList();
+    String[] value = getMultiValue(getdown, "channels");
+    String url = value.length == 0 ? value[0] : DEFAULT_CHANNELS;
     File file = new File("channels.json").getAbsoluteFile();
     try {
       Resource res = new Resource(file.getName(), new URL(url), file, false);
@@ -232,7 +244,7 @@ public class UpdateManager {
   }
 
   public void cleanup() {
-    deleteDeprecatedResources();
+    deleteOutdatedResources();
     upgradeLauncher();
     upgradeGetdown();
   }
@@ -269,5 +281,9 @@ public class UpdateManager {
       log.warn("Could not complete the upgrade", e);
     }
     return false;
+  }
+
+  public boolean isStandalone() {
+    return standalone;
   }
 }

@@ -1,5 +1,8 @@
 package com.github.lawena.util;
 
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +14,16 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.jar.JarFile;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +88,56 @@ public class Util {
     } catch (IOException | URISyntaxException e) {
     }
     return "no-jar " + defaultValue;
+  }
+
+  public static ImageIcon createPreviewIcon(String imageName) throws IOException {
+    int size = 96;
+    BufferedImage image;
+    File input = new File(imageName);
+    image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+    image.createGraphics().drawImage(
+        ImageIO.read(input).getScaledInstance(size, size, Image.SCALE_SMOOTH), 0, 0, null);
+    return new ImageIcon(image);
+  }
+
+  public static void registerValidation(JComboBox<String> combo, final String validationRegex,
+      final JLabel label) {
+    final JTextComponent tc = (JTextComponent) combo.getEditor().getEditorComponent();
+    tc.getDocument().addDocumentListener(new DocumentListener() {
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {}
+
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        validateInput();
+      }
+
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        validateInput();
+      }
+
+      private void validateInput() {
+        if (tc.getText().matches(validationRegex)) {
+          label.setForeground(Color.BLACK);
+        } else {
+          label.setForeground(Color.RED);
+        }
+      }
+    });
+  }
+
+  public static void selectComboItem(JComboBox<String> combo, String selectedValue,
+      List<String> possibleValues) {
+    if (possibleValues == null || possibleValues.isEmpty()) {
+      combo.setSelectedItem(selectedValue);
+    } else {
+      int i = possibleValues.indexOf(selectedValue);
+      if (i >= 0) {
+        combo.setSelectedIndex(i);
+      }
+    }
   }
 
 }

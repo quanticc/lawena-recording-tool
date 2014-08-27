@@ -1,4 +1,4 @@
-package com.github.lawena.lwrt;
+package com.github.lawena.model;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,9 +18,9 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SettingsManager {
+public class LwrtSettings {
   
-  private static final Logger log = LoggerFactory.getLogger(SettingsManager.class);
+  private static final Logger log = LoggerFactory.getLogger(LwrtSettings.class);
 
   public enum Key {
     TfDir(""),
@@ -105,7 +105,7 @@ public class SettingsManager {
   // transient property, do not save to file
   private String demoname;
 
-  public SettingsManager(String settingsFile) {
+  public LwrtSettings(String settingsFile) {
     filename = settingsFile;
     properties = new Properties();
     for (Key key : Key.values()) {

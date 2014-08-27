@@ -1,9 +1,9 @@
-package com.github.lawena.lwrt;
+package com.github.lawena.model;
 
 import java.nio.file.Path;
 import java.util.EnumSet;
 
-public class CustomPath {
+public class LwrtResource {
 
   public enum PathContents {
     DEFAULT, READONLY, HUD, CONFIG, SKYBOX;
@@ -18,15 +18,15 @@ public class CustomPath {
   private boolean selected = false;
   private EnumSet<PathContents> contents;
 
-  public CustomPath(Path path) {
+  public LwrtResource(Path path) {
     this(path, path.getFileName().toString());
   }
 
-  public CustomPath(Path path, String name) {
+  public LwrtResource(Path path, String name) {
     this(path, name, EnumSet.noneOf(PathContents.class));
   }
 
-  public CustomPath(Path path, String name, EnumSet<PathContents> contents) {
+  public LwrtResource(Path path, String name, EnumSet<PathContents> contents) {
     this.path = path;
     this.name = name;
     this.contents = contents;

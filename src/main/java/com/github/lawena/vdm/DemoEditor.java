@@ -21,8 +21,8 @@ import javax.swing.table.TableColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.lwrt.CommandLine;
-import com.github.lawena.lwrt.SettingsManager;
+import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.DemoEditorView;
 import com.github.lawena.util.DemoPreview;
 
@@ -174,12 +174,12 @@ public class DemoEditor {
   private DemoEditorView view;
   private JFileChooser choosedemo = new JFileChooser();
   private TickTableModel model;
-  private SettingsManager settings;
-  private CommandLine cl;
+  private LwrtSettings settings;
+  private OSInterface cl;
   private String currentdemo;
   private VDMGenerator vdmgenerator;
 
-  public DemoEditor(SettingsManager settings, CommandLine cl) {
+  public DemoEditor(LwrtSettings settings, OSInterface cl) {
     this.settings = settings;
     this.cl = cl;
     choosedemo.setDialogTitle("Choose a demo file");

@@ -11,14 +11,14 @@ import javax.swing.SwingWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.lwrt.CommandLine;
-import com.github.lawena.lwrt.CustomPath;
-import com.github.lawena.lwrt.CustomPath.PathContents;
-import com.github.lawena.lwrt.CustomPathList;
-import com.github.lawena.lwrt.FileManager;
-import com.github.lawena.lwrt.Lawena;
-import com.github.lawena.lwrt.MovieManager;
-import com.github.lawena.lwrt.SettingsManager;
+import com.github.lawena.model.LwrtFiles;
+import com.github.lawena.model.LwrtMovies;
+import com.github.lawena.model.LwrtResource;
+import com.github.lawena.model.LwrtResources;
+import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.model.MainModel;
+import com.github.lawena.model.LwrtResource.PathContents;
+import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.util.LawenaException;
 
@@ -33,11 +33,11 @@ public class LaunchTask extends SwingWorker<Boolean, Void> {
   private LawenaView view;
   private Lawena presenter;
 
-  private CommandLine os;
-  private SettingsManager settings;
-  private MovieManager movies;
-  private FileManager files;
-  private CustomPathList resources;
+  private OSInterface os;
+  private LwrtSettings settings;
+  private LwrtMovies movies;
+  private LwrtFiles files;
+  private LwrtResources resources;
 
   public LaunchTask(Tasks tasks) {
     this.tasks = tasks;
@@ -197,7 +197,7 @@ public class LaunchTask extends SwingWorker<Boolean, Void> {
 
   private boolean verifyCustomHud() {
     if (view.getCmbHud().getSelectedItem().equals("Custom")) {
-      for (CustomPath cp : resources.getList()) {
+      for (LwrtResource cp : resources.getList()) {
         resources.update(cp);
         EnumSet<PathContents> set = cp.getContents();
         if (cp.isSelected() && set.contains(PathContents.HUD)) {

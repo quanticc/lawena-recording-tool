@@ -1,13 +1,21 @@
 package com.github.lawena.app;
 
+import java.awt.Desktop;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -15,11 +23,16 @@ import javax.swing.SwingWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.lwrt.Lawena;
+import com.github.lawena.model.LwrtFiles;
+import com.github.lawena.model.LwrtResources;
+import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.model.MainModel;
+import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.update.BuildInfo;
 import com.github.lawena.update.UpdateManager;
 import com.github.lawena.update.UpdateResult;
+import com.github.lawena.util.Util;
 
 public class Tasks {
 
@@ -33,13 +46,17 @@ public class Tasks {
       try {
         doRun();
       } catch (Exception e) {
-        log.warn("Task could not be completed", e);
+        log.warn("Could not check for updates", e);
       }
       return null;
     }
 
     private void doRun() {
       UpdateManager updater = model.getUpdater();
+      if (updater.isStandalone()) {
+        log.info("Application running in standalone mode");
+        return;
+      }
       updater.cleanup();
       UpdateResult result = updater.checkForUpdates(false);
       switch (result.getStatus()) {
@@ -167,9 +184,165 @@ public class Tasks {
 
   }
 
+  public class PathScanTask extends SwingWorker<Void, Void> {
+    @Override
+    protected Void doInBackground() throws Exception {
+      try {
+        scan();
+        watcher.start();
+      } catch (Exception e) {
+        log.warn("Problem while scanning custom paths", e);
+      }
+      return null;
+    }
+
+    private void scan() {
+      resources.clear();
+      resources.addPaths(Paths.get("custom"));
+      resources.addPaths(settings.getTfPath().resolve("custom"));
+      resources.validateRequired();
+    }
+
+    @Override
+    protected void done() {
+      resources.loadResourceSettings();
+      presenter.loadHudComboState();
+    }
+  }
+
+  public class PathCopyTask extends SwingWorker<Boolean, Void> {
+
+    private Path from;
+
+    public PathCopyTask(Path from) {
+      this.from = from;
+    }
+
+    @Override
+    protected Boolean doInBackground() throws Exception {
+      status.info("Copying " + from + " into lawena custom folder...");
+      return files.copyToCustom(from);
+    }
+
+    @Override
+    protected void done() {
+      boolean result = false;
+      try {
+        result = get();
+      } catch (CancellationException | InterruptedException | ExecutionException e) {
+        log.warn("Custom path copy task was cancelled", e);
+      }
+      if (!result) {
+        try {
+          resources.addPath(from);
+          log.info(from + " added to custom resource list");
+        } catch (IOException e) {
+          log.warn("Problem while loading a custom path", e);
+        }
+      } else {
+        log.info(from + " copied to custom resource folder");
+      }
+      status.info(from.getFileName() + " was added"
+          + (result ? " to lawena custom folder" : " to custom resource list"));
+    }
+
+  }
+
+  public class SkyboxPreviewGenerator extends SwingWorker<Map<String, ImageIcon>, Void> {
+
+    private List<String> data;
+
+    public SkyboxPreviewGenerator(List<String> data) {
+      this.data = data;
+    }
+
+    @Override
+    protected Map<String, ImageIcon> doInBackground() throws Exception {
+      setCurrentWorker(this, false);
+      setProgress(0);
+      final Map<String, ImageIcon> map = new HashMap<>();
+      try {
+        int i = 1;
+        for (String skybox : data) {
+          setProgress((int) (100 * ((double) i / data.size())));
+          status.fine("Generating skybox preview: " + skybox);
+          String img = "skybox/" + skybox + "up.png";
+          if (!Files.exists(Paths.get(img))) {
+            String filename = skybox + "up.vtf";
+            os.generatePreview(filename);
+          }
+          ImageIcon icon = Util.createPreviewIcon(img);
+          map.put(skybox, icon);
+          i++;
+        }
+      } catch (Exception e) {
+        log.warn("Problem while loading skyboxes", e);
+      }
+      return map;
+    }
+
+    @Override
+    protected void done() {
+      try {
+        model.getSkyboxMap().putAll(get());
+        presenter.selectSkyboxFromSettings();
+        log.debug("Skybox loading and preview generation complete");
+      } catch (CancellationException | InterruptedException | ExecutionException e) {
+        log.warn("Skybox preview generator task was cancelled", e);
+      }
+      status.info("Ready");
+      if (!isCancelled()) {
+        setCurrentWorker(null, false);
+      }
+    }
+
+  }
+
+  public class SkyboxLoader extends SwingWorker<Void, Void> {
+    @Override
+    protected Void doInBackground() throws Exception {
+      try {
+        presenter.configureSkyboxes(view.getCmbSkybox());
+      } catch (Exception e) {
+        log.warn("Problem while configuring skyboxes", e);
+      }
+      return null;
+    }
+
+    @Override
+    protected void done() {
+      presenter.selectSkyboxFromSettings();
+    };
+  }
+
+  public class DesktopOpenTask extends SwingWorker<Void, Void> {
+
+    private File file;
+
+    public DesktopOpenTask(File file) {
+      this.file = file;
+    }
+
+    @Override
+    protected Void doInBackground() throws Exception {
+      try {
+        Desktop.getDesktop().open(file);
+      } catch (IOException ex) {
+        log.warn("Could not open file", ex);
+      }
+      return null;
+    }
+  }
+
   private MainModel model;
   private Lawena presenter;
   private LawenaView view;
+
+  private Thread watcher;
+  private LwrtResources resources;
+  private LwrtSettings settings;
+  private LwrtFiles files;
+  private OSInterface os;
 
   private ClearMoviesTask clearMoviesTask = null;
   private LaunchTask currentLaunchTask = null;
@@ -178,6 +351,11 @@ public class Tasks {
     this.presenter = presenter;
     this.model = presenter.getModel();
     this.view = presenter.getView();
+    this.watcher = model.getWatcher();
+    this.resources = model.getResources();
+    this.settings = model.getSettings();
+    this.files = model.getFiles();
+    this.os = model.getOsInterface();
   }
 
   public MainModel getModel() {
@@ -224,6 +402,14 @@ public class Tasks {
       }
     });
 
+  }
+
+  public void openFile(File file) {
+    new DesktopOpenTask(file).execute();
+  }
+
+  public SwingWorker<Boolean, Void> newLaunchTask() {
+    return new LaunchTask(this);
   }
 
 }

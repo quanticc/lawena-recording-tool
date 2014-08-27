@@ -13,16 +13,16 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.lwrt.SettingsManager;
+import com.github.lawena.model.LwrtSettings;
 
 public class VDMGenerator {
 
   private static final Logger log = LoggerFactory.getLogger(VDMGenerator.class);
 
   private List<Tick> ticklist;
-  private SettingsManager cfg;
+  private LwrtSettings cfg;
 
-  public VDMGenerator(List<Tick> ticklist, SettingsManager cfg) {
+  public VDMGenerator(List<Tick> ticklist, LwrtSettings cfg) {
     this.ticklist = ticklist;
     this.cfg = cfg;
   }

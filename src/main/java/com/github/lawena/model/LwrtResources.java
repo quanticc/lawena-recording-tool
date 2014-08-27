@@ -1,4 +1,4 @@
-package com.github.lawena.lwrt;
+package com.github.lawena.model;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,12 +25,13 @@ import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.lwrt.CustomPath.PathContents;
+import com.github.lawena.model.LwrtResource.PathContents;
+import com.github.lawena.os.OSInterface;
 import com.github.lawena.util.ListFilesVisitor;
 
-public class CustomPathList extends AbstractTableModel {
+public class LwrtResources extends AbstractTableModel {
 
-  private static final Logger log = LoggerFactory.getLogger(CustomPathList.class);
+  private static final Logger log = LoggerFactory.getLogger(LwrtResources.class);
 
   public enum Column {
     SELECTED, PATH, CONTENTS;
@@ -38,22 +39,22 @@ public class CustomPathList extends AbstractTableModel {
 
   private static final long serialVersionUID = 1L;
 
-  private static final Map<Path, CustomPath> defaultPaths = new LinkedHashMap<>();
+  private static final Map<Path, LwrtResource> defaultPaths = new LinkedHashMap<>();
   private static final List<Path> ignoredPaths = new ArrayList<>();
 
-  public static final CustomPath particles = new CustomPath(Paths.get("custom/pldx_particles.vpk"),
+  public static final LwrtResource particles = new LwrtResource(Paths.get("custom/pldx_particles.vpk"),
       "Enable enhanced particles", EnumSet.of(PathContents.READONLY));
 
   {
-    List<CustomPath> list = new ArrayList<>();
-    list.add(new CustomPath(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet
+    List<LwrtResource> list = new ArrayList<>();
+    list.add(new LwrtResource(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet
         .of(PathContents.READONLY)));
-    list.add(new CustomPath(Paths.get("custom/no_announcer_voices.vpk"), "Disable announcer voices"));
-    list.add(new CustomPath(Paths.get("custom/no_applause_sounds.vpk"), "Disable applause sounds"));
-    list.add(new CustomPath(Paths.get("custom/no_domination_sounds.vpk"),
+    list.add(new LwrtResource(Paths.get("custom/no_announcer_voices.vpk"), "Disable announcer voices"));
+    list.add(new LwrtResource(Paths.get("custom/no_applause_sounds.vpk"), "Disable applause sounds"));
+    list.add(new LwrtResource(Paths.get("custom/no_domination_sounds.vpk"),
         "Disable domination/revenge sounds"));
     list.add(particles);
-    for (CustomPath path : list) {
+    for (LwrtResource path : list) {
       path.getContents().add(PathContents.DEFAULT);
       defaultPaths.put(path.getPath(), path);
     }
@@ -65,21 +66,21 @@ public class CustomPathList extends AbstractTableModel {
         && !ignoredPaths.contains(entry);
   }
 
-  private List<CustomPath> list = new ArrayList<>();
-  private SettingsManager cfg;
-  private CommandLine cl;
+  private List<LwrtResource> list = new ArrayList<>();
+  private LwrtSettings cfg;
+  private OSInterface cl;
 
-  public CustomPathList(SettingsManager cfg, CommandLine cl) {
+  public LwrtResources(LwrtSettings cfg, OSInterface cl) {
     this.cfg = cfg;
     this.cl = cl;
   }
 
-  public List<CustomPath> getList() {
+  public List<LwrtResource> getList() {
     return Collections.unmodifiableList(list);
   }
 
   private boolean isCustomHudSelected() {
-    for (CustomPath cp : list) {
+    for (LwrtResource cp : list) {
       if (cp.getContents().contains(PathContents.HUD) && cp.isSelected()) {
         return true;
       }
@@ -89,7 +90,7 @@ public class CustomPathList extends AbstractTableModel {
 
   @Override
   public boolean isCellEditable(int row, int column) {
-    CustomPath cp = list.get(row);
+    LwrtResource cp = list.get(row);
     EnumSet<PathContents> conts = cp.getContents();
     boolean readonly = conts.contains(PathContents.READONLY);
     boolean hud = conts.contains(PathContents.HUD);
@@ -103,7 +104,7 @@ public class CustomPathList extends AbstractTableModel {
       case SELECTED:
         return Boolean.class;
       case PATH:
-        return CustomPath.class;
+        return LwrtResource.class;
       default:
         return String.class;
     }
@@ -141,7 +142,7 @@ public class CustomPathList extends AbstractTableModel {
 
   @Override
   public Object getValueAt(int row, int column) {
-    CustomPath cp = list.get(row);
+    LwrtResource cp = list.get(row);
     switch (Column.values()[column]) {
       case CONTENTS:
         return simplify(cp.getContents());
@@ -156,7 +157,7 @@ public class CustomPathList extends AbstractTableModel {
 
   @Override
   public void setValueAt(Object value, int row, int column) {
-    CustomPath cp = list.get(row);
+    LwrtResource cp = list.get(row);
     switch (Column.values()[column]) {
       case SELECTED:
         cp.setSelected((boolean) value);
@@ -183,7 +184,7 @@ public class CustomPathList extends AbstractTableModel {
     return Collections.emptyList();
   }
 
-  public void update(CustomPath cp) {
+  public void update(LwrtResource cp) {
     EnumSet<PathContents> c = cp.getContents();
     Path path = cp.getPath();
     if (!c.contains(PathContents.READONLY)) {
@@ -201,20 +202,20 @@ public class CustomPathList extends AbstractTableModel {
     }
   }
 
-  private void addRow(CustomPath cp) {
+  private void addRow(LwrtResource cp) {
     int row = getRowCount();
     list.add(cp);
     update(cp);
     fireTableRowsInserted(row, row);
   }
 
-  private void insertRow(int index, CustomPath e) {
+  private void insertRow(int index, LwrtResource e) {
     list.add(index, e);
     update(e);
     fireTableRowsInserted(index, index);
   }
 
-  public CustomPath getPath(int index) {
+  public LwrtResource getPath(int index) {
     return list.get(index);
   }
 
@@ -228,9 +229,9 @@ public class CustomPathList extends AbstractTableModel {
 
   public void insertPath(int index, Path path) throws IOException {
     if (accept(path)) {
-      CustomPath cp = defaultPaths.get(path);
+      LwrtResource cp = defaultPaths.get(path);
       if (cp == null) {
-        cp = new CustomPath(path);
+        cp = new LwrtResource(path);
       }
       if (index > 0) {
         insertRow(index, cp);
@@ -258,7 +259,7 @@ public class CustomPathList extends AbstractTableModel {
 
   public void updatePath(Path path) {
     int i = 0;
-    for (CustomPath cp : list) {
+    for (LwrtResource cp : list) {
       if (cp.getPath().equals(path)) {
         update(cp);
         break;
@@ -269,9 +270,9 @@ public class CustomPathList extends AbstractTableModel {
   }
 
   public void removePath(Path path) {
-    CustomPath toremove = null;
+    LwrtResource toremove = null;
     int i = 0;
-    for (CustomPath cp : list) {
+    for (LwrtResource cp : list) {
       if (cp.getPath().equals(path)) {
         toremove = cp;
         break;
@@ -295,7 +296,7 @@ public class CustomPathList extends AbstractTableModel {
   // for each "required" custom path, extract it from jar and add it
   // in case the user deleted the custom vpks/folders included with lawena
   public void validateRequired() {
-    for (CustomPath cp : defaultPaths.values()) {
+    for (LwrtResource cp : defaultPaths.values()) {
       if (cp.getContents().contains(PathContents.DEFAULT) && !list.contains(cp)) {
         Path filename = cp.getPath().getFileName();
         Path destdir = Paths.get("custom");
@@ -333,7 +334,7 @@ public class CustomPathList extends AbstractTableModel {
     List<String> selected = cfg.getCustomResources();
     Path tfpath = cfg.getTfPath();
     int i = 0;
-    for (CustomPath cp : list) {
+    for (LwrtResource cp : list) {
       Path path = cp.getPath();
       if (!cp.getContents().contains(PathContents.READONLY) && !selected.isEmpty()) {
         String key = (path.startsWith(tfpath) ? "tf*" : "");

@@ -1,0 +1,533 @@
+package com.github.lawena.app;
+
+import java.awt.Dialog.ModalityType;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Vector;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.RowFilter;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.lawena.model.LwrtFiles;
+import com.github.lawena.model.LwrtResource;
+import com.github.lawena.model.LwrtResource.PathContents;
+import com.github.lawena.model.LwrtResources;
+import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.model.MainModel;
+import com.github.lawena.os.OSInterface;
+import com.github.lawena.ui.AboutDialog;
+import com.github.lawena.ui.LawenaView;
+import com.github.lawena.ui.TableDropTarget;
+import com.github.lawena.ui.TooltipRenderer;
+import com.github.lawena.util.LoggingAppender;
+import com.github.lawena.util.StatusAppender;
+import com.github.lawena.util.Util;
+import com.github.lawena.vdm.DemoEditor;
+
+public class Lawena {
+
+  private static final Logger log = LoggerFactory.getLogger(Lawena.class);
+
+  private MainModel model;
+  private LawenaView view;
+
+  private LwrtSettings settings;
+  private LwrtFiles files;
+  private DemoEditor demos;
+  private LwrtResources resources;
+  private OSInterface os;
+
+  private Tasks tasks;
+  private Particles particles;
+  private Segments segments;
+
+  private AboutDialog dialog;
+  private JTextArea customSettingsTextArea;
+  private JScrollPane customSettingsScrollPane;
+  private Object lastHud;
+
+  public Lawena(MainModel mainModel) {
+    model = mainModel;
+  }
+
+  public void start() {
+    view = new LawenaView();
+    tasks = new Tasks(this);
+    particles = new Particles(this);
+    segments = new Segments(this);
+
+    os = model.getOsInterface();
+    settings = model.getSettings();
+    files = model.getFiles();
+    demos = model.getDemos();
+    resources = model.getResources();
+
+    // setup ui loggers: log tab and status bar
+    ch.qos.logback.classic.Logger rootLog =
+        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
+    rootLog.addAppender(new LoggingAppender(view.getLogPane(), rootLog.getLoggerContext()));
+    ch.qos.logback.classic.Logger statusLog =
+        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("status");
+    statusLog.setAdditive(false);
+    statusLog.addAppender(new StatusAppender(view.getLblStatus(), statusLog.getLoggerContext()));
+
+    tasks.new UpdaterTask().execute();
+
+    view.setTitle("Lawena Recording Tool " + model.getShortVersion());
+    try {
+      view.setIconImage(new ImageIcon(getClass().getResource("tf2.png")).getImage());
+    } catch (Exception e) {
+      log.warn("Window icon missing or could not be set");
+    }
+    view.addWindowListener(new WindowAdapter() {
+
+      @Override
+      public void windowClosing(WindowEvent e) {
+        saveAndExit();
+      }
+
+    });
+    view.getMntmAbout().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (dialog == null) {
+          dialog = new AboutDialog(model.getFullVersion(), model.getBuildTime());
+          dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+          dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+          dialog.getBtnUpdater().setEnabled(false);
+        }
+        dialog.setVisible(true);
+      }
+    });
+    view.getMntmSelectEnhancedParticles().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        startParticlesDialog();
+      }
+    });
+    view.getMntmAddCustomSettings().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JTextArea custom = getCustomSettingsTextArea();
+        String previous = custom.getText();
+        int result =
+            JOptionPane.showConfirmDialog(view, getCustomSettingsScrollPane(),
+                "Configure Custom Settings", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+          log.info("Saving custom settings change: " + custom.getText());
+          saveSettings();
+        } else {
+          custom.setText(previous);
+        }
+      }
+    });
+
+    final JTable table = view.getTableCustomContent();
+    table.setModel(resources);
+    table.getColumnModel().getColumn(0).setMaxWidth(20);
+    table.getColumnModel().getColumn(2).setMaxWidth(50);
+    table.setDefaultRenderer(LwrtResource.class, new TooltipRenderer(settings));
+    table.getModel().addTableModelListener(new TableModelListener() {
+
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if (e.getColumn() == LwrtResources.Column.SELECTED.ordinal()) {
+          int row = e.getFirstRow();
+          TableModel model = (TableModel) e.getSource();
+          LwrtResource cp =
+              (LwrtResource) model.getValueAt(row, LwrtResources.Column.PATH.ordinal());
+          checkCustomHud(cp);
+          if (cp == LwrtResources.particles && cp.isSelected()) {
+            startParticlesDialog();
+          }
+        }
+      }
+    });
+    table.setDropTarget(new TableDropTarget(tasks));
+    TableRowSorter<LwrtResources> sorter = new TableRowSorter<>(resources);
+    table.setRowSorter(sorter);
+    RowFilter<LwrtResources, Object> filter = new RowFilter<LwrtResources, Object>() {
+      public boolean include(Entry<? extends LwrtResources, ? extends Object> entry) {
+        LwrtResource cp = (LwrtResource) entry.getValue(LwrtResources.Column.PATH.ordinal());
+        return !cp.getContents().contains(PathContents.READONLY);
+      }
+    };
+    sorter.setRowFilter(filter);
+    tasks.new PathScanTask().execute();
+    tasks.new SkyboxLoader().execute();
+
+    loadSettings();
+
+    view.getMntmChangeTfDirectory().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (tasks.getCurrentLaunchTask() == null) {
+          Path newpath = model.getChosenTfPath();
+          if (newpath != null) {
+            settings.setTfPath(newpath);
+            tasks.new PathScanTask().execute();
+          }
+        } else {
+          JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
+        }
+      }
+    });
+    view.getMntmChangeMovieDirectory().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (tasks.getCurrentLaunchTask() == null) {
+          Path newpath = model.getChosenMoviePath();
+          if (newpath != null) {
+            settings.setMoviePath(newpath);
+          }
+        } else {
+          JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
+        }
+      }
+    });
+    view.getMntmRevertToDefault().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        Path movies = settings.getMoviePath();
+        settings.loadDefaults();
+        settings.setMoviePath(movies);
+        loadSettings();
+        resources.loadResourceSettings();
+        loadHudComboState();
+        saveSettings();
+      }
+    });
+    view.getMntmExit().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        saveAndExit();
+      }
+    });
+    view.getMntmSaveSettings().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        saveSettings();
+      }
+    });
+    view.getBtnStartTf().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        tasks.newLaunchTask().execute();
+      }
+    });
+    view.getBtnClearMovieFolder().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        startSegmentsDialog();
+      }
+    });
+    view.getMntmOpenMovieFolder().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        tasks.openFile(settings.getMoviePath().toFile());
+      }
+    });
+    view.getMntmOpenCustomFolder().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        tasks.openFile(Paths.get("custom").toFile());
+      }
+    });
+    view.getChckbxmntmInsecure().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
+      }
+    });
+    view.getMntmLaunchTimeout().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        Object answer =
+            JOptionPane.showInputDialog(view, "Enter the number of seconds to wait\n"
+                + "before interrupting TF2 launch.\n" + "Enter 0 to disable timeout.",
+                "Launch Timeout", JOptionPane.PLAIN_MESSAGE, null, null,
+                settings.getLaunchTimeout());
+        if (answer != null) {
+          try {
+            int value = Integer.parseInt(answer.toString());
+            settings.setLaunchTimeout(value);
+          } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(view, "Invalid value, must be 0 or higher integer.",
+                "Launch Options", JOptionPane.WARNING_MESSAGE);
+          }
+        }
+      }
+    });
+    view.getCmbViewmodel().addItemListener(new ItemListener() {
+
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+          checkViewmodelState();
+        }
+      }
+    });
+    view.getCmbSourceVideoFormat().addItemListener(new ItemListener() {
+
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+          checkFrameFormatState();
+        }
+      }
+    });
+
+    view.getTabbedPane().addTab("VDM", null, demos.start());
+    view.setVisible(true);
+  }
+
+  private void checkViewmodelState() {
+    boolean e = view.getCmbViewmodel().getSelectedIndex() != 1;
+    view.getLblViewmodelFov().setEnabled(e);
+    view.getSpinnerViewmodelFov().setEnabled(e);
+  }
+
+  private void checkFrameFormatState() {
+    boolean e = view.getCmbSourceVideoFormat().getSelectedIndex() != 0;
+    view.getLblJpegQuality().setEnabled(e);
+    view.getSpinnerJpegQuality().setEnabled(e);
+  }
+
+  private JTextArea getCustomSettingsTextArea() {
+    if (customSettingsTextArea == null) {
+      customSettingsTextArea = new JTextArea(10, 40);
+      customSettingsTextArea.setEditable(true);
+      customSettingsTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+    }
+    return customSettingsTextArea;
+  }
+
+  private JScrollPane getCustomSettingsScrollPane() {
+    if (customSettingsScrollPane == null) {
+      customSettingsScrollPane = new JScrollPane(getCustomSettingsTextArea());
+    }
+    return customSettingsScrollPane;
+  }
+
+  private void startParticlesDialog() {
+    particles.start();
+  }
+
+  private void startSegmentsDialog() {
+    segments.start();
+  }
+
+  private boolean checkCustomHud(LwrtResource cp) {
+    EnumSet<PathContents> set = cp.getContents();
+    if (cp.isSelected()) {
+      if (set.contains(PathContents.HUD)) {
+        lastHud = view.getCmbHud().getSelectedItem();
+        view.getCmbHud().setSelectedItem("Custom");
+        view.getCmbHud().setEnabled(false);
+        return true;
+      }
+    } else {
+      if (set.contains(PathContents.HUD)) {
+        if (lastHud != null) {
+          view.getCmbHud().setSelectedItem(lastHud);
+        }
+        view.getCmbHud().setEnabled(true);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  public void loadHudComboState() {
+    boolean detected = false;
+    for (LwrtResource cp : resources.getList()) {
+      if (detected) {
+        break;
+      }
+      detected = checkCustomHud(cp);
+    }
+  }
+
+  private void loadSettings() {
+    Util.registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
+        view.getLblResolution());
+    Util.registerValidation(view.getCmbFramerate(), "[1-9][0-9]*", view.getLblFrameRate());
+    Util.selectComboItem(view.getCmbHud(), settings.getHud(), Key.Hud.getAllowedValues());
+    Util.selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
+        Key.DxLevel.getAllowedValues());
+    Util.selectComboItem(view.getCmbViewmodel(), settings.getViewmodelSwitch(),
+        Key.ViewmodelSwitch.getAllowedValues());
+    selectSkyboxFromSettings();
+    view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
+    view.getCmbFramerate().setSelectedItem(settings.getFramerate() + "");
+    try {
+      view.getSpinnerViewmodelFov().setValue(settings.getViewmodelFov());
+    } catch (IllegalArgumentException e) {
+    }
+    view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
+    view.getDisableCombatText().setSelected(!settings.getCombattext());
+    view.getDisableCrosshair().setSelected(!settings.getCrosshair());
+    view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
+    view.getDisableHitSounds().setSelected(!settings.getHitsounds());
+    view.getDisableVoiceChat().setSelected(!settings.getVoice());
+    view.getUseHudMinmode().setSelected(settings.getHudMinmode());
+    view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
+    view.getChckbxmntmBackupMode().setSelected(settings.getBoolean(Key.DeleteBackupsWhenRestoring));
+    view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
+    getCustomSettingsTextArea().setText(settings.getCustomSettings());
+    view.getCmbSourceVideoFormat().setSelectedItem(
+        settings.getString(Key.SourceRecorderVideoFormat).toUpperCase());
+    view.getSpinnerJpegQuality().setValue(settings.getInt(Key.SourceRecorderJpegQuality));
+    checkViewmodelState();
+    checkFrameFormatState();
+  }
+
+  public void saveSettings() {
+    String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
+    if (resolution.length == 2) {
+      settings.setWidth(Integer.parseInt(resolution[0]));
+      settings.setHeight(Integer.parseInt(resolution[1]));
+    } else {
+      log.warn("Bad resolution format, reverting to previously saved");
+      view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
+    }
+    String framerate = (String) view.getCmbFramerate().getSelectedItem();
+    settings.setFramerate(Integer.parseInt(framerate));
+    settings.setHud(Key.Hud.getAllowedValues().get(view.getCmbHud().getSelectedIndex()));
+    settings.setViewmodelSwitch(Key.ViewmodelSwitch.getAllowedValues().get(
+        view.getCmbViewmodel().getSelectedIndex()));
+    settings.setViewmodelFov((int) view.getSpinnerViewmodelFov().getValue());
+    settings
+        .setDxlevel(Key.DxLevel.getAllowedValues().get(view.getCmbQuality().getSelectedIndex()));
+    settings.setMotionBlur(view.getEnableMotionBlur().isSelected());
+    settings.setCombattext(!view.getDisableCombatText().isSelected());
+    settings.setCrosshair(!view.getDisableCrosshair().isSelected());
+    settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
+    settings.setHitsounds(!view.getDisableHitSounds().isSelected());
+    settings.setVoice(!view.getDisableVoiceChat().isSelected());
+    settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
+    Path tfpath = settings.getTfPath();
+    List<String> selected = new ArrayList<>();
+    for (LwrtResource cp : resources.getList()) {
+      Path path = cp.getPath();
+      if (!cp.getContents().contains(PathContents.READONLY) && cp.isSelected()) {
+        String key = (path.startsWith(tfpath) ? "tf*" : "");
+        key += path.getFileName().toString();
+        selected.add(key);
+      }
+    }
+    settings.setCustomResources(selected);
+    settings.setHudMinmode(view.getUseHudMinmode().isSelected());
+    settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
+    settings
+        .setBoolean(Key.DeleteBackupsWhenRestoring, view.getChckbxmntmBackupMode().isSelected());
+    settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
+    settings.setCustomSettings(getCustomSettingsTextArea().getText());
+    settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
+        .getSelectedItem().toString().toLowerCase());
+    settings.setInt(Key.SourceRecorderJpegQuality, (int) view.getSpinnerJpegQuality().getValue());
+    settings.save();
+    log.info("Settings saved");
+  }
+
+  private void saveAndExit() {
+    saveSettings();
+    view.setVisible(false);
+    if (!os.isRunningTF2()) {
+      files.restoreAll();
+    }
+    System.exit(0);
+  }
+
+  public void configureSkyboxes(final JComboBox<String> combo) {
+    final Vector<String> data = new Vector<>();
+    Path dir = Paths.get("skybox");
+    if (Files.exists(dir)) {
+      log.info("Loading skyboxes from folder");
+      try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*up.vtf")) {
+        for (Path path : stream) {
+          log.debug("Skybox found at: " + path);
+          String skybox = path.toFile().getName();
+          skybox = skybox.substring(0, skybox.indexOf("up.vtf"));
+          data.add(skybox);
+        }
+      } catch (IOException e) {
+        log.warn("Problem while loading skyboxes", e);
+      }
+    }
+    model.setSkyboxMap(new HashMap<String, ImageIcon>(data.size()));
+    tasks.new SkyboxPreviewGenerator(new ArrayList<>(data)).execute();
+    data.add(0, (String) Key.Skybox.defValue());
+    combo.setModel(new DefaultComboBoxModel<String>(data));
+    combo.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        ImageIcon preview = model.getSkyboxMap().get(combo.getSelectedItem());
+        view.getLblPreview().setText(preview == null ? "" : "Preview:");
+        view.getLblSkyboxPreview().setIcon(preview);
+      }
+    });
+
+  }
+
+  public void selectSkyboxFromSettings() {
+    view.getCmbSkybox().setSelectedItem(settings.getSkybox());
+  }
+
+  public MainModel getModel() {
+    return model;
+  }
+
+  public LawenaView getView() {
+    return view;
+  }
+
+  public void clearSegmentFiles(List<String> selected) {
+    tasks.new ClearMoviesTask(selected).execute();
+  }
+}

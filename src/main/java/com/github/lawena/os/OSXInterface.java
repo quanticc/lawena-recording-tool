@@ -1,4 +1,4 @@
-package com.github.lawena.lwrt;
+package com.github.lawena.os;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CLOSX extends CommandLine {
+public class OSXInterface extends OSInterface {
 
-  private static final Logger log = LoggerFactory.getLogger(CLOSX.class);
+  private static final Logger log = LoggerFactory.getLogger(OSXInterface.class);
 
   private static Set<PosixFilePermission> perms777 = new HashSet<PosixFilePermission>();
 

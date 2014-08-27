@@ -1,4 +1,4 @@
-package com.github.lawena.app;
+package com.github.lawena.model;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,19 +7,16 @@ import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.lwrt.CLLinux;
-import com.github.lawena.lwrt.CLOSX;
-import com.github.lawena.lwrt.CLWindows;
-import com.github.lawena.lwrt.CommandLine;
-import com.github.lawena.lwrt.CustomPathList;
-import com.github.lawena.lwrt.FileManager;
-import com.github.lawena.lwrt.MovieManager;
-import com.github.lawena.lwrt.SettingsManager;
+import com.github.lawena.os.LinuxInterface;
+import com.github.lawena.os.OSInterface;
+import com.github.lawena.os.OSXInterface;
+import com.github.lawena.os.WindowsInterface;
 import com.github.lawena.update.UpdateManager;
 import com.github.lawena.util.Util;
 import com.github.lawena.util.WatchDir;
@@ -29,9 +26,9 @@ public class MainModel {
 
   private static final Logger log = LoggerFactory.getLogger(MainModel.class);
 
-  private SettingsManager settings;
+  private LwrtSettings settings;
   private Map<String, String> versionData;
-  private CommandLine osInterface;
+  private OSInterface osInterface;
   private UpdateManager updater;
 
   private String originalDxLevel;
@@ -39,13 +36,14 @@ public class MainModel {
   private Thread watcher;
   private JFileChooser movieFileChooser;
   private JFileChooser gameFileChooser;
+  private Map<String, ImageIcon> skyboxMap;
 
-  private FileManager files;
-  private MovieManager movies;
-  private CustomPathList resources;
+  private LwrtFiles files;
+  private LwrtMovies movies;
+  private LwrtResources resources;
   private DemoEditor demos;
 
-  public MainModel(SettingsManager settingsManager) {
+  public MainModel(LwrtSettings settingsManager) {
     this.settings = settingsManager;
     this.versionData = loadVersionData();
     this.updater = new UpdateManager();
@@ -68,7 +66,7 @@ public class MainModel {
       }
     }
     settings.setTfPath(tfpath);
-    files = new FileManager(settings, osInterface);
+    files = new LwrtFiles(settings, osInterface);
 
     Path moviepath = settings.getMoviePath();
     if (moviepath == null || moviepath.toString().isEmpty() || !Files.exists(moviepath)) {
@@ -78,13 +76,13 @@ public class MainModel {
         System.exit(1);
       }
     }
-    movies = new MovieManager(settings);
+    movies = new LwrtMovies(settings);
     settings.setMoviePath(moviepath);
 
     settings.save();
     files.restoreAll();
 
-    resources = new CustomPathList(settings, osInterface);
+    resources = new LwrtResources(settings, osInterface);
     files.setCustomPathList(resources);
 
     watcher = new Thread(new Runnable() {
@@ -126,11 +124,11 @@ public class MainModel {
   private void loadOsInterface() {
     String osname = System.getProperty("os.name");
     if (osname.contains("Windows")) {
-      osInterface = new CLWindows();
+      osInterface = new WindowsInterface();
     } else if (osname.contains("Linux")) {
-      osInterface = new CLLinux();
+      osInterface = new LinuxInterface();
     } else if (osname.contains("OS X")) {
-      osInterface = new CLOSX();
+      osInterface = new OSXInterface();
     } else {
       throw new UnsupportedOperationException("OS not supported");
     }
@@ -145,8 +143,8 @@ public class MainModel {
       String[] arr = impl.split("-");
       map.put("shortVersion", arr[0] + (arr.length > 1 ? "-" + arr[1] : ""));
     } else {
-      map.put("version", "v4 no-git");
-      map.put("shortVersion", "v4");
+      map.put("version", "4.2 no-git");
+      map.put("shortVersion", "4.2");
     }
     map.put("build", Util.getManifestString("Implementation-Build", Util.now("yyyyMMddHHmmss")));
     return map;
@@ -179,11 +177,11 @@ public class MainModel {
     return versionData.get("build");
   }
 
-  public SettingsManager getSettings() {
+  public LwrtSettings getSettings() {
     return settings;
   }
 
-  public CommandLine getOsInterface() {
+  public OSInterface getOsInterface() {
     return osInterface;
   }
 
@@ -242,20 +240,28 @@ public class MainModel {
     return demos;
   }
 
-  public FileManager getFiles() {
+  public LwrtFiles getFiles() {
     return files;
   }
 
-  public MovieManager getMovies() {
+  public LwrtMovies getMovies() {
     return movies;
   }
 
-  public CustomPathList getResources() {
+  public LwrtResources getResources() {
     return resources;
   }
 
   public Thread getWatcher() {
     return watcher;
+  }
+
+  public Map<String, ImageIcon> getSkyboxMap() {
+    return skyboxMap;
+  }
+
+  public void setSkyboxMap(Map<String, ImageIcon> skyboxMap) {
+    this.skyboxMap = skyboxMap;
   }
 
 }

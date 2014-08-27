@@ -1,4 +1,4 @@
-package com.github.lawena.lwrt;
+package com.github.lawena.model;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,13 +7,13 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.github.lawena.lwrt.SettingsManager.Key;
+import com.github.lawena.model.LwrtSettings.Key;
 
-public class MovieManager {
+public class LwrtMovies {
 
-  private SettingsManager cfg;
+  private LwrtSettings cfg;
 
-  public MovieManager(SettingsManager cfg) {
+  public LwrtMovies(LwrtSettings cfg) {
     this.cfg = cfg;
   }
 

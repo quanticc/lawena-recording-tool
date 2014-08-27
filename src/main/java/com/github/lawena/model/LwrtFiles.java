@@ -1,4 +1,4 @@
-package com.github.lawena.lwrt;
+package com.github.lawena.model;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -15,22 +15,23 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.lwrt.SettingsManager.Key;
+import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.os.OSInterface;
 import com.github.lawena.util.CopyDirVisitor;
 import com.github.lawena.util.DeleteDirVisitor;
 import com.github.lawena.util.LawenaException;
 import com.github.lawena.util.Util;
 import com.github.lawena.util.Zip;
 
-public class FileManager {
+public class LwrtFiles {
 
-  private static final Logger log = LoggerFactory.getLogger(FileManager.class);
+  private static final Logger log = LoggerFactory.getLogger(LwrtFiles.class);
 
-  private CustomPathList customPathList;
-  private SettingsManager cfg;
-  private CommandLine cl;
+  private LwrtResources customPathList;
+  private LwrtSettings cfg;
+  private OSInterface cl;
 
-  public FileManager(SettingsManager cfg, CommandLine cl) {
+  public LwrtFiles(LwrtSettings cfg, OSInterface cl) {
     this.cfg = cfg;
     this.cl = cl;
   }
@@ -63,11 +64,11 @@ public class FileManager {
     }
   }
 
-  public CustomPathList getCustomPathList() {
+  public LwrtResources getCustomPathList() {
     return customPathList;
   }
 
-  public void setCustomPathList(CustomPathList customPathList) {
+  public void setCustomPathList(LwrtResources customPathList) {
     this.customPathList = customPathList;
   }
 
@@ -154,7 +155,7 @@ public class FileManager {
     Path customParticlesPath = customPath.resolve("lawena/particles");
 
     log.info("Copying selected custom vpks and folders");
-    for (CustomPath cp : customPathList.getList()) {
+    for (LwrtResource cp : customPathList.getList()) {
       try {
         if (cp.isSelected()) {
           Path source;
@@ -171,7 +172,7 @@ public class FileManager {
               log.debug("Copying custom folder: " + source.getFileName());
               Path dest = customPath.resolve(source.getFileName());
               copyReadOnly(source, dest);
-            } else if (cp == CustomPathList.particles) {
+            } else if (cp == LwrtResources.particles) {
               List<String> contents = cl.getVpkContents(tfpath, cp.getPath());
               List<String> selected = cfg.getParticles();
               if (!selected.contains("*")) {
