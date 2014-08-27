@@ -44,7 +44,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -65,6 +64,7 @@ import javax.swing.text.JTextComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.app.LaunchTask;
 import com.github.lawena.app.MainModel;
 import com.github.lawena.app.Tasks;
 import com.github.lawena.lwrt.CustomPath.PathContents;
@@ -74,310 +74,27 @@ import com.github.lawena.ui.LawenaView;
 import com.github.lawena.ui.ParticlesDialog;
 import com.github.lawena.ui.SegmentsDialog;
 import com.github.lawena.ui.TooltipRenderer;
-import com.github.lawena.util.LawenaException;
 import com.github.lawena.util.LoggingAppender;
 import com.github.lawena.util.StatusAppender;
-import com.github.lawena.util.WatchDir;
 import com.github.lawena.vdm.DemoEditor;
 
 public class Lawena {
+
+  private static final Logger log = LoggerFactory.getLogger(Lawena.class);
+  private static final java.util.logging.Logger status = java.util.logging.Logger
+      .getLogger("status");
 
   public class MovieFolderChange implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      if (startTfTask == null) {
-        Path newpath = getChosenMoviePath();
+      if (tasks.getCurrentLaunchTask() == null) {
+        Path newpath = model.getChosenMoviePath();
         if (newpath != null) {
           settings.setMoviePath(newpath);
         }
       } else {
         JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
-      }
-    }
-
-  }
-
-  public class ClearMoviesTask extends SwingWorker<Void, Path> {
-
-    private int count = 0;
-    private List<String> segmentsToDelete;
-
-    public ClearMoviesTask() {}
-
-    public ClearMoviesTask(List<String> segmentsToDelete) {
-      this.segmentsToDelete = segmentsToDelete;
-    }
-
-    @Override
-    protected Void doInBackground() throws Exception {
-      SwingUtilities.invokeAndWait(new Runnable() {
-
-        @Override
-        public void run() {
-          view.getBtnClearMovieFolder().setEnabled(false);
-        }
-      });
-      if (clearMoviesTask == null) {
-        String segmentsGlob = "";
-        if (segmentsToDelete != null && !segmentsToDelete.isEmpty()) {
-          segmentsGlob =
-              segmentsToDelete.toString().replace("[", "{").replace("]", "}").replace(" ", "");
-          log.info("Deleting segments: " + segmentsGlob);
-        } else {
-          int answer =
-              JOptionPane.showConfirmDialog(view,
-                  "Are you sure you want to clear ALL movie files?", "Clearing Movie Files",
-                  JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-          if (answer != JOptionPane.YES_NO_OPTION) {
-            return null;
-          }
-        }
-        try (DirectoryStream<Path> stream =
-            Files.newDirectoryStream(settings.getMoviePath(), segmentsGlob + "*.{tga,wav}")) {
-
-          clearMoviesTask = this;
-          setCurrentWorker(this, true);
-          SwingUtilities.invokeAndWait(new Runnable() {
-
-            @Override
-            public void run() {
-              view.getBtnClearMovieFolder().setEnabled(true);
-              view.getBtnClearMovieFolder().setText("Stop Clearing");
-            }
-          });
-
-          for (Path path : stream) {
-            if (isCancelled()) {
-              break;
-            }
-            path.toFile().setWritable(true);
-            try {
-              Files.delete(path);
-            } catch (IOException e) {
-              log.warn("Could not delete a file", e);
-            }
-            publish(path);
-          }
-
-        } catch (IOException ex) {
-          log.warn("Problem while clearing movie folder", ex);
-        }
-      } else {
-        log.info("Cancelling movie folder clearing task");
-        status.info("Cancelling task");
-        clearMoviesTask.cancel(true);
-      }
-
-      return null;
-    }
-
-    @Override
-    protected void process(List<Path> chunks) {
-      count += chunks.size();
-      status.info("Deleting " + count + " files from movie folder...");
-    };
-
-    @Override
-    protected void done() {
-      if (!isCancelled()) {
-        clearMoviesTask = null;
-        setCurrentWorker(null, false);
-        if (count > 0) {
-          log.info("Movie folder cleared: " + count + " files deleted");
-        } else {
-          log.info("Movie folder already clean, no files deleted");
-        }
-        view.getBtnClearMovieFolder().setEnabled(true);
-        view.getBtnClearMovieFolder().setText("Clear Movie Files");
-        status.info("Ready");
-      }
-    };
-
-  }
-
-  public class StartTfTask extends SwingWorker<Boolean, Void> {
-
-    @Override
-    protected Boolean doInBackground() throws Exception {
-      SwingUtilities.invokeAndWait(new Runnable() {
-
-        @Override
-        public void run() {
-          view.getBtnStartTf().setEnabled(false);
-        }
-      });
-      if (startTfTask == null) {
-        startTfTask = this;
-        setCurrentWorker(this, false);
-        setProgress(0);
-
-        // Checking if the user selects "Custom" HUD in the dropdown,
-        // he or she also selects a "hud" in the sidebar
-        if (!verifyCustomHud()) {
-          JOptionPane.showMessageDialog(view,
-              "Please select a custom HUD in the\nCustom Resources table and retry", "Custom HUD",
-              JOptionPane.INFORMATION_MESSAGE);
-          log.info("Launch aborted because the custom HUD to use was not specified");
-          return false;
-        }
-
-        setProgress(20);
-        closeTf2Handles();
-
-        // Restoring user files
-        status.info("Restoring your files");
-        files.restoreAll();
-        setProgress(40);
-
-        // Saving ui settings to cfg files
-        status.info("Saving settings and generating cfg files");
-        try {
-          saveSettings();
-          settings.saveToCfg();
-          movies.createMovienameCfgs();
-        } catch (IOException e) {
-          log.warn("Problem while saving settings to file", e);
-          status.info("Failed to save lawena settings to file");
-          return false;
-        }
-        // Allow failing this without cancelling launch, notify user
-        // See https://github.com/iabarca/lawena-recording-tool/issues/36
-        try {
-          movies.movieOffset();
-        } catch (IOException e) {
-          log.info("Could not detect current movie slot");
-        }
-
-        setProgress(60);
-
-        // Backing up user files and copying lawena files
-        status.info("Copying lawena files to cfg and custom...");
-        try {
-          files.replaceAll();
-        } catch (LawenaException e) {
-          status.info(e.getMessage());
-          return false;
-        }
-        setProgress(80);
-
-        // Launching process
-        status.info("Launching TF2 process");
-        cl.startTf(settings);
-
-        SwingUtilities.invokeAndWait(new Runnable() {
-
-          @Override
-          public void run() {
-            view.getBtnStartTf().setEnabled(true);
-            view.getBtnStartTf().setText("Stop Team Fortress 2");
-          }
-        });
-        setProgress(100);
-
-        int timeout = 0;
-        int cfgtimeout = settings.getLaunchTimeout();
-        int millis = 5000;
-        int maxtimeout = cfgtimeout / (millis / 1000);
-        setProgress(0);
-        status.info("Waiting for TF2 to start...");
-        if (cfgtimeout > 0) {
-          log.debug("TF2 launch timeout: around " + cfgtimeout + " seconds");
-        } else {
-          log.debug("TF2 launch timeout disabled");
-        }
-        while (!cl.isRunningTF2() && (cfgtimeout == 0 || timeout < maxtimeout)) {
-          ++timeout;
-          if (cfgtimeout > 0) {
-            setProgress((int) ((double) timeout / maxtimeout * 100));
-          }
-          Thread.sleep(millis);
-        }
-
-        if (cfgtimeout > 0 && timeout >= maxtimeout) {
-          int s = timeout * (millis / 1000);
-          log.info("TF2 launch timed out after " + s + " seconds");
-          status.info("TF2 did not start after " + s + " seconds");
-          return false;
-        }
-
-        log.info("TF2 has started running");
-        status.info("Waiting for TF2 to finish running...");
-        SwingUtilities.invokeLater(new Runnable() {
-
-          @Override
-          public void run() {
-            view.getProgressBar().setIndeterminate(true);
-          }
-        });
-        while (cl.isRunningTF2()) {
-          Thread.sleep(millis);
-        }
-
-        Thread.sleep(5000);
-        closeTf2Handles();
-
-      } else {
-        if (cl.isRunningTF2()) {
-          status.info("Attempting to finish TF2 process...");
-          cl.killTf2Process();
-          Thread.sleep(5000);
-          if (!cl.isRunningTF2()) {
-            startTfTask.cancel(true);
-          }
-          closeTf2Handles();
-        } else {
-          status.info("TF2 was not running, cancelling");
-        }
-      }
-
-      return true;
-    }
-
-    private void closeTf2Handles() {
-      status.info("Closing open handles in TF2 'cfg' folder...");
-      cl.closeHandles(settings.getTfPath().resolve("cfg"));
-      status.info("Closing open handles in TF2 'custom' folder...");
-      cl.closeHandles(settings.getTfPath().resolve("custom"));
-    }
-
-    private boolean verifyCustomHud() {
-      if (view.getCmbHud().getSelectedItem().equals("Custom")) {
-        for (CustomPath cp : customPaths.getList()) {
-          customPaths.update(cp);
-          EnumSet<PathContents> set = cp.getContents();
-          if (cp.isSelected() && set.contains(PathContents.HUD)) {
-            return true;
-          }
-        }
-        return false;
-      } else {
-        return true;
-      }
-    }
-
-    @Override
-    protected void done() {
-      if (!isCancelled()) {
-        startTfTask = null;
-        setCurrentWorker(null, false);
-        view.getBtnStartTf().setEnabled(false);
-        boolean ranTf2Correctly = false;
-        try {
-          ranTf2Correctly = get();
-        } catch (InterruptedException | ExecutionException e) {
-        }
-        boolean restoredAllFiles = files.restoreAll();
-        if (ranTf2Correctly) {
-          if (restoredAllFiles) {
-            status.info("TF2 has finished running. All files restored");
-          } else {
-            status.info("Your files could not be restored correctly. Check log for details");
-          }
-        }
-        cl.setSystemDxLevel(oDxlevel);
-        view.getBtnStartTf().setText("Start Team Fortress 2");
-        view.getBtnStartTf().setEnabled(true);
       }
     }
 
@@ -396,15 +113,15 @@ public class Lawena {
     }
 
     private void scan() {
-      customPaths.clear();
-      customPaths.addPaths(Paths.get("custom"));
-      customPaths.addPaths(settings.getTfPath().resolve("custom"));
-      customPaths.validateRequired();
+      resources.clear();
+      resources.addPaths(Paths.get("custom"));
+      resources.addPaths(settings.getTfPath().resolve("custom"));
+      resources.validateRequired();
     }
 
     @Override
     protected void done() {
-      customPaths.loadResourceSettings();
+      resources.loadResourceSettings();
       loadHudComboState();
     }
   }
@@ -433,7 +150,7 @@ public class Lawena {
       }
       if (!result) {
         try {
-          customPaths.addPath(from);
+          resources.addPath(from);
           log.info(from + " added to custom resource list");
         } catch (IOException e) {
           log.warn("Problem while loading a custom path", e);
@@ -468,7 +185,7 @@ public class Lawena {
           String img = "skybox/" + skybox + "up.png";
           if (!Files.exists(Paths.get(img))) {
             String filename = skybox + "up.vtf";
-            cl.generatePreview(filename);
+            os.generatePreview(filename);
           }
           ImageIcon icon = createPreviewIcon(img);
           map.put(skybox, icon);
@@ -501,8 +218,8 @@ public class Lawena {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      if (startTfTask == null) {
-        Path newpath = getChosenTfPath();
+      if (tasks.getCurrentLaunchTask() == null) {
+        Path newpath = model.getChosenTfPath();
         if (newpath != null) {
           settings.setTfPath(newpath);
           new PathScanTask().execute();
@@ -513,14 +230,6 @@ public class Lawena {
     }
 
   }
-
-
-  private static final Logger log = LoggerFactory.getLogger(Lawena.class);
-  private static final java.util.logging.Logger status = java.util.logging.Logger
-      .getLogger("status");
-
-  private static StartTfTask startTfTask = null;
-  private static ClearMoviesTask clearMoviesTask = null;
 
   private static ImageIcon createPreviewIcon(String imageName) throws IOException {
     int size = 96;
@@ -577,9 +286,9 @@ public class Lawena {
   private SettingsManager settings;
   private MovieManager movies;
   private FileManager files;
-  private DemoEditor vdm;
-  private CommandLine cl;
-  private CustomPathList customPaths;
+  private DemoEditor demos;
+  private CustomPathList resources;
+  private CommandLine os;
 
   private AboutDialog dialog;
   private ParticlesDialog particles;
@@ -588,10 +297,6 @@ public class Lawena {
   private JScrollPane customSettingsScrollPane;
 
   private HashMap<String, ImageIcon> skyboxMap;
-  private JFileChooser choosemovie;
-  private JFileChooser choosedir;
-  private Path steampath;
-  private String oDxlevel;
   private Thread watcher;
   private Object lastHud;
 
@@ -600,81 +305,19 @@ public class Lawena {
 
   public Lawena(MainModel mainModel) {
     model = mainModel;
-    cl = model.getOsInterface();
-    settings = model.getSettings();
-
-    oDxlevel = cl.getSystemDxLevel();
-    steampath = cl.getSteamPath();
-    Path tfpath = settings.getTfPath();
-    if (tfpath == null || tfpath.toString().isEmpty()) {
-      tfpath = steampath.resolve("SteamApps/common/Team Fortress 2/tf");
-    }
-    if (!Files.exists(tfpath)) {
-      tfpath = getChosenTfPath();
-      if (tfpath == null) {
-        log.info("No tf directory specified, exiting.");
-        System.exit(1);
-      }
-    }
-    settings.setTfPath(tfpath);
-    files = new FileManager(settings, cl);
-
-    Path moviepath = settings.getMoviePath();
-    if (moviepath == null || moviepath.toString().isEmpty() || !Files.exists(moviepath)) {
-      moviepath = getChosenMoviePath();
-      if (moviepath == null) {
-        log.info("No movie directory specified, exiting.");
-        System.exit(1);
-      }
-    }
-    movies = new MovieManager(settings);
-    settings.setMoviePath(moviepath);
-
-    settings.save();
-    files.restoreAll();
-
-    customPaths = new CustomPathList(settings, cl);
-    files.setCustomPathList(customPaths);
-
-    watcher = new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-        try {
-          WatchDir w = new WatchDir(Paths.get("custom"), false) {
-            @Override
-            public void entryCreated(Path child) {
-              try {
-                customPaths.addPath(child);
-              } catch (IOException e) {
-                log.warn("Could not add custom path", e);
-              }
-            }
-
-            @Override
-            public void entryModified(Path child) {
-              customPaths.updatePath(child);
-            };
-
-            @Override
-            public void entryDeleted(Path child) {
-              customPaths.removePath(child);
-            }
-          };
-          w.processEvents();
-        } catch (IOException e) {
-          log.warn("Problem while watching directory", e);
-        }
-      }
-    }, "FolderWatcher");
-    watcher.setDaemon(true);
-
-    vdm = new DemoEditor(settings, cl);
   }
 
   public void start() {
     view = new LawenaView();
     tasks = new Tasks(this);
+
+    os = model.getOsInterface();
+    settings = model.getSettings();
+    movies = model.getMovies();
+    files = model.getFiles();
+    demos = model.getDemos();
+    resources = model.getResources();
+    watcher = model.getWatcher();
 
     // setup ui loggers
     ch.qos.logback.classic.Logger rootLog =
@@ -710,13 +353,6 @@ public class Lawena {
           dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
           dialog.setModalityType(ModalityType.APPLICATION_MODAL);
           dialog.getBtnUpdater().setEnabled(false);
-          // dialog.getBtnUpdater().addActionListener(new ActionListener() {
-          //
-          // @Override
-          // public void actionPerformed(ActionEvent e) {
-          // updater.showSwitchUpdateChannelDialog();
-          // }
-          // });
         }
         dialog.setVisible(true);
       }
@@ -748,7 +384,7 @@ public class Lawena {
     });
 
     final JTable table = view.getTableCustomContent();
-    table.setModel(customPaths);
+    table.setModel(resources);
     table.getColumnModel().getColumn(0).setMaxWidth(20);
     table.getColumnModel().getColumn(2).setMaxWidth(50);
     table.setDefaultRenderer(CustomPath.class, new TooltipRenderer(settings));
@@ -811,7 +447,7 @@ public class Lawena {
         }
       }
     });
-    TableRowSorter<CustomPathList> sorter = new TableRowSorter<>(customPaths);
+    TableRowSorter<CustomPathList> sorter = new TableRowSorter<>(resources);
     table.setRowSorter(sorter);
     RowFilter<CustomPathList, Object> filter = new RowFilter<CustomPathList, Object>() {
       public boolean include(Entry<? extends CustomPathList, ? extends Object> entry) {
@@ -850,7 +486,7 @@ public class Lawena {
         settings.loadDefaults();
         settings.setMoviePath(movies);
         loadSettings();
-        customPaths.loadResourceSettings();
+        resources.loadResourceSettings();
         loadHudComboState();
         saveSettings();
       }
@@ -873,7 +509,7 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        new StartTfTask().execute();
+        new LaunchTask(tasks).execute();
       }
     });
     view.getBtnClearMovieFolder().addActionListener(new ActionListener() {
@@ -961,7 +597,7 @@ public class Lawena {
       }
     });
 
-    view.getTabbedPane().addTab("VDM", null, vdm.start());
+    view.getTabbedPane().addTab("VDM", null, demos.start());
     view.setVisible(true);
   }
 
@@ -1058,7 +694,7 @@ public class Lawena {
       tableParticles.getColumnModel().getColumn(0).setMaxWidth(20);
       List<String> selected = settings.getParticles();
       boolean selectAll = selected.contains("*");
-      for (String particle : cl.getVpkContents(settings.getTfPath(),
+      for (String particle : os.getVpkContents(settings.getTfPath(),
           CustomPathList.particles.getPath())) {
         dtm.addRow(new Object[] {selectAll || selected.contains(particle), particle});
       }
@@ -1106,7 +742,7 @@ public class Lawena {
           }
         }
         if (selectCount > 0) {
-          new ClearMoviesTask(selected).execute();
+          tasks.new ClearMoviesTask(selected).execute();
         } else {
           log.info("No segments selected to remove");
         }
@@ -1187,7 +823,7 @@ public class Lawena {
 
   private void loadHudComboState() {
     boolean detected = false;
-    for (CustomPath cp : customPaths.getList()) {
+    for (CustomPath cp : resources.getList()) {
       if (detected) {
         break;
       }
@@ -1227,7 +863,7 @@ public class Lawena {
     checkFrameFormatState();
   }
 
-  private void saveSettings() {
+  public void saveSettings() {
     String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
     if (resolution.length == 2) {
       settings.setWidth(Integer.parseInt(resolution[0]));
@@ -1253,7 +889,7 @@ public class Lawena {
     settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
     Path tfpath = settings.getTfPath();
     List<String> selected = new ArrayList<>();
-    for (CustomPath cp : customPaths.getList()) {
+    for (CustomPath cp : resources.getList()) {
       Path path = cp.getPath();
       if (!cp.getContents().contains(PathContents.READONLY) && cp.isSelected()) {
         String key = (path.startsWith(tfpath) ? "tf*" : "");
@@ -1278,7 +914,7 @@ public class Lawena {
   private void saveAndExit() {
     saveSettings();
     view.setVisible(false);
-    if (!cl.isRunningTF2()) {
+    if (!os.isRunningTF2()) {
       files.restoreAll();
     }
     System.exit(0);
@@ -1318,45 +954,6 @@ public class Lawena {
 
   private void selectSkyboxFromSettings() {
     view.getCmbSkybox().setSelectedItem(settings.getSkybox());
-  }
-
-  private Path getChosenMoviePath() {
-    Path selected = null;
-    int ret = 0;
-    while ((selected == null && ret == 0) || (selected != null && !Files.exists(selected))) {
-      choosemovie = new JFileChooser();
-      choosemovie.setDialogTitle("Choose a directory to store your movie files");
-      choosemovie.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      ret = choosemovie.showOpenDialog(null);
-      if (ret == JFileChooser.APPROVE_OPTION) {
-        selected = choosemovie.getSelectedFile().toPath();
-      } else {
-        selected = null;
-      }
-    }
-    return selected;
-  }
-
-  private Path getChosenTfPath() {
-    Path selected = null;
-    int ret = 0;
-    while ((selected == null && ret == 0)
-        || (selected != null && (!Files.exists(selected) || !selected.toFile().getName().toString()
-            .equals("tf")))) {
-      choosedir = new JFileChooser();
-      choosedir.setDialogTitle("Choose your \"tf\" directory");
-      choosedir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      choosedir.setCurrentDirectory(steampath.toFile());
-      choosedir.setFileHidingEnabled(false);
-      ret = choosedir.showOpenDialog(null);
-      if (ret == JFileChooser.APPROVE_OPTION) {
-        selected = choosedir.getSelectedFile().toPath();
-      } else {
-        selected = null;
-      }
-      log.debug("Selected path: " + selected);
-    }
-    return selected;
   }
 
   private void setCurrentWorker(final SwingWorker<?, ?> worker, final boolean indeterminate) {
