@@ -275,8 +275,8 @@ public class UpdateManager {
 
   public boolean upgradeApplication(BuildInfo build) {
     try {
-      return LaunchUtil.updateVersionAndRelaunch(new File(""), "getdown-client.jar",
-          build.getName());
+      return LaunchUtil.updateVersionAndRelaunch(new File("").getAbsoluteFile(),
+          "getdown-client.jar", build.getName());
     } catch (IOException e) {
       log.warn("Could not complete the upgrade", e);
     }
@@ -285,5 +285,17 @@ public class UpdateManager {
 
   public boolean isStandalone() {
     return standalone;
+  }
+
+  public boolean createVersionFile(String version) {
+    Path path = Paths.get("version.txt");
+    try {
+      path = Files.write(path, Arrays.asList(version), Charset.defaultCharset());
+      log.debug("Version file created at {}", path.toAbsolutePath());
+      return true;
+    } catch (IOException e) {
+      log.warn("Could not create version file", e);
+      return false;
+    }
   }
 }

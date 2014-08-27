@@ -70,14 +70,29 @@ public class Tasks {
           BuildInfo details = result.getDetails();
           log.info("New version available: {} ({})", details.getDescribe(), details.getName());
           int answer =
-              JOptionPane.showConfirmDialog(view, "Do you want to update to the latest version?",
-                  "New version " + details.getDescribe() + " available", JOptionPane.YES_NO_OPTION,
-                  JOptionPane.QUESTION_MESSAGE);
+              JOptionPane.showConfirmDialog(view,
+                  "New version found!\nUpdater Channel: " + updater.getCurrentChannel()
+                      + "\nVersion: " + details.getDescribe() + "\nBuild: " + details.getName()
+                      + "\n\nDo you want to update to the latest version?"
+                      + "\nApplication will be restarted", "New version available",
+                  JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
           if (answer == JOptionPane.YES_OPTION) {
             if (updater.upgradeApplication(details)) {
               log.info("Upgrade in progress..");
+              presenter.saveAndExit();
             } else {
-              log.info("Upgrade could not be completed, please retry or restart the application");
+              log.debug("Attempting to update version marker file again");
+              if (updater.createVersionFile(details.getName())) {
+                String notice = "Update is ready. Please restart your application to use it";
+                log.info(notice);
+                JOptionPane.showMessageDialog(view, notice, "Update Ready",
+                    JOptionPane.INFORMATION_MESSAGE);
+              } else {
+                String notice = "Update could not be completed, please report this issue";
+                log.info(notice);
+                JOptionPane.showMessageDialog(view, notice, "Updater Error",
+                    JOptionPane.WARNING_MESSAGE);
+              }
             }
           }
           break;

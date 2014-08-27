@@ -382,7 +382,7 @@ public class Lawena {
     return false;
   }
 
-  public void loadHudComboState() {
+  void loadHudComboState() {
     boolean detected = false;
     for (LwrtResource cp : resources.getList()) {
       if (detected) {
@@ -426,7 +426,7 @@ public class Lawena {
     checkFrameFormatState();
   }
 
-  public void saveSettings() {
+  void saveSettings() {
     String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
     if (resolution.length == 2) {
       settings.setWidth(Integer.parseInt(resolution[0]));
@@ -474,7 +474,7 @@ public class Lawena {
     log.info("Settings saved");
   }
 
-  private void saveAndExit() {
+  void saveAndExit() {
     saveSettings();
     view.setVisible(false);
     if (!os.isRunningTF2()) {
@@ -483,7 +483,7 @@ public class Lawena {
     System.exit(0);
   }
 
-  public void configureSkyboxes(final JComboBox<String> combo) {
+  void configureSkyboxes(final JComboBox<String> combo) {
     final Vector<String> data = new Vector<>();
     Path dir = Paths.get("skybox");
     if (Files.exists(dir)) {
@@ -515,19 +515,19 @@ public class Lawena {
 
   }
 
-  public void selectSkyboxFromSettings() {
+  void selectSkyboxFromSettings() {
     view.getCmbSkybox().setSelectedItem(settings.getSkybox());
   }
 
-  public MainModel getModel() {
+  MainModel getModel() {
     return model;
   }
 
-  public LawenaView getView() {
+  LawenaView getView() {
     return view;
   }
 
-  public void clearSegmentFiles(List<String> selected) {
+  void clearSegmentFiles(List<String> selected) {
     tasks.new ClearMoviesTask(selected).execute();
   }
 }
