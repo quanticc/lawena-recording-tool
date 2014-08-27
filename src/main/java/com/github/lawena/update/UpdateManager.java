@@ -198,7 +198,7 @@ public class UpdateManager {
     if (standalone)
       return Collections.emptyList();
     String[] value = getMultiValue(getdown, "channels");
-    String url = value.length == 0 ? value[0] : DEFAULT_CHANNELS;
+    String url = value.length > 0 ? value[0] : DEFAULT_CHANNELS;
     File file = new File("channels.json").getAbsoluteFile();
     try {
       Resource res = new Resource(file.getName(), new URL(url), file, false);
