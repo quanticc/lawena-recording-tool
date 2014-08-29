@@ -30,8 +30,8 @@ import com.github.lawena.model.MainModel;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.update.BuildInfo;
-import com.github.lawena.update.UpdateManager;
 import com.github.lawena.update.UpdateResult;
+import com.github.lawena.update.Updater;
 import com.github.lawena.util.Util;
 
 public class Tasks {
@@ -40,7 +40,7 @@ public class Tasks {
   private static final java.util.logging.Logger status = java.util.logging.Logger
       .getLogger("status");
 
-  public class UpdaterTask extends SwingWorker<Void, Void> {
+  private class UpdaterTask extends SwingWorker<Void, Void> {
 
     protected Void doInBackground() throws Exception {
       try {
@@ -52,13 +52,13 @@ public class Tasks {
     }
 
     private void doRun() {
-      UpdateManager updater = model.getUpdater();
+      Updater updater = model.getUpdater();
       if (updater.isStandalone()) {
         log.info("Application running in standalone mode");
         return;
       }
-      updater.cleanup();
-      UpdateResult result = updater.checkForUpdates(false);
+      updater.clear();
+      UpdateResult result = updater.checkForUpdates();
       switch (result.getStatus()) {
         case ALREADY_LATEST_VERSION:
           log.info("Latest version already installed");
@@ -71,43 +71,25 @@ public class Tasks {
           log.info("New version available: {} ({})", details.getDescribe(), details.getName());
           int answer =
               JOptionPane.showConfirmDialog(view,
-                  "New version found!\nUpdater Channel: " + updater.getCurrentChannel()
+                  "New version found!\nUpdater Channel: " + updater.getCurrentChannelName()
                       + "\nVersion: " + details.getDescribe() + "\nBuild: " + details.getName()
                       + "\n\nDo you want to update to the latest version?"
                       + "\nApplication will be restarted", "New version available",
                   JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
           if (answer == JOptionPane.YES_OPTION) {
-            if (updater.upgradeApplication(details)) {
-              log.info("Upgrade in progress..");
-              presenter.saveAndExit();
-            } else {
-              log.debug("Attempting to update version marker file again");
-              if (updater.createVersionFile(details.getName())) {
-                String notice = "Update is ready. Please restart your application to use it";
-                log.info(notice);
-                JOptionPane.showMessageDialog(view, notice, "Update Ready",
-                    JOptionPane.INFORMATION_MESSAGE);
-              } else {
-                String notice = "Update could not be completed, please report this issue";
-                log.info(notice);
-                JOptionPane.showMessageDialog(view, notice, "Updater Error",
-                    JOptionPane.WARNING_MESSAGE);
-              }
-            }
+            presenter.upgrade(details);
           }
           break;
       }
     }
   }
 
-  public class ClearMoviesTask extends SwingWorker<Void, Path> {
+  private class SegmentCleaner extends SwingWorker<Void, Path> {
 
     private int count = 0;
     private List<String> segmentsToDelete;
 
-    public ClearMoviesTask() {}
-
-    public ClearMoviesTask(List<String> segmentsToDelete) {
+    public SegmentCleaner(List<String> segmentsToDelete) {
       this.segmentsToDelete = segmentsToDelete;
     }
 
@@ -199,7 +181,7 @@ public class Tasks {
 
   }
 
-  public class PathScanTask extends SwingWorker<Void, Void> {
+  private class ResourceScanner extends SwingWorker<Void, Void> {
     @Override
     protected Void doInBackground() throws Exception {
       try {
@@ -225,11 +207,11 @@ public class Tasks {
     }
   }
 
-  public class PathCopyTask extends SwingWorker<Boolean, Void> {
+  private class ResourceCopyTask extends SwingWorker<Boolean, Void> {
 
     private Path from;
 
-    public PathCopyTask(Path from) {
+    public ResourceCopyTask(Path from) {
       this.from = from;
     }
 
@@ -263,7 +245,7 @@ public class Tasks {
 
   }
 
-  public class SkyboxPreviewGenerator extends SwingWorker<Map<String, ImageIcon>, Void> {
+  private class SkyboxPreviewGenerator extends SwingWorker<Map<String, ImageIcon>, Void> {
 
     private List<String> data;
 
@@ -313,7 +295,7 @@ public class Tasks {
 
   }
 
-  public class SkyboxLoader extends SwingWorker<Void, Void> {
+  private class SkyboxLoader extends SwingWorker<Void, Void> {
     @Override
     protected Void doInBackground() throws Exception {
       try {
@@ -330,7 +312,7 @@ public class Tasks {
     };
   }
 
-  public class DesktopOpenTask extends SwingWorker<Void, Void> {
+  private class DesktopOpenTask extends SwingWorker<Void, Void> {
 
     private File file;
 
@@ -359,8 +341,8 @@ public class Tasks {
   private LwrtFiles files;
   private OSInterface os;
 
-  private ClearMoviesTask clearMoviesTask = null;
-  private LaunchTask currentLaunchTask = null;
+  private SegmentCleaner clearMoviesTask = null;
+  private Launch currentLaunchTask = null;
 
   public Tasks(Lawena presenter) {
     this.presenter = presenter;
@@ -385,11 +367,11 @@ public class Tasks {
     return view;
   }
 
-  public LaunchTask getCurrentLaunchTask() {
+  public Launch getCurrentLaunchTask() {
     return currentLaunchTask;
   }
 
-  public void setCurrentLaunchTask(LaunchTask currentLaunchTask) {
+  public void setCurrentLaunchTask(Launch currentLaunchTask) {
     this.currentLaunchTask = currentLaunchTask;
   }
 
@@ -423,8 +405,31 @@ public class Tasks {
     new DesktopOpenTask(file).execute();
   }
 
-  public SwingWorker<Boolean, Void> newLaunchTask() {
-    return new LaunchTask(this);
+  public void launch() {
+    new Launch(this).execute();
   }
 
+  public void checkForUpdates() {
+    new UpdaterTask().execute();
+  }
+
+  public void cleanSegments(List<String> selected) {
+    new SegmentCleaner(selected).execute();
+  }
+
+  public void scanResources() {
+    new ResourceScanner().execute();
+  }
+
+  public void loadSkyboxes() {
+    new SkyboxLoader().execute();
+  }
+
+  public void copyResourcesFrom(Path path) {
+    new ResourceCopyTask(path).execute();
+  }
+
+  public void generateSkyboxPreviews(List<String> list) {
+    new SkyboxPreviewGenerator(list).execute();
+  }
 }

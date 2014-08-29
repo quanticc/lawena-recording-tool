@@ -59,7 +59,7 @@ public class TableDropTarget extends DropTarget {
             if (value instanceof File) {
               File f = (File) value;
               log.info("Attempting to copy " + f.toPath());
-              tasks.new PathCopyTask(f.toPath()).execute();
+              tasks.copyResourcesFrom(f.toPath());
             }
           }
         }

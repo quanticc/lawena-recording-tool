@@ -22,9 +22,9 @@ import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.util.LawenaException;
 
-public class LaunchTask extends SwingWorker<Boolean, Void> {
+public class Launch extends SwingWorker<Boolean, Void> {
 
-  private static final Logger log = LoggerFactory.getLogger(LaunchTask.class);
+  private static final Logger log = LoggerFactory.getLogger(Launch.class);
   private static final java.util.logging.Logger status = java.util.logging.Logger
       .getLogger("status");
 
@@ -39,7 +39,7 @@ public class LaunchTask extends SwingWorker<Boolean, Void> {
   private LwrtFiles files;
   private LwrtResources resources;
 
-  public LaunchTask(Tasks tasks) {
+  public Launch(Tasks tasks) {
     this.tasks = tasks;
     this.model = tasks.getModel();
     this.view = tasks.getView();

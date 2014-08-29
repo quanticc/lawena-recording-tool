@@ -1,14 +1,55 @@
 package com.github.lawena.update;
 
+import java.util.List;
+import java.util.SortedSet;
+
+import com.google.gson.annotations.SerializedName;
+
 public class Channel {
+
+  public enum Type {
+    /**
+     * Static channels do not use the updater system. They exist as a repository for a release or a
+     * version that will not be updated in the future.
+     */
+    @SerializedName("static")
+    STATIC,
+    /**
+     * Versioned channels adhere strictly to the updater system and will be auto-updated as soon as
+     * Getdown detects a newer version.
+     */
+    @SerializedName("versioned")
+    VERSIONED,
+    /**
+     * Snapshot channels allow updating manually and also rollbacking to previous versions. Updater
+     * class provides a way to retrieve the builds available for a specific snapshot channel.
+     */
+    @SerializedName("snapshot")
+    SNAPSHOT;
+  }
+
+  public static final Channel STANDALONE = new Channel("standalone");
 
   private String id;
   private String name;
-  private String type;
+  private Type type;
   private String description;
   private String github;
   private String compare;
   private String url;
+
+  private transient SortedSet<BuildInfo> builds;
+  private transient List<String> changeLog;
+
+  public Channel() {
+
+  }
+
+  private Channel(String id) {
+    this.id = id;
+    this.name = id;
+    this.type = Type.STATIC;
+  }
 
   public String getId() {
     return id;
@@ -18,7 +59,7 @@ public class Channel {
     return name;
   }
 
-  public String getType() {
+  public Type getType() {
     return type;
   }
 
@@ -38,10 +79,50 @@ public class Channel {
     return url;
   }
 
+  public SortedSet<BuildInfo> getBuilds() {
+    return builds;
+  }
+
+  public void setBuilds(SortedSet<BuildInfo> builds) {
+    this.builds = builds;
+  }
+
+  public List<String> getChangeLog() {
+    return changeLog;
+  }
+
+  public void setChangeLog(List<String> changeLog) {
+    this.changeLog = changeLog;
+  }
+
   @Override
   public String toString() {
-    return "Channel [id=" + id + ", name=" + name + ", type=" + type + ", description="
-        + description + ", github=" + github + ", compare=" + compare + ", url=" + url + "]";
+    return name + " (" + type.toString().toLowerCase() + ")";
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Channel other = (Channel) obj;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+    return true;
   }
 
 

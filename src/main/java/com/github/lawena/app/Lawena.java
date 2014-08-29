@@ -46,8 +46,11 @@ import com.github.lawena.model.MainModel;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LawenaView;
+import com.github.lawena.ui.LogView;
 import com.github.lawena.ui.TableDropTarget;
 import com.github.lawena.ui.TooltipRenderer;
+import com.github.lawena.update.BuildInfo;
+import com.github.lawena.update.Updater;
 import com.github.lawena.util.LoggingAppender;
 import com.github.lawena.util.StatusAppender;
 import com.github.lawena.util.Util;
@@ -69,7 +72,10 @@ public class Lawena {
   private Tasks tasks;
   private Particles particles;
   private Segments segments;
+  private Branches branches;
 
+  private LogView logView;
+  
   private AboutDialog dialog;
   private JTextArea customSettingsTextArea;
   private JScrollPane customSettingsScrollPane;
@@ -81,9 +87,11 @@ public class Lawena {
 
   public void start() {
     view = new LawenaView();
+    logView = new LogView();
     tasks = new Tasks(this);
     particles = new Particles(this);
     segments = new Segments(this);
+    branches = new Branches(this);
 
     os = model.getOsInterface();
     settings = model.getSettings();
@@ -94,19 +102,21 @@ public class Lawena {
     // setup ui loggers: log tab and status bar
     ch.qos.logback.classic.Logger rootLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
-    rootLog.addAppender(new LoggingAppender(view.getLogPane(), rootLog.getLoggerContext()));
+    rootLog.addAppender(new LoggingAppender(logView.getLogPane(), logView.getLogScroll(), rootLog
+        .getLoggerContext()));
     ch.qos.logback.classic.Logger statusLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("status");
     statusLog.setAdditive(false);
     statusLog.addAppender(new StatusAppender(view.getLblStatus(), statusLog.getLoggerContext()));
 
-    tasks.new UpdaterTask().execute();
+    model.getUpdater().fileCleanup();
+    tasks.checkForUpdates();
 
     view.setTitle("Lawena Recording Tool " + model.getShortVersion());
     try {
       view.setIconImage(new ImageIcon(getClass().getResource("tf2.png")).getImage());
     } catch (Exception e) {
-      log.warn("Window icon missing or could not be set");
+      log.warn("Window icon missing / could not be set");
     }
     view.addWindowListener(new WindowAdapter() {
 
@@ -124,7 +134,6 @@ public class Lawena {
           dialog = new AboutDialog(model.getFullVersion(), model.getBuildTime());
           dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
           dialog.setModalityType(ModalityType.APPLICATION_MODAL);
-          dialog.getBtnUpdater().setEnabled(false);
         }
         dialog.setVisible(true);
       }
@@ -152,6 +161,28 @@ public class Lawena {
         } else {
           custom.setText(previous);
         }
+      }
+    });
+    view.getCheckForUpdatesMenuItem().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        tasks.checkForUpdates();
+      }
+    });
+    view.getSwitchUpdaterBranchMenuItem().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        startBranchesDialog();
+      }
+    });
+    view.getShowLogMenuItem().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        logView.setLocation(view.getX() + view.getWidth() + 10, view.getY());
+        logView.setVisible(true);
       }
     });
 
@@ -186,8 +217,8 @@ public class Lawena {
       }
     };
     sorter.setRowFilter(filter);
-    tasks.new PathScanTask().execute();
-    tasks.new SkyboxLoader().execute();
+    tasks.scanResources();
+    tasks.loadSkyboxes();
 
     loadSettings();
 
@@ -199,7 +230,7 @@ public class Lawena {
           Path newpath = model.getChosenTfPath();
           if (newpath != null) {
             settings.setTfPath(newpath);
-            tasks.new PathScanTask().execute();
+            tasks.scanResources();
           }
         } else {
           JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
@@ -251,7 +282,7 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        tasks.newLaunchTask().execute();
+        tasks.launch();
       }
     });
     view.getBtnClearMovieFolder().addActionListener(new ActionListener() {
@@ -359,6 +390,10 @@ public class Lawena {
 
   private void startSegmentsDialog() {
     segments.start();
+  }
+
+  private void startBranchesDialog() {
+    branches.start();
   }
 
   private boolean checkCustomHud(LwrtResource cp) {
@@ -500,7 +535,7 @@ public class Lawena {
       }
     }
     model.setSkyboxMap(new HashMap<String, ImageIcon>(data.size()));
-    tasks.new SkyboxPreviewGenerator(new ArrayList<>(data)).execute();
+    tasks.generateSkyboxPreviews(new ArrayList<>(data));
     data.add(0, (String) Key.Skybox.defValue());
     combo.setModel(new DefaultComboBoxModel<String>(data));
     combo.addActionListener(new ActionListener() {
@@ -528,6 +563,32 @@ public class Lawena {
   }
 
   void clearSegmentFiles(List<String> selected) {
-    tasks.new ClearMoviesTask(selected).execute();
+    tasks.cleanSegments(selected);
+  }
+
+  public void upgrade(BuildInfo details) {
+    if (details.equals(BuildInfo.LATEST)) {
+      String notice = "Update is ready. Please restart Lawena to use it";
+      log.info(notice);
+      JOptionPane.showMessageDialog(view, notice, "Update Ready", JOptionPane.INFORMATION_MESSAGE);
+      return;
+    }
+    Updater updater = model.getUpdater();
+    if (updater.upgradeApplication(details)) {
+      log.info("Upgrade in progress..");
+      saveAndExit();
+    } else {
+      log.debug("Attempting to update version marker file again");
+      if (updater.createVersionFile(details.getName())) {
+        String notice = "Update is ready. Please restart Lawena to use it";
+        log.info(notice);
+        JOptionPane
+            .showMessageDialog(view, notice, "Update Ready", JOptionPane.INFORMATION_MESSAGE);
+      } else {
+        String notice = "Update could not be completed, please report this issue";
+        log.info(notice);
+        JOptionPane.showMessageDialog(view, notice, "Updater Error", JOptionPane.WARNING_MESSAGE);
+      }
+    }
   }
 }

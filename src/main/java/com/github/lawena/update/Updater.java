@@ -14,14 +14,17 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +40,9 @@ import com.threerings.getdown.net.HTTPDownloader;
 import com.threerings.getdown.util.ConfigUtil;
 import com.threerings.getdown.util.LaunchUtil;
 
-public class UpdateManager {
+public class Updater {
 
-  private static final Logger log = LoggerFactory.getLogger(UpdateManager.class);
+  private static final Logger log = LoggerFactory.getLogger(Updater.class);
   private static final String DEFAULT_CHANNELS =
       "https://dl.dropboxusercontent.com/u/74380/lwrt/channels.json";
 
@@ -47,17 +50,14 @@ public class UpdateManager {
   private final Map<String, Object> getdown;
   private final Gson gson = new Gson();
   private List<Channel> channels;
-
   private long lastCheck = 0L;
-  private SortedSet<BuildInfo> buildList;
 
-  public UpdateManager() {
+  public Updater() {
     this(Paths.get("getdown.txt"));
   }
 
-  public UpdateManager(Path getdownPath) {
+  public Updater(Path getdownPath) {
     this.getdown = parseConfig(getdownPath);
-    this.channels = loadChannels();
   }
 
   private Map<String, Object> parseConfig(Path path) {
@@ -70,18 +70,27 @@ public class UpdateManager {
     }
   }
 
-  private SortedSet<BuildInfo> getVersionList(String channelName) {
-    for (Channel channel : getChannels()) {
-      if (channel.getId().equals(channelName)) {
-        return getVersionList(channel);
-      }
-    }
-    throw new IllegalArgumentException("Channel name not found");
+  public void clear() {
+    channels = null;
   }
 
-  private SortedSet<BuildInfo> getVersionList(Channel channel) {
+  private SortedSet<BuildInfo> getBuildList(Channel channel) {
+    if (channel == null)
+      throw new IllegalArgumentException("Must set a channel");
+    SortedSet<BuildInfo> builds = channel.getBuilds();
+    if (builds != null) {
+      return builds;
+    }
+    builds = Collections.emptySortedSet();
+    if (channel.equals(Channel.STANDALONE)) {
+      return builds;
+    }
+    if (channel.getUrl() == null || channel.getUrl().isEmpty()) {
+      log.warn("Invalid url for channel {}", channel);
+      return builds;
+    }
     String name = "buildlist.txt";
-    SortedSet<BuildInfo> set = new TreeSet<BuildInfo>();
+    builds = new TreeSet<BuildInfo>();
     try {
       File local = new File(name).getAbsoluteFile();
       URL url = new URL(channel.getUrl() + name);
@@ -90,20 +99,36 @@ public class UpdateManager {
         try {
           for (String line : Files.readAllLines(local.toPath(), Charset.defaultCharset())) {
             String[] data = line.split(";");
-            set.add(new BuildInfo(data));
+            builds.add(new BuildInfo(data));
           }
         } catch (IOException e) {
           log.warn("Could not read lines from file: " + e);
         }
         res.erase();
+        try {
+          Files.deleteIfExists(local.toPath());
+        } catch (IOException e) {
+          log.warn("Could not delete file", e);
+        }
       }
     } catch (MalformedURLException e) {
       log.warn("Invalid URL: " + e);
     }
-    return set;
+    channel.setBuilds(builds);
+    return builds;
   }
 
-  public String getCurrentChannel() {
+  public Channel getCurrentChannel() {
+    String chName = getCurrentChannelName();
+    for (Channel channel : getChannels()) {
+      if (channel.getId().equals(chName)) {
+        return channel;
+      }
+    }
+    return Channel.STANDALONE;
+  }
+
+  public String getCurrentChannelName() {
     String[] value = getMultiValue(getdown, "channel");
     if (value.length == 0)
       return "standalone";
@@ -185,32 +210,38 @@ public class UpdateManager {
     upgrade("Lawena updater", oldgd, curgd, newgd);
   }
 
-  private List<Channel> getChannels() {
-    List<Channel> newlist = loadChannels();
-    if (channels == null || !newlist.isEmpty()) {
-      channels = newlist;
+  public List<Channel> getChannels() {
+    if (channels == null || channels.isEmpty()) {
+      channels = loadChannels();
     }
     return channels;
   }
 
   private List<Channel> loadChannels() {
-    // don't load channels in standalone mode
-    if (standalone)
-      return Collections.emptyList();
     String[] value = getMultiValue(getdown, "channels");
     String url = value.length > 0 ? value[0] : DEFAULT_CHANNELS;
     File file = new File("channels.json").getAbsoluteFile();
+    List<Channel> list = Collections.emptyList();
     try {
       Resource res = new Resource(file.getName(), new URL(url), file, false);
+      lastCheck = System.currentTimeMillis();
       if (download(res)) {
         try {
           Reader reader = new FileReader(file);
           Type token = new TypeToken<List<Channel>>() {}.getType();
-          return gson.fromJson(reader, token);
+          list = gson.fromJson(reader, token);
+          for (Channel channel : list) {
+            if (channel.getType() == Channel.Type.SNAPSHOT) {
+              getBuildList(channel);
+            }
+          }
+          reader.close();
         } catch (JsonSyntaxException | JsonIOException e) {
           log.warn("Invalid latest version file found: " + e);
         } catch (FileNotFoundException e) {
           log.info("No latest version file found");
+        } catch (IOException e) {
+          log.warn("Could not close reader stream", e);
         }
         res.erase();
       }
@@ -222,7 +253,7 @@ public class UpdateManager {
     } catch (IOException e) {
       log.debug("Could not delete channels file: " + e);
     }
-    return Collections.emptyList();
+    return list;
   }
 
   private boolean download(Resource... res) {
@@ -243,23 +274,18 @@ public class UpdateManager {
     }).download();
   }
 
-  public void cleanup() {
+  public void fileCleanup() {
     deleteOutdatedResources();
     upgradeLauncher();
     upgradeGetdown();
   }
 
-  public UpdateResult checkForUpdates(boolean force) {
-    long now = System.currentTimeMillis();
-    long delta = TimeUnit.MILLISECONDS.toHours(now - lastCheck);
-    if (force || delta >= 1 || buildList == null || buildList.isEmpty()) {
-      lastCheck = System.currentTimeMillis();
-      buildList = getVersionList(getCurrentChannel());
-    }
+  public UpdateResult checkForUpdates() {
+    SortedSet<BuildInfo> buildList = getBuildList(getCurrentChannel());
     if (buildList.isEmpty()) {
-      return UpdateResult.notFound("No builds were found for this channel");
+      return UpdateResult.notFound("No builds were found for the current branch");
     }
-    BuildInfo latest = buildList.last();
+    BuildInfo latest = buildList.first();
     try {
       long current = Long.parseLong(getCurrentVersion());
       if (current < latest.getTimestamp()) {
@@ -297,5 +323,70 @@ public class UpdateManager {
       log.warn("Could not create version file", e);
       return false;
     }
+  }
+
+  public String getLastCheckString() {
+    if (lastCheck == 0L) {
+      return "Never";
+    }
+    return convertTime(lastCheck);
+  }
+
+  private String convertTime(long time) {
+    Date date = new Date(time);
+    Format format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    return format.format(date);
+  }
+
+  public void switchChannel(Channel newChannel) throws IOException {
+    String appbase = newChannel.getUrl() + "latest/";
+    Path getdownPath = Paths.get("getdown.txt");
+    try {
+      Files.copy(getdownPath, Paths.get("getdown.bak.txt"));
+    } catch (IOException e) {
+      log.warn("Could not backup updater metadata file", e);
+    }
+    List<String> lines = new ArrayList<>();
+    lines.add("appbase = " + appbase);
+    try {
+      for (String line : Files.readAllLines(getdownPath)) {
+        if (line.startsWith("ui.")) {
+          lines.add(line);
+        }
+      }
+    } catch (IOException e) {
+      log.warn("Could not read current updater metadata file", e);
+    }
+    Files.write(getdownPath, lines);
+    log.info("New updater metadata file created");
+  }
+
+  public List<String> getChangeLog(Channel channel) {
+    List<String> list = channel.getChangeLog();
+    if (list != null) {
+      return list;
+    }
+    list = Collections.emptyList();
+    String url = channel.getUrl();
+    if (url == null) {
+      return list;
+    }
+    url = url + "changelog.txt";
+    File file = new File("changelog.txt").getAbsoluteFile();
+    try {
+      Resource res = new Resource(file.getName(), new URL(url), file, false);
+      if (download(res)) {
+        try {
+          list = Files.readAllLines(file.toPath());
+          channel.setChangeLog(list);
+        } catch (IOException e) {
+          log.warn("Could not read lines from file", e);
+        }
+        res.erase();
+      }
+    } catch (MalformedURLException e) {
+      log.warn("Invalid URL: " + e);
+    }
+    return list;
   }
 }

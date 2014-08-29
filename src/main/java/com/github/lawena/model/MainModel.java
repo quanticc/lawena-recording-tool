@@ -17,7 +17,7 @@ import com.github.lawena.os.LinuxInterface;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.os.OSXInterface;
 import com.github.lawena.os.WindowsInterface;
-import com.github.lawena.update.UpdateManager;
+import com.github.lawena.update.Updater;
 import com.github.lawena.util.Util;
 import com.github.lawena.util.WatchDir;
 import com.github.lawena.vdm.DemoEditor;
@@ -29,7 +29,7 @@ public class MainModel {
   private LwrtSettings settings;
   private Map<String, String> versionData;
   private OSInterface osInterface;
-  private UpdateManager updater;
+  private Updater updater;
 
   private String originalDxLevel;
   private Path steamPath;
@@ -46,7 +46,7 @@ public class MainModel {
   public MainModel(LwrtSettings settingsManager) {
     this.settings = settingsManager;
     this.versionData = loadVersionData();
-    this.updater = new UpdateManager();
+    this.updater = new Updater();
 
     logVMInfo();
     loadOsInterface();
@@ -153,7 +153,7 @@ public class MainModel {
   private void logVMInfo() {
     // saving essential info to log for troubleshooting
     log.debug("----------------- Lawena Recording Tool -----------------");
-    log.debug("v {} {} [{}]", getFullVersion(), getBuildTime(), updater.getCurrentChannel());
+    log.debug("v {} {} [{}]", getFullVersion(), getBuildTime(), updater.getCurrentChannelName());
     log.debug("------------------------ VM Info ------------------------");
     log.debug("OS name: {} {}", System.getProperty("os.name"), System.getProperty("os.arch"));
     log.debug("Java version: {}", System.getProperty("java.version"));
@@ -185,7 +185,7 @@ public class MainModel {
     return osInterface;
   }
 
-  public UpdateManager getUpdater() {
+  public Updater getUpdater() {
     return updater;
   }
 

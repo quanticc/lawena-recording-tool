@@ -59,7 +59,6 @@ public class AboutDialog extends JDialog {
   }
 
   private final JPanel contentPanel = new JPanel();
-  private JButton btnUpdater;
 
   /**
    * Create the dialog.
@@ -125,13 +124,6 @@ public class AboutDialog extends JDialog {
     JButton btnOk = new JButton("OK");
     btnOk.setPreferredSize(new Dimension(80, 23));
     btnOk.addActionListener(new BtnOkActionListener());
-
-    btnUpdater = new JButton("Updater Channel...");
-    GridBagConstraints gbc_btnUpdater = new GridBagConstraints();
-    gbc_btnUpdater.insets = new Insets(0, 0, 0, 5);
-    gbc_btnUpdater.gridx = 0;
-    gbc_btnUpdater.gridy = 0;
-    buttonPane.add(btnUpdater, gbc_btnUpdater);
     GridBagConstraints gbc_btnOk = new GridBagConstraints();
     gbc_btnOk.anchor = GridBagConstraints.NORTHWEST;
     gbc_btnOk.gridx = 2;
@@ -144,7 +136,4 @@ public class AboutDialog extends JDialog {
     setLocationByPlatform(true);
   }
 
-  public JButton getBtnUpdater() {
-    return btnUpdater;
-  }
 }

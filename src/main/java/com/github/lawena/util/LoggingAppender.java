@@ -6,11 +6,14 @@
 package com.github.lawena.util;
 
 import java.awt.Color;
-import java.awt.Font;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 
+import javax.swing.BoundedRangeModel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Style;
@@ -26,14 +29,36 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
   private final JTextPane pane;
+  private JScrollPane scroll;
   private final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss");
   private boolean printStackTrace = false;
 
-  public LoggingAppender(JTextPane pane, LoggerContext context) {
+  public LoggingAppender(JTextPane pane, JScrollPane scroll, LoggerContext context) {
     this.pane = pane;
+    this.scroll = scroll;
+    configureScroll();
     setName("LoggingAppender");
     setContext(context);
     start();
+  }
+
+  private void configureScroll() {
+    scroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+
+      BoundedRangeModel brm = scroll.getVerticalScrollBar().getModel();
+      boolean wasAtBottom = true;
+
+      @Override
+      public void adjustmentValueChanged(AdjustmentEvent e) {
+        if (!brm.getValueIsAdjusting()) {
+          if (wasAtBottom) {
+            brm.setValue(brm.getMaximum());
+          }
+        } else {
+          wasAtBottom = ((brm.getValue() + brm.getExtent()) == brm.getMaximum());
+        }
+      }
+    });
   }
 
   public boolean isPrintStackTrace() {
@@ -84,13 +109,13 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
         } else {
           msgStyle = doc.getStyle("Debug");
         }
-        doc.insertString(doc.getLength(), "\n", doc.getStyle("Normal"));
         int prevLength = doc.getLength();
         doc.insertString(doc.getLength(), "[" + dateFormatter.format(event.getTimeStamp()) + "] ",
             doc.getStyle("Normal"));
         doc.insertString(doc.getLength(), event.getLevel().toString() + "  ", doc.getStyle("Level"));
         // doc.insertString(doc.getLength(), event.getLoggerName() + " ", doc.getStyle("Class"));
         doc.insertString(doc.getLength(), formatMsg(event, message), msgStyle);
+        doc.insertString(doc.getLength(), "\n", doc.getStyle("Normal"));
         pane.setCaretPosition(prevLength);
       } catch (Exception e) {
         e.printStackTrace();

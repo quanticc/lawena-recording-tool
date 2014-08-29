@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -36,7 +35,6 @@ import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
@@ -47,9 +45,11 @@ import javax.swing.border.TitledBorder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javax.swing.ImageIcon;
 
 public class LawenaView extends JFrame {
 
+  private static final long serialVersionUID = 1L;
   private static final Logger log = LoggerFactory.getLogger(LawenaView.class);
 
   private static class LaunchURLWorker extends SwingWorker<Void, Void> {
@@ -112,11 +112,6 @@ public class LawenaView extends JFrame {
     }
   }
 
-  /**
-     * 
-     */
-  private static final long serialVersionUID = 1L;
-
   private JComboBox<String> cmbHud;
   private JComboBox<String> cmbQuality;
   private JComboBox<String> cmbSkybox;
@@ -159,11 +154,10 @@ public class LawenaView extends JFrame {
   private JCheckBoxMenuItem chckbxmntmInsecure;
   private JMenuItem mntmRevertToDefault;
   private JCheckBoxMenuItem chckbxmntmBackupMode;
-  private JTextPane logPane;
+  private JMenuItem checkForUpdatesMenuItem;
+  private JMenuItem switchUpdaterBranchMenuItem;
+  private JMenuItem showLogMenuItem;
 
-  /**
-   * Create the frame.
-   */
   public LawenaView() {
     super();
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -234,28 +228,44 @@ public class LawenaView extends JFrame {
     JMenu mnHelp = new JMenu(" Help ");
     menuBar.add(mnHelp);
 
+    JMenuItem showLogMenuItem = new JMenuItem("Show Log");
+    showLogMenuItem.setIcon(new ImageIcon(LawenaView.class.getResource("/com/github/lawena/ui/fugue/clock.png")));
+    mnHelp.add(showLogMenuItem);
+
+    JSeparator separator_7 = new JSeparator();
+    mnHelp.add(separator_7);
+
     JMenuItem mntmInstructions = new JMenuItem("Instructions and FAQ");
     mntmInstructions.addActionListener(new MntmInstructionsActionListener());
     mnHelp.add(mntmInstructions);
 
     JMenuItem mntmVdmTutorial = new JMenuItem("VDM Tutorial");
     mntmVdmTutorial.addActionListener(new MntmVdmTutorialActionListener());
+    mnHelp.add(mntmVdmTutorial);
 
     JMenuItem mntmRenderingTutorial = new JMenuItem("Rendering Tutorial");
     mntmRenderingTutorial.addActionListener(new MntmRenderingTutorialActionListener());
     mnHelp.add(mntmRenderingTutorial);
-    mnHelp.add(mntmVdmTutorial);
+
+    JSeparator separator_2 = new JSeparator();
+    mnHelp.add(separator_2);
+
+    JMenuItem checkForUpdatesMenuItem = new JMenuItem("Check for Updates");
+    mnHelp.add(checkForUpdatesMenuItem);
+
+    JMenuItem switchUpdaterBranchMenuItem = new JMenuItem("Switch Updater Branch...");
+    mnHelp.add(switchUpdaterBranchMenuItem);
+
+    JMenuItem mntmPatchNotes = new JMenuItem("Release Notes");
+    mntmPatchNotes.addActionListener(new MntmPatchNotesActionListener());
+    mnHelp.add(mntmPatchNotes);
 
     JMenuItem mntmProjectPage = new JMenuItem("Project Page");
     mntmProjectPage.addActionListener(new MntmProjectPageActionListener());
     mnHelp.add(mntmProjectPage);
 
-    JMenuItem mntmPatchNotes = new JMenuItem("Patch Notes");
-    mntmPatchNotes.addActionListener(new MntmPatchNotesActionListener());
-    mnHelp.add(mntmPatchNotes);
-
-    JSeparator separator_2 = new JSeparator();
-    mnHelp.add(separator_2);
+    JSeparator separator_6 = new JSeparator();
+    mnHelp.add(separator_6);
 
     JMenuItem mntmAbout = new JMenuItem("About");
     mnHelp.add(mntmAbout);
@@ -623,30 +633,6 @@ public class LawenaView extends JFrame {
     JButton btnStartTf = new JButton("Start Team Fortress 2");
     panelBottomRight.add(btnStartTf);
 
-    JPanel panelLog = new JPanel();
-    tabbedPane.addTab("Log", null, panelLog, null);
-    GridBagLayout gbl_panelLog = new GridBagLayout();
-    gbl_panelLog.columnWidths = new int[] {719, 0};
-    gbl_panelLog.rowHeights = new int[] {320, 0};
-    gbl_panelLog.columnWeights = new double[] {1.0, Double.MIN_VALUE};
-    gbl_panelLog.rowWeights = new double[] {1.0, Double.MIN_VALUE};
-    panelLog.setLayout(gbl_panelLog);
-
-    JScrollPane logScroll = new JScrollPane();
-    GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
-    gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
-    gbc_scrollPane_2.insets = new Insets(5, 5, 5, 5);
-    gbc_scrollPane_2.gridx = 0;
-    gbc_scrollPane_2.gridy = 0;
-    panelLog.add(logScroll, gbc_scrollPane_2);
-
-    JTextPane logPane = new JTextPane();
-    logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-    logPane.setFont(new Font("Tahoma", Font.PLAIN, 10));
-    logPane.setEditable(false);
-    logPane.setText("");
-    logScroll.setViewportView(logPane);
-
     JPanel panelStatusbar = new JPanel();
     contentPane.add(panelStatusbar, BorderLayout.SOUTH);
     GridBagLayout gbl_panelStatusbar = new GridBagLayout();
@@ -713,7 +699,9 @@ public class LawenaView extends JFrame {
     this.lblViewmodelFov = lblViewmodelFov;
     this.lblJpegQuality = lblJpegQuality;
     this.chckbxmntmBackupMode = chckbxmntmBackupMode;
-    this.logPane = logPane;
+    this.checkForUpdatesMenuItem = checkForUpdatesMenuItem;
+    this.switchUpdaterBranchMenuItem = switchUpdaterBranchMenuItem;
+    this.showLogMenuItem = showLogMenuItem;
 
     pack();
     setMinimumSize(new Dimension(750, 420));
@@ -786,10 +774,6 @@ public class LawenaView extends JFrame {
 
   public JButton getBtnClearMovieFolder() {
     return btnClearMovieFolder;
-  }
-
-  public JTextPane getLogPane() {
-    return logPane;
   }
 
   public JTable getTableCustomContent() {
@@ -890,6 +874,18 @@ public class LawenaView extends JFrame {
 
   public JCheckBoxMenuItem getChckbxmntmBackupMode() {
     return chckbxmntmBackupMode;
+  }
+
+  public JMenuItem getCheckForUpdatesMenuItem() {
+    return checkForUpdatesMenuItem;
+  }
+
+  public JMenuItem getSwitchUpdaterBranchMenuItem() {
+    return switchUpdaterBranchMenuItem;
+  }
+
+  public JMenuItem getShowLogMenuItem() {
+    return showLogMenuItem;
   }
 
 }
