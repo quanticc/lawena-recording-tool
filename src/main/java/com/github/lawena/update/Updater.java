@@ -81,7 +81,7 @@ public class Updater {
     if (builds != null) {
       return builds;
     }
-    builds = Collections.emptySortedSet();
+    builds = new TreeSet<BuildInfo>();
     if (channel.equals(Channel.STANDALONE)) {
       return builds;
     }
@@ -349,7 +349,7 @@ public class Updater {
     List<String> lines = new ArrayList<>();
     lines.add("appbase = " + appbase);
     try {
-      for (String line : Files.readAllLines(getdownPath)) {
+      for (String line : Files.readAllLines(getdownPath, Charset.defaultCharset())) {
         if (line.startsWith("ui.")) {
           lines.add(line);
         }
@@ -357,7 +357,7 @@ public class Updater {
     } catch (IOException e) {
       log.warn("Could not read current updater metadata file", e);
     }
-    Files.write(getdownPath, lines);
+    Files.write(getdownPath, lines, Charset.defaultCharset());
     log.info("New updater metadata file created");
   }
 
@@ -377,7 +377,7 @@ public class Updater {
       Resource res = new Resource(file.getName(), new URL(url), file, false);
       if (download(res)) {
         try {
-          list = Files.readAllLines(file.toPath());
+          list = Files.readAllLines(file.toPath(), Charset.defaultCharset());
           channel.setChangeLog(list);
         } catch (IOException e) {
           log.warn("Could not read lines from file", e);
