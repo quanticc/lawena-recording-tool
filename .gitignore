@@ -90,7 +90,7 @@ local.properties
 nbproject/private/
 build/
 nbbuild/
-dist/
+#dist/
 nbdist/
 nbactions.xml
 nb-configuration.xml
@@ -140,3 +140,5 @@ custom/*
 version.txt
 *.lck
 !launcher/*.jar
+src/main/dist/*.exe
+src/main/dist/lawena/code/*.exe
