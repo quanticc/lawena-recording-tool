@@ -596,7 +596,7 @@ public class Lawena {
   private Thread watcher;
   private Object lastHud;
 
-  private String version = "4.0-SNAPSHOT";
+  private String version = "4.1";
   private String build;
   private UpdateHelper updater;
 

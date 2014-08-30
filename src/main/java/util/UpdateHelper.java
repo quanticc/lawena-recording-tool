@@ -86,16 +86,13 @@ public class UpdateHelper {
 
   public void showSwitchUpdateChannelDialog() {
     if (channels.isEmpty()) {
-      JOptionPane.showMessageDialog(null, "No development branch options found");
+      JOptionPane.showMessageDialog(null, "No updater branch options found");
       return;
     }
     Object answer =
         JOptionPane.showInputDialog(null,
-            "Select the channel from where updates will be downloaded.\n"
-                + "This is an experimental feature to allow easy switching\n"
-                + "from stable to beta/dev/experimental branches and back.\n",
-            "Switch Update Channel", JOptionPane.PLAIN_MESSAGE, null, channels.keySet().toArray(),
-            null);
+            "Select the branch from where updates will be downloaded\n", "Switch Updater Branch",
+            JOptionPane.PLAIN_MESSAGE, null, channels.keySet().toArray(), null);
     if (answer != null) {
       String filename = channels.getProperty((String) answer);
       if (filename != null) {
@@ -108,13 +105,13 @@ public class UpdateHelper {
           Files.copy(curGetdown.toPath(), oldGetdown.toPath());
           Files.deleteIfExists(curGetdown.toPath());
         } catch (IOException e) {
-          log.info("Problem while changing streams");
+          log.info("Problem while changing branches");
         }
         try {
           Files.copy(newGetdown.toPath(), curGetdown.toPath());
           Files.deleteIfExists(oldGetdown.toPath());
         } catch (IOException e) {
-          log.info("Problem while changing streams");
+          log.info("Problem while changing branches");
         }
       } else {
         log.info("Invalid branch name: " + answer);
@@ -126,9 +123,9 @@ public class UpdateHelper {
     channels = new Properties();
     try {
       channels.load(new FileInputStream("res/channels.txt"));
-      log.finer("Loaded development channels: " + channels.toString());
+      log.finer("Loaded updater branches: " + channels.toString());
     } catch (IOException e) {
-      log.fine("Development channels not found, disabling feature");
+      log.fine("Updater branches file not found, disabling feature");
     }
   }
 

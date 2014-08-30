@@ -148,8 +148,8 @@ public class StartLogger {
   }
 
   private static final String newLine = System.getProperty("line.separator");
-  private static final SimpleDateFormat TIME = new SimpleDateFormat("HH:mm:ss.SSS");
-  private static final SimpleDateFormat DATETIME = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
+  private static final SimpleDateFormat TIME = new SimpleDateFormat("HH:mm:ss");
+  private static final SimpleDateFormat DATETIME = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
   private Logger logger;
 

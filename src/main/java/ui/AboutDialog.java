@@ -126,7 +126,7 @@ public class AboutDialog extends JDialog {
     btnOk.setPreferredSize(new Dimension(80, 23));
     btnOk.addActionListener(new BtnOkActionListener());
 
-    btnUpdater = new JButton("Updater Channel...");
+    btnUpdater = new JButton("Select Updater Branch...");
     GridBagConstraints gbc_btnUpdater = new GridBagConstraints();
     gbc_btnUpdater.insets = new Insets(0, 0, 0, 5);
     gbc_btnUpdater.gridx = 0;
