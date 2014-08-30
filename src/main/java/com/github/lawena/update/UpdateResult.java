@@ -6,7 +6,7 @@ public class UpdateResult {
     UPDATE_AVAILABLE, NO_UPDATES_FOUND, ALREADY_LATEST_VERSION;
   }
 
-  public static UpdateResult found(BuildInfo details) {
+  public static UpdateResult found(Build details) {
     return new UpdateResult(Status.UPDATE_AVAILABLE, details);
   }
 
@@ -19,7 +19,7 @@ public class UpdateResult {
   }
 
   private Status status;
-  private BuildInfo details;
+  private Build details;
   private String message;
 
   private UpdateResult(Status status) {
@@ -30,11 +30,11 @@ public class UpdateResult {
     this(status, null, message);
   }
 
-  private UpdateResult(Status status, BuildInfo details) {
+  private UpdateResult(Status status, Build details) {
     this(status, details, status.toString());
   }
 
-  private UpdateResult(Status status, BuildInfo details, String message) {
+  private UpdateResult(Status status, Build details, String message) {
     this.status = status;
     this.details = details;
     this.message = message;
@@ -44,7 +44,7 @@ public class UpdateResult {
     return status;
   }
 
-  public BuildInfo getDetails() {
+  public Build getDetails() {
     return details;
   }
 

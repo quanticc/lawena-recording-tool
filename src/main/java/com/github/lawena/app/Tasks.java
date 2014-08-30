@@ -29,7 +29,7 @@ import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.MainModel;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
-import com.github.lawena.update.BuildInfo;
+import com.github.lawena.update.Build;
 import com.github.lawena.update.UpdateResult;
 import com.github.lawena.update.Updater;
 import com.github.lawena.util.Util;
@@ -67,12 +67,13 @@ public class Tasks {
           log.info("No updates were found: {}", result.getMessage());
           break;
         case UPDATE_AVAILABLE:
-          BuildInfo details = result.getDetails();
+          Build details = result.getDetails();
+          // TODO: add a "never ask me again" checkbox and a changelog to this dialog
           log.info("New version available: {} ({})", details.getDescribe(), details.getName());
           int answer =
               JOptionPane.showConfirmDialog(view,
-                  "New version found!\nUpdater Channel: " + updater.getCurrentChannelName()
-                      + "\nVersion: " + details.getDescribe() + "\nBuild: " + details.getName()
+                  "New version found!\nBranch: " + updater.getCurrentBranchName() + "\nVersion: "
+                      + details.getDescribe() + "\nBuild: " + details.getName()
                       + "\n\nDo you want to update to the latest version?"
                       + "\nApplication will be restarted", "New version available",
                   JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);

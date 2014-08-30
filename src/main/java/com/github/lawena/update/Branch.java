@@ -5,30 +5,40 @@ import java.util.SortedSet;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Channel {
+/**
+ * Represents a set of elements to retrieve a deployment descriptor used to switch an application to
+ * a specific context.
+ * 
+ * @author Ivan
+ *
+ */
+public class Branch {
 
   public enum Type {
     /**
-     * Static channels do not use the updater system. They exist as a repository for a release or a
+     * Static branches do not use the updater system. They exist as a repository for a release or a
      * version that will not be updated in the future.
      */
     @SerializedName("static")
     STATIC,
     /**
-     * Versioned channels adhere strictly to the updater system and will be auto-updated as soon as
+     * Versioned branches adhere strictly to the updater system and will be auto-updated as soon as
      * Getdown detects a newer version.
      */
     @SerializedName("versioned")
     VERSIONED,
     /**
-     * Snapshot channels allow updating manually and also rollbacking to previous versions. Updater
-     * class provides a way to retrieve the builds available for a specific snapshot channel.
+     * Snapshot branches allow updating manually and also rollbacking to previous versions. Updater
+     * class provides a way to retrieve the builds available for a specific snapshot branch.
      */
     @SerializedName("snapshot")
     SNAPSHOT;
   }
 
-  public static final Channel STANDALONE = new Channel("standalone");
+  /**
+   * Represents a branch without a deployment descriptor
+   */
+  public static final Branch STANDALONE = new Branch("standalone");
 
   private String id;
   private String name;
@@ -38,14 +48,14 @@ public class Channel {
   private String compare;
   private String url;
 
-  private transient SortedSet<BuildInfo> builds;
+  private transient SortedSet<Build> builds;
   private transient List<String> changeLog;
 
-  public Channel() {
+  public Branch() {
 
   }
 
-  private Channel(String id) {
+  private Branch(String id) {
     this.id = id;
     this.name = id;
     this.type = Type.STATIC;
@@ -79,11 +89,11 @@ public class Channel {
     return url;
   }
 
-  public SortedSet<BuildInfo> getBuilds() {
+  public SortedSet<Build> getBuilds() {
     return builds;
   }
 
-  public void setBuilds(SortedSet<BuildInfo> builds) {
+  public void setBuilds(SortedSet<Build> builds) {
     this.builds = builds;
   }
 
@@ -116,7 +126,7 @@ public class Channel {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    Channel other = (Channel) obj;
+    Branch other = (Branch) obj;
     if (id == null) {
       if (other.id != null)
         return false;

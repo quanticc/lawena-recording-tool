@@ -153,7 +153,7 @@ public class MainModel {
   private void logVMInfo() {
     // saving essential info to log for troubleshooting
     log.debug("----------------- Lawena Recording Tool -----------------");
-    log.debug("v {} {} [{}]", getFullVersion(), getBuildTime(), updater.getCurrentChannelName());
+    log.debug("v {} {} [{}]", getFullVersion(), getBuildTime(), updater.getCurrentBranchName());
     log.debug("------------------------ VM Info ------------------------");
     log.debug("OS name: {} {}", System.getProperty("os.name"), System.getProperty("os.arch"));
     log.debug("Java version: {}", System.getProperty("java.version"));

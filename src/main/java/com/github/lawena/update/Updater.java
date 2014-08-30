@@ -40,16 +40,22 @@ import com.threerings.getdown.net.HTTPDownloader;
 import com.threerings.getdown.util.ConfigUtil;
 import com.threerings.getdown.util.LaunchUtil;
 
+/**
+ * Supports updating and branch-switching features using Getdown as a service for deployment.
+ * 
+ * @author Ivan
+ *
+ */
 public class Updater {
 
   private static final Logger log = LoggerFactory.getLogger(Updater.class);
-  private static final String DEFAULT_CHANNELS =
+  private static final String DEFAULT_BRANCHES =
       "https://dl.dropboxusercontent.com/u/74380/lwrt/channels.json";
 
   private boolean standalone = false;
   private final Map<String, Object> getdown;
   private final Gson gson = new Gson();
-  private List<Channel> channels;
+  private List<Branch> branches;
   private long lastCheck = 0L;
 
   public Updater() {
@@ -71,35 +77,35 @@ public class Updater {
   }
 
   public void clear() {
-    channels = null;
+    branches = null;
   }
 
-  private SortedSet<BuildInfo> getBuildList(Channel channel) {
-    if (channel == null)
-      throw new IllegalArgumentException("Must set a channel");
-    SortedSet<BuildInfo> builds = channel.getBuilds();
+  private SortedSet<Build> getBuildList(Branch branch) {
+    if (branch == null)
+      throw new IllegalArgumentException("Must set a branch");
+    SortedSet<Build> builds = branch.getBuilds();
     if (builds != null) {
       return builds;
     }
-    builds = new TreeSet<BuildInfo>();
-    if (channel.equals(Channel.STANDALONE)) {
+    builds = new TreeSet<Build>();
+    if (branch.equals(Branch.STANDALONE)) {
       return builds;
     }
-    if (channel.getUrl() == null || channel.getUrl().isEmpty()) {
-      log.warn("Invalid url for channel {}", channel);
+    if (branch.getUrl() == null || branch.getUrl().isEmpty()) {
+      log.warn("Invalid url for branch {}", branch);
       return builds;
     }
     String name = "buildlist.txt";
-    builds = new TreeSet<BuildInfo>();
+    builds = new TreeSet<Build>();
     try {
       File local = new File(name).getAbsoluteFile();
-      URL url = new URL(channel.getUrl() + name);
+      URL url = new URL(branch.getUrl() + name);
       Resource res = new Resource(local.getName(), url, local, false);
       if (download(res)) {
         try {
           for (String line : Files.readAllLines(local.toPath(), Charset.defaultCharset())) {
             String[] data = line.split(";");
-            builds.add(new BuildInfo(data));
+            builds.add(new Build(data));
           }
         } catch (IOException e) {
           log.warn("Could not read lines from file: " + e);
@@ -114,21 +120,27 @@ public class Updater {
     } catch (MalformedURLException e) {
       log.warn("Invalid URL: " + e);
     }
-    channel.setBuilds(builds);
+    branch.setBuilds(builds);
     return builds;
   }
 
-  public Channel getCurrentChannel() {
-    String chName = getCurrentChannelName();
-    for (Channel channel : getChannels()) {
-      if (channel.getId().equals(chName)) {
-        return channel;
+  /**
+   * Retrieves the current development branch the installation is in. This method might trigger
+   * {@link #getBranches()} to update available branches
+   * 
+   * @return the current {@link Branch}
+   */
+  public Branch getCurrentBranch() {
+    String branchName = getCurrentBranchName();
+    for (Branch branch : getBranches()) {
+      if (branch.getId().equals(branchName)) {
+        return branch;
       }
     }
-    return Channel.STANDALONE;
+    return Branch.STANDALONE;
   }
 
-  public String getCurrentChannelName() {
+  public String getCurrentBranchName() {
     String[] value = getMultiValue(getdown, "channel");
     if (value.length == 0)
       return "standalone";
@@ -210,29 +222,29 @@ public class Updater {
     upgrade("Lawena updater", oldgd, curgd, newgd);
   }
 
-  public List<Channel> getChannels() {
-    if (channels == null || channels.isEmpty()) {
-      channels = loadChannels();
+  public List<Branch> getBranches() {
+    if (branches == null || branches.isEmpty()) {
+      branches = loadBranches();
     }
-    return channels;
+    return branches;
   }
 
-  private List<Channel> loadChannels() {
+  private List<Branch> loadBranches() {
     String[] value = getMultiValue(getdown, "channels");
-    String url = value.length > 0 ? value[0] : DEFAULT_CHANNELS;
+    String url = value.length > 0 ? value[0] : DEFAULT_BRANCHES;
     File file = new File("channels.json").getAbsoluteFile();
-    List<Channel> list = Collections.emptyList();
+    List<Branch> list = Collections.emptyList();
     try {
       Resource res = new Resource(file.getName(), new URL(url), file, false);
       lastCheck = System.currentTimeMillis();
       if (download(res)) {
         try {
           Reader reader = new FileReader(file);
-          Type token = new TypeToken<List<Channel>>() {}.getType();
+          Type token = new TypeToken<List<Branch>>() {}.getType();
           list = gson.fromJson(reader, token);
-          for (Channel channel : list) {
-            if (channel.getType() == Channel.Type.SNAPSHOT) {
-              getBuildList(channel);
+          for (Branch branch : list) {
+            if (branch.getType() == Branch.Type.SNAPSHOT) {
+              getBuildList(branch);
             }
           }
           reader.close();
@@ -251,7 +263,7 @@ public class Updater {
     try {
       Files.deleteIfExists(file.toPath());
     } catch (IOException e) {
-      log.debug("Could not delete channels file: " + e);
+      log.debug("Could not delete branches file: " + e);
     }
     return list;
   }
@@ -281,11 +293,11 @@ public class Updater {
   }
 
   public UpdateResult checkForUpdates() {
-    SortedSet<BuildInfo> buildList = getBuildList(getCurrentChannel());
+    SortedSet<Build> buildList = getBuildList(getCurrentBranch());
     if (buildList.isEmpty()) {
       return UpdateResult.notFound("No builds were found for the current branch");
     }
-    BuildInfo latest = buildList.first();
+    Build latest = buildList.first();
     try {
       long current = Long.parseLong(getCurrentVersion());
       if (current < latest.getTimestamp()) {
@@ -299,7 +311,7 @@ public class Updater {
     }
   }
 
-  public boolean upgradeApplication(BuildInfo build) {
+  public boolean upgradeApplication(Build build) {
     try {
       return LaunchUtil.updateVersionAndRelaunch(new File("").getAbsoluteFile(),
           "getdown-client.jar", build.getName());
@@ -309,6 +321,12 @@ public class Updater {
     return false;
   }
 
+  /**
+   * A standalone installation means that no deployment descriptor file was found on the application
+   * folder.
+   * 
+   * @return <code>true</code> if this install is standalone or <code>false</code> if it is not
+   */
   public boolean isStandalone() {
     return standalone;
   }
@@ -338,8 +356,8 @@ public class Updater {
     return format.format(date);
   }
 
-  public void switchChannel(Channel newChannel) throws IOException {
-    String appbase = newChannel.getUrl() + "latest/";
+  public void switchBranch(Branch newBranch) throws IOException {
+    String appbase = newBranch.getUrl() + "latest/";
     Path getdownPath = Paths.get("getdown.txt");
     try {
       Files.copy(getdownPath, Paths.get("getdown.bak.txt"));
@@ -361,13 +379,13 @@ public class Updater {
     log.info("New updater metadata file created");
   }
 
-  public List<String> getChangeLog(Channel channel) {
-    List<String> list = channel.getChangeLog();
+  public List<String> getChangeLog(Branch branch) {
+    List<String> list = branch.getChangeLog();
     if (list != null) {
       return list;
     }
     list = Collections.emptyList();
-    String url = channel.getUrl();
+    String url = branch.getUrl();
     if (url == null) {
       return list;
     }
@@ -378,7 +396,7 @@ public class Updater {
       if (download(res)) {
         try {
           list = Files.readAllLines(file.toPath(), Charset.defaultCharset());
-          channel.setChangeLog(list);
+          branch.setChangeLog(list);
         } catch (IOException e) {
           log.warn("Could not read lines from file", e);
         }

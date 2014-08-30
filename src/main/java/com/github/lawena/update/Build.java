@@ -1,24 +1,24 @@
 package com.github.lawena.update;
 
-public class BuildInfo implements Comparable<BuildInfo> {
+public class Build implements Comparable<Build> {
 
-  public static final BuildInfo LATEST = new BuildInfo("", "Latest", Long.MAX_VALUE);
+  public static final Build LATEST = new Build("", "Latest", Long.MAX_VALUE);
 
   private String name;
   private String describe;
   private long timestamp;
 
-  public BuildInfo() {}
+  public Build() {}
 
-  public BuildInfo(String[] raw) {
+  public Build(String[] raw) {
     this(raw[0], raw[1], Long.parseLong(raw[0]));
   }
 
-  public BuildInfo(String name, String describe) {
+  public Build(String name, String describe) {
     this(name, describe, Long.MAX_VALUE);
   }
 
-  public BuildInfo(String name, String describe, long timestamp) {
+  public Build(String name, String describe, long timestamp) {
     this.name = name;
     this.describe = describe;
     this.timestamp = timestamp;
@@ -42,7 +42,7 @@ public class BuildInfo implements Comparable<BuildInfo> {
   }
 
   @Override
-  public int compareTo(BuildInfo o) {
+  public int compareTo(Build o) {
     return -Long.compare(timestamp, o.timestamp);
   }
 
@@ -62,7 +62,7 @@ public class BuildInfo implements Comparable<BuildInfo> {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BuildInfo other = (BuildInfo) obj;
+    Build other = (Build) obj;
     if (name == null) {
       if (other.name != null)
         return false;

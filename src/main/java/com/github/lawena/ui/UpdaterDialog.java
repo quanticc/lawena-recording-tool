@@ -20,20 +20,20 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.html.HTMLDocument;
 
-import com.github.lawena.update.BuildInfo;
-import com.github.lawena.update.Channel;
+import com.github.lawena.update.Build;
+import com.github.lawena.update.Branch;
 
 public class UpdaterDialog extends JDialog {
 
   private static final long serialVersionUID = 1L;
 
   private final JPanel contentPanel = new JPanel();
-  private JComboBox<Channel> channelsComboBox;
-  private JComboBox<BuildInfo> buildsComboBox;
-  private JTextPane channelDataPane;
+  private JComboBox<Branch> branchesComboBox;
+  private JComboBox<Build> buildsComboBox;
+  private JTextPane branchTextPane;
   private JButton okButton;
   private JButton cancelButton;
-  private JTextField channelTextField;
+  private JTextField branchTextField;
   private JTextField buildTextField;
   private JButton refreshButton;
   private JLabel lblLastCheck;
@@ -68,24 +68,24 @@ public class UpdaterDialog extends JDialog {
       contentPanel.add(lblNewLabel, gbc_lblNewLabel);
     }
     {
-      JLabel lblCurrentChannel = new JLabel("Current Branch:");
-      GridBagConstraints gbc_lblCurrentChannel = new GridBagConstraints();
-      gbc_lblCurrentChannel.anchor = GridBagConstraints.EAST;
-      gbc_lblCurrentChannel.insets = new Insets(0, 0, 5, 5);
-      gbc_lblCurrentChannel.gridx = 0;
-      gbc_lblCurrentChannel.gridy = 1;
-      contentPanel.add(lblCurrentChannel, gbc_lblCurrentChannel);
+      JLabel lblCurrentBranch = new JLabel("Current Branch:");
+      GridBagConstraints gbc_lblCurrentBranch = new GridBagConstraints();
+      gbc_lblCurrentBranch.anchor = GridBagConstraints.EAST;
+      gbc_lblCurrentBranch.insets = new Insets(0, 0, 5, 5);
+      gbc_lblCurrentBranch.gridx = 0;
+      gbc_lblCurrentBranch.gridy = 1;
+      contentPanel.add(lblCurrentBranch, gbc_lblCurrentBranch);
     }
     {
-      channelTextField = new JTextField();
-      channelTextField.setEditable(false);
-      GridBagConstraints gbc_channelTextField = new GridBagConstraints();
-      gbc_channelTextField.insets = new Insets(0, 0, 5, 5);
-      gbc_channelTextField.fill = GridBagConstraints.HORIZONTAL;
-      gbc_channelTextField.gridx = 1;
-      gbc_channelTextField.gridy = 1;
-      contentPanel.add(channelTextField, gbc_channelTextField);
-      channelTextField.setColumns(10);
+      branchTextField = new JTextField();
+      branchTextField.setEditable(false);
+      GridBagConstraints gbc_branchTextField = new GridBagConstraints();
+      gbc_branchTextField.insets = new Insets(0, 0, 5, 5);
+      gbc_branchTextField.fill = GridBagConstraints.HORIZONTAL;
+      gbc_branchTextField.gridx = 1;
+      gbc_branchTextField.gridy = 1;
+      contentPanel.add(branchTextField, gbc_branchTextField);
+      branchTextField.setColumns(10);
     }
     {
       JLabel lblVersion_1 = new JLabel("Version:");
@@ -109,22 +109,22 @@ public class UpdaterDialog extends JDialog {
       buildTextField.setColumns(10);
     }
     {
-      JLabel lblUpdateChannel = new JLabel("New Branch:");
-      GridBagConstraints gbc_lblUpdateChannel = new GridBagConstraints();
-      gbc_lblUpdateChannel.insets = new Insets(0, 0, 5, 5);
-      gbc_lblUpdateChannel.anchor = GridBagConstraints.EAST;
-      gbc_lblUpdateChannel.gridx = 0;
-      gbc_lblUpdateChannel.gridy = 2;
-      contentPanel.add(lblUpdateChannel, gbc_lblUpdateChannel);
+      JLabel lblUpdateBranch = new JLabel("New Branch:");
+      GridBagConstraints gbc_lblUpdateBranch = new GridBagConstraints();
+      gbc_lblUpdateBranch.insets = new Insets(0, 0, 5, 5);
+      gbc_lblUpdateBranch.anchor = GridBagConstraints.EAST;
+      gbc_lblUpdateBranch.gridx = 0;
+      gbc_lblUpdateBranch.gridy = 2;
+      contentPanel.add(lblUpdateBranch, gbc_lblUpdateBranch);
     }
     {
-      channelsComboBox = new JComboBox<>();
-      GridBagConstraints gbc_channelsComboBox = new GridBagConstraints();
-      gbc_channelsComboBox.insets = new Insets(0, 0, 5, 5);
-      gbc_channelsComboBox.fill = GridBagConstraints.HORIZONTAL;
-      gbc_channelsComboBox.gridx = 1;
-      gbc_channelsComboBox.gridy = 2;
-      contentPanel.add(channelsComboBox, gbc_channelsComboBox);
+      branchesComboBox = new JComboBox<>();
+      GridBagConstraints gbc_branchesComboBox = new GridBagConstraints();
+      gbc_branchesComboBox.insets = new Insets(0, 0, 5, 5);
+      gbc_branchesComboBox.fill = GridBagConstraints.HORIZONTAL;
+      gbc_branchesComboBox.gridx = 1;
+      gbc_branchesComboBox.gridy = 2;
+      contentPanel.add(branchesComboBox, gbc_branchesComboBox);
     }
     {
       JLabel lblVersion = new JLabel("Version:");
@@ -210,31 +210,31 @@ public class UpdaterDialog extends JDialog {
         JScrollPane scrollPane = new JScrollPane();
         centerPanel.add(scrollPane, BorderLayout.CENTER);
         {
-          channelDataPane = new JTextPane();
-          channelDataPane.setContentType("text/html");
-          channelDataPane.setEditable(false);
+          branchTextPane = new JTextPane();
+          branchTextPane.setContentType("text/html");
+          branchTextPane.setEditable(false);
           String style =
               new StringBuilder().append("body { font-family: ")
                   .append(UIManager.getDefaults().getFont("TextPane.font").getFamily())
                   .append("; ").append("font-size: 10pt; text-align: left}").toString();
 
-          ((HTMLDocument) channelDataPane.getDocument()).getStyleSheet().addRule(style);
-          scrollPane.setViewportView(channelDataPane);
+          ((HTMLDocument) branchTextPane.getDocument()).getStyleSheet().addRule(style);
+          scrollPane.setViewportView(branchTextPane);
         }
       }
     }
   }
 
-  public JComboBox<Channel> getChannelsComboBox() {
-    return channelsComboBox;
+  public JComboBox<Branch> getBranchesComboBox() {
+    return branchesComboBox;
   }
 
-  public JComboBox<BuildInfo> getBuildsComboBox() {
+  public JComboBox<Build> getBuildsComboBox() {
     return buildsComboBox;
   }
 
-  public JTextPane getChannelDataPane() {
-    return channelDataPane;
+  public JTextPane getBranchTextPane() {
+    return branchTextPane;
   }
 
   public JButton getOkButton() {
@@ -249,8 +249,8 @@ public class UpdaterDialog extends JDialog {
     return refreshButton;
   }
 
-  public JTextField getChannelTextField() {
-    return channelTextField;
+  public JTextField getBranchTextField() {
+    return branchTextField;
   }
 
   public JTextField getBuildTextField() {

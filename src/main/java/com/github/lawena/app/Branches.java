@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.lawena.ui.UpdaterDialog;
-import com.github.lawena.update.BuildInfo;
-import com.github.lawena.update.Channel;
+import com.github.lawena.update.Build;
+import com.github.lawena.update.Branch;
 import com.github.lawena.update.Updater;
 
 public class Branches {
@@ -37,14 +37,14 @@ public class Branches {
   private UpdaterDialog view;
   private Updater updater;
 
-  private BuildInfo buildinfo;
+  private Build buildinfo;
 
   public Branches(Lawena parent) {
     this.parent = parent;
     this.updater = parent.getModel().getUpdater();
     String version = parent.getModel().getFullVersion();
     String buildtime = parent.getModel().getBuildTime();
-    this.buildinfo = new BuildInfo(buildtime, version);
+    this.buildinfo = new Build(buildtime, version);
   }
 
   public void start() {
@@ -57,24 +57,24 @@ public class Branches {
 
   private void refresh() {
     log.debug("Refreshing branches dialog data");
-    JComboBox<Channel> branches = view.getChannelsComboBox();
+    JComboBox<Branch> branchCombo = view.getBranchesComboBox();
     // this operation might take a while
-    Channel current = updater.getCurrentChannel();
+    Branch current = updater.getCurrentBranch();
     view.getLastCheckLabel().setText(updater.getLastCheckString());
-    view.getChannelTextField().setText(current.getName());
+    view.getBranchTextField().setText(current.getName());
     view.getBuildTextField().setText(buildinfo.toString());
-    branches.removeAllItems();
-    List<Channel> channels = updater.getChannels();
-    for (Channel item : channels) {
-      branches.addItem(item);
+    branchCombo.removeAllItems();
+    List<Branch> branchList = updater.getBranches();
+    for (Branch item : branchList) {
+      branchCombo.addItem(item);
     }
-    branches.setSelectedItem(current);
+    branchCombo.setSelectedItem(current);
     refreshBuilds(current);
   }
 
-  private void refreshChangeLog(Channel ch) {
+  private void refreshChangeLog(Branch ch) {
     List<String> lines = updater.getChangeLog(ch);
-    JTextPane pane = view.getChannelDataPane();
+    JTextPane pane = view.getBranchTextPane();
     HTMLDocument doc = (HTMLDocument) pane.getDocument();
     try {
       doc.remove(0, doc.getLength());
@@ -91,20 +91,20 @@ public class Branches {
     }
   }
 
-  private void refreshBuilds(Channel ch) {
-    log.debug("Refreshing builds for channel {}", ch);
-    JComboBox<BuildInfo> builds = view.getBuildsComboBox();
+  private void refreshBuilds(Branch ch) {
+    log.debug("Refreshing builds for branch {}", ch);
+    JComboBox<Build> builds = view.getBuildsComboBox();
     builds.removeAllItems();
-    if (ch.getType() == Channel.Type.SNAPSHOT) {
-      for (BuildInfo item : ch.getBuilds()) {
+    if (ch.getType() == Branch.Type.SNAPSHOT) {
+      for (Build item : ch.getBuilds()) {
         builds.addItem(item);
       }
       builds.setEnabled(true);
     } else {
-      builds.addItem(BuildInfo.LATEST);
+      builds.addItem(Build.LATEST);
       builds.setEnabled(false);
     }
-    if (updater.getCurrentChannel().equals(ch)) {
+    if (updater.getCurrentBranch().equals(ch)) {
       builds.setSelectedItem(buildinfo);
     }
   }
@@ -119,16 +119,16 @@ public class Branches {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        Channel newChannel = (Channel) view.getChannelsComboBox().getSelectedItem();
-        BuildInfo newBuild = (BuildInfo) view.getBuildsComboBox().getSelectedItem();
-        Channel currentChannel = updater.getCurrentChannel();
-        BuildInfo currentBuild = buildinfo;
-        if (currentChannel.equals(newChannel) && currentBuild.equals(newBuild)) {
+        Branch newBranch = (Branch) view.getBranchesComboBox().getSelectedItem();
+        Build newBuild = (Build) view.getBuildsComboBox().getSelectedItem();
+        Branch currentBranch = updater.getCurrentBranch();
+        Build currentBuild = buildinfo;
+        if (currentBranch.equals(newBranch) && currentBuild.equals(newBuild)) {
           log.debug("No switch will be done since the same branch & build as current was selected");
           return;
         }
         try {
-          updater.switchChannel(newChannel);
+          updater.switchBranch(newBranch);
           parent.upgrade(newBuild);
         } catch (IOException ex) {
           log.info("Could not switch update branches", ex);
@@ -151,12 +151,12 @@ public class Branches {
         refresh();
       }
     });
-    view.getChannelsComboBox().addItemListener(new ItemListener() {
+    view.getBranchesComboBox().addItemListener(new ItemListener() {
 
       @Override
       public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
-          Channel selected = (Channel) e.getItem();
+          Branch selected = (Branch) e.getItem();
           refreshChangeLog(selected);
           refreshBuilds(selected);
           checkValidSwitchState();
@@ -172,7 +172,7 @@ public class Branches {
         }
       }
     });
-    view.getChannelDataPane().addHyperlinkListener(new HyperlinkListener() {
+    view.getBranchTextPane().addHyperlinkListener(new HyperlinkListener() {
 
       @Override
       public void hyperlinkUpdate(final HyperlinkEvent e) {
@@ -194,17 +194,17 @@ public class Branches {
   }
 
   private void checkValidSwitchState() {
-    Channel selectedChannel = (Channel) view.getChannelsComboBox().getSelectedItem();
-    BuildInfo selectedBuild = (BuildInfo) view.getBuildsComboBox().getSelectedItem();
-    Channel currentChannel = updater.getCurrentChannel();
-    BuildInfo currentBuild = buildinfo;
+    Branch selectedBranch = (Branch) view.getBranchesComboBox().getSelectedItem();
+    Build selectedBuild = (Build) view.getBuildsComboBox().getSelectedItem();
+    Branch currentBranch = updater.getCurrentBranch();
+    Build currentBuild = buildinfo;
     if (updater.isStandalone()) {
       view.getOkButton().setEnabled(false);
       view.getSwitchStatusLabel().setText("Standalone builds are not allowed to switch branches");
       view.getSwitchStatusLabel().setIcon(
           new ImageIcon(Branches.class.getResource("/com/github/lawena/ui/fugue/exclamation.png")));
     } else {
-      if (selectedChannel.equals(currentChannel) && selectedBuild.equals(currentBuild)) {
+      if (selectedBranch.equals(currentBranch) && selectedBuild.equals(currentBuild)) {
         view.getOkButton().setEnabled(false);
         view.getSwitchStatusLabel().setText("You are currently in this same branch and version");
         view.getSwitchStatusLabel()

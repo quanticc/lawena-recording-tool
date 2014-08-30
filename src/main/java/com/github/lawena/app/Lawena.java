@@ -49,7 +49,7 @@ import com.github.lawena.ui.LawenaView;
 import com.github.lawena.ui.LogView;
 import com.github.lawena.ui.TableDropTarget;
 import com.github.lawena.ui.TooltipRenderer;
-import com.github.lawena.update.BuildInfo;
+import com.github.lawena.update.Build;
 import com.github.lawena.update.Updater;
 import com.github.lawena.util.LoggingAppender;
 import com.github.lawena.util.StatusAppender;
@@ -566,8 +566,8 @@ public class Lawena {
     tasks.cleanSegments(selected);
   }
 
-  public void upgrade(BuildInfo details) {
-    if (details.equals(BuildInfo.LATEST)) {
+  public void upgrade(Build details) {
+    if (details.equals(Build.LATEST)) {
       String notice = "Update is ready. Please restart Lawena to use it";
       log.info(notice);
       JOptionPane.showMessageDialog(view, notice, "Update Ready", JOptionPane.INFORMATION_MESSAGE);
