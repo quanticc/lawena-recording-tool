@@ -1,5 +1,8 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'distribution'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -8,6 +11,13 @@ def mainClassName = 'ui.LwrtGUI'
 def buildtime = new Date().format("yyyyMMddHHmmss")
 
 defaultTasks 'clean', 'run'
+
+eclipse {
+    classpath {
+         containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+         containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7'
+    }
+}
 
 sourceSets {
     main {
@@ -32,6 +42,7 @@ try {
 }
 
 jar {
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     archiveName = 'lawena.jar'
     destinationDir = null
     def implVersion = (version == null ? "v4" : version)
@@ -46,8 +57,172 @@ jar {
     }
 }
 
+distributions {
+    main {}
+    stable {
+        contents {
+            from { 'src/main/dist' }
+            duplicatesStrategy = 'exclude'
+        }
+    }
+    preview {
+        contents {
+            from { 'src/main/dist' }
+            duplicatesStrategy = 'exclude'
+        }
+    }
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '2.0'
+}
+
+task buildLauncher {
+    inputs.file 'launcher/lawena-launcher.xml'
+    outputs.file 'launcher/lawena.exe'
+    doLast {
+        exec {
+            workingDir 'launcher'
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', launch4jPath, 'lawena-launcher.xml'
+            } else {
+                commandLine launch4jPath, 'lawena-launcher.xml'
+            }
+        }
+    }
+}
+
+task copyLauncher(type: Copy, dependsOn: 'buildLauncher') {
+    from 'launcher/lawena.exe'
+    into 'src/main/dist'
+}
+
+task copyLauncherNew(type: Copy, dependsOn: 'copyLauncher') {
+    from 'launcher/lawena.exe'
+    into 'src/main/dist/lawena/code'
+    rename 'lawena.exe', 'lawena-new.exe'
+}
+
+task copyGetdownClient(type: Copy, dependsOn: 'copyLauncherNew') {
+    from 'launcher/getdown-client.jar'
+    into 'src/main/dist/lawena'
+}
+
+task copyGetdownClientNew(type: Copy, dependsOn: 'copyGetdownClient') {
+    from 'launcher/getdown-client.jar'
+    into 'src/main/dist/lawena/code'
+    rename 'getdown-client.jar', 'getdown-client-new.jar'
+}
+
+task copyMainJar(type: Copy, dependsOn: 'jar') {
+    from 'lawena.jar'
+    into 'src/main/dist/lawena'
+}
+
+task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar']) {
+}
+
+task packResources(type: Zip) {
+    archiveName = 'lwrtresources.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['cfg/**', 'hud/**']
+}
+
+task packVpks(type: Zip) {
+    archiveName = 'lwrtvpks.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['custom/**']
+}
+
+task packWinBatches(type: Zip) {
+    archiveName = 'lwrtwinstuff.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['batch/**', 'vtfcmd/**']
+}
+
+task packSkyboxes(type: Zip) {
+    archiveName = 'skybox.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['skybox/**']
+}
+
+task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
+}
+
+// stable
+
+task setupGetdownStable(dependsOn: 
+      ['copyLibs', 'pack', 'cleanInstallStableDist', 'stableDistZip', 'installStableDist']) {
+    doLast {
+        def base = file('build/install/lawena-stable/lawena/getdown.base.txt')
+        def getdown = file('build/install/lawena-stable/lawena/getdown.txt')
+        getdown.withWriter { w ->
+            base.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'release') + System.getProperty("line.separator")
+            }
+        }
+    }      
+}
+
+task digestStable(type: JavaExec, dependsOn: 'setupGetdownStable') {
+    main 'com.threerings.getdown.tools.Digester'
+    classpath 'launcher/getdown-client.jar'
+    args = [file('build/install/lawena-stable/lawena')]
+}
+
+task deployStable(dependsOn: 'digestStable') {
+    doLast {
+        copy {
+            from fileTree('build/install/lawena-stable/lawena')
+            into file(stableDeployDir + '/latest')
+        }
+        copy {
+            from fileTree('build/install/lawena-stable/lawena')
+            into file(stableDeployDir + '/' + buildtime)
+        }
+        def output = file(stableDeployDir + '/buildlist.txt')
+        output.append buildtime + ';' + version + '\n'
+    }
+}
+
+// preview
+
+task setupGetdownPreview(dependsOn: 
+      ['copyLibs', 'pack', 'cleanInstallPreviewDist', 'previewDistZip', 'installPreviewDist']) {
+    doLast {
+        def base = file('build/install/lawena-preview/lawena/getdown.base.txt')
+        def getdown = file('build/install/lawena-preview/lawena/getdown.txt')
+        getdown.withWriter { w ->
+            base.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'preview') + System.getProperty("line.separator")
+            }
+        }
+    }      
+}
+
+task digestPreview(type: JavaExec, dependsOn: 'setupGetdownPreview') {
+    main 'com.threerings.getdown.tools.Digester'
+    classpath 'launcher/getdown-client.jar'
+    args = [file('build/install/lawena-preview/lawena')]
+}
+
+task deployPreview(dependsOn: 'digestPreview') {
+    doLast {
+        copy {
+            from fileTree('build/install/lawena-preview/lawena')
+            into file(previewDeployDir + '/latest')
+        }
+        copy {
+            from fileTree('build/install/lawena-preview/lawena')
+            into file(previewDeployDir + '/' + buildtime)
+        }
+        def output = file(previewDeployDir + '/buildlist.txt')
+        output.append buildtime + ';' + version + '\n'
+    }
 }
 
 task run(type: JavaExec, dependsOn: 'classes') {

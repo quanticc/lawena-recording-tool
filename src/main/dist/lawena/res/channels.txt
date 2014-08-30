@@ -1,0 +1,4 @@
+release-4.1.x=res/getdown-4.1-release.txt
+preview-4.1.x=res/getdown-4.1-preview.txt
+release-4.2.x=res/getdown-4.2-release.txt
+preview-4.2.x=res/getdown-4.2-preview.txt

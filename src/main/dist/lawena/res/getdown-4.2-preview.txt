@@ -1,0 +1,15 @@
+appbase = https://dl.dropboxusercontent.com/u/74380/lwrt/preview/latest/
+
+ui.name = Lawena Recording Tool
+ui.background_image = res/background.png
+ui.progress = 16, 163, 458, 22
+ui.progress_text = FFFFFF
+ui.status = 16, 89, 458, 68
+ui.status_text = CCCCCC
+ui.icon = res/icon_256.png
+ui.patch_notes = 345, 90, 132, 26
+ui.patch_notes_url = https://github.com/iabarca/lawena-recording-tool/commits/v4.x
+ui.error_background = res/background_1.png
+ui.install_error = http://code.google.com/p/lawenarecordingtool/
+ui.background = 111100
+ui.progress_bar = 500446
