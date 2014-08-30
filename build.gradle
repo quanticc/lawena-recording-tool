@@ -148,6 +148,7 @@ task packSkyboxes(type: Zip) {
     destinationDir = file('src/main/dist/lawena')
     from projectDir
     includes = ['skybox/**']
+    excludes = ['**/*.db']
 }
 
 task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
