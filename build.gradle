@@ -1,11 +1,13 @@
 apply plugin: 'java'
-apply plugin: 'application'
 apply plugin: 'eclipse'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-mainClassName = 'ui.LwrtGUI'
+def mainClassName = 'ui.LwrtGUI'
+def buildtime = new Date().format("yyyyMMddHHmmss")
+
+defaultTasks 'clean', 'run'
 
 sourceSets {
     main {
@@ -15,29 +17,41 @@ sourceSets {
     }
 }
 
-new ByteArrayOutputStream().withStream { execOS ->
-    exec {
-        executable = 'git'
-        args = [ 'describe', '--tags', '--always' ]
-        standardOutput = execOS
+try {
+    new ByteArrayOutputStream().withStream { execOS ->
+        exec {
+            executable = 'git'
+            args = [ 'describe', '--tags', '--always' ]
+            standardOutput = execOS
+        }
+        def describe = execOS.toString().trim()
+        version describe
     }
-    def buildVersion = execOS.toString().trim()
-    version buildVersion
+} catch (Exception e) {
+    println "Could not retrieve version number"
 }
 
 jar {
     archiveName = 'lawena.jar'
     destinationDir = null
+    def implVersion = (version == null ? "v4" : version)
     manifest {
-        ext.buildTime = new Date().format("yyyyMMddHHmmss")
-        file('version.txt').write ext.buildTime
-        
         attributes (
             'Main-Class': mainClassName,
-            'Implementation-Title': 'lawena Recording Tool',
-            'Implementation-Version': version,
-            'Implementation-Build': ext.buildTime,
+            'Implementation-Title': 'Lawena Recording Tool',
+            'Implementation-Version': implVersion,
+            'Implementation-Build': buildtime,
             'SplashScreen-Image': 'ui/splash.png'
         )
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
+task run(type: JavaExec, dependsOn: 'classes') {
+    description "Runs this project as a JVM application"
+    main mainClassName
+    classpath project.sourceSets.main.runtimeClasspath
 }

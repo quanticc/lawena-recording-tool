@@ -1,64 +1,144 @@
-.gradle
+# Created by http://www.gitignore.io
 
-*.class
-*.jar
-*.war
-*.ear
+### Windows ###
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
 
-*.lwf
-*.log
-cfg/mov/*.cfg
-target/
-custom/*
-version.txt
-*.lck
+# Folder config file
+Desktop.ini
 
-# NetBeans #
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-nbactions.xml
-nb-configuration.xml
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
 
-# IntelliJ #
-*.iml
-*.ipr
-*.iws
-.idea/
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
 
-# Eclipse #
+
+### Linux ###
+*~
+
+# KDE directory preferences
+.directory
+
+
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+### Eclipse ###
 *.pydevproject
-.project
 .metadata
-bin/**
-tmp/**
-tmp/**/*
+.gradle
+bin/
+tmp/
 *.tmp
 *.bak
 *.swp
 *~.nib
 local.properties
-.classpath
 .settings/
 .loadpath
+
+# Additional eclipse files
+.classpath
+.project
+
+# External tool builders
 .externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
 *.launch
 
-# Operating systems #
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-.DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
-.Spotlight-V100
-.Trashes
-.*
-!.gitignore
-!.travis.yml
-*~
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin 
+.target
+
+# TeXlipse plugin
+.texlipse
+
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+#dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+
+### Java ###
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+
+### Gradle ###
+.gradle
+build/
+gradle.properties
+!gradle/wrapper/*.jar
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+
+### Lawena-specific ###
+*.lwf
+*.log
+cfg/settings.cfg
+cfg/namescroll.cfg
+cfg/mov/*.cfg
+custom/*
+version.txt
+*.lck
+!launcher/*.jar
+src/main/dist/*.exe
+src/main/dist/lawena/code/*.exe
