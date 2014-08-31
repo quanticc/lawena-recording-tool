@@ -27,12 +27,6 @@ public class WindowsInterface extends OSInterface {
   }
 
   @Override
-  public ProcessBuilder getBuilderVTFCmd(String skyboxFilename) {
-    return new ProcessBuilder("vtfcmd\\VTFCmd.exe", "-file", "skybox\\" + skyboxFilename,
-        "-output", "skybox", "-exportformat", "png");
-  }
-
-  @Override
   public Path getSteamPath() {
     return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1));
   }
@@ -187,5 +181,10 @@ public class WindowsInterface extends OSInterface {
     } catch (InterruptedException | IOException e) {
       log.warn("", e);
     }
+  }
+
+  @Override
+  public String getVTFCmdLocation() {
+    return "vtfcmd/VTFCmd.exe";
   }
 }

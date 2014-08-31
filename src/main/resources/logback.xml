@@ -29,11 +29,12 @@
 		<appender-ref ref="FILE" />
 		<appender-ref ref="STDOUT" />
 	</root>
-	
+
 	<logger name="java.awt" level="INFO" />
 	<logger name="javax.swing" level="INFO" />
 	<logger name="sun.awt" level="INFO" />
 	<logger name="sun.net" level="INFO" />
+	<logger name="com.threerings.getdown" level="WARN" />
 
 	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
 </configuration>

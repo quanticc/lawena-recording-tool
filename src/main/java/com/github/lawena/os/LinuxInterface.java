@@ -49,16 +49,6 @@ public class LinuxInterface extends OSInterface {
   }
 
   @Override
-  public ProcessBuilder getBuilderVTFCmd(String skyboxFilename) {
-    return null;
-  }
-
-  @Override
-  public void generatePreview(String skyboxFilename) {
-    log.debug("[linux] Skybox preview for " + skyboxFilename + " won't be generated");
-  }
-
-  @Override
   public Path getSteamPath() {
     return Paths.get(System.getProperty("user.home"), ".local/share/Steam");
   }
@@ -116,6 +106,11 @@ public class LinuxInterface extends OSInterface {
   @Override
   public void delete(Path path) {
     // no need to implement this yet
+  }
+
+  @Override
+  public String getVTFCmdLocation() {
+    throw new UnsupportedOperationException("Skybox previews are not supported on this platform");
   }
 
 }

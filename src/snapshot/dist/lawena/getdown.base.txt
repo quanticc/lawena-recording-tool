@@ -22,6 +22,8 @@ delete = custom/skybox.vpk
 java_version = 1070042
 class = com.github.lawena.app.Main
 
+jvmarg = -Xmx256M
+
 ui.name = Lawena Recording Tool [<channel>]
 ui.background_image = res/background.png
 ui.progress = 16, 163, 458, 22

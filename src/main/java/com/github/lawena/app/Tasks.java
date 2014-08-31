@@ -9,36 +9,33 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MarkerFactory;
 
+import com.github.lawena.app.task.Launch;
+import com.github.lawena.app.task.PreviewGenerator;
 import com.github.lawena.model.LwrtFiles;
 import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.MainModel;
-import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.update.Build;
 import com.github.lawena.update.UpdateResult;
 import com.github.lawena.update.Updater;
-import com.github.lawena.util.Util;
 
 public class Tasks {
 
   private static final Logger log = LoggerFactory.getLogger(Tasks.class);
-  private static final java.util.logging.Logger status = java.util.logging.Logger
-      .getLogger("status");
+  private static final Logger status = LoggerFactory.getLogger("status");
 
   private class UpdaterTask extends SwingWorker<Void, Void> {
 
@@ -176,7 +173,7 @@ public class Tasks {
         }
         view.getBtnClearMovieFolder().setEnabled(true);
         view.getBtnClearMovieFolder().setText("Clear Movie Files");
-        status.info("Ready");
+        status.info(MarkerFactory.getMarker("OK"), "Ready");
       }
     };
 
@@ -246,60 +243,11 @@ public class Tasks {
 
   }
 
-  private class SkyboxPreviewGenerator extends SwingWorker<Map<String, ImageIcon>, Void> {
-
-    private List<String> data;
-
-    public SkyboxPreviewGenerator(List<String> data) {
-      this.data = data;
-    }
-
-    @Override
-    protected Map<String, ImageIcon> doInBackground() throws Exception {
-      setCurrentWorker(this, false);
-      setProgress(0);
-      final Map<String, ImageIcon> map = new HashMap<>();
-      try {
-        int i = 1;
-        for (String skybox : data) {
-          setProgress((int) (100 * ((double) i / data.size())));
-          status.fine("Generating skybox preview: " + skybox);
-          String img = "skybox/" + skybox + "up.png";
-          if (!Files.exists(Paths.get(img))) {
-            String filename = skybox + "up.vtf";
-            os.generatePreview(filename);
-          }
-          ImageIcon icon = Util.createPreviewIcon(img);
-          map.put(skybox, icon);
-          i++;
-        }
-      } catch (Exception e) {
-        log.warn("Problem while loading skyboxes", e);
-      }
-      return map;
-    }
-
-    @Override
-    protected void done() {
-      try {
-        model.getSkyboxMap().putAll(get());
-        presenter.selectSkyboxFromSettings();
-        log.debug("Skybox loading and preview generation complete");
-      } catch (CancellationException | InterruptedException | ExecutionException e) {
-        log.warn("Skybox preview generator task was cancelled", e);
-      }
-      status.info("Ready");
-      if (!isCancelled()) {
-        setCurrentWorker(null, false);
-      }
-    }
-
-  }
-
   private class SkyboxLoader extends SwingWorker<Void, Void> {
     @Override
     protected Void doInBackground() throws Exception {
       try {
+        
         presenter.configureSkyboxes(view.getCmbSkybox());
       } catch (Exception e) {
         log.warn("Problem while configuring skyboxes", e);
@@ -340,7 +288,6 @@ public class Tasks {
   private LwrtResources resources;
   private LwrtSettings settings;
   private LwrtFiles files;
-  private OSInterface os;
 
   private SegmentCleaner clearMoviesTask = null;
   private Launch currentLaunchTask = null;
@@ -353,7 +300,6 @@ public class Tasks {
     this.resources = model.getResources();
     this.settings = model.getSettings();
     this.files = model.getFiles();
-    this.os = model.getOsInterface();
   }
 
   public MainModel getModel() {
@@ -431,6 +377,6 @@ public class Tasks {
   }
 
   public void generateSkyboxPreviews(List<String> list) {
-    new SkyboxPreviewGenerator(list).execute();
+    new PreviewGenerator(this, list).execute();
   }
 }

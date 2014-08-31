@@ -1,5 +1,6 @@
 package com.github.lawena.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,12 +8,12 @@ import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.model.LwrtSettings.Key;
 import com.github.lawena.os.LinuxInterface;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.os.OSXInterface;
@@ -36,12 +37,12 @@ public class MainModel {
   private Thread watcher;
   private JFileChooser movieFileChooser;
   private JFileChooser gameFileChooser;
-  private Map<String, ImageIcon> skyboxMap;
 
   private LwrtFiles files;
   private LwrtMovies movies;
   private LwrtResources resources;
   private DemoEditor demos;
+  private Skyboxes skyboxes;
 
   public MainModel(LwrtSettings settingsManager) {
     this.settings = settingsManager;
@@ -119,6 +120,8 @@ public class MainModel {
     watcher.setDaemon(true);
 
     demos = new DemoEditor(settings, osInterface);
+    skyboxes = new Skyboxes();
+    loadSkyboxData();
   }
 
   private void loadOsInterface() {
@@ -256,12 +259,30 @@ public class MainModel {
     return watcher;
   }
 
-  public Map<String, ImageIcon> getSkyboxMap() {
-    return skyboxMap;
+  public Skyboxes getSkyboxes() {
+    return skyboxes;
   }
 
-  public void setSkyboxMap(Map<String, ImageIcon> skyboxMap) {
-    this.skyboxMap = skyboxMap;
+  public void loadSkyboxData() {
+    File skySerialFile = new File(settings.getString(Key.SkyboxDataSavePath));
+    if (!Files.exists(skySerialFile.toPath()))
+      return;
+    try {
+      skyboxes.load(skySerialFile);
+      log.debug("Skybox data loaded from {}", skySerialFile);
+    } catch (ClassNotFoundException | IOException e) {
+      log.warn("Could not read skybox data from file: " + e);
+    }
+  }
+
+  public void saveSkyboxData() {
+    File skySerialFile = new File(settings.getString(Key.SkyboxDataSavePath));
+    try {
+      skyboxes.save(skySerialFile);
+      log.debug("Skybox data saved to {}", skySerialFile);
+    } catch (IOException e) {
+      log.warn("Could not save skybox data to file: " + e);
+    }
   }
 
 }

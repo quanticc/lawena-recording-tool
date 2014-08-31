@@ -125,11 +125,9 @@ public class LawenaView extends JFrame {
   private JButton btnStartTf;
   private JLabel lblResolution;
   private JLabel lblFrameRate;
-  private JLabel lblSkyboxPreview;
   private JButton btnClearMovieFolder;
   private JLabel lblStatus;
   private JComboBox<String> cmbViewmodel;
-  private JLabel lblPreview;
   private JProgressBar progressBar;
   private JMenuItem mntmExit;
   private JMenuItem mntmAbout;
@@ -414,29 +412,12 @@ public class LawenaView extends JFrame {
 
     JComboBox<String> cmbSkybox = new JComboBox<>();
     GridBagConstraints gbc_cmbSkybox = new GridBagConstraints();
-    gbc_cmbSkybox.gridwidth = 3;
+    gbc_cmbSkybox.gridwidth = 5;
     gbc_cmbSkybox.fill = GridBagConstraints.HORIZONTAL;
     gbc_cmbSkybox.insets = new Insets(0, 0, 5, 5);
     gbc_cmbSkybox.gridx = 1;
     gbc_cmbSkybox.gridy = 2;
     panelSettings.add(cmbSkybox, gbc_cmbSkybox);
-
-    JLabel lblPreview = new JLabel("");
-    GridBagConstraints gbc_lblPreview = new GridBagConstraints();
-    gbc_lblPreview.anchor = GridBagConstraints.EAST;
-    gbc_lblPreview.insets = new Insets(0, 0, 5, 5);
-    gbc_lblPreview.gridx = 4;
-    gbc_lblPreview.gridy = 2;
-    panelSettings.add(lblPreview, gbc_lblPreview);
-
-    JLabel lblSkyboxPreview = new JLabel("");
-    GridBagConstraints gbc_lblSkyboxPreview = new GridBagConstraints();
-    gbc_lblSkyboxPreview.anchor = GridBagConstraints.NORTHWEST;
-    gbc_lblSkyboxPreview.gridheight = 4;
-    gbc_lblSkyboxPreview.insets = new Insets(0, 0, 5, 5);
-    gbc_lblSkyboxPreview.gridx = 5;
-    gbc_lblSkyboxPreview.gridy = 2;
-    panelSettings.add(lblSkyboxPreview, gbc_lblSkyboxPreview);
 
     JLabel lblViewmodels = new JLabel("Viewmodels:");
     GridBagConstraints gbc_lblViewmodels = new GridBagConstraints();
@@ -672,7 +653,6 @@ public class LawenaView extends JFrame {
     this.btnStartTf = btnStartTf;
     this.lblResolution = lblResolution;
     this.lblFrameRate = lblFrameRate;
-    this.lblSkyboxPreview = lblSkyboxPreview;
     this.btnClearMovieFolder = btnClearMovieFolder;
     this.tableCustomContent = tableCustomContent;
     this.tabbedPane = tabbedPane;
@@ -680,7 +660,6 @@ public class LawenaView extends JFrame {
     this.mntmChangeMovieDirectory = mntmChangeMovieDirectory;
     this.lblStatus = lblStatus;
     this.cmbViewmodel = cmbViewmodel;
-    this.lblPreview = lblPreview;
     this.progressBar = progressBar;
     this.mntmRevertToDefault = mntmRevertToDefault;
     this.mntmExit = mntmExit;
@@ -768,10 +747,6 @@ public class LawenaView extends JFrame {
     return lblFrameRate;
   }
 
-  public JLabel getLblSkyboxPreview() {
-    return lblSkyboxPreview;
-  }
-
   public JButton getBtnClearMovieFolder() {
     return btnClearMovieFolder;
   }
@@ -798,10 +773,6 @@ public class LawenaView extends JFrame {
 
   public JComboBox<String> getCmbViewmodel() {
     return cmbViewmodel;
-  }
-
-  public JLabel getLblPreview() {
-    return lblPreview;
   }
 
   public JProgressBar getProgressBar() {

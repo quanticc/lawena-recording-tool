@@ -1,4 +1,4 @@
-package com.github.lawena.app;
+package com.github.lawena.app.task;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -10,7 +10,10 @@ import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MarkerFactory;
 
+import com.github.lawena.app.Lawena;
+import com.github.lawena.app.Tasks;
 import com.github.lawena.model.LwrtFiles;
 import com.github.lawena.model.LwrtMovies;
 import com.github.lawena.model.LwrtResource;
@@ -25,8 +28,7 @@ import com.github.lawena.util.LawenaException;
 public class Launch extends SwingWorker<Boolean, Void> {
 
   private static final Logger log = LoggerFactory.getLogger(Launch.class);
-  private static final java.util.logging.Logger status = java.util.logging.Logger
-      .getLogger("status");
+  private static final Logger status = LoggerFactory.getLogger("status");
 
   private Tasks tasks;
   private MainModel model;
@@ -92,7 +94,7 @@ public class Launch extends SwingWorker<Boolean, Void> {
         movies.createMovienameCfgs();
       } catch (IOException e) {
         log.warn("Problem while saving settings to file", e);
-        status.info("Failed to save lawena settings to file");
+        status.info(MarkerFactory.getMarker("ERROR"), "Failed to save lawena settings to file");
         return false;
       }
       // Allow failing this without cancelling launch, notify user
@@ -110,7 +112,7 @@ public class Launch extends SwingWorker<Boolean, Void> {
       try {
         files.replaceAll();
       } catch (LawenaException e) {
-        status.info(e.getMessage());
+        status.info(MarkerFactory.getMarker("ERROR"), e.getMessage());
         return false;
       }
       setProgress(80);
@@ -151,7 +153,7 @@ public class Launch extends SwingWorker<Boolean, Void> {
       if (cfgtimeout > 0 && timeout >= maxtimeout) {
         int s = timeout * (millis / 1000);
         log.info("TF2 launch timed out after " + s + " seconds");
-        status.info("TF2 did not start after " + s + " seconds");
+        status.info(MarkerFactory.getMarker("WARN"), "TF2 did not start after " + s + " seconds");
         return false;
       }
 
@@ -224,9 +226,11 @@ public class Launch extends SwingWorker<Boolean, Void> {
       boolean restoredAllFiles = files.restoreAll();
       if (ranTf2Correctly) {
         if (restoredAllFiles) {
-          status.info("TF2 has finished running. All files restored");
+          status
+              .info(MarkerFactory.getMarker("OK"), "TF2 has finished running. All files restored");
         } else {
-          status.info("Your files could not be restored correctly. Check log for details");
+          status.info(MarkerFactory.getMarker("WARN"),
+              "Your files could not be restored correctly. Check log for details");
         }
       }
       os.setSystemDxLevel(model.getOriginalDxLevel());

@@ -45,17 +45,6 @@ public abstract class OSInterface {
   public abstract ProcessBuilder getBuilderTF2ProcessKiller();
 
   /**
-   * Returns the necessary {@link ProcessBuilder} to generate a preview of a VTF file, in particular
-   * in this tool, to generate a skybox preview. It will be used when
-   * {@link #generatePreview(String)} is called.
-   * 
-   * @param skyboxFilename the filename of the skybox file to generate the preview
-   * @return The <code>ProcessBuilder</code> used to create a {@link Process} and generate the
-   *         skybox preview or <code>null</code> if it couldn't be created.
-   */
-  public abstract ProcessBuilder getBuilderVTFCmd(String skyboxFilename);
-
-  /**
    * Returns the {@link Path} of the Steam installation (where Steam.exe, steam.sh or equivalent is
    * located)
    * 
@@ -163,28 +152,6 @@ public abstract class OSInterface {
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
       log.warn("Problem extracting contents from VPK file", e);
-    }
-  }
-
-  /**
-   * Generate an preview image representing a specified skybox.
-   * 
-   * @param skyboxFilename The filename of the skybox to generate the preview
-   * @see #getBuilderVTFCmd(String)
-   */
-  public void generatePreview(String skyboxFilename) {
-    try {
-      ProcessBuilder pb = getBuilderVTFCmd(skyboxFilename);
-      log.debug("generatePreview: " + pb.command());
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.debug("[vtfcmd] " + line);
-      }
-      pr.waitFor();
-    } catch (InterruptedException | IOException e) {
-      log.warn("Problem while generating png from vtf file", e);
     }
   }
 
@@ -306,4 +273,7 @@ public abstract class OSInterface {
       log.warn("Could not open directory: " + dir, e);
     }
   }
+
+  public abstract String getVTFCmdLocation();
+
 }

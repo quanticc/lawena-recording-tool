@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -47,6 +46,7 @@ import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.ui.LogView;
+import com.github.lawena.ui.SkyboxListRenderer;
 import com.github.lawena.ui.TooltipRenderer;
 import com.github.lawena.update.Build;
 import com.github.lawena.update.Updater;
@@ -74,7 +74,7 @@ public class Lawena {
   private Branches branches;
 
   private LogView logView;
-  
+
   private AboutDialog dialog;
   private JTextArea customSettingsTextArea;
   private JScrollPane customSettingsScrollPane;
@@ -459,7 +459,7 @@ public class Lawena {
     checkFrameFormatState();
   }
 
-  void saveSettings() {
+  public void saveSettings() {
     String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
     if (resolution.length == 2) {
       settings.setWidth(Integer.parseInt(resolution[0]));
@@ -520,35 +520,25 @@ public class Lawena {
     final Vector<String> data = new Vector<>();
     Path dir = Paths.get("skybox");
     if (Files.exists(dir)) {
-      log.info("Loading skyboxes from folder");
+      log.info("Loading skybox folder");
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*up.vtf")) {
         for (Path path : stream) {
-          log.debug("Skybox found at: " + path);
+          log.trace("Skybox found at: " + path);
           String skybox = path.toFile().getName();
           skybox = skybox.substring(0, skybox.indexOf("up.vtf"));
           data.add(skybox);
         }
       } catch (IOException e) {
-        log.warn("Problem while loading skyboxes", e);
+        log.warn("Problem while loading skybox folder", e);
       }
     }
-    model.setSkyboxMap(new HashMap<String, ImageIcon>(data.size()));
     tasks.generateSkyboxPreviews(new ArrayList<>(data));
     data.add(0, (String) Key.Skybox.defValue());
     combo.setModel(new DefaultComboBoxModel<String>(data));
-    combo.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        ImageIcon preview = model.getSkyboxMap().get(combo.getSelectedItem());
-        view.getLblPreview().setText(preview == null ? "" : "Preview:");
-        view.getLblSkyboxPreview().setIcon(preview);
-      }
-    });
-
+    combo.setRenderer(new SkyboxListRenderer(model.getSkyboxes().getMap()));
   }
 
-  void selectSkyboxFromSettings() {
+  public void selectSkyboxFromSettings() {
     view.getCmbSkybox().setSelectedItem(settings.getSkybox());
   }
 

@@ -34,7 +34,7 @@ public class LogView extends JFrame {
 
     logPane = new JTextPane();
     logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-    logPane.setFont(new Font("Tahoma", Font.PLAIN, 10));
+    logPane.setFont(new Font("Tahoma", Font.PLAIN, 12));
     logPane.setEditable(false);
     logPane.setText("");
     logScroll.setViewportView(logPane);

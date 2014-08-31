@@ -20,6 +20,7 @@ import javax.swing.table.TableColumn;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MarkerFactory;
 
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.os.OSInterface;
@@ -29,8 +30,7 @@ import com.github.lawena.util.DemoPreview;
 public class DemoEditor {
 
   private static final Logger log = LoggerFactory.getLogger(DemoEditor.class);
-  private static final java.util.logging.Logger status = java.util.logging.Logger
-      .getLogger("status");
+  private static final Logger status = LoggerFactory.getLogger("status");
 
   public class VdmAddTick implements ActionListener {
 
@@ -109,7 +109,8 @@ public class DemoEditor {
 
         } catch (IOException e1) {
           log.warn("A problem occurred while generating the VDM: " + e1);
-          status.info("Problem occurred while generating the VDM files");
+          status.info(MarkerFactory.getMarker("WARN"),
+              "Problem occurred while generating the VDM files");
         }
       }
     }
@@ -163,7 +164,7 @@ public class DemoEditor {
           status.info(str);
         } else {
           log.debug("No VDM files were deleted");
-          status.info("Ready");
+          status.info(MarkerFactory.getMarker("OK"), "Ready");
         }
         view.getBtnDeleteVdmFiles().setEnabled(true);
       }

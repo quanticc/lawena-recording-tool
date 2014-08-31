@@ -13,12 +13,17 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 
 import javax.swing.BoundedRangeModel;
+import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MarkerFactory;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -28,6 +33,8 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 
 public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
+  private static final Logger log = LoggerFactory.getLogger(LoggingAppender.class);
+
   private final JTextPane pane;
   private JScrollPane scroll;
   private final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss");
@@ -36,7 +43,7 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   public LoggingAppender(JTextPane pane, JScrollPane scroll, LoggerContext context) {
     this.pane = pane;
     this.scroll = scroll;
-    configureScroll();
+    // configureScroll();
     setName("LoggingAppender");
     setContext(context);
     start();
@@ -71,7 +78,11 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
   @Override
   public void append(ILoggingEvent event) {
-    SwingUtilities.invokeLater(new WriteOutput(event));
+    if (!event.getLoggerName().equals("status")) {
+      if (event.getMarker() == null || !event.getMarker().contains("no-ui-log")) {
+        SwingUtilities.invokeLater(new WriteOutput(event));
+      }
+    }
   }
 
   public class WriteOutput implements Runnable {
@@ -95,30 +106,39 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
     @Override
     public void run() {
       try {
-        // swallow status logger to avoid pollution
-        if (event.getLoggerName().equals("status"))
-          return;
         String message = event.getFormattedMessage().trim();
         if (name.trim().equals(""))
           return;
         Style msgStyle = null;
-        if (event.getLevel().isGreaterOrEqual(Level.WARN)) {
+        ImageIcon icon = null;
+        Level level = event.getLevel();
+        if (level.isGreaterOrEqual(Level.WARN)) {
           msgStyle = doc.getStyle("Error");
-        } else if (event.getLevel().isGreaterOrEqual(Level.INFO)) {
+          if (level.isGreaterOrEqual(Level.ERROR)) {
+            icon = Images.get("ui/fugue/error.png");
+          } else {
+            icon = Images.get("ui/fugue/warn.png");
+          }
+        } else if (level.isGreaterOrEqual(Level.INFO)) {
           msgStyle = doc.getStyle("Normal");
+          icon = Images.get("ui/fugue/info.png");
         } else {
           msgStyle = doc.getStyle("Debug");
+          icon = Images.get("ui/fugue/debug.png");
         }
         int prevLength = doc.getLength();
-        doc.insertString(doc.getLength(), "[" + dateFormatter.format(event.getTimeStamp()) + "] ",
+        pane.setCaretPosition(prevLength);
+        pane.insertIcon(icon);
+        doc.insertString(doc.getLength(), " [" + dateFormatter.format(event.getTimeStamp()) + "] ",
             doc.getStyle("Normal"));
-        doc.insertString(doc.getLength(), event.getLevel().toString() + "  ", doc.getStyle("Level"));
+        // doc.insertString(doc.getLength(), event.getLevel().toString() + "  ",
+        // doc.getStyle("Level"));
         // doc.insertString(doc.getLength(), event.getLoggerName() + " ", doc.getStyle("Class"));
         doc.insertString(doc.getLength(), formatMsg(event, message), msgStyle);
         doc.insertString(doc.getLength(), "\n", doc.getStyle("Normal"));
         pane.setCaretPosition(prevLength);
       } catch (Exception e) {
-        e.printStackTrace();
+        log.warn(MarkerFactory.getMarker("no-ui-log"), "Problem while appending to textPane", e);
       }
     }
 
@@ -137,7 +157,7 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
         String exString = ex.toString();
         if (exString != null) {
           builder.append("\n");
-          builder.append("Caused by " + exString);
+          builder.append("\tCaused by " + exString);
         }
       }
       return builder.toString();

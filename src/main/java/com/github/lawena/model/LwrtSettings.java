@@ -52,7 +52,8 @@ public class LwrtSettings {
     SourceRecorderVideoFormat("tga", "tga", "jpg"),
     SourceRecorderAudioFormat("wav", "wav", ""),
     SourceRecorderJpegQuality(50, 1, 100),
-    DeleteBackupsWhenRestoring(true);
+    DeleteBackupsWhenRestoring(true),
+    SkyboxDataSavePath("skybox.ser.gz");
 
     private Object value;
     private List<String> allowedValues;
