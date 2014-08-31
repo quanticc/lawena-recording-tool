@@ -89,6 +89,7 @@ public class Branches {
         log.warn("Could not insert text to text pane: " + e);
       }
     }
+    pane.setCaretPosition(0);
   }
 
   private void refreshBuilds(Branch ch) {

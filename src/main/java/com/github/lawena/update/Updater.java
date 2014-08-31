@@ -398,7 +398,7 @@ public class Updater {
           list = Files.readAllLines(file.toPath(), Charset.defaultCharset());
           branch.setChangeLog(list);
         } catch (IOException e) {
-          log.warn("Could not read lines from file", e);
+          log.warn("Could not read lines from file: " + e);
         }
         res.erase();
       }

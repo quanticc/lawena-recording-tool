@@ -229,7 +229,8 @@ public class LawenaView extends JFrame {
     menuBar.add(mnHelp);
 
     JMenuItem showLogMenuItem = new JMenuItem("Show Log");
-    showLogMenuItem.setIcon(new ImageIcon(LawenaView.class.getResource("/com/github/lawena/ui/fugue/clock.png")));
+    showLogMenuItem.setIcon(new ImageIcon(LawenaView.class
+        .getResource("/com/github/lawena/ui/fugue/clock.png")));
     mnHelp.add(showLogMenuItem);
 
     JSeparator separator_7 = new JSeparator();
@@ -349,8 +350,7 @@ public class LawenaView extends JFrame {
     panelCustomContent.setLayout(gbl_panelCustomContent);
 
     JScrollPane scrollPane = new JScrollPane();
-    scrollPane
-        .setToolTipText("<html>Drag custom folders to this table or copy them<br>\r\nto lawena 'custom' folder to make them appear here.");
+    scrollPane.setToolTipText("Copy folders to lawena/custom folder to make them appear here");
     GridBagConstraints gbc_scrollPane = new GridBagConstraints();
     gbc_scrollPane.fill = GridBagConstraints.BOTH;
     gbc_scrollPane.gridx = 0;

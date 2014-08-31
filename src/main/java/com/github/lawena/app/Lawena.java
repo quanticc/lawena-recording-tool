@@ -47,7 +47,6 @@ import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.ui.LogView;
-import com.github.lawena.ui.TableDropTarget;
 import com.github.lawena.ui.TooltipRenderer;
 import com.github.lawena.update.Build;
 import com.github.lawena.update.Updater;
@@ -207,7 +206,6 @@ public class Lawena {
         }
       }
     });
-    table.setDropTarget(new TableDropTarget(tasks));
     TableRowSorter<LwrtResources> sorter = new TableRowSorter<>(resources);
     table.setRowSorter(sorter);
     RowFilter<LwrtResources, Object> filter = new RowFilter<LwrtResources, Object>() {
