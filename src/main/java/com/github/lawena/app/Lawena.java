@@ -101,8 +101,7 @@ public class Lawena {
     // setup ui loggers: log tab and status bar
     ch.qos.logback.classic.Logger rootLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
-    rootLog.addAppender(new LoggingAppender(logView.getLogPane(), logView.getLogScroll(), rootLog
-        .getLoggerContext()));
+    rootLog.addAppender(new LoggingAppender(logView.getLogPane(), rootLog.getLoggerContext()));
     ch.qos.logback.classic.Logger statusLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("status");
     statusLog.setAdditive(false);

@@ -623,7 +623,7 @@ public class LawenaView extends JFrame {
     gbl_panelStatusbar.rowWeights = new double[] {0.0, Double.MIN_VALUE};
     panelStatusbar.setLayout(gbl_panelStatusbar);
 
-    JLabel lblStatus = new JLabel("Status");
+    JLabel lblStatus = new JLabel("");
     GridBagConstraints gbc_lblStatus = new GridBagConstraints();
     gbc_lblStatus.insets = new Insets(0, 5, 0, 5);
     gbc_lblStatus.anchor = GridBagConstraints.NORTHWEST;
@@ -632,6 +632,7 @@ public class LawenaView extends JFrame {
     panelStatusbar.add(lblStatus, gbc_lblStatus);
 
     JProgressBar progressBar = new JProgressBar();
+    progressBar.setVisible(false);
     GridBagConstraints gbc_progressBar = new GridBagConstraints();
     gbc_progressBar.anchor = GridBagConstraints.EAST;
     gbc_progressBar.gridx = 2;
