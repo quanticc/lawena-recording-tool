@@ -140,6 +140,7 @@ custom/*
 version.txt
 *.lck
 !launcher/*.jar
+launcher/*.exe
 src/main/dist/*.exe
 src/main/dist/lawena/code/*.exe
 *.ser.gz
