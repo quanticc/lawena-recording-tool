@@ -61,13 +61,13 @@ distributions {
     main {}
     stable {
         contents {
-            from { 'src/main/dist' }
+            from { ['src/main/dist', 'build/getdown/stable', 'build/gradlew'] }
             duplicatesStrategy = 'exclude'
         }
     }
     preview {
         contents {
-            from { 'src/main/dist' }
+            from { ['src/main/dist', 'build/getdown/preview', 'build/gradlew'] }
             duplicatesStrategy = 'exclude'
         }
     }
@@ -119,8 +119,16 @@ task copyMainJar(type: Copy, dependsOn: 'jar') {
     into 'src/main/dist/lawena'
 }
 
-task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar']) {
+task copyGradleLauncher(type: Copy) {
+    from(projectDir) {
+        include 'gradlew'
+        include 'gradlew.bat'
+    }
+    from 'gradle'
+    into 'build/gradlew/lawena'
 }
+
+task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar', 'copyGradleLauncher']) {}
 
 task packResources(type: Zip) {
     archiveName = 'lwrtresources.jar'
@@ -151,25 +159,24 @@ task packSkyboxes(type: Zip) {
     excludes = ['**/*.db']
 }
 
-task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
-}
+task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {}
 
 // stable
 
-task setupGetdownStable(dependsOn: 
-      ['copyLibs', 'pack', 'cleanInstallStableDist', 'stableDistZip', 'installStableDist']) {
-    doLast {
-        def base = file('build/install/lawena-stable/lawena/getdown.base.txt')
-        def getdown = file('build/install/lawena-stable/lawena/getdown.txt')
-        getdown.withWriter { w ->
-            base.eachLine { line ->
-                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'release') + System.getProperty("line.separator")
-            }
+task setupGetdownStable(dependsOn: ['copyLibs', 'pack']) {
+    def base = file('src/stable/dist/lawena/getdown.base.txt')
+    def getdown = file('build/getdown/stable/lawena/getdown.txt')
+    inputs.file base
+    outputs.file getdown
+    getdown.getParentFile().mkdirs()
+    getdown.withWriter { w ->
+        base.eachLine { line ->
+            w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'release') + System.getProperty("line.separator")
         }
-    }      
+    }     
 }
 
-task digestStable(type: JavaExec, dependsOn: 'setupGetdownStable') {
+task digestStable(type: JavaExec, dependsOn: ['setupGetdownStable', 'stableDistZip', 'cleanInstallStableDist', 'installStableDist']) {
     main 'com.threerings.getdown.tools.Digester'
     classpath 'launcher/getdown-client.jar'
     args = [file('build/install/lawena-stable/lawena')]
@@ -192,20 +199,20 @@ task deployStable(dependsOn: 'digestStable') {
 
 // preview
 
-task setupGetdownPreview(dependsOn: 
-      ['copyLibs', 'pack', 'cleanInstallPreviewDist', 'previewDistZip', 'installPreviewDist']) {
-    doLast {
-        def base = file('build/install/lawena-preview/lawena/getdown.base.txt')
-        def getdown = file('build/install/lawena-preview/lawena/getdown.txt')
-        getdown.withWriter { w ->
-            base.eachLine { line ->
-                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'preview') + System.getProperty("line.separator")
-            }
+task setupGetdownPreview(dependsOn: ['copyLibs', 'pack']) {
+    def base = file('src/preview/dist/lawena/getdown.base.txt')
+    def getdown = file('build/getdown/preview/lawena/getdown.txt')
+    inputs.file base
+    outputs.file getdown
+    getdown.getParentFile().mkdirs()
+    getdown.withWriter { w ->
+        base.eachLine { line ->
+            w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'release') + System.getProperty("line.separator")
         }
-    }      
+    }   
 }
 
-task digestPreview(type: JavaExec, dependsOn: 'setupGetdownPreview') {
+task digestPreview(type: JavaExec, dependsOn: ['setupGetdownPreview', 'previewDistZip', 'cleanInstallPreviewDist', 'installPreviewDist']) {
     main 'com.threerings.getdown.tools.Digester'
     classpath 'launcher/getdown-client.jar'
     args = [file('build/install/lawena-preview/lawena')]
