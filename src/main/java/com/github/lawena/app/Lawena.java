@@ -35,6 +35,9 @@ import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
+
+import com.github.lawena.app.task.FileOpener;
 import com.github.lawena.model.LwrtFiles;
 import com.github.lawena.model.LwrtResource;
 import com.github.lawena.model.LwrtResource.PathContents;
@@ -101,9 +104,11 @@ public class Lawena {
     resources = model.getResources();
 
     // setup ui loggers: log tab and status bar
-    ch.qos.logback.classic.Logger rootLog =
+    final ch.qos.logback.classic.Logger rootLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
-    rootLog.addAppender(new LoggingAppender(logView.getLogPane(), rootLog.getLoggerContext()));
+    final LoggingAppender appender =
+        new LoggingAppender(logView.getLogPane(), rootLog.getLoggerContext());
+    rootLog.addAppender(appender);
     ch.qos.logback.classic.Logger statusLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("status");
     statusLog.setAdditive(false);
@@ -181,8 +186,42 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        logView.setLocation(view.getX() + view.getWidth() + 10, view.getY());
+        logView.setLocation(view.getX() + view.getWidth() + 5, view.getY());
         logView.setVisible(true);
+      }
+    });
+    logView.getOpenLogButton().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        new FileOpener(Paths.get("logs", "lawena.log")).execute();
+      }
+    });
+    logView.getCopyLogButton().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        logView.getLogPane().selectAll();
+        logView.getLogPane().copy();
+        logView.getLogPane().select(0, 0);
+        log.info("Log contents copied to clipboard");
+      }
+    });
+    logView.getLevelComboBox().setSelectedItem(appender.getLevel().toString());
+    logView.getLevelComboBox().addItemListener(new ItemListener() {
+
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+          Level level = Level.valueOf((String) e.getItem());
+          log.info("Changing log level to {}", level);
+          appender.setLevel(level);
+          if (!Level.INFO.isGreaterOrEqual(level)) {
+            rootLog.setLevel(Level.INFO);
+          } else if (rootLog.getLevel().isGreaterOrEqual(level)) {
+            rootLog.setLevel(level);
+          }
+        }
       }
     });
 

@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 
-import javax.swing.ImageIcon;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Style;
@@ -34,6 +33,7 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   private final JTextPane pane;
   private final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss");
   private boolean printStackTrace = false;
+  private Level level = Level.DEBUG;
 
   public LoggingAppender(JTextPane pane, LoggerContext context) {
     this.pane = pane;
@@ -50,9 +50,17 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
     this.printStackTrace = printStackTrace;
   }
 
+  public Level getLevel() {
+    return level;
+  }
+
+  public void setLevel(Level level) {
+    this.level = level;
+  }
+
   @Override
   public void append(ILoggingEvent event) {
-    if (!event.getLoggerName().equals("status")) {
+    if (!event.getLoggerName().equals("status") && event.getLevel().isGreaterOrEqual(level)) {
       if (event.getMarker() == null || !event.getMarker().contains("no-ui-log")) {
         SwingUtilities.invokeLater(new WriteOutput(event));
       }
@@ -84,27 +92,19 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
         if (name.trim().equals(""))
           return;
         Style msgStyle = null;
-        ImageIcon icon = null;
         Level level = event.getLevel();
         if (level.isGreaterOrEqual(Level.WARN)) {
           msgStyle = doc.getStyle("Error");
-          if (level.isGreaterOrEqual(Level.ERROR)) {
-            icon = Images.get("ui/fugue/error.png");
-          } else {
-            icon = Images.get("ui/fugue/warn.png");
-          }
         } else if (level.isGreaterOrEqual(Level.INFO)) {
           msgStyle = doc.getStyle("Normal");
-          icon = Images.get("ui/fugue/info.png");
         } else {
           msgStyle = doc.getStyle("Debug");
-          icon = Images.get("ui/fugue/debug.png");
         }
+        String time = dateFormatter.format(event.getTimeStamp());
+        String logger = last(event.getLoggerName());
         int prevLength = doc.getLength();
-        pane.setCaretPosition(prevLength);
-        pane.insertIcon(icon);
-        doc.insertString(doc.getLength(), " [" + dateFormatter.format(event.getTimeStamp()) + "] ",
-            doc.getStyle("Normal"));
+        doc.insertString(doc.getLength(), "[" + time + "] ", doc.getStyle("Normal"));
+        doc.insertString(doc.getLength(), "[" + logger + "] ", doc.getStyle("Class"));
         doc.insertString(doc.getLength(), formatMsg(event, message), msgStyle);
         doc.insertString(doc.getLength(), "\n", doc.getStyle("Normal"));
         pane.setCaretPosition(prevLength);
@@ -133,5 +133,9 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
       }
       return builder.toString();
     }
+  }
+
+  private static String last(String str) {
+    return str.substring(Math.max(0, str.lastIndexOf('.') + 1), str.length());
   }
 }

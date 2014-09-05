@@ -72,6 +72,6 @@ public class LinkRunner extends SwingWorker<Void, Void> {
         .showMessageDialog(
             null,
             "Sorry, a problem occurred while trying to open this link in your system's standard browser.",
-            "A problem occured", JOptionPane.ERROR_MESSAGE);
+            "A problem occurred", JOptionPane.ERROR_MESSAGE);
   }
 }
