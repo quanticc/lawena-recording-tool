@@ -76,6 +76,20 @@ jar {
     }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
+task run(type: JavaExec, dependsOn: 'classes') {
+    description "Runs this project as a JVM application"
+    main mainClassName
+    classpath project.sourceSets.main.runtimeClasspath
+}
+
+// Deployment tasks
+
+// 1. Configure distributions
+
 distributions {
     main {}
     stable {
@@ -93,14 +107,13 @@ distributions {
     snapshot {
         contents {
             from { ['src/main/dist', 'build/getdown/snapshot', 'build/gradlew'] }
+            exclude "**/getdown.*.txt"
             duplicatesStrategy = 'exclude'
         }
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.0'
-}
+// 2. Prepare executables and classpath related files
 
 task buildLauncher {
     inputs.file 'launcher/lawena-launcher.xml'
@@ -153,7 +166,11 @@ task copyGradleLauncher(type: Copy) {
     into 'build/gradlew/lawena'
 }
 
-task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar', 'copyGradleLauncher']) {}
+task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar', 'copyGradleLauncher']) {
+    description "Copy all required executable and build files"
+}
+
+// 3. Pack additional resources into jar files
 
 task packResources(type: Zip) {
     archiveName = 'lwrtresources.jar'
@@ -184,180 +201,102 @@ task packSkyboxes(type: Zip) {
     excludes = ['**/*.db']
 }
 
-task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {}
-
-// stable
-
-task setupGetdownStable(dependsOn: ['copyLibs', 'pack']) {
-    def base = file('src/stable/dist/lawena/getdown.base.txt')
-    def getdown = file('build/getdown/stable/lawena/getdown.txt')
-    inputs.file base
-    outputs.file getdown
-    getdown.getParentFile().mkdirs()
-    getdown.withWriter { w ->
-        base.eachLine { line ->
-            w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'release') + System.getProperty("line.separator")
-        }
-    }     
+task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
+    description "Create packages of application resources"
 }
 
-task digestStable(type: JavaExec, dependsOn: ['setupGetdownStable', 'stableDistZip', 'cleanInstallStableDist', 'installStableDist']) {
-    main 'com.threerings.getdown.tools.Digester'
-    classpath 'launcher/getdown-client.jar'
-    args = [file('build/install/lawena-stable/lawena')]
-}
+// 4. Create deployment-ready archives for each distribution and deploy them
 
-task deployStable(dependsOn: 'digestStable') {
-    doLast {
-        copy {
-            from fileTree('build/install/lawena-stable/lawena')
-            into file(stableDeployDir + '/latest')
-        }
-        copy {
-            from fileTree('build/install/lawena-stable/lawena')
-            into file(stableDeployDir + '/' + buildtime)
-        }
-        def output = file(stableDeployDir + '/buildlist.txt')
-        output.append buildtime + ';' + version + '\n'
+['stable', 'preview', 'snapshot'].each { def distName ->
+    def DistName = distName.substring(0, 1).toUpperCase() + distName.substring(1)
+    def latestFolder = 'latest'
+    tasks.create(name: "setup${DistName}Dist", dependsOn: ['copyLibs', 'pack']) {
+        description "Prepares deployment descriptor for packaging ${distName} distribution"
+        def min = file("src/${distName}/dist/lawena/getdown.min.txt")
+        def getdown = file("build/getdown/${distName}/lawena/getdown.txt")
+        inputs.file min
+        outputs.file getdown
+        getdown.getParentFile().mkdirs()
+        getdown.withWriter { w ->
+            min.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', distName) + System.getProperty("line.separator")
+            }
+        } 
     }
-}
-
-task diffDeployStable(dependsOn: 'deployStable') {
-    doLast {
-        def buildlist = []
-        file(stableDeployDir).eachDirMatch(~/^[0-9]+$/) { dir ->
-            buildlist.add dir.name
-        }
-        buildlist.sort(java.text.Collator.instance)
-        def latest = buildlist[buildlist.size() - 1]
-        buildlist = buildlist - latest
-        buildlist.each { s ->
-            println "Creating diff between " + s + " and latest build " + latest
+    
+    tasks.create(name: "build${DistName}Dist", dependsOn: ["setup${DistName}Dist", "${distName}DistZip"]) {}
+    
+    tasks.create(name: "setup${DistName}Deploy", dependsOn: ["build${DistName}Dist", "cleanInstall${DistName}Dist", "install${DistName}Dist"]) {
+        description "Prepares deployment descriptor for deploying ${distName} distribution"
+        def base = file("src/${distName}/dist/lawena/getdown.base.txt")
+        def getdown = file("build/getdown/${distName}/lawena/getdown.full.txt")
+        inputs.file base
+        outputs.file getdown
+        getdown.getParentFile().mkdirs()
+        getdown.withWriter { w ->
+            base.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', distName) + System.getProperty("line.separator")
+            }
+        } 
+    }
+    
+    tasks.create(name: "deploy${DistName}", dependsOn: "setup${DistName}Deploy") {
+        description "Deploys ${distName} distribution to a local directory"
+        doLast {
+            def sourceTree = fileTree("build/install/lawena-${distName}/lawena")
+            def stampDestFile = file("${deployDir}/${distName}/${buildtime}")
+            def latestDestFile = file("${deployDir}/${distName}/${latestFolder}")
+            copy {
+                from sourceTree
+                into stampDestFile
+            }
+            copy {
+                from file("build/getdown/${distName}/lawena/getdown.full.txt")
+                into file("${deployDir}/${distName}/${buildtime}")
+                rename "getdown.full.txt", "getdown.txt"
+            }
             javaexec {
-                main 'com.threerings.getdown.tools.Differ'
+                main 'com.threerings.getdown.tools.Digester'
                 classpath 'launcher/getdown-client.jar'
-                args = ['-verbose', file(stableDeployDir + '/' + latest), file(stableDeployDir + '/' + s)]
+                args = [stampDestFile]
+            }
+            copy {
+                from sourceTree
+                into latestDestFile
+            }
+            copy {
+                from file("build/getdown/${distName}/lawena/getdown.full.txt")
+                into file("${deployDir}/${distName}/${latestFolder}")
+                rename "getdown.full.txt", "getdown.txt"
+            }
+            javaexec {
+                main 'com.threerings.getdown.tools.Digester'
+                classpath 'launcher/getdown-client.jar'
+                args = [latestDestFile]
+            }
+            def output = file("${deployDir}/${distName}/buildlist.txt")
+            output.append "${buildtime};${version}\n"
+        }
+    }
+    
+    tasks.create(name: "diffDeploy${DistName}", dependsOn: "deploy${DistName}") {
+        description "Deploys and creates diff patch files for ${distName} distribution"
+        doLast {
+            def buildlist = []
+            file("${deployDir}/${distName}").eachDirMatch(~/^[0-9]+$/) { dir ->
+                buildlist.add dir.name
+            }
+            buildlist.sort(java.text.Collator.instance)
+            def latest = buildlist[buildlist.size() - 1]
+            buildlist = buildlist - latest
+            buildlist.each { s ->
+                println "Creating diff between ${s} and latest build ${latest}"
+                javaexec {
+                    main 'com.threerings.getdown.tools.Differ'
+                    classpath 'launcher/getdown-client.jar'
+                    args = ['-verbose', file("${deployDir}/${distName}/${latestFolder}"), file("${deployDir}/${distName}/${s}")]
+                }
             }
         }
     }
-}
-
-// preview
-
-task setupGetdownPreview(dependsOn: ['copyLibs', 'pack']) {
-    def base = file('src/preview/dist/lawena/getdown.base.txt')
-    def getdown = file('build/getdown/preview/lawena/getdown.txt')
-    inputs.file base
-    outputs.file getdown
-    getdown.getParentFile().mkdirs()
-    getdown.withWriter { w ->
-        base.eachLine { line ->
-            w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'release') + System.getProperty("line.separator")
-        }
-    }   
-}
-
-task digestPreview(type: JavaExec, dependsOn: ['setupGetdownPreview', 'previewDistZip', 'cleanInstallPreviewDist', 'installPreviewDist']) {
-    main 'com.threerings.getdown.tools.Digester'
-    classpath 'launcher/getdown-client.jar'
-    args = [file('build/install/lawena-preview/lawena')]
-}
-
-task deployPreview(dependsOn: 'digestPreview') {
-    doLast {
-        copy {
-            from fileTree('build/install/lawena-preview/lawena')
-            into file(previewDeployDir + '/latest')
-        }
-        copy {
-            from fileTree('build/install/lawena-preview/lawena')
-            into file(previewDeployDir + '/' + buildtime)
-        }
-        def output = file(previewDeployDir + '/buildlist.txt')
-        output.append buildtime + ';' + version + '\n'
-    }
-}
-
-task diffDeployPreview(dependsOn: 'deployPreview') {
-    doLast {
-        def buildlist = []
-        file(stableDeployDir).eachDirMatch(~/^[0-9]+$/) { dir ->
-            buildlist.add dir.name
-        }
-        buildlist.sort(java.text.Collator.instance)
-        def latest = buildlist[buildlist.size() - 1]
-        buildlist = buildlist - latest
-        buildlist.each { s ->
-            println "Creating diff between " + s + " and latest build " + latest
-            javaexec {
-                main 'com.threerings.getdown.tools.Differ'
-                classpath 'launcher/getdown-client.jar'
-                args = ['-verbose', file(previewDeployDir + '/' + latest), file(previewDeployDir + '/' + s)]
-            }
-        }
-    }
-}
-
-// snapshot
-
-task setupGetdownSnapshot(dependsOn: ['copyLibs', 'pack']) {
-    def base = file('src/snapshot/dist/lawena/getdown.base.txt')
-    def getdown = file('build/getdown/snapshot/lawena/getdown.txt')
-    inputs.file base
-    outputs.file getdown
-    getdown.getParentFile().mkdirs()
-    getdown.withWriter { w ->
-        base.eachLine { line ->
-            w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', 'release') + System.getProperty("line.separator")
-        }
-    }  
-}
-
-task digestSnapshot(type: JavaExec, dependsOn: ['setupGetdownSnapshot', 'snapshotDistZip', 'cleanInstallSnapshotDist', 'installSnapshotDist']) {
-    main 'com.threerings.getdown.tools.Digester'
-    classpath 'launcher/getdown-client.jar'
-    args = [file('build/install/lawena-snapshot/lawena')]
-}
-
-task deploySnapshot(dependsOn: 'digestSnapshot') {
-    doLast {
-        copy {
-            from fileTree('build/install/lawena-snapshot/lawena')
-            into file(snapshotDeployDir + '/latest')
-        }
-        copy {
-            from fileTree('build/install/lawena-snapshot/lawena')
-            into file(snapshotDeployDir + '/' + buildtime)
-        }
-        def output = file(snapshotDeployDir + '/buildlist.txt')
-        output.append buildtime + ';' + version + '\n'
-    }
-}
-
-task diffDeploySnapshot(dependsOn: 'deploySnapshot') {
-    doLast {
-        def buildlist = []
-        file(stableDeployDir).eachDirMatch(~/^[0-9]+$/) { dir ->
-            buildlist.add dir.name
-        }
-        buildlist.sort(java.text.Collator.instance)
-        def latest = buildlist[buildlist.size() - 1]
-        buildlist = buildlist - latest
-        buildlist.each { s ->
-            println "Creating diff between " + s + " and latest build " + latest
-            javaexec {
-                main 'com.threerings.getdown.tools.Differ'
-                classpath 'launcher/getdown-client.jar'
-                args = ['-verbose', file(snapshotDeployDir + '/' + latest), file(snapshotDeployDir + '/' + s)]
-            }
-        }
-    }
-}
-
-//
-
-task run(type: JavaExec, dependsOn: 'classes') {
-    description "Runs this project as a JVM application"
-    main mainClassName
-    classpath project.sourceSets.main.runtimeClasspath
 }
