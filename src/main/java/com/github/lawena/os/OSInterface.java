@@ -227,7 +227,7 @@ public abstract class OSInterface {
         if (key.startsWith("-") || key.startsWith("+")) {
           if (i + 1 < params.length) {
             String next = params[i + 1];
-            if (!next.startsWith("-") && !next.startsWith("+")) {
+            if (next.matches("^-?\\d+$") || (!next.startsWith("-") && !next.startsWith("+"))) {
               value = next;
               i++;
             }
