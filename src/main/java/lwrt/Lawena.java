@@ -1,6 +1,7 @@
 package lwrt;
 
 import ui.AboutDialog;
+import ui.LaunchOptionsDialog;
 import ui.LawenaView;
 import ui.ParticlesDialog;
 import ui.SegmentsDialog;
@@ -599,6 +600,8 @@ public class Lawena {
   private String version = "4.1";
   private String build;
   private UpdateHelper updater;
+  
+  private LaunchOptionsDialog launchOptionsDialog;
 
   public Lawena(SettingsManager cfg) {
     String impl = this.getClass().getPackage().getImplementationVersion();
@@ -971,6 +974,23 @@ public class Lawena {
             JOptionPane.showMessageDialog(view, "Invalid value, must be 0 or higher integer.",
                 "Launch Options", JOptionPane.WARNING_MESSAGE);
           }
+        }
+      }
+    });
+    view.getCustomLaunchOptionsMenuItem().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (launchOptionsDialog == null) {
+          launchOptionsDialog = new LaunchOptionsDialog();
+        }
+        launchOptionsDialog.getOptionsTextField().setText(settings.getString(Key.LaunchOptions));
+        int result = launchOptionsDialog.showDialog();
+        if (result == JOptionPane.YES_OPTION) {
+          String launchOptions = launchOptionsDialog.getOptionsTextField().getText();
+          settings.setString(Key.LaunchOptions, launchOptions);
+        } else if (result == 1) {
+          settings.setString(Key.LaunchOptions, (String) Key.LaunchOptions.defValue());
         }
       }
     });

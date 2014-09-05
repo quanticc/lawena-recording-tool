@@ -8,18 +8,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.UIManager;
 
+import lwrt.SettingsManager.Key;
+
 /**
  * This class lets you access to all values and actions that are OS-dependent, aiming to simplify
  * the porting of some features to all systems where TF2 can run (Windows, Linux and OSX)
  * 
- * @author iabarca "Quantic"
+ * @author Ivan
  */
 public abstract class CommandLine {
 
@@ -246,29 +250,64 @@ public abstract class CommandLine {
    * @see #getBuilderStartTF2()
    */
   public void startTf(SettingsManager cfg) {
-    String dxlevel = cfg.getDxlevel();
-    String width = cfg.getWidth() + "";
-    String height = cfg.getHeight() + "";
     try {
-      log.fine("Starting TF2 in " + width + "x" + height + " with dxlevel " + dxlevel);
+      String opts = cfg.getString(Key.LaunchOptions);
+      Map<String, String> options = new LinkedHashMap<>();
+      // these options will be overridden if the user wants
+      options.put("-applaunch", "440");
+      options.put("-dxlevel", cfg.getDxlevel());
+      options.put("-w", cfg.getWidth() + "");
+      options.put("-h", cfg.getHeight() + "");
+      String[] params = opts.trim().replaceAll("\\s+", " ").split(" ");
+      for (int i = 0; i < params.length; i++) {
+        String key = params[i];
+        String value = "";
+        if (key.startsWith("-") || key.startsWith("+")) {
+          if (i + 1 < params.length) {
+            String next = params[i + 1];
+            if (next.matches("^-?\\d+$") || (!next.startsWith("-") && !next.startsWith("+"))) {
+              value = next;
+              i++;
+            }
+          }
+          options.put(key, value);
+        } else {
+          log.warning("Discarding invalid launch parameter: " + key);
+        }
+      }
+      boolean fs = options.containsKey("-full") || options.containsKey("-fullscreen");
+      if (fs) {
+        options.remove("-sw");
+        options.remove("-window");
+        options.remove("-startwindowed");
+        options.remove("-windowed");
+      } else {
+        options.put("-sw", "");
+        options.put("-noborder", "");
+      }
+      if (options.containsKey("-width")) {
+        options.remove("-w");
+      }
+      if (options.containsKey("-height")) {
+        options.remove("-h");
+      }
+      // prepare list of options
+      log.info("Launching Steam AppID " + options.get("-applaunch") + "  in " + options.get("-w")
+          + "x" + options.get("-h") + " " + (fs ? "Fullscreen" : "Windowed") + " with dxlevel "
+          + options.get("-dxlevel"));
+      log.finer("Parameters: " + options);
       ProcessBuilder pb = getBuilderStartTF2();
-      pb.command().addAll(
-          Arrays.asList("-applaunch", "440", "-dxlevel", dxlevel, "-novid", "-noborder",
-              "-noforcedmparms", "-noforcemaccel", "-noforcemspd", "-console", "-high", "-noipx",
-              "-nojoy", "-sw", "-w", width, "-h", height));
+      pb.command().add("-applaunch");
+      pb.command().add(options.get("-applaunch"));
+      options.remove("-applaunch");
+      for (Entry<String, String> e : options.entrySet()) {
+        pb.command().add(e.getKey());
+        pb.command().add(e.getValue());
+      }
+      // keeping this for compatibility
       if (cfg.getInsecure()) {
         log.fine("Using -insecure in launch options");
         pb.command().add("-insecure");
-      }
-      if (cfg.getCondebug()) {
-        pb.command().add("-condebug");
-        Path logpath = cfg.getTfPath().resolve("console.log");
-        log.info("TF2 console output saved to: " + logpath);
-        try {
-          Files.deleteIfExists(logpath);
-        } catch (IOException e) {
-          log.log(Level.FINE, "Could not delete previous console.log file", e);
-        }
       }
       Process pr = pb.start();
       BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
@@ -278,7 +317,7 @@ public abstract class CommandLine {
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
-      log.log(Level.INFO, "Process was interrupted", e);
+      log.warning("Process was interrupted: " + e);
     }
   }
 

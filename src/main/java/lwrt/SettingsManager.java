@@ -54,7 +54,8 @@ public class SettingsManager {
     SourceRecorderVideoFormat("tga", "tga", "jpg"),
     SourceRecorderAudioFormat("wav", "wav", ""),
     SourceRecorderJpegQuality(50, 1, 100),
-    DeleteBackupsWhenRestoring(true);
+    DeleteBackupsWhenRestoring(true),
+    LaunchOptions("-novid -console");
 
     private Object value;
     private List<String> allowedValues;
