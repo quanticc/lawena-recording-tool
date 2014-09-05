@@ -1,4 +1,4 @@
-appbase = https://dl.dropboxusercontent.com/u/74380/lwrt/preview/latest/
+appbase = https://dl.dropboxusercontent.com/u/74380/lwrt/snapshot/latest/
 
 ui.name = Lawena Recording Tool
 ui.background_image = res/background.png
