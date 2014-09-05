@@ -41,11 +41,11 @@ public class LwrtSettings {
     Hitsounds(false),
     Voice(false),
     SteamCloud(false),
-    Condebug(true),
     HudMinmode(true),
     HudPlayerModel(false),
     Particles(""),
     LaunchTimeout(120, 0, Integer.MAX_VALUE),
+    @Deprecated
     Insecure(false),
     VdmSrcDemoFix(false),
     CustomSettings("// Custom User Settings"),
@@ -53,7 +53,8 @@ public class LwrtSettings {
     SourceRecorderAudioFormat("wav", "wav", ""),
     SourceRecorderJpegQuality(50, 1, 100),
     DeleteBackupsWhenRestoring(true),
-    SkyboxDataSavePath("skybox.ser.gz");
+    SkyboxDataSavePath("skybox.ser.gz"),
+    LaunchOptions("-novid -console");
 
     private Object value;
     private List<String> allowedValues;
@@ -190,7 +191,6 @@ public class LwrtSettings {
     settings.println("mat_motion_blur_forward_enabled " + (getMotionBlur() ? "1" : "0"));
     settings.println("mat_motion_blur_strength " + (getMotionBlur() ? "1" : "0"));
     settings.println((getSteamCloud() ? "//" : "") + "cl_cloud_settings 0");
-    settings.println((getCondebug() ? "" : "//") + "con_timestamp 1");
     settings.println("viewmodel_fov_demo " + getViewmodelFov());
     boolean crosshairswitch = getCrosshairSwitch();
     settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_file \"\"");
@@ -377,10 +377,6 @@ public class LwrtSettings {
     setString(Key.Skybox, value);
   }
 
-  public void setCondebug(boolean value) {
-    setBoolean(Key.Condebug, value);
-  }
-
   public void setCustomResources(List<String> values) {
     Key key = Key.CustomResources;
     setString(key, listToString(values, '|'));
@@ -489,10 +485,6 @@ public class LwrtSettings {
 
   public String getSkybox() {
     return getString(Key.Skybox);
-  }
-
-  public boolean getCondebug() {
-    return getBoolean(Key.Condebug);
   }
   
   public List<String> getCustomResources() {

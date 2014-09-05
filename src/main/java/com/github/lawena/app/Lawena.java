@@ -1,6 +1,7 @@
 package com.github.lawena.app;
 
 import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,14 +19,19 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -47,6 +53,7 @@ import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.ui.LogView;
 import com.github.lawena.ui.SkyboxListRenderer;
+import com.github.lawena.ui.SwingLink;
 import com.github.lawena.ui.TooltipRenderer;
 import com.github.lawena.update.Build;
 import com.github.lawena.update.Updater;
@@ -327,6 +334,41 @@ public class Lawena {
             JOptionPane.showMessageDialog(view, "Invalid value, must be 0 or higher integer.",
                 "Launch Options", JOptionPane.WARNING_MESSAGE);
           }
+        }
+      }
+    });
+    view.getCustomLaunchOptionsMenuItem().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        Object[] options = {"OK", "Set defaults", "Cancel"};
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBounds(0, 0, 81, 140);
+        panel
+            .add(new JLabel(
+                "<html>Enter the list of custom launch options to use on game launch."
+                    + "<br>Steam AppID, Resolution and DxLevel are provided by Lawena in case they are not defined here."
+                    + "<br>These options are for advanced users only and can override settings from the main window."));
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        panel.add(new SwingLink("Launch Options Valve Developer Wiki",
+            "https://developer.valvesoftware.com/wiki/Launch_options"));
+        JTextField textField = new JTextField(settings.getString(Key.LaunchOptions));
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        panel.add(textField);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        panel
+            .add(new JLabel(
+                "Press OK to use above values or Set Defaults to use the standard launch options used by Lawena."));
+        int result =
+            JOptionPane.showOptionDialog(null, panel, "Custom Launch Options",
+                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options,
+                null);
+        if (result == JOptionPane.YES_OPTION) {
+          String launchOptions = textField.getText();
+          settings.setString(Key.LaunchOptions, launchOptions);
+        } else if (result == 1) {
+          settings.setString(Key.LaunchOptions, (String) Key.LaunchOptions.defValue());
         }
       }
     });

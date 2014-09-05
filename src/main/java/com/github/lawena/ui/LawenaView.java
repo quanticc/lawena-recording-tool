@@ -3,7 +3,6 @@ package com.github.lawena.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -13,12 +12,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -38,39 +35,15 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import javax.swing.ImageIcon;
+import com.github.lawena.app.task.LinkRunner;
 
 public class LawenaView extends JFrame {
 
   private static final long serialVersionUID = 1L;
-  private static final Logger log = LoggerFactory.getLogger(LawenaView.class);
-
-  private static class LaunchURLWorker extends SwingWorker<Void, Void> {
-
-    private String url;
-
-    public LaunchURLWorker(String url) {
-      this.url = url;
-    }
-
-    @Override
-    protected Void doInBackground() throws Exception {
-      try {
-        Desktop.getDesktop().browse(new URI(url));
-      } catch (IOException | URISyntaxException e1) {
-        log.warn("Could not open URL", e1);
-      }
-      return null;
-    }
-
-  }
 
   private static final String renderingTutorialURL =
       "http://code.google.com/p/lawenarecordingtool/wiki/RenderingTutorial";
@@ -84,31 +57,31 @@ public class LawenaView extends JFrame {
 
   private class MntmRenderingTutorialActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-      new LaunchURLWorker(renderingTutorialURL).execute();
+      new LinkRunner(renderingTutorialURL).execute();
     }
   }
 
   private class MntmPatchNotesActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-      new LaunchURLWorker(releasesURL).execute();
+      new LinkRunner(releasesURL).execute();
     }
   }
 
   private class MntmProjectPageActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-      new LaunchURLWorker(projectPageURL).execute();
+      new LinkRunner(projectPageURL).execute();
     }
   }
 
   private class MntmVdmTutorialActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-      new LaunchURLWorker(vdmTutorialURL).execute();
+      new LinkRunner(vdmTutorialURL).execute();
     }
   }
 
   private class MntmInstructionsActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-      new LaunchURLWorker(instructionsURL).execute();
+      new LinkRunner(instructionsURL).execute();
     }
   }
 
@@ -155,6 +128,7 @@ public class LawenaView extends JFrame {
   private JMenuItem checkForUpdatesMenuItem;
   private JMenuItem switchUpdaterBranchMenuItem;
   private JMenuItem showLogMenuItem;
+  private JMenuItem customLaunchOptionsMenuItem;
 
   public LawenaView() {
     super();
@@ -201,16 +175,19 @@ public class LawenaView extends JFrame {
     JMenu mnAdvanced = new JMenu(" Advanced ");
     menuBar.add(mnAdvanced);
 
-    JMenuItem mntmSelectEnhancedParticles = new JMenuItem("Select Enhanced Particles...");
+    JMenuItem mntmSelectEnhancedParticles = new JMenuItem("Enhanced Particles...");
     mnAdvanced.add(mntmSelectEnhancedParticles);
 
-    JMenuItem mntmAddCustomSettings = new JMenuItem("Custom Settings...");
+    JMenuItem mntmAddCustomSettings = new JMenuItem("Custom Settings/CVars...");
     mnAdvanced.add(mntmAddCustomSettings);
+
+    JMenuItem customLaunchOptionsMenuItem = new JMenuItem("Custom Launch Options...");
+    mnAdvanced.add(customLaunchOptionsMenuItem);
 
     JSeparator separator_3 = new JSeparator();
     mnAdvanced.add(separator_3);
 
-    JCheckBoxMenuItem chckbxmntmInsecure = new JCheckBoxMenuItem("Use -insecure in Launch Options");
+    JCheckBoxMenuItem chckbxmntmInsecure = new JCheckBoxMenuItem("Launch using -insecure");
     mnAdvanced.add(chckbxmntmInsecure);
 
     JCheckBoxMenuItem chckbxmntmBackupMode =
@@ -682,6 +659,7 @@ public class LawenaView extends JFrame {
     this.checkForUpdatesMenuItem = checkForUpdatesMenuItem;
     this.switchUpdaterBranchMenuItem = switchUpdaterBranchMenuItem;
     this.showLogMenuItem = showLogMenuItem;
+    this.customLaunchOptionsMenuItem = customLaunchOptionsMenuItem;
 
     pack();
     setMinimumSize(new Dimension(750, 420));
@@ -858,6 +836,10 @@ public class LawenaView extends JFrame {
 
   public JMenuItem getShowLogMenuItem() {
     return showLogMenuItem;
+  }
+
+  public JMenuItem getCustomLaunchOptionsMenuItem() {
+    return customLaunchOptionsMenuItem;
   }
 
 }
