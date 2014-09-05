@@ -95,12 +95,7 @@ distributions {
     stable {
         contents {
             from { ['src/main/dist', 'build/getdown/stable', 'build/gradlew'] }
-            duplicatesStrategy = 'exclude'
-        }
-    }
-    preview {
-        contents {
-            from { ['src/main/dist', 'build/getdown/preview', 'build/gradlew'] }
+            exclude "**/getdown.*.txt"
             duplicatesStrategy = 'exclude'
         }
     }
@@ -207,7 +202,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
 
 // 4. Create deployment-ready archives for each distribution and deploy them
 
-['stable', 'preview', 'snapshot'].each { def distName ->
+['stable', 'snapshot'].each { def distName ->
     def DistName = distName.substring(0, 1).toUpperCase() + distName.substring(1)
     def latestFolder = 'latest'
     tasks.create(name: "setup${DistName}Dist", dependsOn: ['copyLibs', 'pack']) {
