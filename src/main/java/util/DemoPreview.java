@@ -3,6 +3,7 @@ package util;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -12,7 +13,8 @@ public class DemoPreview extends RandomAccessFile {
 
   private static final Logger log = Logger.getLogger("lawena");
 
-  private final int maxStringLength = 260;
+  private final static int maxStringLength = 260;
+
   private int demoProtocol;
   private int networkProtocol;
   private String demoStamp;
@@ -48,10 +50,10 @@ public class DemoPreview extends RandomAccessFile {
     byte[] aux = new byte[length];
     try {
       read(aux);
-      String result = new String(aux);
+      String result = new String(aux, Charset.forName("UTF-8"));
       return result.substring(0, result.indexOf(0));
     } catch (IOException e) {
-      e.printStackTrace();
+      log.warning("Error while reading demo info: " + e);
     }
     return null;
   }
@@ -65,9 +67,8 @@ public class DemoPreview extends RandomAccessFile {
         value += (aux[i] & 0xff) << (8 * i);
       }
       return Float.intBitsToFloat(value);
-
     } catch (IOException e) {
-      e.printStackTrace();
+      log.warning("Error while reading demo info: " + e);
     }
     return 0;
   }
@@ -82,7 +83,7 @@ public class DemoPreview extends RandomAccessFile {
       }
       return value;
     } catch (IOException e) {
-      e.printStackTrace();
+      log.warning("Error while reading demo info: " + e);
     }
     return 0;
   }

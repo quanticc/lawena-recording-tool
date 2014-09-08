@@ -28,6 +28,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
       log.finer("Deleting file: " + path);
       Files.delete(path);
     } catch (NoSuchFileException e) {
+      log.fine("File does not exist: " + e);
     } catch (IOException e) {
       // attempt to delete custom hud font files that mess up the restore
       if (path.endsWith(".otf") || path.endsWith(".ttf")) {
@@ -48,6 +49,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
         log.finer("Deleting folder: " + dir);
         Files.delete(dir);
       } catch (NoSuchFileException e) {
+        log.fine("File does not exist: " + e);
       } catch (IOException e) {
         log.warning("Could not delete directory: " + e);
         throw e;

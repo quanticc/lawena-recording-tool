@@ -2,7 +2,6 @@ package lwrt;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,13 +69,13 @@ public class CLLinux extends CommandLine {
     try {
       ProcessBuilder pb = new ProcessBuilder("pgrep", "hl2_linux");
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      line = input.readLine();
-      if (line != null) {
-        found = true;
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        line = input.readLine();
+        if (line != null) {
+          found = true;
+        }
       }
-      input.close();
     } catch (IOException e) {
       log.log(Level.INFO, "", e);
     }

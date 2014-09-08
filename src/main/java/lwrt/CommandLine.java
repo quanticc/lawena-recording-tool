@@ -4,6 +4,7 @@ import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -163,10 +164,11 @@ public abstract class CommandLine {
       ProcessBuilder pb = new ProcessBuilder(cmds);
       pb.directory(dest.toFile());
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.fine("[vpk] " + line);
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.fine("[vpk] " + line);
+        }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
@@ -185,10 +187,11 @@ public abstract class CommandLine {
       ProcessBuilder pb = getBuilderVTFCmd(skyboxFilename);
       log.finer("generatePreview: " + pb.command());
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.finer("[vtfcmd] " + line);
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.finer("[vtfcmd] " + line);
+        }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
@@ -209,10 +212,11 @@ public abstract class CommandLine {
       Path vpktool = resolveVpkToolPath(tfpath);
       ProcessBuilder pb = new ProcessBuilder(vpktool.toString(), "l", vpkpath.toString());
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        files.add(line);
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          files.add(line);
+        }
       }
       pr.waitFor();
       log.finer("[" + vpkpath.getFileName() + "] Contents scanned: " + files.size() + " file(s)");
@@ -231,10 +235,11 @@ public abstract class CommandLine {
     try {
       ProcessBuilder pb = getBuilderTF2ProcessKiller();
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.fine("[taskkill] " + line);
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.fine("[taskkill] " + line);
+        }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
@@ -310,10 +315,11 @@ public abstract class CommandLine {
         pb.command().add("-insecure");
       }
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.finer("[steam] " + line);
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.finer("[steam] " + line);
+        }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
@@ -348,5 +354,9 @@ public abstract class CommandLine {
     } catch (IOException e) {
       log.log(Level.INFO, "Could not open directory: " + dir, e);
     }
+  }
+
+  protected BufferedReader newProcessReader(Process p) {
+    return new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("UTF-8")));
   }
 }

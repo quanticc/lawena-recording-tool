@@ -53,7 +53,7 @@ public class LawenaView extends JFrame {
 
   private static final Logger log = Logger.getLogger("lawena");
 
-  private class LaunchURLWorker extends SwingWorker<Void, Void> {
+  private static class LaunchURLWorker extends SwingWorker<Void, Void> {
 
     private String url;
 
@@ -83,39 +83,36 @@ public class LawenaView extends JFrame {
   private static final String instructionsURL =
       "http://code.google.com/p/lawenarecordingtool/wiki/Instructions";
 
-  private class MntmRenderingTutorialActionListener implements ActionListener {
+  private static class MntmRenderingTutorialActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(renderingTutorialURL).execute();
     }
   }
 
-  private class MntmPatchNotesActionListener implements ActionListener {
+  private static class MntmPatchNotesActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(releasesURL).execute();
     }
   }
 
-  private class MntmProjectPageActionListener implements ActionListener {
+  private static class MntmProjectPageActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(projectPageURL).execute();
     }
   }
 
-  private class MntmVdmTutorialActionListener implements ActionListener {
+  private static class MntmVdmTutorialActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(vdmTutorialURL).execute();
     }
   }
 
-  private class MntmInstructionsActionListener implements ActionListener {
+  private static class MntmInstructionsActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(instructionsURL).execute();
     }
   }
 
-  /**
-     * 
-     */
   private static final long serialVersionUID = 1L;
 
   private JComboBox<String> cmbHud;
@@ -216,7 +213,7 @@ public class LawenaView extends JFrame {
 
     JMenuItem mntmAddCustomSettings = new JMenuItem("Custom Settings...");
     mnAdvanced.add(mntmAddCustomSettings);
-    
+
     JMenuItem customLaunchOptionsMenuItem = new JMenuItem("Custom Launch Options...");
     mnAdvanced.add(customLaunchOptionsMenuItem);
 
@@ -465,8 +462,7 @@ public class LawenaView extends JFrame {
     gbc_spinnerViewmodelFov.gridx = 3;
     gbc_spinnerViewmodelFov.gridy = 3;
     panelSettings.add(spinnerViewmodelFov, gbc_spinnerViewmodelFov);
-    spinnerViewmodelFov
-        .setModel(new SpinnerNumberModel(new Integer(70), null, null, new Integer(1)));
+    spinnerViewmodelFov.setModel(new SpinnerNumberModel(70, null, null, 1));
 
     Component horizontalStrut = Box.createHorizontalStrut(24);
     GridBagConstraints gbc_horizontalStrut = new GridBagConstraints();
@@ -895,7 +891,7 @@ public class LawenaView extends JFrame {
   public JCheckBoxMenuItem getChckbxmntmBackupMode() {
     return chckbxmntmBackupMode;
   }
-  
+
   public JMenuItem getCustomLaunchOptionsMenuItem() {
     return customLaunchOptionsMenuItem;
   }

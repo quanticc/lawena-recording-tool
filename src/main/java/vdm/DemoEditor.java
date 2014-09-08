@@ -6,6 +6,7 @@ import util.DemoPreview;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -35,14 +36,11 @@ public class DemoEditor {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      if (!Files.exists(settings.getTfPath().resolve(view.getTxtDemofile().getText()))) {
+      if (!Files.exists(currentDemoFile.toPath())) {
         JOptionPane.showMessageDialog(view,
             "Please fill the required demo file field with a valid demo file", "Error",
             JOptionPane.ERROR_MESSAGE);
         return;
-      } else {
-        currentdemo = view.getTxtDemofile().getText();
-        updateDemoDetails();
       }
 
       try {
@@ -51,7 +49,11 @@ public class DemoEditor {
         if (tick1 >= tick2) {
           throw new NumberFormatException();
         }
-        model.addTick(new Tick(currentdemo, tick1, tick2));
+        Tick segment =
+            new Tick(settings.getTfPath().relativize(currentDemoFile.toPath()).toString(), tick1,
+                tick2);
+        model.addTick(segment);
+        log.info("Adding segment: " + segment);
       } catch (NumberFormatException ex) {
         JOptionPane.showMessageDialog(view,
             "Please fill the required tick fields with valid numbers", "Error",
@@ -67,9 +69,10 @@ public class DemoEditor {
     public void actionPerformed(ActionEvent e) {
       int returnVal = choosedemo.showOpenDialog(view);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
-        currentdemo = choosedemo.getSelectedFile().getName();
-        if (Files.exists(choosedemo.getSelectedFile().toPath())) {
-          view.getTxtDemofile().setText(currentdemo);
+        currentDemoFile = choosedemo.getSelectedFile();
+        if (Files.exists(currentDemoFile.toPath())) {
+          log.info("Selected demo file: " + currentDemoFile);
+          view.getTxtDemofile().setText(currentDemoFile.getName());
           updateDemoDetails();
         } else {
           JOptionPane.showMessageDialog(view, "The selected file does not exist.", "Browse",
@@ -175,8 +178,8 @@ public class DemoEditor {
   private TickTableModel model;
   private SettingsManager settings;
   private CommandLine cl;
-  private String currentdemo;
   private VDMGenerator vdmgenerator;
+  private File currentDemoFile;
 
   public DemoEditor(SettingsManager settings, CommandLine cl) {
     this.settings = settings;
@@ -194,7 +197,7 @@ public class DemoEditor {
 
       @Override
       protected String doInBackground() throws Exception {
-        try (DemoPreview dp = new DemoPreview(settings.getTfPath().resolve(currentdemo))) {
+        try (DemoPreview dp = new DemoPreview(currentDemoFile.toPath())) {
           return dp.toString();
         }
       }

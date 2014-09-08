@@ -172,7 +172,9 @@ public class StartLogger {
     File logFolder = new File(pattern).getParentFile();
     try {
       if (logFolder != null && !logFolder.exists()) {
-        logFolder.mkdir();
+        if (!logFolder.mkdir()) {
+          logger.warning("Could not create log folder");
+        }
       }
       FileHandler localFileHandler = new FileHandler(pattern, 1024000, 3, true);
       localFileHandler.setFormatter(new LogFormatter().dateFormat(DATETIME).fullTraces());

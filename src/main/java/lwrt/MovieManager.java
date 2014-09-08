@@ -1,11 +1,13 @@
 package lwrt;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import lwrt.SettingsManager.Key;
 
@@ -34,9 +36,7 @@ public class MovieManager {
         alias = "alias namescroll noslots";
       }
     }
-    PrintWriter pw = new PrintWriter(new FileWriter("cfg/namescroll.cfg"));
-    pw.println(alias);
-    pw.close();
+    Files.write(Paths.get("cfg/namescroll.cfg"), Arrays.asList(alias), Charset.forName("UTF-8"));
   }
 
   public void createMovienameCfgs() throws IOException {
@@ -47,10 +47,10 @@ public class MovieManager {
     String audio = cfg.getString(Key.SourceRecorderAudioFormat);
     int quality = cfg.getInt(Key.SourceRecorderJpegQuality);
     for (String prefix : prefixes) {
-      PrintWriter pw = new PrintWriter(new FileWriter("cfg/mov/" + prefix + ".cfg"));
-      pw.println("startmovie \"" + cfg.getMoviePath() + "/" + prefix + "_\" " + video + " " + audio
-          + (video.equals("jpg") ? " jpeg_quality " + quality : ""));
-      pw.close();
+      List<String> lines =
+          Arrays.asList("startmovie \"" + cfg.getMoviePath() + "/" + prefix + "_\" " + video + " "
+              + audio + (video.equals("jpg") ? " jpeg_quality " + quality : ""));
+      Files.write(Paths.get("cfg/mov/" + prefix + ".cfg"), lines, Charset.forName("UTF-8"));
     }
   }
 }

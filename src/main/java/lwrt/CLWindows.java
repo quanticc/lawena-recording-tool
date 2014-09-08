@@ -3,7 +3,6 @@ package lwrt;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -49,15 +48,15 @@ public class CLWindows extends CommandLine {
     for (ProcessBuilder pb : builders) {
       try {
         Process p = pb.start();
-        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        while ((line = input.readLine()) != null) {
-          log.finest("[" + pb.command().get(0) + "] " + line);
-          if (line.contains(hl2)) {
-            log.finer("TF2 process detected by " + pb.command().get(0));
-            return true;
+        try (BufferedReader input = newProcessReader(p)) {
+          while ((line = input.readLine()) != null) {
+            log.finest("[" + pb.command().get(0) + "] " + line);
+            if (line.contains(hl2)) {
+              log.finer("TF2 process detected by " + pb.command().get(0));
+              return true;
+            }
           }
         }
-        input.close();
       } catch (IOException e) {
         log.log(Level.INFO, "Problem while finding if TF2 is running", e);
       }
@@ -77,27 +76,27 @@ public class CLWindows extends CommandLine {
   }
 
   private String regQuery(String key, String value, int mode) {
-    String result = "";
+    StringBuilder result = new StringBuilder();
     try {
       ProcessBuilder pb = new ProcessBuilder("reg", "query", key, "/v", value);
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        result = result + line + '\n';
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          result.append(line + '\n');
+        }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
       log.log(Level.INFO, "", e);
     }
-
     try {
       if (mode == 0) {
         return result.substring(result.lastIndexOf("0x") + 2,
-            result.indexOf('\n', result.lastIndexOf("0x")));
+            result.indexOf("\n", result.lastIndexOf("0x")));
       }
       return result.substring(result.lastIndexOf(":") - 1,
-          result.indexOf('\n', result.lastIndexOf(":")));
+          result.indexOf("\n", result.lastIndexOf(":")));
     } catch (IndexOutOfBoundsException e) {
       return "98";
     }
@@ -128,14 +127,15 @@ public class CLWindows extends CommandLine {
     try {
       ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", "-c", handle, "-p", pid, "-y");
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      int count = 0;
-      while ((line = input.readLine()) != null) {
-        if (count > 7) {
-          log.info("[handle] " + line);
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        int count = 0;
+        while ((line = input.readLine()) != null) {
+          if (count > 7) {
+            log.info("[handle] " + line);
+          }
+          count++;
         }
-        count++;
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
@@ -148,20 +148,21 @@ public class CLWindows extends CommandLine {
     try {
       ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", path.toString());
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      int count = 0;
-      while ((line = input.readLine()) != null) {
-        if (count > 4) {
-          String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
-          if (columns.length == 4) {
-            log.info("[handle] Closing handle " + columns[3] + " opened by " + columns[0]);
-            closeHandle(columns[1], columns[2]);
-          } else {
-            log.info("[handle] " + line);
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        int count = 0;
+        while ((line = input.readLine()) != null) {
+          if (count > 4) {
+            String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
+            if (columns.length == 4) {
+              log.info("[handle] Closing handle " + columns[3] + " opened by " + columns[0]);
+              closeHandle(columns[1], columns[2]);
+            } else {
+              log.info("[handle] " + line);
+            }
           }
+          count++;
         }
-        count++;
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
@@ -174,10 +175,11 @@ public class CLWindows extends CommandLine {
     try {
       ProcessBuilder pb = new ProcessBuilder("del", "/f", "/s", "/q", "/a", path.toString());
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.info("[delete] " + line);
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.info("[delete] " + line);
+        }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {

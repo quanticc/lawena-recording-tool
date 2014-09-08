@@ -34,7 +34,7 @@ public class AboutDialog extends JDialog {
 
   private static final long serialVersionUID = 1L;
 
-  private class AboutTextPaneHyperlinkListener implements HyperlinkListener {
+  private static class AboutTextPaneHyperlinkListener implements HyperlinkListener {
     public void hyperlinkUpdate(final HyperlinkEvent e) {
       if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
         new SwingWorker<Void, Void>() {

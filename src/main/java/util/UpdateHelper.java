@@ -1,8 +1,8 @@
 package util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -10,6 +10,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -25,12 +27,17 @@ public class UpdateHelper {
   private Properties channels;
 
   public UpdateHelper() {
-    try {
-      URL[] urls = new URL[] {new File("code/getdown-client.jar").toURI().toURL()};
-      cl = new URLClassLoader(urls);
-    } catch (MalformedURLException e) {
-      log.log(Level.INFO, "URL is malformed!", e);
-    }
+    AccessController.doPrivileged(new PrivilegedAction<Object>() {
+      public Object run() {
+        try {
+          URL[] urls = new URL[] {new File("code/getdown-client.jar").toURI().toURL()};
+          cl = new URLClassLoader(urls);
+        } catch (MalformedURLException e) {
+          log.log(Level.INFO, "URL is malformed!", e);
+        }
+        return null;
+      }
+    });
   }
 
   /**
@@ -121,8 +128,8 @@ public class UpdateHelper {
 
   public void loadChannels() {
     channels = new Properties();
-    try {
-      channels.load(new FileInputStream("res/channels.txt"));
+    try (InputStream in = Files.newInputStream(Paths.get("res/channels.txt"))) {
+      channels.load(in);
       log.finer("Loaded updater branches: " + channels.toString());
     } catch (IOException e) {
       log.fine("Updater branches file not found, disabling feature");

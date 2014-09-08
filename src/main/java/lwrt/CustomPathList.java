@@ -315,13 +315,14 @@ public class CustomPathList extends AbstractTableModel {
       jar = new JarFile(jarpath.toFile());
       JarEntry entry = jar.getJarEntry(name);
       if (entry != null) {
-        InputStream is = jar.getInputStream(entry);
-        FileOutputStream fos = new FileOutputStream(destpath.resolve(name).toFile());
-        while (is.available() > 0) {
-          fos.write(is.read());
+        try (InputStream is = jar.getInputStream(entry);
+            FileOutputStream fos = new FileOutputStream(destpath.resolve(name).toFile())) {
+          while (is.available() > 0) {
+            fos.write(is.read());
+          }
+        } catch (IOException e) {
+          log.warning("Problem while unpacking file: " + e);
         }
-        fos.close();
-        is.close();
       } else {
         log.warning("File " + name + " does not exist in " + jarpath);
       }

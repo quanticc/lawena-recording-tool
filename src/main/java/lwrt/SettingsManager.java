@@ -1,10 +1,10 @@
 package lwrt;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -114,8 +114,8 @@ public class SettingsManager {
     for (Key key : Key.values()) {
       properties.setProperty(key.toString(), key.value + "");
     }
-    try {
-      properties.load(new FileReader(filename));
+    try (BufferedReader r = Files.newBufferedReader(Paths.get(filename), Charset.forName("UTF-8"))) {
+      properties.load(r);
     } catch (FileNotFoundException e) {
       // do nothing, will load defaults
     } catch (IOException e) {
@@ -130,111 +130,109 @@ public class SettingsManager {
   }
 
   public void save() {
-    try {
-      PrintWriter pw = new PrintWriter(new FileWriter(filename));
-      properties.store(pw, "lawena settings");
+    try (BufferedWriter w = Files.newBufferedWriter(Paths.get(filename), Charset.forName("UTF-8"))) {
+      properties.store(w, "Lawena Settings");
     } catch (IOException e) {
       log.log(Level.INFO, "Settings could not be saved", e);
     }
   }
 
   public void saveToCfg() throws IOException {
-    PrintWriter settings = new PrintWriter(new FileWriter("cfg/settings.cfg"));
+    List<String> lines = new ArrayList<>();
     int framerate = getFramerate();
-    settings.println("alias recframerate host_framerate " + framerate);
+    lines.add("alias recframerate host_framerate " + framerate);
     if (framerate < 60) {
-      settings.println("alias currentfpsup 60fps");
-      settings.println("alias currentfpsdn 3840fps");
+      lines.add("alias currentfpsup 60fps");
+      lines.add("alias currentfpsdn 3840fps");
     } else if (framerate == 60) {
-      settings.println("alias currentfpsup 120fps");
-      settings.println("alias currentfpsdn 3840fps");
+      lines.add("alias currentfpsup 120fps");
+      lines.add("alias currentfpsdn 3840fps");
     } else if (framerate < 120) {
-      settings.println("alias currentfpsup 120fps");
-      settings.println("alias currentfpsdn 60fps");
+      lines.add("alias currentfpsup 120fps");
+      lines.add("alias currentfpsdn 60fps");
     } else if (framerate == 120) {
-      settings.println("alias currentfpsup 240fps");
-      settings.println("alias currentfpsdn 60fps");
+      lines.add("alias currentfpsup 240fps");
+      lines.add("alias currentfpsdn 60fps");
     } else if (framerate < 240) {
-      settings.println("alias currentfpsup 240fps");
-      settings.println("alias currentfpsdn 120fps");
+      lines.add("alias currentfpsup 240fps");
+      lines.add("alias currentfpsdn 120fps");
     } else if (framerate == 240) {
-      settings.println("alias currentfpsup 480fps");
-      settings.println("alias currentfpsdn 120fps");
+      lines.add("alias currentfpsup 480fps");
+      lines.add("alias currentfpsdn 120fps");
     } else if (framerate < 480) {
-      settings.println("alias currentfpsup 480fps");
-      settings.println("alias currentfpsdn 240fps");
+      lines.add("alias currentfpsup 480fps");
+      lines.add("alias currentfpsdn 240fps");
     } else if (framerate == 480) {
-      settings.println("alias currentfpsup 960fps");
-      settings.println("alias currentfpsdn 240fps");
+      lines.add("alias currentfpsup 960fps");
+      lines.add("alias currentfpsdn 240fps");
     } else if (framerate < 960) {
-      settings.println("alias currentfpsup 960fps");
-      settings.println("alias currentfpsdn 480fps");
+      lines.add("alias currentfpsup 960fps");
+      lines.add("alias currentfpsdn 480fps");
     } else if (framerate == 960) {
-      settings.println("alias currentfpsup 1920fps");
-      settings.println("alias currentfpsdn 480fps");
+      lines.add("alias currentfpsup 1920fps");
+      lines.add("alias currentfpsdn 480fps");
     } else if (framerate < 1920) {
-      settings.println("alias currentfpsup 1920fps");
-      settings.println("alias currentfpsdn 960fps");
+      lines.add("alias currentfpsup 1920fps");
+      lines.add("alias currentfpsdn 960fps");
     } else if (framerate == 1920) {
-      settings.println("alias currentfpsup 3840fps");
-      settings.println("alias currentfpsdn 960fps");
+      lines.add("alias currentfpsup 3840fps");
+      lines.add("alias currentfpsdn 960fps");
     } else if (framerate < 3840) {
-      settings.println("alias currentfpsup 3840fps");
-      settings.println("alias currentfpsdn 1920fps");
+      lines.add("alias currentfpsup 3840fps");
+      lines.add("alias currentfpsdn 1920fps");
     } else if (framerate == 3840) {
-      settings.println("alias currentfpsup 60fps");
-      settings.println("alias currentfpsdn 1920fps");
+      lines.add("alias currentfpsup 60fps");
+      lines.add("alias currentfpsdn 1920fps");
     } else {
-      settings.println("alias currentfpsup 60fps");
-      settings.println("alias currentfpsdn 3840fps");
+      lines.add("alias currentfpsup 60fps");
+      lines.add("alias currentfpsdn 3840fps");
     }
-    settings.println("mat_motion_blur_enabled " + (getMotionBlur() ? "1" : "0"));
-    settings.println("mat_motion_blur_forward_enabled " + (getMotionBlur() ? "1" : "0"));
-    settings.println("mat_motion_blur_strength " + (getMotionBlur() ? "1" : "0"));
-    settings.println((getSteamCloud() ? "//" : "") + "cl_cloud_settings 0");
-    settings.println((getCondebug() ? "" : "//") + "con_timestamp 1");
-    settings.println("viewmodel_fov_demo " + getViewmodelFov());
+    lines.add("mat_motion_blur_enabled " + (getMotionBlur() ? "1" : "0"));
+    lines.add("mat_motion_blur_forward_enabled " + (getMotionBlur() ? "1" : "0"));
+    lines.add("mat_motion_blur_strength " + (getMotionBlur() ? "1" : "0"));
+    lines.add((getSteamCloud() ? "//" : "") + "cl_cloud_settings 0");
+    lines.add((getCondebug() ? "" : "//") + "con_timestamp 1");
+    lines.add("viewmodel_fov_demo " + getViewmodelFov());
     boolean crosshairswitch = getCrosshairSwitch();
-    settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_file \"\"");
-    settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_red 200");
-    settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_green 200");
-    settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_blue 200");
-    settings.println((crosshairswitch ? "//" : "") + "cl_crosshair_scale 32");
-    settings.println((crosshairswitch ? "//" : "") + "cl_crosshairalpha 200");
-    settings.println("crosshair " + (getCrosshair() ? "1" : "0"));
-    settings.println("hud_combattext " + (getCombattext() ? "1" : "0"));
-    settings.println("hud_combattext_healing " + (getCombattext() ? "1" : "0"));
-    settings.println("tf_dingalingaling " + (getHitsounds() ? "1" : "0"));
-    settings.println("voice_enable " + (getVoice() ? "1" : "0"));
-    settings.println("alias voice_enable \"\"");
-    settings.println("cl_autorezoom 0");
-    settings.println("hud_saytext_time 0");
-    settings.println("net_graph 0");
-    settings.println("alias net_graph \"\"");
-    settings.println("alias voice_menu_1 \"\"");
-    settings.println("alias voice_menu_2 \"\"");
-    settings.println("alias voice_menu_3 \"\"");
-    settings.println("cl_showfps 0");
-    settings.println("alias cl_showfps \"\"");
-    settings.println("volume 0.5");
-    settings.println("hud_fastswitch 1");
-    settings.println("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
-    settings.println("cl_hud_playerclass_playermodel_showed_confirm_dialog 1");
-    settings.println("cl_hud_playerclass_use_playermodel " + (getHudPlayerModel() ? "1" : "0"));
-    settings.println("tf_training_has_prompted_for_loadout 1");
-    settings.println("engine_no_focus_sleep 0");
-    settings.println("cl_spec_carrieditems 0");
-    settings.println(getCustomSettings());
-    settings.println((getViewmodelSwitch().equals("off") ? "//" : "") + "lockviewmodelson");
-    settings.println((getViewmodelSwitch().equals("on") ? "//" : "") + "lockviewmodelsoff");
-    settings.println((crosshairswitch ? "//" : "") + "lockcrosshair");
-    settings.println((crosshairswitch ? "//" : "") + "alias toggle \"\"");
-    settings.close();
+    lines.add((crosshairswitch ? "//" : "") + "cl_crosshair_file \"\"");
+    lines.add((crosshairswitch ? "//" : "") + "cl_crosshair_red 200");
+    lines.add((crosshairswitch ? "//" : "") + "cl_crosshair_green 200");
+    lines.add((crosshairswitch ? "//" : "") + "cl_crosshair_blue 200");
+    lines.add((crosshairswitch ? "//" : "") + "cl_crosshair_scale 32");
+    lines.add((crosshairswitch ? "//" : "") + "cl_crosshairalpha 200");
+    lines.add("crosshair " + (getCrosshair() ? "1" : "0"));
+    lines.add("hud_combattext " + (getCombattext() ? "1" : "0"));
+    lines.add("hud_combattext_healing " + (getCombattext() ? "1" : "0"));
+    lines.add("tf_dingalingaling " + (getHitsounds() ? "1" : "0"));
+    lines.add("voice_enable " + (getVoice() ? "1" : "0"));
+    lines.add("alias voice_enable \"\"");
+    lines.add("cl_autorezoom 0");
+    lines.add("hud_saytext_time 0");
+    lines.add("net_graph 0");
+    lines.add("alias net_graph \"\"");
+    lines.add("alias voice_menu_1 \"\"");
+    lines.add("alias voice_menu_2 \"\"");
+    lines.add("alias voice_menu_3 \"\"");
+    lines.add("cl_showfps 0");
+    lines.add("alias cl_showfps \"\"");
+    lines.add("volume 0.5");
+    lines.add("hud_fastswitch 1");
+    lines.add("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
+    lines.add("cl_hud_playerclass_playermodel_showed_confirm_dialog 1");
+    lines.add("cl_hud_playerclass_use_playermodel " + (getHudPlayerModel() ? "1" : "0"));
+    lines.add("tf_training_has_prompted_for_loadout 1");
+    lines.add("engine_no_focus_sleep 0");
+    lines.add("cl_spec_carrieditems 0");
+    lines.add(getCustomSettings());
+    lines.add((getViewmodelSwitch().equals("off") ? "//" : "") + "lockviewmodelson");
+    lines.add((getViewmodelSwitch().equals("on") ? "//" : "") + "lockviewmodelsoff");
+    lines.add((crosshairswitch ? "//" : "") + "lockcrosshair");
+    lines.add((crosshairswitch ? "//" : "") + "alias toggle \"\"");
+    Files.write(Paths.get("cfg/settings.cfg"), lines, Charset.forName("UTF-8"));
 
     if (demoname != null) {
-      PrintWriter playdemo = new PrintWriter(new FileWriter("cfg/lawena.cfg"));
-      playdemo.println("playdemo \"" + demoname + "\"");
-      playdemo.close();
+      Files.write(Paths.get("cfg/lawena.cfg"), Arrays.asList("playdemo \"" + demoname + "\""),
+          Charset.forName("UTF-8"));
     } else {
       Files.deleteIfExists(Paths.get("cfg/lawena.cfg"));
     }
@@ -296,7 +294,7 @@ public class SettingsManager {
     Iterator<String> it = list.iterator();
     if (!it.hasNext())
       return "";
-  
+
     StringBuilder sb = new StringBuilder();
     for (;;) {
       String e = it.next();
@@ -428,7 +426,7 @@ public class SettingsManager {
   public void setHudPlayerModel(boolean value) {
     setBoolean(Key.HudPlayerModel, value);
   }
-  
+
   public void setCustomSettings(String value) {
     setString(Key.CustomSettings, value);
   }
@@ -508,7 +506,7 @@ public class SettingsManager {
   public boolean getCondebug() {
     return getBoolean(Key.Condebug);
   }
-  
+
   public List<String> getCustomResources() {
     return getList(Key.CustomResources);
   }
@@ -564,7 +562,7 @@ public class SettingsManager {
   public boolean getHudPlayerModel() {
     return getBoolean(Key.HudPlayerModel);
   }
-  
+
   public String getCustomSettings() {
     return getString(Key.CustomSettings);
   }

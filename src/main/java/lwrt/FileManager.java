@@ -249,6 +249,7 @@ public class FileManager {
       try {
         delete(customPath);
       } catch (NoSuchFileException e) {
+        log.fine("File does not exist: " + e);
       } catch (IOException e) {
         log.info("Could not delete lawena custom files: " + e);
       }
@@ -268,6 +269,7 @@ public class FileManager {
       try {
         delete(configPath);
       } catch (NoSuchFileException e) {
+        log.fine("File does not exist: " + e);
       } catch (IOException e) {
         log.info("Could not delete lawena cfg folder: " + e);
       }

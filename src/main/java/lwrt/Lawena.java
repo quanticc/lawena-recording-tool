@@ -600,7 +600,7 @@ public class Lawena {
   private String version = "4.1";
   private String build;
   private UpdateHelper updater;
-  
+
   private LaunchOptionsDialog launchOptionsDialog;
 
   public Lawena(SettingsManager cfg) {
@@ -638,7 +638,7 @@ public class Lawena {
       tfpath = getChosenTfPath();
       if (tfpath == null) {
         log.info("No tf directory specified, exiting.");
-        System.exit(1);
+        throw new IllegalArgumentException("A game directory must be specified");
       }
     }
     settings.setTfPath(tfpath);
@@ -649,7 +649,7 @@ public class Lawena {
       moviepath = getChosenMoviePath();
       if (moviepath == null) {
         log.info("No movie directory specified, exiting.");
-        System.exit(1);
+        throw new IllegalArgumentException("A segment directory must be specified");
       }
     }
     movies = new MovieManager(settings);
