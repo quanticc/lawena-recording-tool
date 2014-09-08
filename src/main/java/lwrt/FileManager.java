@@ -14,11 +14,14 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import lwrt.SettingsManager.Key;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
 import util.CopyDirVisitor;
 import util.DeleteDirVisitor;
 import util.LawenaException;
 import util.Util;
-import util.Zip;
 
 public class FileManager {
 
@@ -289,8 +292,14 @@ public class FileManager {
     if (Files.exists(configBackupPath) || Files.exists(customBackupPath)) {
       log.info("Creating a backup of your files in: " + zip);
       try {
-        Zip.create(zip, Arrays.asList(configBackupPath, customBackupPath));
-      } catch (IllegalArgumentException | IOException e) {
+        ZipFile zipFile = new ZipFile(zip.toFile());
+        ZipParameters parameters = new ZipParameters();
+        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        for (Path path : Arrays.asList(configBackupPath, customBackupPath)) {
+          zipFile.addFolder(path.toFile(), parameters);
+        }
+      } catch (IllegalArgumentException | ZipException e) {
         // IllegalArgumentException can be caused by a bug in jdk versions 7u40 and older
         log.info("Emergency backup could not be created: " + e);
       }
@@ -298,13 +307,13 @@ public class FileManager {
     if (restoreComplete) {
       // at this stage, restore can still fail
       try {
-        if (Files.exists(configBackupPath)) {
-          log.info("Restoring: Deleting files inside lwrtcfg");
-          delete(configBackupPath);
-        }
         if (Files.exists(customBackupPath)) {
           log.info("Restoring: Deleting files inside lwrtcustom");
           delete(customBackupPath);
+        }
+        if (Files.exists(configBackupPath)) {
+          log.info("Restoring: Deleting files inside lwrtcfg");
+          delete(configBackupPath);
         }
       } catch (IOException e) {
         log.info("Could not delete one or both lwrt folders: " + e);
@@ -314,8 +323,8 @@ public class FileManager {
     if (!restoreComplete) {
       log.info("*** Restoring Failed: Some files could not be deleted and process was interrupted");
       log.info("*** Your files are still inside lwrtcfg and lwrtcustom folders. DO NOT delete them");
-      log.info("*** Lawena will attempt to restore them again upon close or next launch.");
-      log.info("*** If it doesn't work, it might be caused by Windows locking font files,");
+      log.info("*** Lawena will attempt to restore them again when closing or at next launch.");
+      log.info("*** If this doesn't work, it might be caused by Windows locking font files,");
       log.info("*** in a way that can only be unlocked through a restart or using Unlocker software :(");
     } else {
       log.info("*** Restore and cleanup completed");

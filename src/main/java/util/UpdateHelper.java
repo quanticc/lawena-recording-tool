@@ -3,15 +3,8 @@ package util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -19,26 +12,16 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import com.threerings.getdown.util.ConfigUtil;
+import com.threerings.getdown.util.LaunchUtil;
+
 public class UpdateHelper {
 
   private static final Logger log = Logger.getLogger("lawena");
 
-  private ClassLoader cl;
   private Properties channels;
 
-  public UpdateHelper() {
-    AccessController.doPrivileged(new PrivilegedAction<Object>() {
-      public Object run() {
-        try {
-          URL[] urls = new URL[] {new File("code/getdown-client.jar").toURI().toURL()};
-          cl = new URLClassLoader(urls);
-        } catch (MalformedURLException e) {
-          log.log(Level.INFO, "URL is malformed!", e);
-        }
-        return null;
-      }
-    });
-  }
+  public UpdateHelper() {}
 
   /**
    * Workaround to delete resources not used anymore by lawena, since Getdown does not support this
@@ -46,13 +29,8 @@ public class UpdateHelper {
    */
   public void cleanupUnusedFiles() {
     try {
-      Class<?> cls = cl.loadClass("com.threerings.getdown.util.ConfigUtil");
-      Method parseConfig = cls.getMethod("parseConfig", File.class, boolean.class);
-      @SuppressWarnings("unchecked")
-      Map<String, Object> config =
-          (Map<String, Object>) parseConfig.invoke(null, new File("getdown.txt"), false);
-      Method getMultiValue = cls.getMethod("getMultiValue", Map.class, String.class);
-      String[] toDelete = (String[]) getMultiValue.invoke(null, config, "delete");
+      Map<String, Object> config = ConfigUtil.parseConfig(new File("getdown.txt"), false);
+      String[] toDelete = (String[]) ConfigUtil.getMultiValue(config, "delete");
       for (String path : toDelete) {
         try {
           if (Files.deleteIfExists(Paths.get(path))) {
@@ -62,8 +40,7 @@ public class UpdateHelper {
           log.log(Level.INFO, "Could not delete deprecated file: " + path, e);
         }
       }
-    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
-        | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+    } catch (IllegalArgumentException | IOException e) {
       log.info("Could not remove unused files: " + e);
     }
   }
@@ -74,19 +51,16 @@ public class UpdateHelper {
    */
   public void updateLauncher() {
     try {
-      Class<?> cls = cl.loadClass("com.threerings.getdown.util.LaunchUtil");
-      Method upgradeLauncher = cls.getMethod("upgradeGetdown", File.class, File.class, File.class);
       Logger logger = Logger.getLogger("com.threerings.getdown");
       logger.setParent(Logger.getLogger("lawena"));
       String[] executables = {"lawena", "lawena-no-updates"};
       for (String exe : executables) {
-        File oldLauncher = new File("../" + exe + "-old.exe");
-        File curLauncher = new File("../" + exe + ".exe");
-        File newLauncher = new File("code/" + exe + "-new.exe");
-        upgradeLauncher.invoke(null, oldLauncher, curLauncher, newLauncher);
+        File oldgd = new File("../" + exe + "-old.exe");
+        File curgd = new File("../" + exe + ".exe");
+        File newgd = new File("code/" + exe + "-new.exe");
+        LaunchUtil.upgradeGetdown(oldgd, curgd, newgd);
       }
-    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
-        | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+    } catch (IllegalArgumentException e) {
       log.info("Could not update launcher executable: " + e);
     }
   }
