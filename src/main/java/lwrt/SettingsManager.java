@@ -55,6 +55,7 @@ public class SettingsManager {
     SourceRecorderAudioFormat("wav", "wav", ""),
     SourceRecorderJpegQuality(50, 1, 100),
     DeleteBackupsWhenRestoring(true),
+    BigFolderMBThreshold(200, 0, Integer.MAX_VALUE),
     LaunchOptions("-novid -console");
 
     private Object value;

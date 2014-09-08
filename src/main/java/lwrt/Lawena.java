@@ -224,6 +224,37 @@ public class Lawena {
           return false;
         }
 
+        setProgress(10);
+
+        // Check for big custom folders, mitigate OOM errors with custom folder > 2 GB
+        Path tfpath = settings.getTfPath();
+        Path customPath = tfpath.resolve("custom");
+        Path configPath = tfpath.resolve("cfg");
+        try {
+          long bytes = Util.sizeOfPath(configPath) + Util.sizeOfPath(customPath);
+          String size = Util.humanReadableByteCount(bytes, true);
+          log.info("Config and Custom folders size: " + size);
+          if (bytes / 1024 / 1024 > settings.getInt(Key.BigFolderMBThreshold)) {
+            int answer =
+                JOptionPane
+                    .showConfirmDialog(
+                        null,
+                        "Your cfg and custom folders are "
+                            + size
+                            + " in size."
+                            + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
+                            + "\nDo you still want to proceed?", "Copying Folders before Launch",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
+              log.info("Launch aborted by the user");
+              status.info("Launch aborted by the user");
+              return false;
+            }
+          }
+        } catch (IOException e) {
+          log.info("Could not determine folder size: " + e);
+        }
+
         setProgress(20);
         closeTf2Handles();
 

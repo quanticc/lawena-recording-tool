@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
 import lwrt.SettingsManager.Key;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -266,6 +268,8 @@ public class FileManager {
         log.info("Could not restore custom files: " + e);
         restoreComplete = false;
       }
+    } else {
+      log.fine("No custom backup folder present");
     }
     if (Files.exists(configBackupPath)) {
       log.fine("Restoring all your config files");
@@ -286,10 +290,38 @@ public class FileManager {
         log.info("Could not restore cfg files: " + e);
         restoreComplete = false;
       }
+    } else {
+      log.fine("No config backup folder present");
     }
     // always make a backup, later decide if it's useful
     Path zip = tfpath.resolve("lawena-user." + Util.now("yyMMddHHmmss") + ".bak.zip");
+    boolean doBackup = true;
     if (Files.exists(configBackupPath) || Files.exists(customBackupPath)) {
+      try {
+        long bytes = Util.sizeOfPath(configBackupPath) + Util.sizeOfPath(customBackupPath);
+        String size = Util.humanReadableByteCount(bytes, true);
+        log.info("Backup folders size: " + size);
+        if (bytes / 1024 / 1024 > cfg.getInt(Key.BigFolderMBThreshold)) {
+          int answer =
+              JOptionPane
+                  .showConfirmDialog(
+                      null,
+                      "Your cfg and custom folders are "
+                          + size
+                          + " in size.\nThis might cause Lawena to hang or crash while it creates a backup."
+                          + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
+                          + "\nDo you still want to create a backup?", "Backup Folder",
+                      JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+          if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
+            log.info("Backup creation skipped by the user");
+            doBackup = false;
+          }
+        }
+      } catch (IOException e) {
+        log.info("Could not determine folder size: " + e);
+      }
+    }
+    if (doBackup && (Files.exists(configBackupPath) || Files.exists(customBackupPath))) {
       log.info("Creating a backup of your files in: " + zip);
       try {
         ZipFile zipFile = new ZipFile(zip.toFile());

@@ -297,7 +297,7 @@ public abstract class CommandLine {
         options.remove("-h");
       }
       // prepare list of options
-      log.info("Launching Steam AppID " + options.get("-applaunch") + "  in " + options.get("-w")
+      log.info("Launching Steam AppID " + options.get("-applaunch") + " in " + options.get("-w")
           + "x" + options.get("-h") + " " + (fs ? "Fullscreen" : "Windowed") + " with dxlevel "
           + options.get("-dxlevel"));
       log.finer("Parameters: " + options);
