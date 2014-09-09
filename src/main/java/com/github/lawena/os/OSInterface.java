@@ -3,7 +3,6 @@ package com.github.lawena.os;
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.util.Util;
 
 /**
  * This class lets you access to all values and actions that are OS-dependent, aiming to simplify
@@ -146,13 +146,14 @@ public abstract class OSInterface {
       cmds.addAll(files);
       ProcessBuilder pb = new ProcessBuilder(cmds);
       pb.directory(dest.toFile());
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.debug("[vpk] " + line);
+      Process p = pb.start();
+      try (BufferedReader input = Util.newProcessReader(p)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.debug("[vpk] " + line);
+        }
       }
-      pr.waitFor();
+      p.waitFor();
     } catch (InterruptedException | IOException e) {
       log.warn("Problem extracting contents from VPK file", e);
     }
@@ -170,13 +171,14 @@ public abstract class OSInterface {
     try {
       Path vpktool = resolveVpkToolPath(tfpath);
       ProcessBuilder pb = new ProcessBuilder(vpktool.toString(), "l", vpkpath.toString());
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        files.add(line);
+      Process p = pb.start();
+      try (BufferedReader input = Util.newProcessReader(p)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          files.add(line);
+        }
       }
-      pr.waitFor();
+      p.waitFor();
       log.trace("[" + vpkpath.getFileName() + "] Contents scanned: " + files.size() + " file(s)");
     } catch (InterruptedException | IOException e) {
       log.warn("Problem retrieving contents of VPK file", e);
@@ -192,13 +194,14 @@ public abstract class OSInterface {
   public void killTf2Process() {
     try {
       ProcessBuilder pb = getBuilderTF2ProcessKiller();
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.trace("[taskkill] " + line);
+      Process p = pb.start();
+      try (BufferedReader input = Util.newProcessReader(p)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.trace("[taskkill] " + line);
+        }
       }
-      pr.waitFor();
+      p.waitFor();
     } catch (InterruptedException | IOException e) {
       log.warn("Problem stopping TF2 process", e);
     }
@@ -271,13 +274,14 @@ public abstract class OSInterface {
         log.debug("Using -insecure in launch options");
         pb.command().add("-insecure");
       }
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.trace("[steam] " + line);
+      Process p = pb.start();
+      try (BufferedReader input = Util.newProcessReader(p)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.trace("[steam] " + line);
+        }
       }
-      pr.waitFor();
+      p.waitFor();
     } catch (InterruptedException | IOException e) {
       log.warn("Process was interrupted", e);
     }

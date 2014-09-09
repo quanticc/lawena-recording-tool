@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MarkerFactory;
 
-import com.github.lawena.app.task.Launch;
+import com.github.lawena.app.task.Launcher;
 import com.github.lawena.app.task.PreviewGenerator;
 import com.github.lawena.model.LwrtFiles;
 import com.github.lawena.model.LwrtResources;
@@ -247,7 +247,6 @@ public class Tasks {
     @Override
     protected Void doInBackground() throws Exception {
       try {
-        
         presenter.configureSkyboxes(view.getCmbSkybox());
       } catch (Exception e) {
         log.warn("Problem while configuring skyboxes", e);
@@ -261,7 +260,7 @@ public class Tasks {
     };
   }
 
-  private class DesktopOpenTask extends SwingWorker<Void, Void> {
+  private static class DesktopOpenTask extends SwingWorker<Void, Void> {
 
     private File file;
 
@@ -290,7 +289,7 @@ public class Tasks {
   private LwrtFiles files;
 
   private SegmentCleaner clearMoviesTask = null;
-  private Launch currentLaunchTask = null;
+  private Launcher currentLaunchTask = null;
 
   public Tasks(Lawena presenter) {
     this.presenter = presenter;
@@ -314,11 +313,11 @@ public class Tasks {
     return view;
   }
 
-  public Launch getCurrentLaunchTask() {
+  public Launcher getCurrentLaunchTask() {
     return currentLaunchTask;
   }
 
-  public void setCurrentLaunchTask(Launch currentLaunchTask) {
+  public void setCurrentLaunchTask(Launcher currentLaunchTask) {
     this.currentLaunchTask = currentLaunchTask;
   }
 
@@ -353,7 +352,7 @@ public class Tasks {
   }
 
   public void launch() {
-    new Launch(this).execute();
+    new Launcher(this).execute();
   }
 
   public void checkForUpdates() {

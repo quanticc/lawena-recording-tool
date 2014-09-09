@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -182,14 +184,21 @@ public class Updater {
       return;
     }
     log.info("Upgrade {} with {}...", desc, newgd);
-    if (oldgd.exists()) {
-      oldgd.delete();
+    try {
+      Files.deleteIfExists(oldgd.toPath());
+    } catch (IOException e) {
+      log.warn("Could not delete old path: " + e);
     }
     if (!curgd.exists() || curgd.renameTo(oldgd)) {
       if (newgd.renameTo(curgd)) {
-        oldgd.delete();
         try {
-          Util.copy(new FileInputStream(curgd), new FileOutputStream(newgd));
+          Files.deleteIfExists(oldgd.toPath());
+        } catch (IOException e) {
+          log.warn("Could not delete old path: " + e);
+        }
+        try (InputStream in = new FileInputStream(curgd);
+            OutputStream out = new FileOutputStream(newgd)) {
+          Util.copy(in, out);
         } catch (IOException e) {
           log.warn("Problem copying {} back: {}", desc, e);
         }
@@ -201,8 +210,9 @@ public class Updater {
       }
     }
     log.info("Attempting to upgrade by copying over " + curgd + "...");
-    try {
-      Util.copy(new FileInputStream(newgd), new FileOutputStream(curgd));
+    try (InputStream in = new FileInputStream(newgd);
+        OutputStream out = new FileOutputStream(curgd)) {
+      Util.copy(in, out);
     } catch (IOException e) {
       log.warn("Brute force copy method also failed", e);
     }
@@ -239,7 +249,8 @@ public class Updater {
       lastCheck = System.currentTimeMillis();
       if (download(res)) {
         try {
-          Reader reader = new FileReader(file);
+          Reader reader =
+              new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8"));
           Type token = new TypeToken<List<Branch>>() {}.getType();
           list = gson.fromJson(reader, token);
           for (Branch branch : list) {

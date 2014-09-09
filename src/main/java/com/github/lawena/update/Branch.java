@@ -43,17 +43,13 @@ public class Branch {
   private String id;
   private String name;
   private Type type;
-  private String description;
-  private String github;
-  private String compare;
-  private String url;
+  private String description = "";
+  private String github = "";
+  private String compare = "";
+  private String url = "";
 
   private transient SortedSet<Build> builds;
   private transient List<String> changeLog;
-
-  public Branch() {
-
-  }
 
   private Branch(String id) {
     this.id = id;

@@ -30,6 +30,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
       log.trace("Deleting file: " + path);
       Files.delete(path);
     } catch (NoSuchFileException e) {
+      log.info("File not found: " + e);
     } catch (IOException e) {
       // attempt to delete custom hud font files that mess up the restore
       if (path.endsWith(".otf") || path.endsWith(".ttf")) {
@@ -50,6 +51,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
         log.trace("Deleting folder: " + dir);
         Files.delete(dir);
       } catch (NoSuchFileException e) {
+        log.info("File not found: " + e);
       } catch (IOException e) {
         log.warn("Could not delete directory: " + e);
         throw e;

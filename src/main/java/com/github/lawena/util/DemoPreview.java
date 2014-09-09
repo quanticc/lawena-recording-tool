@@ -3,6 +3,7 @@ package com.github.lawena.util;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
@@ -48,8 +49,11 @@ public class DemoPreview extends RandomAccessFile {
   private String readString(int length) {
     byte[] aux = new byte[length];
     try {
-      read(aux);
-      String result = new String(aux);
+      int read = read(aux);
+      if (read < aux.length) {
+        log.debug("Expected {} but read {} bytes", aux.length, read);
+      }
+      String result = new String(aux, Charset.forName("UTF-8"));
       return result.substring(0, result.indexOf(0));
     } catch (IOException e) {
       e.printStackTrace();
@@ -60,7 +64,10 @@ public class DemoPreview extends RandomAccessFile {
   private float readFloatBackwards() {
     byte[] aux = new byte[4];
     try {
-      read(aux);
+      int read = read(aux);
+      if (read < aux.length) {
+        log.debug("Expected {} but read {} bytes", aux.length, read);
+      }
       int value = 0;
       for (int i = 0; i < aux.length; i++) {
         value += (aux[i] & 0xff) << (8 * i);
@@ -76,7 +83,10 @@ public class DemoPreview extends RandomAccessFile {
   private int readIntBackwards() {
     byte[] aux = new byte[4];
     try {
-      read(aux);
+      int read = read(aux);
+      if (read < aux.length) {
+        log.debug("Expected {} but read {} bytes", aux.length, read);
+      }
       int value = 0;
       for (int i = 0; i < aux.length; i++) {
         value += (aux[i] & 0xff) << (8 * i);

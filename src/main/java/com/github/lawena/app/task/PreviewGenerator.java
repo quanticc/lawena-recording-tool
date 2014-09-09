@@ -24,6 +24,7 @@ import org.slf4j.MarkerFactory;
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
 import com.github.lawena.model.MainModel;
+import com.github.lawena.util.Util;
 
 public class PreviewGenerator extends SwingWorker<Void, Void> {
 
@@ -154,10 +155,11 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
       }
       log.debug("Invoking process: {}", pb.command());
       Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.trace("[vtfcmd] {}", line);
+      try (BufferedReader input = Util.newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.trace("[vtfcmd] {}", line);
+        }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {

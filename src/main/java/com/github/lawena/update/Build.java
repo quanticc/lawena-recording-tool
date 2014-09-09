@@ -43,7 +43,7 @@ public class Build implements Comparable<Build> {
 
   @Override
   public int compareTo(Build o) {
-    return -Long.compare(timestamp, o.timestamp);
+    return Long.compare(o.timestamp, timestamp);
   }
 
   @Override

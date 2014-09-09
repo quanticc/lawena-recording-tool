@@ -42,14 +42,16 @@ public class LwrtResources extends AbstractTableModel {
   private static final Map<Path, LwrtResource> defaultPaths = new LinkedHashMap<>();
   private static final List<Path> ignoredPaths = new ArrayList<>();
 
-  public static final LwrtResource particles = new LwrtResource(Paths.get("custom/pldx_particles.vpk"),
-      "Enable enhanced particles", EnumSet.of(PathContents.READONLY));
+  public static final LwrtResource particles = new LwrtResource(
+      Paths.get("custom/pldx_particles.vpk"), "Enable enhanced particles",
+      EnumSet.of(PathContents.READONLY));
 
   {
     List<LwrtResource> list = new ArrayList<>();
     list.add(new LwrtResource(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet
         .of(PathContents.READONLY)));
-    list.add(new LwrtResource(Paths.get("custom/no_announcer_voices.vpk"), "Disable announcer voices"));
+    list.add(new LwrtResource(Paths.get("custom/no_announcer_voices.vpk"),
+        "Disable announcer voices"));
     list.add(new LwrtResource(Paths.get("custom/no_applause_sounds.vpk"), "Disable applause sounds"));
     list.add(new LwrtResource(Paths.get("custom/no_domination_sounds.vpk"),
         "Disable domination/revenge sounds"));
@@ -314,13 +316,14 @@ public class LwrtResources extends AbstractTableModel {
       jar = new JarFile(jarpath.toFile());
       JarEntry entry = jar.getJarEntry(name);
       if (entry != null) {
-        InputStream is = jar.getInputStream(entry);
-        FileOutputStream fos = new FileOutputStream(destpath.resolve(name).toFile());
-        while (is.available() > 0) {
-          fos.write(is.read());
+        try (InputStream is = jar.getInputStream(entry);
+            FileOutputStream fos = new FileOutputStream(destpath.resolve(name).toFile())) {
+          while (is.available() > 0) {
+            fos.write(is.read());
+          }
+        } catch (IOException e) {
+          log.warn("Problem while unpacking file: " + e);
         }
-        fos.close();
-        is.close();
       } else {
         log.warn("File " + name + " does not exist in " + jarpath);
       }

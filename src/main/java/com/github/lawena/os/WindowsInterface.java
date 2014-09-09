@@ -3,12 +3,13 @@ package com.github.lawena.os;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.lawena.util.Util;
 
 public class WindowsInterface extends OSInterface {
 
@@ -47,15 +48,14 @@ public class WindowsInterface extends OSInterface {
     for (ProcessBuilder pb : builders) {
       try {
         Process p = pb.start();
-        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        while ((line = input.readLine()) != null) {
-          log.trace("[{}] {}", pb.command().get(0), line);
-          if (line.contains(hl2)) {
-            log.trace("TF2 process detected by {}", pb.command().get(0));
-            return true;
+        try (BufferedReader input = Util.newProcessReader(p)) {
+          while ((line = input.readLine()) != null) {
+            if (line.contains(hl2)) {
+              log.trace("TF2 process detected by {}", pb.command().get(0));
+              return true;
+            }
           }
         }
-        input.close();
       } catch (IOException e) {
         log.warn("Problem while finding if TF2 is running", e);
       }
@@ -67,36 +67,38 @@ public class WindowsInterface extends OSInterface {
   private void regedit(String key, String value, String content) {
     try {
       ProcessBuilder pb = new ProcessBuilder("batch\\rg.bat", key, value, content);
-      Process pr = pb.start();
-      pr.waitFor();
+      Process p = pb.start();
+      p.waitFor();
     } catch (InterruptedException | IOException e) {
-      log.warn("", e);
+      log.warn("Could not restore registry value: " + e);
     }
   }
 
   private String regQuery(String key, String value, int mode) {
-    String result = "";
+    StringBuilder result = new StringBuilder();
     try {
       ProcessBuilder pb = new ProcessBuilder("reg", "query", key, "/v", value);
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        result = result + line + '\n';
+      Process p = pb.start();
+      try (BufferedReader input = Util.newProcessReader(p)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          result.append(line + '\n');
+        }
       }
-      pr.waitFor();
+      p.waitFor();
     } catch (InterruptedException | IOException e) {
-      log.warn("", e);
+      log.warn("Could not retrieve dxlevel registry value: " + e);
     }
 
     try {
       if (mode == 0) {
         return result.substring(result.lastIndexOf("0x") + 2,
-            result.indexOf('\n', result.lastIndexOf("0x")));
+            result.indexOf("\n", result.lastIndexOf("0x")));
       }
       return result.substring(result.lastIndexOf(":") - 1,
-          result.indexOf('\n', result.lastIndexOf(":")));
+          result.indexOf("\n", result.lastIndexOf(":")));
     } catch (IndexOutOfBoundsException e) {
+      log.debug("Could not find registry value for dxlevel. Using 98 as fallback");
       return "98";
     }
   }
@@ -125,17 +127,18 @@ public class WindowsInterface extends OSInterface {
   private void closeHandle(String pid, String handle) {
     try {
       ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", "-c", handle, "-p", pid, "-y");
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      int count = 0;
-      while ((line = input.readLine()) != null) {
-        if (count > 7) {
-          log.debug("[handle] " + line);
+      Process p = pb.start();
+      try (BufferedReader input = Util.newProcessReader(p)) {
+        String line;
+        int count = 0;
+        while ((line = input.readLine()) != null) {
+          if (count > 7) {
+            log.debug("[handle] " + line);
+          }
+          count++;
         }
-        count++;
       }
-      pr.waitFor();
+      p.waitFor();
     } catch (InterruptedException | IOException e) {
       log.warn("", e);
     }
@@ -145,23 +148,24 @@ public class WindowsInterface extends OSInterface {
   public void closeHandles(Path path) {
     try {
       ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", path.toString());
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      int count = 0;
-      while ((line = input.readLine()) != null) {
-        if (count > 4) {
-          String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
-          if (columns.length == 4) {
-            log.debug("[handle] Closing handle {} opened by {}", columns[3], columns[0]);
-            closeHandle(columns[1], columns[2]);
-          } else {
-            log.debug("[handle] " + line);
+      Process p = pb.start();
+      try (BufferedReader input = Util.newProcessReader(p)) {
+        String line;
+        int count = 0;
+        while ((line = input.readLine()) != null) {
+          if (count > 4) {
+            String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
+            if (columns.length == 4) {
+              log.debug("[handle] Closing handle {} opened by {}", columns[3], columns[0]);
+              closeHandle(columns[1], columns[2]);
+            } else {
+              log.debug("[handle] " + line);
+            }
           }
+          count++;
         }
-        count++;
       }
-      pr.waitFor();
+      p.waitFor();
     } catch (InterruptedException | IOException e) {
       log.warn("", e);
     }
@@ -171,13 +175,14 @@ public class WindowsInterface extends OSInterface {
   public void delete(Path path) {
     try {
       ProcessBuilder pb = new ProcessBuilder("del", "/f", "/s", "/q", "/a", path.toString());
-      Process pr = pb.start();
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String line;
-      while ((line = input.readLine()) != null) {
-        log.debug("[delete] " + line);
+      Process p = pb.start();
+      try (BufferedReader input = Util.newProcessReader(p)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.debug("[delete] " + line);
+        }
       }
-      pr.waitFor();
+      p.waitFor();
     } catch (InterruptedException | IOException e) {
       log.warn("", e);
     }

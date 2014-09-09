@@ -12,6 +12,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +28,6 @@ import com.github.lawena.util.CopyDirVisitor;
 import com.github.lawena.util.DeleteDirVisitor;
 import com.github.lawena.util.LawenaException;
 import com.github.lawena.util.Util;
-import com.github.lawena.util.Zip;
 
 public class LwrtFiles {
 
@@ -252,6 +258,7 @@ public class LwrtFiles {
       try {
         delete(customPath);
       } catch (NoSuchFileException e) {
+        log.debug("File not found: " + e);
       } catch (IOException e) {
         log.warn("Could not delete lawena custom files: " + e);
       }
@@ -265,12 +272,15 @@ public class LwrtFiles {
         log.warn("Could not restore custom files: " + e);
         restoreComplete = false;
       }
+    } else {
+      log.debug("No custom backup folder present");
     }
     if (Files.exists(configBackupPath)) {
       log.info("Restoring all your config files");
       try {
         delete(configPath);
       } catch (NoSuchFileException e) {
+        log.debug("File not found: " + e);
       } catch (IOException e) {
         log.warn("Could not delete lawena cfg folder: " + e);
       }
@@ -284,28 +294,62 @@ public class LwrtFiles {
         log.warn("Could not restore cfg files: " + e);
         restoreComplete = false;
       }
+    } else {
+      log.debug("No config backup folder present");
     }
     // always make a backup, later decide if it's useful
     Path zip = tfpath.resolve("lawena-user." + Util.now("yyMMddHHmmss") + ".bak.zip");
+    boolean doBackup = true;
     if (Files.exists(configBackupPath) || Files.exists(customBackupPath)) {
-      log.debug("Creating a backup of your files in: " + zip);
       try {
-        Zip.create(zip, Arrays.asList(configBackupPath, customBackupPath));
-      } catch (IllegalArgumentException | IOException e) {
+        long bytes = Util.sizeOfPath(configBackupPath) + Util.sizeOfPath(customBackupPath);
+        String size = Util.humanReadableByteCount(bytes, true);
+        log.info("Backup folders size: " + size);
+        if (bytes / 1024 / 1024 > cfg.getInt(Key.BigFolderMBThreshold)) {
+          int answer =
+              JOptionPane
+                  .showConfirmDialog(
+                      null,
+                      "Your cfg and custom folders are "
+                          + size
+                          + " in size.\nThis might cause Lawena to hang or crash while it creates a backup."
+                          + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
+                          + "\nDo you still want to create a backup?", "Backup Folder",
+                      JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+          if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
+            log.info("Backup creation skipped by the user");
+            doBackup = false;
+          }
+        }
+      } catch (IOException e) {
+        log.info("Could not determine folder size: " + e);
+      }
+    }
+    if (doBackup && (Files.exists(configBackupPath) || Files.exists(customBackupPath))) {
+      log.info("Creating a backup of your files in: " + zip);
+      try {
+        ZipFile zipFile = new ZipFile(zip.toFile());
+        ZipParameters parameters = new ZipParameters();
+        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        for (Path path : Arrays.asList(configBackupPath, customBackupPath)) {
+          zipFile.addFolder(path.toFile(), parameters);
+        }
+      } catch (IllegalArgumentException | ZipException e) {
         // IllegalArgumentException can be caused by a bug in jdk versions 7u40 and older
-        log.warn("Emergency backup could not be created: " + e);
+        log.info("Emergency backup could not be created: " + e);
       }
     }
     if (restoreComplete) {
       // at this stage, restore can still fail
       try {
-        if (Files.exists(configBackupPath)) {
-          log.debug("Restoring: Deleting files inside lwrtcfg");
-          delete(configBackupPath);
-        }
         if (Files.exists(customBackupPath)) {
           log.debug("Restoring: Deleting files inside lwrtcustom");
           delete(customBackupPath);
+        }
+        if (Files.exists(configBackupPath)) {
+          log.debug("Restoring: Deleting files inside lwrtcfg");
+          delete(configBackupPath);
         }
       } catch (IOException e) {
         log.warn("Could not delete one or both lwrt folders: " + e);

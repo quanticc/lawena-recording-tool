@@ -3,6 +3,7 @@ package com.github.lawena.vdm;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -36,14 +37,11 @@ public class DemoEditor {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      if (!Files.exists(settings.getTfPath().resolve(view.getTxtDemofile().getText()))) {
+      if (!Files.exists(currentDemoFile.toPath())) {
         JOptionPane.showMessageDialog(view,
             "Please fill the required demo file field with a valid demo file", "Error",
             JOptionPane.ERROR_MESSAGE);
         return;
-      } else {
-        currentdemo = view.getTxtDemofile().getText();
-        updateDemoDetails();
       }
 
       try {
@@ -52,14 +50,17 @@ public class DemoEditor {
         if (tick1 >= tick2) {
           throw new NumberFormatException();
         }
-        model.addTick(new Tick(currentdemo, tick1, tick2));
+        Tick segment =
+            new Tick(settings.getTfPath().relativize(currentDemoFile.toPath()).toString(), tick1,
+                tick2);
+        model.addTick(segment);
+        log.info("Adding segment: " + segment);
       } catch (NumberFormatException ex) {
         JOptionPane.showMessageDialog(view,
             "Please fill the required tick fields with valid numbers", "Error",
             JOptionPane.ERROR_MESSAGE);
       }
     }
-
   }
 
   public class VdmBrowseDemo implements ActionListener {
@@ -68,9 +69,10 @@ public class DemoEditor {
     public void actionPerformed(ActionEvent e) {
       int returnVal = choosedemo.showOpenDialog(view);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
-        currentdemo = choosedemo.getSelectedFile().getName();
-        if (Files.exists(choosedemo.getSelectedFile().toPath())) {
-          view.getTxtDemofile().setText(currentdemo);
+        currentDemoFile = choosedemo.getSelectedFile();
+        if (Files.exists(currentDemoFile.toPath())) {
+          log.info("Selected demo file: " + currentDemoFile);
+          view.getTxtDemofile().setText(currentDemoFile.getName());
           updateDemoDetails();
         } else {
           JOptionPane.showMessageDialog(view, "The selected file does not exist.", "Browse",
@@ -78,7 +80,6 @@ public class DemoEditor {
         }
       }
     }
-
   }
 
   public class VdmClearTicks implements ActionListener {
@@ -87,7 +88,6 @@ public class DemoEditor {
     public void actionPerformed(ActionEvent e) {
       model.clear();
     }
-
   }
 
   public class VdmCreateFile implements ActionListener {
@@ -174,11 +174,11 @@ public class DemoEditor {
 
   private DemoEditorView view;
   private JFileChooser choosedemo = new JFileChooser();
-  private TickTableModel model;
+  private TickTableModel model = new TickTableModel();
   private LwrtSettings settings;
   private OSInterface cl;
-  private String currentdemo;
   private VDMGenerator vdmgenerator;
+  private File currentDemoFile;
 
   public DemoEditor(LwrtSettings settings, OSInterface cl) {
     this.settings = settings;
@@ -187,8 +187,6 @@ public class DemoEditor {
     choosedemo.setFileSelectionMode(JFileChooser.FILES_ONLY);
     choosedemo.setFileFilter(new FileNameExtensionFilter("Demo files", new String[] {"DEM"}));
     choosedemo.setCurrentDirectory(settings.getTfPath().toFile());
-
-    model = new TickTableModel();
   }
 
   public void updateDemoDetails() {
@@ -196,11 +194,12 @@ public class DemoEditor {
 
       @Override
       protected String doInBackground() throws Exception {
-        try (DemoPreview dp = new DemoPreview(settings.getTfPath().resolve(currentdemo))) {
+        try (DemoPreview dp = new DemoPreview(currentDemoFile.toPath())) {
           return dp.toString();
         }
       }
 
+      @Override
       protected void done() {
         try {
           view.getTxtrDemodetails().setText(get());

@@ -63,7 +63,7 @@ public class MainModel {
       tfpath = getChosenTfPath();
       if (tfpath == null) {
         log.info("No tf directory specified, exiting.");
-        System.exit(1);
+        throw new IllegalArgumentException("Must set a game folder");
       }
     }
     settings.setTfPath(tfpath);
@@ -74,7 +74,7 @@ public class MainModel {
       moviepath = getChosenMoviePath();
       if (moviepath == null) {
         log.info("No movie directory specified, exiting.");
-        System.exit(1);
+        throw new IllegalArgumentException("Must set a segment folder");
       }
     }
     movies = new LwrtMovies(settings);

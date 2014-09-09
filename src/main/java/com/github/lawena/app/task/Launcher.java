@@ -1,6 +1,7 @@
 package com.github.lawena.app.task;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutionException;
 
@@ -19,15 +20,17 @@ import com.github.lawena.model.LwrtMovies;
 import com.github.lawena.model.LwrtResource;
 import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.model.LwrtSettings.Key;
 import com.github.lawena.model.MainModel;
 import com.github.lawena.model.LwrtResource.PathContents;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.util.LawenaException;
+import com.github.lawena.util.Util;
 
-public class Launch extends SwingWorker<Boolean, Void> {
+public class Launcher extends SwingWorker<Boolean, Void> {
 
-  private static final Logger log = LoggerFactory.getLogger(Launch.class);
+  private static final Logger log = LoggerFactory.getLogger(Launcher.class);
   private static final Logger status = LoggerFactory.getLogger("status");
 
   private Tasks tasks;
@@ -41,7 +44,7 @@ public class Launch extends SwingWorker<Boolean, Void> {
   private LwrtFiles files;
   private LwrtResources resources;
 
-  public Launch(Tasks tasks) {
+  public Launcher(Tasks tasks) {
     this.tasks = tasks;
     this.model = tasks.getModel();
     this.view = tasks.getView();
@@ -76,6 +79,37 @@ public class Launch extends SwingWorker<Boolean, Void> {
             JOptionPane.INFORMATION_MESSAGE);
         log.info("Launch aborted because the custom HUD to use was not specified");
         return false;
+      }
+
+      setProgress(10);
+
+      // Check for big custom folders, mitigate OOM errors with custom folder > 2 GB
+      Path tfpath = settings.getTfPath();
+      Path customPath = tfpath.resolve("custom");
+      Path configPath = tfpath.resolve("cfg");
+      try {
+        long bytes = Util.sizeOfPath(configPath) + Util.sizeOfPath(customPath);
+        String size = Util.humanReadableByteCount(bytes, true);
+        log.info("Config and Custom folders size: " + size);
+        if (bytes / 1024 / 1024 > settings.getInt(Key.BigFolderMBThreshold)) {
+          int answer =
+              JOptionPane
+                  .showConfirmDialog(
+                      null,
+                      "Your cfg and custom folders are "
+                          + size
+                          + " in size."
+                          + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
+                          + "\nDo you still want to proceed?", "Copying Folders before Launch",
+                      JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+          if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
+            log.info("Launch aborted by the user");
+            status.info("Launch aborted by the user");
+            return false;
+          }
+        }
+      } catch (IOException e) {
+        log.info("Could not determine folder size: " + e);
       }
 
       setProgress(20);
