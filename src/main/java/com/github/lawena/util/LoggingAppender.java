@@ -10,8 +10,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -34,11 +36,14 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   private boolean printStackTrace = false;
   private Level level = Level.DEBUG;
 
-  public LoggingAppender(JTextPane pane, LoggerContext context) {
+  public LoggingAppender(JTextPane pane, JScrollPane scroll, LoggerContext context) {
     this.pane = pane;
     setName("LoggingAppender");
     setContext(context);
     start();
+    DefaultCaret caret = (DefaultCaret) pane.getCaret();
+    caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+    pane.getDocument().addDocumentListener(new ScrollingDocumentListener(pane, scroll));
   }
 
   public boolean isPrintStackTrace() {

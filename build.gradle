@@ -185,7 +185,7 @@ task packWinBatches(type: Zip) {
     archiveName = 'lwrtwinstuff.jar'
     destinationDir = file('src/main/dist/lawena')
     from projectDir
-    includes = ['batch/**', 'vtfcmd/**', '*.dll', '*.dll.manifest']
+    includes = ['batch/**', 'vtfcmd/**', '*.dll']
 }
 
 task packSkyboxes(type: Zip) {

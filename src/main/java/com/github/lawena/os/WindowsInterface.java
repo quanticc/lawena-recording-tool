@@ -71,7 +71,10 @@ public class WindowsInterface extends OSInterface {
 
   private void regedit(String key, String value, String content) {
     try {
-      ProcessBuilder pb = new ProcessBuilder("batch\\rg.bat", key, value, content);
+      File file = new File("batch", "rg.bat");
+      ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath(), key, value, content);
+      pb.environment().clear();
+      pb.directory(null);
       Process p = pb.start();
       p.waitFor();
     } catch (InterruptedException | IOException e) {
@@ -131,7 +134,10 @@ public class WindowsInterface extends OSInterface {
 
   private void closeHandle(String pid, String handle) {
     try {
-      ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", "-c", handle, "-p", pid, "-y");
+      File file = new File("batch", "handle.exe");
+      ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath(), "-c", handle, "-p", pid, "-y");
+      pb.environment().clear();
+      pb.directory(null);
       Process p = pb.start();
       try (BufferedReader input = Util.newProcessReader(p)) {
         String line;
@@ -152,7 +158,10 @@ public class WindowsInterface extends OSInterface {
   @Override
   public void closeHandles(Path path) {
     try {
-      ProcessBuilder pb = new ProcessBuilder("batch\\handle.exe", path.toString());
+      File file = new File("batch", "handle.exe");
+      ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath(), path.toString());
+      pb.environment().clear();
+      pb.directory(null);
       Process p = pb.start();
       try (BufferedReader input = Util.newProcessReader(p)) {
         String line;

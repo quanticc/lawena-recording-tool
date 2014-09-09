@@ -107,7 +107,8 @@ public class Lawena {
     final ch.qos.logback.classic.Logger rootLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
     final LoggingAppender appender =
-        new LoggingAppender(logView.getLogPane(), rootLog.getLoggerContext());
+        new LoggingAppender(logView.getLogPane(), logView.getLogScroll(),
+            rootLog.getLoggerContext());
     rootLog.addAppender(appender);
     ch.qos.logback.classic.Logger statusLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("status");
