@@ -1,7 +1,9 @@
 package com.github.lawena.os;
 
 import java.awt.Desktop;
+import java.awt.Frame;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,7 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.JFileChooser;
 import javax.swing.UIManager;
+
+import net.tomahawk.ExtensionsFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -317,5 +322,83 @@ public abstract class OSInterface {
   }
 
   public abstract String getVTFCmdLocation();
+
+  /**
+   * Display a dialog to retrieve a single folder selected by the user.
+   * 
+   * @param parent the parent component of the dialog
+   * @param title the new <code>String</code> for the title bar
+   * @param path the current directory to point to
+   * @return the selected folder or <code>null</code> if none was chosen
+   */
+  public String chooseSingleFolder(Frame parent, String title, String path) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle(title);
+    chooser.setCurrentDirectory(new File(path));
+    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    chooser.setFileHidingEnabled(false);
+    int answer = chooser.showOpenDialog(parent);
+    if (answer == JFileChooser.APPROVE_OPTION) {
+      return chooser.getSelectedFile().toString();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Display a dialog to let the user choose a location to save a file.
+   * 
+   * @param parent the parent component of the dialog
+   * @param title the new <code>String</code> for the title bar
+   * @param path the current directory to point to
+   * @param filters a <code>List<code> of <code>ExtensionsFilter</code> to add to the choosable file
+   *        filter list
+   * @return the selected file or <code>null</code> if none was chosen
+   */
+  public String chooseSaveFile(Frame parent, String title, String path,
+      List<ExtensionsFilter> filters) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle(title);
+    chooser.setCurrentDirectory(new File(path));
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setFileHidingEnabled(false);
+    for (ExtensionsFilter filter : filters) {
+      chooser.addChoosableFileFilter(filter);
+    }
+    int answer = chooser.showSaveDialog(parent);
+    if (answer == JFileChooser.APPROVE_OPTION) {
+      return chooser.getSelectedFile().toString();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Display a dialog to retrieve a single file selected by the user.
+   * 
+   * @param parent the parent component of the dialog
+   * @param title the new <code>String</code> for the title bar
+   * @param path the current directory to point to
+   * @param filters a <code>List<code> of <code>ExtensionsFilter</code> to add to the choosable file
+   *        filter list
+   * @return the selected file or <code>null</code> if none was chosen
+   */
+  public String chooseSingleFile(Frame parent, String title, String path,
+      List<ExtensionsFilter> filters) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle(title);
+    chooser.setCurrentDirectory(new File(path));
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setFileHidingEnabled(false);
+    for (ExtensionsFilter filter : filters) {
+      chooser.addChoosableFileFilter(filter);
+    }
+    int answer = chooser.showOpenDialog(parent);
+    if (answer == JFileChooser.APPROVE_OPTION) {
+      return chooser.getSelectedFile().toString();
+    } else {
+      return null;
+    }
+  }
 
 }

@@ -105,7 +105,7 @@ public class Updater {
       Resource res = new Resource(local.getName(), url, local, false);
       if (download(res)) {
         try {
-          for (String line : Files.readAllLines(local.toPath(), Charset.defaultCharset())) {
+          for (String line : Files.readAllLines(local.toPath(), Charset.forName("UTF-8"))) {
             String[] data = line.split(";");
             builds.add(new Build(data));
           }
@@ -378,7 +378,7 @@ public class Updater {
     List<String> lines = new ArrayList<>();
     lines.add("appbase = " + appbase);
     try {
-      for (String line : Files.readAllLines(getdownPath, Charset.defaultCharset())) {
+      for (String line : Files.readAllLines(getdownPath, Charset.forName("UTF-8"))) {
         if (line.startsWith("ui.")) {
           lines.add(line);
         }
@@ -406,7 +406,7 @@ public class Updater {
       Resource res = new Resource(file.getName(), new URL(url), file, false);
       if (download(res)) {
         try {
-          list = Files.readAllLines(file.toPath(), Charset.defaultCharset());
+          list = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
           branch.setChangeLog(list);
         } catch (IOException e) {
           log.warn("Could not read lines from file: " + e);

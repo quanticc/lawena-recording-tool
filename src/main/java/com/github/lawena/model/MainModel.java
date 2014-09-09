@@ -20,7 +20,6 @@ import com.github.lawena.os.OSXInterface;
 import com.github.lawena.os.WindowsInterface;
 import com.github.lawena.update.Updater;
 import com.github.lawena.util.Util;
-import com.github.lawena.util.WatchDir;
 import com.github.lawena.vdm.DemoEditor;
 
 public class MainModel {
@@ -34,7 +33,6 @@ public class MainModel {
 
   private String originalDxLevel;
   private Path steamPath;
-  private Thread watcher;
   private JFileChooser movieFileChooser;
   private JFileChooser gameFileChooser;
 
@@ -85,39 +83,6 @@ public class MainModel {
 
     resources = new LwrtResources(settings, osInterface);
     files.setCustomPathList(resources);
-
-    watcher = new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-        try {
-          WatchDir w = new WatchDir(Paths.get("custom"), false) {
-            @Override
-            public void entryCreated(Path child) {
-              try {
-                resources.addPath(child);
-              } catch (IOException e) {
-                log.warn("Could not add custom path", e);
-              }
-            }
-
-            @Override
-            public void entryModified(Path child) {
-              resources.updatePath(child);
-            };
-
-            @Override
-            public void entryDeleted(Path child) {
-              resources.removePath(child);
-            }
-          };
-          w.processEvents();
-        } catch (IOException e) {
-          log.warn("Problem while watching directory", e);
-        }
-      }
-    }, "FolderWatcher");
-    watcher.setDaemon(true);
 
     demos = new DemoEditor(settings, osInterface);
     skyboxes = new Skyboxes();
@@ -253,10 +218,6 @@ public class MainModel {
 
   public LwrtResources getResources() {
     return resources;
-  }
-
-  public Thread getWatcher() {
-    return watcher;
   }
 
   public Skyboxes getSkyboxes() {

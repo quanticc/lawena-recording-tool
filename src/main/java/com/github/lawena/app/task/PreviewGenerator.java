@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,11 +18,11 @@ import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MarkerFactory;
 
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
 import com.github.lawena.model.MainModel;
+import com.github.lawena.util.StatusAppender;
 import com.github.lawena.util.Util;
 
 public class PreviewGenerator extends SwingWorker<Void, Void> {
@@ -107,7 +106,7 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
   protected void done() {
     presenter.selectSkyboxFromSettings();
     log.info("Skybox loading complete");
-    status.info(MarkerFactory.getMarker("OK"), "Ready");
+    status.info(StatusAppender.OK, "Ready");
     if (!isCancelled()) {
       parent.setCurrentWorker(null, false);
     }

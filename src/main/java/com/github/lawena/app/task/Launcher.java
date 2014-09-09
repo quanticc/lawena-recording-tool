@@ -11,21 +11,21 @@ import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MarkerFactory;
 
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
 import com.github.lawena.model.LwrtFiles;
 import com.github.lawena.model.LwrtMovies;
 import com.github.lawena.model.LwrtResource;
+import com.github.lawena.model.LwrtResource.PathContents;
 import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.LwrtSettings.Key;
 import com.github.lawena.model.MainModel;
-import com.github.lawena.model.LwrtResource.PathContents;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.util.LawenaException;
+import com.github.lawena.util.StatusAppender;
 import com.github.lawena.util.Util;
 
 public class Launcher extends SwingWorker<Boolean, Void> {
@@ -124,11 +124,17 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       status.info("Saving settings and generating cfg files");
       try {
         presenter.saveSettings();
+        if (model.getDemos().isAutoplay()) {
+          String demoname = model.getDemos().getDemoname();
+          if (demoname != null && !demoname.isEmpty()) {
+            settings.setDemoname(demoname);
+          }
+        }
         settings.saveToCfg();
         movies.createMovienameCfgs();
       } catch (IOException e) {
         log.warn("Problem while saving settings to file", e);
-        status.info(MarkerFactory.getMarker("ERROR"), "Failed to save lawena settings to file");
+        status.info(StatusAppender.ERROR, "Failed to save lawena settings to file");
         return false;
       }
       // Allow failing this without cancelling launch, notify user
@@ -146,7 +152,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       try {
         files.replaceAll();
       } catch (LawenaException e) {
-        status.info(MarkerFactory.getMarker("ERROR"), e.getMessage());
+        status.info(StatusAppender.ERROR, e.getMessage());
         return false;
       }
       setProgress(80);
@@ -187,7 +193,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       if (cfgtimeout > 0 && timeout >= maxtimeout) {
         int s = timeout * (millis / 1000);
         log.info("TF2 launch timed out after " + s + " seconds");
-        status.info(MarkerFactory.getMarker("WARN"), "TF2 did not start after " + s + " seconds");
+        status.info(StatusAppender.WARN, "TF2 did not start after " + s + " seconds");
         return false;
       }
 
@@ -260,10 +266,9 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       boolean restoredAllFiles = files.restoreAll();
       if (ranTf2Correctly) {
         if (restoredAllFiles) {
-          status
-              .info(MarkerFactory.getMarker("OK"), "TF2 has finished running. All files restored");
+          status.info(StatusAppender.OK, "TF2 has finished running. All files restored");
         } else {
-          status.info(MarkerFactory.getMarker("WARN"),
+          status.info(StatusAppender.WARN,
               "Your files could not be restored correctly. Check log for details");
         }
       }

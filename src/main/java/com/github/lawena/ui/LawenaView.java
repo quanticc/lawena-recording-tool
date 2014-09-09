@@ -661,7 +661,7 @@ public class LawenaView extends JFrame {
     this.customLaunchOptionsMenuItem = customLaunchOptionsMenuItem;
 
     pack();
-    setMinimumSize(new Dimension(750, 420));
+    setMinimumSize(new Dimension(750, 480));
     setLocationByPlatform(true);
   }
 

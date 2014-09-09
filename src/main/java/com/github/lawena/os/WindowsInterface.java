@@ -1,10 +1,15 @@
 package com.github.lawena.os;
 
+import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+
+import net.tomahawk.ExtensionsFilter;
+import net.tomahawk.XFileDialog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -191,5 +196,54 @@ public class WindowsInterface extends OSInterface {
   @Override
   public String getVTFCmdLocation() {
     return "vtfcmd/VTFCmd.exe";
+  }
+
+  @Override
+  public String chooseSingleFolder(Frame parent, String title, String path) {
+    if (parent == null) {
+      log.warn("Parent frame must not be null to use native dialog");
+      return super.chooseSingleFolder(parent, title, path);
+    } else {
+      XFileDialog dialog = new XFileDialog(parent);
+      dialog.setTitle(title);
+      dialog.setDirectory(path);
+      String folder = dialog.getFolder();
+      dialog.dispose();
+      return folder;
+    }
+  }
+
+  @Override
+  public String chooseSaveFile(Frame parent, String title, String path,
+      List<ExtensionsFilter> filters) {
+    if (parent == null) {
+      log.warn("Parent frame must not be null to use native dialog");
+      return super.chooseSaveFile(parent, title, path, filters);
+    } else {
+      XFileDialog dialog = new XFileDialog(parent);
+      dialog.setTitle(title);
+      dialog.addFilters(filters);
+      String content = dialog.getSaveFile();
+      String folder = dialog.getDirectory();
+      dialog.dispose();
+      return (content == null ? content : new File(folder, content).toString());
+    }
+  }
+
+  @Override
+  public String chooseSingleFile(Frame parent, String title, String path,
+      List<ExtensionsFilter> filters) {
+    if (parent == null) {
+      log.warn("Parent frame must not be null to use native dialog");
+      return super.chooseSingleFile(parent, title, path, filters);
+    } else {
+      XFileDialog dialog = new XFileDialog(parent);
+      dialog.setTitle(title);
+      dialog.addFilters(filters);
+      String content = dialog.getFile();
+      String folder = dialog.getDirectory();
+      dialog.dispose();
+      return (content == null ? content : new File(folder, content).toString());
+    }
   }
 }

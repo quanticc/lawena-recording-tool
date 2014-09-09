@@ -18,7 +18,6 @@ import javax.swing.text.StyledDocument;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MarkerFactory;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -109,7 +108,7 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
         doc.insertString(doc.getLength(), "\n", doc.getStyle("Normal"));
         pane.setCaretPosition(prevLength);
       } catch (Exception e) {
-        log.warn(MarkerFactory.getMarker("no-ui-log"), "Problem while appending to textPane", e);
+        log.warn(StatusAppender.NOGUI, "Problem while appending to textPane", e);
       }
     }
 
@@ -128,7 +127,7 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
         String exString = ex.toString();
         if (exString != null) {
           builder.append("\n");
-          builder.append("\tCaused by " + exString);
+          builder.append("----- Caused by " + exString);
         }
       }
       return builder.toString();

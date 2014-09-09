@@ -1,244 +1,241 @@
 package com.github.lawena.ui;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.JCheckBox;
+import javax.swing.JToolBar;
+
+import com.github.lawena.util.Images;
 
 public class DemoEditorView extends JPanel {
 
-  /**
-     * 
-     */
   private static final long serialVersionUID = 1L;
 
-  private JLabel lblSelectDemoFile;
-  private JTextField txtDemofile;
-  private JButton btnBrowse;
-  private JLabel lblStartTick;
-  private JTextField txtStarttick;
-  private JLabel lblEndTick;
-  private JTextField txtEndtick;
-  private JButton btnAdd;
-  private JPanel panelButtonsLeft;
-  private JButton btnClearTickList;
-  private JButton btnCreateVdmFiles;
-  private JButton btnDeleteVdmFiles;
+  private JTextFieldPlaceholder startTickTextField;
+  private JTextFieldPlaceholder endTickTextField;
+  private JButton addButton;
+  private JPanel panelButtonsBottomLeft;
+  private JButton clearTickListButton;
+  private JButton createVdmFilesButton;
+  private JButton deleteVdmFilesButton;
   private JScrollPane scrollPane_1;
-  private JTable tableTicks;
-  private JPanel panelButtonsRight;
-  private JButton btnDeleteSelectedTick;
-  private JScrollPane scrollPane;
-  private JTextArea txtrDemodetails;
-  private JCheckBox chckbxSrcDemoFix;
+  private JTable segmentListTable;
+  private JButton deleteSelectedTickButton;
+  private JCheckBox noSkipToTickCheckBox;
+  private JScrollPane scrollPane_2;
+  private JTable demosTable;
+  private JCheckBox autoplayFirstDemoCheckBox;
+  private JComboBox<String> segmentTypeComboBox;
+  private JPanel panelButtonsCenterLeft;
+  private JTextFieldPlaceholder demoFilterTextField;
+  private JButton changeDemoFolderButton;
+  private JButton saveSegmentListButton;
+  private JButton loadSegmentListButton;
+  private JToolBar toolbar;
 
-  /**
-   * Create the panel.
-   */
   public DemoEditorView() {
     GridBagLayout gbl_panelVdm = new GridBagLayout();
-    gbl_panelVdm.columnWidths = new int[] {0, 110, 0, 110, 0, 0, 0, 0};
+    gbl_panelVdm.columnWidths = new int[] {0};
     gbl_panelVdm.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0};
-    gbl_panelVdm.columnWeights =
-        new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0, Double.MIN_VALUE};
-    gbl_panelVdm.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+    gbl_panelVdm.columnWeights = new double[] {1.0};
+    gbl_panelVdm.rowWeights = new double[] {0.0, 1.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
     setLayout(gbl_panelVdm);
 
-    lblSelectDemoFile = new JLabel("Demo File:");
-    GridBagConstraints gbc_lblSelectDemoFile = new GridBagConstraints();
-    gbc_lblSelectDemoFile.anchor = GridBagConstraints.EAST;
-    gbc_lblSelectDemoFile.insets = new Insets(5, 5, 5, 5);
-    gbc_lblSelectDemoFile.gridx = 0;
-    gbc_lblSelectDemoFile.gridy = 0;
-    add(lblSelectDemoFile, gbc_lblSelectDemoFile);
+    demoFilterTextField = new JTextFieldPlaceholder();
+    demoFilterTextField.setPlaceholder("Search");
+    GridBagConstraints gbc_txtFilterDemos = new GridBagConstraints();
+    gbc_txtFilterDemos.insets = new Insets(5, 5, 5, 5);
+    gbc_txtFilterDemos.fill = GridBagConstraints.HORIZONTAL;
+    gbc_txtFilterDemos.gridx = 0;
+    gbc_txtFilterDemos.gridy = 0;
+    add(demoFilterTextField, gbc_txtFilterDemos);
+    demoFilterTextField.setColumns(10);
 
-    txtDemofile = new JTextField();
-    GridBagConstraints gbc_txtDemofile = new GridBagConstraints();
-    gbc_txtDemofile.gridwidth = 3;
-    gbc_txtDemofile.insets = new Insets(5, 0, 5, 5);
-    gbc_txtDemofile.fill = GridBagConstraints.HORIZONTAL;
-    gbc_txtDemofile.gridx = 1;
-    gbc_txtDemofile.gridy = 0;
-    add(txtDemofile, gbc_txtDemofile);
-    txtDemofile.setColumns(10);
+    scrollPane_2 = new JScrollPane();
+    GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
+    gbc_scrollPane_2.gridheight = 2;
+    gbc_scrollPane_2.insets = new Insets(0, 5, 5, 5);
+    gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
+    gbc_scrollPane_2.gridx = 0;
+    gbc_scrollPane_2.gridy = 1;
+    add(scrollPane_2, gbc_scrollPane_2);
 
-    btnBrowse = new JButton("Browse...");
-    GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
-    gbc_btnBrowse.fill = GridBagConstraints.HORIZONTAL;
-    gbc_btnBrowse.insets = new Insets(5, 0, 5, 5);
-    gbc_btnBrowse.gridx = 4;
-    gbc_btnBrowse.gridy = 0;
-    add(btnBrowse, gbc_btnBrowse);
+    demosTable = new JTable();
+    demosTable.setShowVerticalLines(false);
+    demosTable.setGridColor(new Color(0, 0, 0, 30));
+    scrollPane_2.setViewportView(demosTable);
 
-    scrollPane = new JScrollPane();
-    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-    gbc_scrollPane.gridheight = 4;
-    gbc_scrollPane.gridwidth = 2;
-    gbc_scrollPane.insets = new Insets(5, 0, 5, 5);
-    gbc_scrollPane.fill = GridBagConstraints.BOTH;
-    gbc_scrollPane.gridx = 5;
-    gbc_scrollPane.gridy = 0;
-    add(scrollPane, gbc_scrollPane);
-
-    txtrDemodetails = new JTextArea();
-    txtrDemodetails.setWrapStyleWord(true);
-    txtrDemodetails.setText("Select a demo to view its details here.");
-    txtrDemodetails.setOpaque(false);
-    txtrDemodetails.setEditable(false);
-    txtrDemodetails.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-    scrollPane.setViewportView(txtrDemodetails);
-
-    lblStartTick = new JLabel("Start Tick:");
-    GridBagConstraints gbc_lblStartTick = new GridBagConstraints();
-    gbc_lblStartTick.anchor = GridBagConstraints.EAST;
-    gbc_lblStartTick.insets = new Insets(0, 5, 5, 5);
-    gbc_lblStartTick.gridx = 0;
-    gbc_lblStartTick.gridy = 2;
-    add(lblStartTick, gbc_lblStartTick);
-
-    txtStarttick = new JTextField();
-    GridBagConstraints gbc_txtStarttick = new GridBagConstraints();
-    gbc_txtStarttick.insets = new Insets(0, 0, 5, 5);
-    gbc_txtStarttick.fill = GridBagConstraints.HORIZONTAL;
-    gbc_txtStarttick.gridx = 1;
-    gbc_txtStarttick.gridy = 2;
-    add(txtStarttick, gbc_txtStarttick);
-    txtStarttick.setColumns(10);
-
-    lblEndTick = new JLabel("End Tick:");
-    GridBagConstraints gbc_lblEndTick = new GridBagConstraints();
-    gbc_lblEndTick.anchor = GridBagConstraints.EAST;
-    gbc_lblEndTick.insets = new Insets(0, 0, 5, 5);
-    gbc_lblEndTick.gridx = 2;
-    gbc_lblEndTick.gridy = 2;
-    add(lblEndTick, gbc_lblEndTick);
-
-    txtEndtick = new JTextField();
-    GridBagConstraints gbc_txtEndtick = new GridBagConstraints();
-    gbc_txtEndtick.insets = new Insets(0, 0, 5, 5);
-    gbc_txtEndtick.fill = GridBagConstraints.HORIZONTAL;
-    gbc_txtEndtick.gridx = 3;
-    gbc_txtEndtick.gridy = 2;
-    add(txtEndtick, gbc_txtEndtick);
-    txtEndtick.setColumns(10);
-
-    panelButtonsRight = new JPanel();
-    FlowLayout flowLayout = (FlowLayout) panelButtonsRight.getLayout();
-    flowLayout.setAlignment(FlowLayout.RIGHT);
+    panelButtonsCenterLeft = new JPanel();
+    FlowLayout flowLayout = (FlowLayout) panelButtonsCenterLeft.getLayout();
+    flowLayout.setAlignment(FlowLayout.LEADING);
     flowLayout.setVgap(0);
-    flowLayout.setHgap(0);
-    GridBagConstraints gbc_panelButtonsRight = new GridBagConstraints();
-    gbc_panelButtonsRight.anchor = GridBagConstraints.WEST;
-    gbc_panelButtonsRight.gridwidth = 4;
-    gbc_panelButtonsRight.insets = new Insets(0, 5, 5, 5);
-    gbc_panelButtonsRight.fill = GridBagConstraints.VERTICAL;
-    gbc_panelButtonsRight.gridx = 0;
-    gbc_panelButtonsRight.gridy = 3;
-    add(panelButtonsRight, gbc_panelButtonsRight);
+    GridBagConstraints gbc_panelButtonsCenterLeft = new GridBagConstraints();
+    gbc_panelButtonsCenterLeft.insets = new Insets(0, 5, 5, 5);
+    gbc_panelButtonsCenterLeft.fill = GridBagConstraints.BOTH;
+    gbc_panelButtonsCenterLeft.gridx = 0;
+    gbc_panelButtonsCenterLeft.gridy = 3;
+    add(panelButtonsCenterLeft, gbc_panelButtonsCenterLeft);
 
-    btnAdd = new JButton("Add Segment");
-    panelButtonsRight.add(btnAdd);
+    segmentTypeComboBox = new JComboBox<String>();
+    panelButtonsCenterLeft.add(segmentTypeComboBox);
 
-    btnDeleteSelectedTick = new JButton("Delete Segment");
-    panelButtonsRight.add(btnDeleteSelectedTick);
+    startTickTextField = new JTextFieldPlaceholder();
+    startTickTextField.setPlaceholder("Start at");
+    panelButtonsCenterLeft.add(startTickTextField);
+    startTickTextField.setColumns(5);
 
-    btnClearTickList = new JButton("Clear List");
-    panelButtonsRight.add(btnClearTickList);
+    endTickTextField = new JTextFieldPlaceholder();
+    endTickTextField.setPlaceholder("Stop at");
+    panelButtonsCenterLeft.add(endTickTextField);
+    endTickTextField.setColumns(5);
+
+    toolbar = new JToolBar();
+    toolbar.setFloatable(false);
+    panelButtonsCenterLeft.add(toolbar);
+
+    addButton = new JButton("");
+    addButton.setIcon(Images.get("ui/fugue/plus-button.png"));
+    addButton.setToolTipText("Add a segment for the selected demo for the entered ticks");
+    toolbar.add(addButton);
+
+    deleteSelectedTickButton = new JButton("");
+    deleteSelectedTickButton.setIcon(Images.get("ui/fugue/minus-button.png"));
+    deleteSelectedTickButton.setToolTipText("Remove the selected segments from the list");
+    toolbar.add(deleteSelectedTickButton);
+
+    clearTickListButton = new JButton("");
+    clearTickListButton.setIcon(Images.get("ui/fugue/bin.png"));
+    clearTickListButton.setToolTipText("Clear all segments from the list");
+    toolbar.add(clearTickListButton);
+
+    saveSegmentListButton = new JButton("");
+    saveSegmentListButton.setIcon(Images.get("ui/fugue/drive-download.png"));
+    saveSegmentListButton.setToolTipText("Save this segment list to a file for later use");
+    toolbar.add(saveSegmentListButton);
+
+    loadSegmentListButton = new JButton("");
+    loadSegmentListButton.setIcon(Images.get("ui/fugue/drive-upload.png"));
+    loadSegmentListButton.setToolTipText("Load a previously saved segment list from a file");
+    toolbar.add(loadSegmentListButton);
+
+    changeDemoFolderButton = new JButton("");
+    changeDemoFolderButton.setIcon(Images.get("ui/fugue/folder-bookmark.png"));
+    changeDemoFolderButton.setToolTipText("Change demos location");
+    toolbar.add(changeDemoFolderButton);
 
     scrollPane_1 = new JScrollPane();
     GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
     gbc_scrollPane_1.insets = new Insets(0, 5, 5, 5);
     gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
-    gbc_scrollPane_1.gridwidth = 7;
     gbc_scrollPane_1.gridx = 0;
     gbc_scrollPane_1.gridy = 4;
     add(scrollPane_1, gbc_scrollPane_1);
 
-    tableTicks = new JTable();
-    scrollPane_1.setViewportView(tableTicks);
+    segmentListTable = new JTable();
+    segmentListTable.setShowVerticalLines(false);
+    segmentListTable.setGridColor(new Color(0, 0, 0, 30));
+    scrollPane_1.setViewportView(segmentListTable);
 
-    panelButtonsLeft = new JPanel();
-    FlowLayout fl_panelButtonsLeft = (FlowLayout) panelButtonsLeft.getLayout();
-    fl_panelButtonsLeft.setVgap(0);
-    fl_panelButtonsLeft.setHgap(0);
-    GridBagConstraints gbc_panelButtonsLeft = new GridBagConstraints();
-    gbc_panelButtonsLeft.gridwidth = 4;
-    gbc_panelButtonsLeft.anchor = GridBagConstraints.WEST;
-    gbc_panelButtonsLeft.insets = new Insets(0, 5, 5, 5);
-    gbc_panelButtonsLeft.gridx = 0;
-    gbc_panelButtonsLeft.gridy = 5;
-    add(panelButtonsLeft, gbc_panelButtonsLeft);
+    panelButtonsBottomLeft = new JPanel();
+    FlowLayout fl_panelButtonsBottomLeft = (FlowLayout) panelButtonsBottomLeft.getLayout();
+    fl_panelButtonsBottomLeft.setAlignment(FlowLayout.LEADING);
+    fl_panelButtonsBottomLeft.setVgap(0);
+    fl_panelButtonsBottomLeft.setHgap(0);
+    GridBagConstraints gbc_panelButtonsBottomLeft = new GridBagConstraints();
+    gbc_panelButtonsBottomLeft.fill = GridBagConstraints.HORIZONTAL;
+    gbc_panelButtonsBottomLeft.insets = new Insets(0, 5, 4, 5);
+    gbc_panelButtonsBottomLeft.gridx = 0;
+    gbc_panelButtonsBottomLeft.gridy = 5;
+    add(panelButtonsBottomLeft, gbc_panelButtonsBottomLeft);
 
-    btnCreateVdmFiles = new JButton("Create VDM Files");
-    panelButtonsLeft.add(btnCreateVdmFiles);
+    createVdmFilesButton = new JButton("Create VDM Files");
+    panelButtonsBottomLeft.add(createVdmFilesButton);
 
-    btnDeleteVdmFiles = new JButton("Delete VDM Files...");
-    panelButtonsLeft.add(btnDeleteVdmFiles);
+    deleteVdmFilesButton = new JButton("Delete VDM Files...");
+    panelButtonsBottomLeft.add(deleteVdmFilesButton);
 
-    chckbxSrcDemoFix = new JCheckBox("SrcDemo\u00B2 Fix (hover for details)");
-    chckbxSrcDemoFix
-        .setToolTipText("<html>Don't add \"skiptotick\" lines to VDM files created, which<br>\r\nin some cases, can solve VDM playback along with SrcDemo\u00B2");
-    panelButtonsLeft.add(chckbxSrcDemoFix);
+    autoplayFirstDemoCheckBox = new JCheckBox("Auto-play First Demo");
+    autoplayFirstDemoCheckBox.setToolTipText("Plays the first demo on game launch");
+    panelButtonsBottomLeft.add(autoplayFirstDemoCheckBox);
+
+    noSkipToTickCheckBox = new JCheckBox("Remove SkipToTick lines");
+    noSkipToTickCheckBox.setToolTipText("Do not add SkipToTick lines to VDM files created");
+    panelButtonsBottomLeft.add(noSkipToTickCheckBox);
 
   }
 
-  public JTextField getTxtDemofile() {
-    return txtDemofile;
+  public JTextFieldPlaceholder getStartTickTextField() {
+    return startTickTextField;
   }
 
-  public JButton getBtnBrowse() {
-    return btnBrowse;
+  public JTextFieldPlaceholder getEndTickTextField() {
+    return endTickTextField;
   }
 
-  public JTextField getTxtStarttick() {
-    return txtStarttick;
+  public JButton getAddButton() {
+    return addButton;
   }
 
-  public JTextField getTxtEndtick() {
-    return txtEndtick;
+  public JButton getClearTickListButton() {
+    return clearTickListButton;
   }
 
-  public JButton getBtnAdd() {
-    return btnAdd;
+  public JButton getCreateVdmFilesButton() {
+    return createVdmFilesButton;
   }
 
-  public JButton getBtnClearTickList() {
-    return btnClearTickList;
+  public JButton getDeleteVdmFilesButton() {
+    return deleteVdmFilesButton;
   }
 
-  public JButton getBtnCreateVdmFiles() {
-    return btnCreateVdmFiles;
+  public JButton getSaveSegmentListButton() {
+    return saveSegmentListButton;
   }
 
-  public JButton getBtnDeleteVdmFiles() {
-    return btnDeleteVdmFiles;
+  public JButton getLoadSegmentListButton() {
+    return loadSegmentListButton;
   }
 
-  public JTable getTableTicks() {
-    return tableTicks;
+  public JButton getChangeDemoFolderButton() {
+    return changeDemoFolderButton;
   }
 
-  public JButton getBtnDeleteSelectedTick() {
-    return btnDeleteSelectedTick;
+  public JTable getSegmentListTable() {
+    return segmentListTable;
   }
 
-  public JTextArea getTxtrDemodetails() {
-    return txtrDemodetails;
+  public JButton getDeleteSelectedTickButton() {
+    return deleteSelectedTickButton;
   }
 
-  public JCheckBox getChckbxSrcDemoFix() {
-    return chckbxSrcDemoFix;
+  public JCheckBox getNoSkipToTickCheckBox() {
+    return noSkipToTickCheckBox;
   }
+
+  public JTable getDemosTable() {
+    return demosTable;
+  }
+
+  public JComboBox<String> getSegmentTypeComboBox() {
+    return segmentTypeComboBox;
+  }
+
+  public JTextField getDemoFilterTextField() {
+    return demoFilterTextField;
+  }
+
+  public JCheckBox getAutoplayFirstDemoCheckBox() {
+    return autoplayFirstDemoCheckBox;
+  }
+
 }

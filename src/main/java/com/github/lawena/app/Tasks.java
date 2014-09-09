@@ -19,7 +19,6 @@ import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MarkerFactory;
 
 import com.github.lawena.app.task.Launcher;
 import com.github.lawena.app.task.PreviewGenerator;
@@ -31,6 +30,7 @@ import com.github.lawena.ui.LawenaView;
 import com.github.lawena.update.Build;
 import com.github.lawena.update.UpdateResult;
 import com.github.lawena.update.Updater;
+import com.github.lawena.util.StatusAppender;
 
 public class Tasks {
 
@@ -173,7 +173,7 @@ public class Tasks {
         }
         view.getBtnClearMovieFolder().setEnabled(true);
         view.getBtnClearMovieFolder().setText("Clear Movie Files");
-        status.info(MarkerFactory.getMarker("OK"), "Ready");
+        status.info(StatusAppender.OK, "Ready");
       }
     };
 
@@ -184,7 +184,6 @@ public class Tasks {
     protected Void doInBackground() throws Exception {
       try {
         scan();
-        watcher.start();
       } catch (Exception e) {
         log.warn("Problem while scanning custom paths", e);
       }
@@ -283,7 +282,6 @@ public class Tasks {
   private Lawena presenter;
   private LawenaView view;
 
-  private Thread watcher;
   private LwrtResources resources;
   private LwrtSettings settings;
   private LwrtFiles files;
@@ -295,7 +293,6 @@ public class Tasks {
     this.presenter = presenter;
     this.model = presenter.getModel();
     this.view = presenter.getView();
-    this.watcher = model.getWatcher();
     this.resources = model.getResources();
     this.settings = model.getSettings();
     this.files = model.getFiles();

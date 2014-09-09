@@ -56,6 +56,9 @@ public class LwrtSettings {
     DeleteBackupsWhenRestoring(true),
     SkyboxDataSavePath("skybox.ser.gz"),
     BigFolderMBThreshold(200, 0, Integer.MAX_VALUE),
+    DemosRelativeFolder(""),
+    LoadKillstreakFile(true),
+    KillstreakFileName("KillStreaks.txt"),
     LaunchOptions("-novid -console");
 
     private Object value;
