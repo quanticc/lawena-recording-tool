@@ -27,12 +27,17 @@ public class ExtensionsFilter extends FileFilter {
   public ExtensionsFilter(String shortDescription, List<String> extensions) {
     this.extensions = extensions;
     this.shortDescription = shortDescription;
-    description = shortDescription + SPACE + OPEN_PAR;
+    StringBuilder desc = new StringBuilder();
+    desc.append(shortDescription);
+    desc.append(SPACE);
+    desc.append(OPEN_PAR);
     for (String ext : extensions) {
-      this.description += ASTERISK + POINT + ext + SEMICOLON;
+      desc.append(ASTERISK);
+      desc.append(POINT);
+      desc.append(ext);
+      desc.append(SEMICOLON);
     }
-    description = description.substring(0, description.length() - 1);
-    description += CLOSE_PAR;
+    description = desc.substring(0, desc.length() - 1) + CLOSE_PAR;
   }
 
   // key: the accept method
@@ -44,8 +49,6 @@ public class ExtensionsFilter extends FileFilter {
     if (extensions.isEmpty())
       return true;
     String filename = f.getName().toLowerCase();
-    if (filename == null)
-      return false;
     for (int i = 0; i < extensions.size(); i++) {
       String ext = extensions.get(i);
       if (filename.endsWith(POINT + ext))
@@ -62,20 +65,25 @@ public class ExtensionsFilter extends FileFilter {
   // get the filter string for native filedialog
   // desc0|*.ext00;...;*.ext0n|desc1|*.ext10;...;*.ext1n...
   public static String getNativeString(ExtensionsFilter... filters) {
-    String filterString = "";
+    StringBuilder filterString = new StringBuilder("");
     for (ExtensionsFilter extensionsFilter : filters) {
-      filterString += extensionsFilter.description + VBAR;
-
+      filterString.append(extensionsFilter.description);
+      filterString.append(VBAR);
       java.util.List<String> exts = extensionsFilter.extensions;
       int count = exts.size();
       for (int j = 0; j < count - 1; j++) {
-        filterString += ASTERISK + POINT + exts.get(j) + SEMICOLON;
+        filterString.append(ASTERISK);
+        filterString.append(POINT);
+        filterString.append(exts.get(j));
+        filterString.append(SEMICOLON);
       }
-      filterString += ASTERISK + POINT + exts.get(count - 1);
-      filterString += VBAR;
+      filterString.append(ASTERISK);
+      filterString.append(POINT);
+      filterString.append(exts.get(count - 1));
+      filterString.append(VBAR);
     }
-    log.trace("Native filter string: " + filterString);
-    return filterString;
+    log.trace("Native filter string: {}", filterString);
+    return filterString.toString();
   }
 
 }

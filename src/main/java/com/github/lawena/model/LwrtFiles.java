@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -158,7 +157,6 @@ public class LwrtFiles {
     Path customBackupPath = tfpath.resolve("lwrtcustom");
     Path customPath = tfpath.resolve("custom");
     Path localCustomPath = Paths.get("custom");
-    Path customParticlesPath = customPath.resolve("lawena/particles");
 
     log.info("Copying selected custom vpks and folders");
     for (LwrtResource cp : customPathList.getList()) {
@@ -178,21 +176,6 @@ public class LwrtFiles {
               log.debug("Copying custom folder: " + source.getFileName());
               Path dest = customPath.resolve(source.getFileName());
               copyReadOnly(source, dest);
-            } else if (cp == LwrtResources.particles) {
-              List<String> contents = cl.getVpkContents(tfpath, cp.getPath());
-              List<String> selected = cfg.getParticles();
-              if (!selected.contains("*")) {
-                contents.retainAll(selected);
-              }
-              if (!contents.isEmpty()) {
-                log.debug("Copying enhanced particles: " + contents);
-                Files.createDirectories(customParticlesPath);
-                // TODO: fix to avoid invoking vpk x
-                cl.extractIfNeeded(tfpath, cp.getPath().toString(),
-                    customParticlesPath.getParent(), contents);
-              } else {
-                log.debug("No enhanced particles were selected");
-              }
             } else if (source.getFileName().toString().endsWith(".vpk")) {
               log.debug("Copying custom VPK: " + cp.getPath());
               Path dest = customPath.resolve(source.getFileName());

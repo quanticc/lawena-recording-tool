@@ -155,14 +155,12 @@ public class XFileDialog {
       showJavaDialog(parent, Mode.LOAD_FOLDERS);
 
       File[] temp1 = failsafe.getSelectedFiles();
-      if (temp1 == null) {
+      if (temp1.length == 0)
         return null;
-      } else {
-        String[] temp2 = new String[temp1.length];
-        for (int i = 0; i < temp1.length; i++)
-          temp2[i] = temp1[i].getAbsolutePath();
-        return temp2;
-      }
+      String[] temp2 = new String[temp1.length];
+      for (int i = 0; i < temp1.length; i++)
+        temp2[i] = temp1[i].getAbsolutePath();
+      return temp2;
     }
   }
 
@@ -201,14 +199,12 @@ public class XFileDialog {
       showJavaDialog(parent, Mode.LOAD_FILES);
 
       File[] temp1 = failsafe.getSelectedFiles();
-      if (temp1 == null) {
+      if (temp1.length == 0)
         return null;
-      } else {
-        String[] temp2 = new String[temp1.length];
-        for (int i = 0; i < temp1.length; i++)
-          temp2[i] = temp1[i].getName();
-        return temp2;
-      }
+      String[] temp2 = new String[temp1.length];
+      for (int i = 0; i < temp1.length; i++)
+        temp2[i] = temp1[i].getName();
+      return temp2;
     }
   }
 
@@ -342,17 +338,14 @@ public class XFileDialog {
   }
 
   public XFileDialog(Frame parent) {
-    String windowtitle = null;
     this.parent = parent;
 
     initClass();
 
     if (parent != null)
-      windowtitle = parent.getTitle();
-    if (parent != null)
       parent.setIgnoreRepaint(false); // prevent error
 
-    // solution2: find the correct window handele with jawt/awt
+    // solution2: find the correct window handle with jawt/awt
     if (nativeEnabled) {
       String javahome = System.getProperty("java.home");
       initWithJAWT(parent, javahome);
@@ -363,7 +356,6 @@ public class XFileDialog {
   }
 
   public XFileDialog(Applet parent) {
-    String windowtitle = null;
     this.parent = parent;
 
     initClass();

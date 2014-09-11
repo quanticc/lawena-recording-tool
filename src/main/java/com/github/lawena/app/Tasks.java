@@ -10,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -22,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.app.task.Launcher;
 import com.github.lawena.app.task.PreviewGenerator;
-import com.github.lawena.model.LwrtFiles;
 import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.MainModel;
@@ -192,7 +189,8 @@ public class Tasks {
 
     private void scan() {
       resources.clear();
-      resources.addPaths(Paths.get("custom"));
+      resources.addPaths(Paths.get("lwrt/tf/default"));
+      resources.addPaths(Paths.get("lwrt/tf/custom"));
       resources.addPaths(settings.getTfPath().resolve("custom"));
       resources.validateRequired();
     }
@@ -202,44 +200,6 @@ public class Tasks {
       resources.loadResourceSettings();
       presenter.loadHudComboState();
     }
-  }
-
-  private class ResourceCopyTask extends SwingWorker<Boolean, Void> {
-
-    private Path from;
-
-    public ResourceCopyTask(Path from) {
-      this.from = from;
-    }
-
-    @Override
-    protected Boolean doInBackground() throws Exception {
-      status.info("Copying " + from + " into lawena custom folder...");
-      return files.copyToCustom(from);
-    }
-
-    @Override
-    protected void done() {
-      boolean result = false;
-      try {
-        result = get();
-      } catch (CancellationException | InterruptedException | ExecutionException e) {
-        log.warn("Custom path copy task was cancelled", e);
-      }
-      if (!result) {
-        try {
-          resources.addPath(from);
-          log.info(from + " added to custom resource list");
-        } catch (IOException e) {
-          log.warn("Problem while loading a custom path", e);
-        }
-      } else {
-        log.info(from + " copied to custom resource folder");
-      }
-      status.info(from.getFileName() + " was added"
-          + (result ? " to lawena custom folder" : " to custom resource list"));
-    }
-
   }
 
   private class SkyboxLoader extends SwingWorker<Void, Void> {
@@ -284,7 +244,6 @@ public class Tasks {
 
   private LwrtResources resources;
   private LwrtSettings settings;
-  private LwrtFiles files;
 
   private SegmentCleaner clearMoviesTask = null;
   private Launcher currentLaunchTask = null;
@@ -295,7 +254,6 @@ public class Tasks {
     this.view = presenter.getView();
     this.resources = model.getResources();
     this.settings = model.getSettings();
-    this.files = model.getFiles();
   }
 
   public MainModel getModel() {
@@ -366,10 +324,6 @@ public class Tasks {
 
   public void loadSkyboxes() {
     new SkyboxLoader().execute();
-  }
-
-  public void copyResourcesFrom(Path path) {
-    new ResourceCopyTask(path).execute();
   }
 
   public void generateSkyboxPreviews(List<String> list) {

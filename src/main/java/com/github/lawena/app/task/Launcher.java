@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
-import com.github.lawena.model.LwrtFiles;
+import com.github.lawena.app.model.Linker;
 import com.github.lawena.model.LwrtMovies;
 import com.github.lawena.model.LwrtResource;
 import com.github.lawena.model.LwrtResource.PathContents;
@@ -41,8 +41,8 @@ public class Launcher extends SwingWorker<Boolean, Void> {
   private OSInterface os;
   private LwrtSettings settings;
   private LwrtMovies movies;
-  private LwrtFiles files;
   private LwrtResources resources;
+  private Linker linker;
 
   public Launcher(Tasks tasks) {
     this.tasks = tasks;
@@ -53,8 +53,8 @@ public class Launcher extends SwingWorker<Boolean, Void> {
     this.os = model.getOsInterface();
     this.settings = model.getSettings();
     this.movies = model.getMovies();
-    this.files = model.getFiles();
     this.resources = model.getResources();
+    this.linker = model.getLinker();
   }
 
   @Override
@@ -69,6 +69,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
     if (tasks.getCurrentLaunchTask() == null) {
       tasks.setCurrentLaunchTask(this);
       tasks.setCurrentWorker(this, false);
+      // linker.setParentTask(this);
       setProgress(0);
 
       // Checking if the user selects "Custom" HUD in the dropdown,
@@ -80,8 +81,6 @@ public class Launcher extends SwingWorker<Boolean, Void> {
         log.info("Launch aborted because the custom HUD to use was not specified");
         return false;
       }
-
-      setProgress(10);
 
       // Check for big custom folders, mitigate OOM errors with custom folder > 2 GB
       Path tfpath = settings.getTfPath();
@@ -112,12 +111,13 @@ public class Launcher extends SwingWorker<Boolean, Void> {
         log.info("Could not determine folder size: " + e);
       }
 
-      setProgress(20);
+      setProgress(5);
       closeTf2Handles();
+      setProgress(15);
 
       // Restoring user files
       status.info("Restoring your files");
-      files.restoreAll();
+      linker.unlink();
       setProgress(40);
 
       // Saving ui settings to cfg files
@@ -145,17 +145,17 @@ public class Launcher extends SwingWorker<Boolean, Void> {
         log.info("Could not detect current movie slot");
       }
 
-      setProgress(60);
+      setProgress(50);
 
       // Backing up user files and copying lawena files
       status.info("Copying lawena files to cfg and custom...");
       try {
-        files.replaceAll();
+        linker.link();
       } catch (LawenaException e) {
         status.info(StatusAppender.ERROR, e.getMessage());
         return false;
       }
-      setProgress(80);
+      setProgress(95);
 
       // Launching process
       status.info("Launching TF2 process");
@@ -218,13 +218,13 @@ public class Launcher extends SwingWorker<Boolean, Void> {
         status.info("Attempting to finish TF2 process...");
         os.killTf2Process();
         Thread.sleep(5000);
-        if (!os.isRunningTF2()) {
-          tasks.getCurrentLaunchTask().cancel(true);
-        }
-        closeTf2Handles();
       } else {
         status.info("TF2 was not running, cancelling");
       }
+      if (!os.isRunningTF2()) {
+        tasks.getCurrentLaunchTask().cancel(true);
+      }
+      closeTf2Handles();
     }
 
     return true;
@@ -257,13 +257,14 @@ public class Launcher extends SwingWorker<Boolean, Void> {
     if (!isCancelled()) {
       tasks.setCurrentLaunchTask(null);
       tasks.setCurrentWorker(null, false);
+      // linker.setParentTask(null);
       view.getBtnStartTf().setEnabled(false);
       boolean ranTf2Correctly = false;
       try {
         ranTf2Correctly = get();
       } catch (InterruptedException | ExecutionException e) {
       }
-      boolean restoredAllFiles = files.restoreAll();
+      boolean restoredAllFiles = linker.unlink();
       if (ranTf2Correctly) {
         if (restoredAllFiles) {
           status.info(StatusAppender.OK, "TF2 has finished running. All files restored");

@@ -40,32 +40,25 @@ public class LwrtResources extends AbstractTableModel {
   private static final long serialVersionUID = 1L;
 
   private static final Map<Path, LwrtResource> defaultPaths = new LinkedHashMap<>();
-  private static final List<Path> ignoredPaths = new ArrayList<>();
-
-  public static final LwrtResource particles = new LwrtResource(
-      Paths.get("custom/pldx_particles.vpk"), "Enable enhanced particles",
-      EnumSet.of(PathContents.READONLY));
 
   {
     List<LwrtResource> list = new ArrayList<>();
-    list.add(new LwrtResource(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet
-        .of(PathContents.READONLY)));
-    list.add(new LwrtResource(Paths.get("custom/no_announcer_voices.vpk"),
+    list.add(new LwrtResource(Paths.get("lwrt/tf/default/default-config.vpk"), "default-config.vpk",
+        EnumSet.of(PathContents.READONLY)));
+    list.add(new LwrtResource(Paths.get("lwrt/tf/custom/no_announcer_voices.vpk"),
         "Disable announcer voices"));
-    list.add(new LwrtResource(Paths.get("custom/no_applause_sounds.vpk"), "Disable applause sounds"));
-    list.add(new LwrtResource(Paths.get("custom/no_domination_sounds.vpk"),
+    list.add(new LwrtResource(Paths.get("lwrt/tf/custom/no_applause_sounds.vpk"),
+        "Disable applause sounds"));
+    list.add(new LwrtResource(Paths.get("lwrt/tf/custom/no_domination_sounds.vpk"),
         "Disable domination/revenge sounds"));
-    list.add(particles);
     for (LwrtResource path : list) {
       path.getContents().add(PathContents.DEFAULT);
       defaultPaths.put(path.getPath(), path);
     }
-    ignoredPaths.add(Paths.get("custom/skybox.vpk"));
   }
 
   public static boolean accept(Path entry) throws IOException {
-    return (Files.isDirectory(entry) || entry.toString().endsWith(".vpk"))
-        && !ignoredPaths.contains(entry);
+    return (Files.isDirectory(entry) || entry.toString().endsWith(".vpk"));
   }
 
   private List<LwrtResource> list = new ArrayList<>();
@@ -301,7 +294,7 @@ public class LwrtResources extends AbstractTableModel {
     for (LwrtResource cp : defaultPaths.values()) {
       if (cp.getContents().contains(PathContents.DEFAULT) && !list.contains(cp)) {
         Path filename = cp.getPath().getFileName();
-        Path destdir = Paths.get("custom");
+        Path destdir = Paths.get("lwrt/tf/custom");
         unpackFileFromJar(Paths.get("lwrtvpks.jar"), filename.toString(), destdir);
         if (Files.exists(destdir.resolve(filename))) {
           addRow(cp);

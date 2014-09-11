@@ -149,7 +149,7 @@ public class Util {
   public static BufferedReader newProcessReader(Process p) {
     return new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("UTF-8")));
   }
-  
+
   public static long sizeOfPath(Path startPath) throws IOException {
     final AtomicLong size = new AtomicLong(0);
     Files.walkFileTree(startPath, new SimpleFileVisitor<Path>() {
@@ -174,6 +174,63 @@ public class Util {
     int exp = (int) (Math.log(bytes) / Math.log(unit));
     String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
     return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+  }
+
+  public static int startProcess(List<String> command, Consumer<String> consumer) {
+    try {
+      ProcessBuilder builder = new ProcessBuilder(command);
+      Process p = builder.start();
+      try (BufferedReader input = newProcessReader(p)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          consumer.consume(line);
+        }
+      }
+      return p.waitFor();
+    } catch (InterruptedException | IOException e) {
+      log.warn("Process could not be completed", e);
+    }
+    return 1;
+  }
+
+  public static int startUncheckedProcess(List<String> command, Consumer<String> consumer)
+      throws IOException, InterruptedException {
+    ProcessBuilder builder = new ProcessBuilder(command);
+    Process p = builder.start();
+    try (BufferedReader input = newProcessReader(p)) {
+      String line;
+      while ((line = input.readLine()) != null) {
+        consumer.consume(line);
+      }
+    }
+    return p.waitFor();
+  }
+
+  public static int startProcess(List<String> command) {
+    try {
+      ProcessBuilder builder = new ProcessBuilder(command);
+      Process p = builder.start();
+      return p.waitFor();
+    } catch (InterruptedException | IOException e) {
+      log.warn("Process could not be completed", e);
+    }
+    return 1;
+  }
+
+  public static int startUncheckedProcess(List<String> command) throws IOException,
+      InterruptedException {
+    ProcessBuilder builder = new ProcessBuilder(command);
+    Process p = builder.start();
+    return p.waitFor();
+  }
+
+  public static String leftPad(String str, int outputLength, char padChar) {
+    StringBuilder sb = new StringBuilder();
+    for (int toPrepend = outputLength - str.length(); toPrepend > 0; toPrepend--) {
+      sb.append(padChar);
+    }
+    sb.append(str);
+    return sb.toString();
   }
 
 }

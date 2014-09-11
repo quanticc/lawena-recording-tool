@@ -133,10 +133,9 @@ release.properties
 ### Lawena-specific ###
 *.lwf
 *.log
-cfg/settings.cfg
-cfg/namescroll.cfg
-cfg/mov/*.cfg
-custom/*
+lwrt/tf/config/cfg/settings.cfg
+lwrt/tf/config/cfg/namescroll.cfg
+lwrt/tf/config/cfg/mov/*.cfg
 version.txt
 *.lck
 !launcher/*.jar
@@ -144,3 +143,5 @@ launcher/*.exe
 src/main/dist/*.exe
 src/main/dist/lawena/code/*.exe
 *.ser.gz
+*.sound.cache
+

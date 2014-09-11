@@ -38,14 +38,12 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 
 import com.github.lawena.app.task.FileOpener;
-import com.github.lawena.model.LwrtFiles;
 import com.github.lawena.model.LwrtResource;
 import com.github.lawena.model.LwrtResource.PathContents;
 import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.LwrtSettings.Key;
 import com.github.lawena.model.MainModel;
-import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LaunchOptionsDialog;
 import com.github.lawena.ui.LawenaView;
@@ -67,13 +65,10 @@ public class Lawena {
   private LawenaView view;
 
   private LwrtSettings settings;
-  private LwrtFiles files;
   private DemoEditor demos;
   private LwrtResources resources;
-  private OSInterface os;
 
   private Tasks tasks;
-  private Particles particles;
   private Segments segments;
   private Branches branches;
 
@@ -84,6 +79,7 @@ public class Lawena {
   private JScrollPane customSettingsScrollPane;
   private Object lastHud;
   private LaunchOptionsDialog launchOptionsDialog;
+  private LoggingAppender appender;
 
   public Lawena(MainModel mainModel) {
     model = mainModel;
@@ -93,23 +89,16 @@ public class Lawena {
     view = new LawenaView();
     logView = new LogView();
     tasks = new Tasks(this);
-    particles = new Particles(this);
     segments = new Segments(this);
     branches = new Branches(this);
 
-    os = model.getOsInterface();
     settings = model.getSettings();
-    files = model.getFiles();
     demos = model.getDemos();
     resources = model.getResources();
 
     // setup ui loggers: log tab and status bar
-    final ch.qos.logback.classic.Logger rootLog =
-        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
-    final LoggingAppender appender =
-        new LoggingAppender(logView.getLogPane(), logView.getLogScroll(),
-            rootLog.getLoggerContext());
-    rootLog.addAppender(appender);
+    appender.setScroll(logView.getLogScroll());
+    appender.setPane(logView.getLogPane());
     ch.qos.logback.classic.Logger statusLog =
         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("status");
     statusLog.setAdditive(false);
@@ -142,13 +131,6 @@ public class Lawena {
           dialog.setModalityType(ModalityType.APPLICATION_MODAL);
         }
         dialog.setVisible(true);
-      }
-    });
-    view.getMntmSelectEnhancedParticles().addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        startParticlesDialog();
       }
     });
     view.getMntmAddCustomSettings().addActionListener(new ActionListener() {
@@ -214,6 +196,8 @@ public class Lawena {
       @Override
       public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
+          ch.qos.logback.classic.Logger rootLog =
+              (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
           Level level = Level.valueOf((String) e.getItem());
           log.info("Changing log level to {}", level);
           appender.setLevel(level);
@@ -241,9 +225,6 @@ public class Lawena {
           LwrtResource cp =
               (LwrtResource) model.getValueAt(row, LwrtResources.Column.PATH.ordinal());
           checkCustomHud(cp);
-          if (cp == LwrtResources.particles && cp.isSelected()) {
-            startParticlesDialog();
-          }
         }
       }
     });
@@ -342,7 +323,7 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        tasks.openFile(Paths.get("custom").toFile());
+        tasks.openFile(Paths.get("lwrt/tf/custom").toFile());
       }
     });
     view.getChckbxmntmInsecure().addActionListener(new ActionListener() {
@@ -438,10 +419,6 @@ public class Lawena {
       customSettingsScrollPane = new JScrollPane(getCustomSettingsTextArea());
     }
     return customSettingsScrollPane;
-  }
-
-  private void startParticlesDialog() {
-    particles.start();
   }
 
   private void startSegmentsDialog() {
@@ -568,15 +545,15 @@ public class Lawena {
   void saveAndExit() {
     saveSettings();
     view.setVisible(false);
-    if (!os.isRunningTF2()) {
-      files.restoreAll();
+    if (!model.getOsInterface().isRunningTF2()) {
+      model.getLinker().unlink();
     }
     System.exit(0);
   }
 
   void configureSkyboxes(final JComboBox<String> combo) {
     final Vector<String> data = new Vector<>();
-    Path dir = Paths.get("skybox");
+    Path dir = Paths.get("lwrt/tf/skybox/vtf");
     if (Files.exists(dir)) {
       log.info("Loading skybox folder");
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*up.vtf")) {
@@ -636,5 +613,13 @@ public class Lawena {
         JOptionPane.showMessageDialog(view, notice, "Updater Error", JOptionPane.WARNING_MESSAGE);
       }
     }
+  }
+
+  public LoggingAppender getAppender() {
+    return appender;
+  }
+
+  public void setAppender(LoggingAppender appender) {
+    this.appender = appender;
   }
 }

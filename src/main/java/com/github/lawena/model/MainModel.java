@@ -13,6 +13,7 @@ import javax.swing.JFileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.app.model.Linker;
 import com.github.lawena.model.LwrtSettings.Key;
 import com.github.lawena.os.LinuxInterface;
 import com.github.lawena.os.OSInterface;
@@ -30,13 +31,13 @@ public class MainModel {
   private Map<String, String> versionData;
   private OSInterface osInterface;
   private Updater updater;
+  private Linker linker;
 
   private String originalDxLevel;
   private Path steamPath;
   private JFileChooser movieFileChooser;
   private JFileChooser gameFileChooser;
 
-  private LwrtFiles files;
   private LwrtMovies movies;
   private LwrtResources resources;
   private DemoEditor demos;
@@ -65,7 +66,6 @@ public class MainModel {
       }
     }
     settings.setTfPath(tfpath);
-    files = new LwrtFiles(settings, osInterface);
 
     Path moviepath = settings.getMoviePath();
     if (moviepath == null || moviepath.toString().isEmpty() || !Files.exists(moviepath)) {
@@ -79,10 +79,11 @@ public class MainModel {
     settings.setMoviePath(moviepath);
 
     settings.save();
-    files.restoreAll();
+
+    linker = new Linker(this);
+    linker.unlink();
 
     resources = new LwrtResources(settings, osInterface);
-    files.setCustomPathList(resources);
 
     demos = new DemoEditor(settings, osInterface);
     skyboxes = new Skyboxes();
@@ -208,10 +209,6 @@ public class MainModel {
     return demos;
   }
 
-  public LwrtFiles getFiles() {
-    return files;
-  }
-
   public LwrtMovies getMovies() {
     return movies;
   }
@@ -244,6 +241,10 @@ public class MainModel {
     } catch (IOException e) {
       log.warn("Could not save skybox data to file: " + e);
     }
+  }
+
+  public Linker getLinker() {
+    return linker;
   }
 
 }

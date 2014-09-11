@@ -1,12 +1,16 @@
 package com.github.lawena.os;
 
+import static com.github.lawena.util.Util.startProcess;
+import static com.github.lawena.util.Util.startUncheckedProcess;
+
 import java.awt.Frame;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.tomahawk.ExtensionsFilter;
 import net.tomahawk.XFileDialog;
@@ -14,13 +18,11 @@ import net.tomahawk.XFileDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.util.Util;
+import com.github.lawena.util.Consumer;
 
 public class WindowsInterface extends OSInterface {
 
   private static final Logger log = LoggerFactory.getLogger(WindowsInterface.class);
-
-  private String hl2 = "hl2.exe";
 
   @Override
   public ProcessBuilder getBuilderStartTF2() {
@@ -29,7 +31,7 @@ public class WindowsInterface extends OSInterface {
 
   @Override
   public ProcessBuilder getBuilderTF2ProcessKiller() {
-    return new ProcessBuilder("taskkill", "/F", "/IM", hl2);
+    return new ProcessBuilder("taskkill", "/F", "/IM", "hl2.exe");
   }
 
   @Override
@@ -44,60 +46,40 @@ public class WindowsInterface extends OSInterface {
 
   @Override
   public boolean isRunningTF2() {
-    String line;
-    ProcessBuilder[] builders =
-        {
-            new ProcessBuilder("tasklist", "/fi", "\"imagename eq " + hl2 + "\"", "/nh", "/fo",
-                "csv"),
-            new ProcessBuilder("cscript", "//NoLogo", new File("batch\\procchk.vbs").getPath(), hl2)};
-    for (ProcessBuilder pb : builders) {
-      try {
-        Process p = pb.start();
-        try (BufferedReader input = Util.newProcessReader(p)) {
-          while ((line = input.readLine()) != null) {
-            if (line.contains(hl2)) {
-              log.trace("TF2 process detected by {}", pb.command().get(0));
-              return true;
-            }
+    final String hl2 = "hl2.exe";
+    String tool = Paths.get("lwrt/tools/processcheck/procchk.vbs").toAbsolutePath().toString();
+    List<List<String>> commandLists =
+        Arrays.asList(
+            Arrays.asList("tasklist", "/fi", "\"imagename eq " + hl2 + "\"", "/nh", "/fo", "csv"),
+            Arrays.asList("cscript", "//NoLogo", tool, hl2));
+    final AtomicBoolean running = new AtomicBoolean(false);
+    for (List<String> commands : commandLists) {
+      startProcess(commands, new Consumer<String>() {
+
+        @Override
+        public void consume(String line) {
+          if (line.contains(hl2)) {
+            running.set(true);
           }
         }
-      } catch (IOException e) {
-        log.warn("Problem while finding if TF2 is running", e);
+      });
+      if (running.get()) {
+        return true;
       }
     }
     log.debug("TF2 process not detected");
     return false;
   }
 
-  private void regedit(String key, String value, String content) {
-    try {
-      File file = new File("batch", "rg.bat");
-      ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath(), key, value, content);
-      pb.environment().clear();
-      pb.directory(null);
-      Process p = pb.start();
-      p.waitFor();
-    } catch (InterruptedException | IOException e) {
-      log.warn("Could not restore registry value: " + e);
-    }
-  }
-
   private String regQuery(String key, String value, int mode) {
-    StringBuilder result = new StringBuilder();
-    try {
-      ProcessBuilder pb = new ProcessBuilder("reg", "query", key, "/v", value);
-      Process p = pb.start();
-      try (BufferedReader input = Util.newProcessReader(p)) {
-        String line;
-        while ((line = input.readLine()) != null) {
-          result.append(line + '\n');
-        }
-      }
-      p.waitFor();
-    } catch (InterruptedException | IOException e) {
-      log.warn("Could not retrieve dxlevel registry value: " + e);
-    }
+    final StringBuilder result = new StringBuilder();
+    startProcess(Arrays.asList("reg", "query", key, "/v", value), new Consumer<String>() {
 
+      @Override
+      public void consume(String line) {
+        result.append(line + '\n');
+      }
+    });
     try {
       if (mode == 0) {
         return result.substring(result.lastIndexOf("0x") + 2,
@@ -118,14 +100,15 @@ public class WindowsInterface extends OSInterface {
 
   @Override
   public void setSystemDxLevel(String dxlevel) {
-    regedit("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1", dxlevel);
+    String tool = Paths.get("lwrt/tools/regedit/rg.bat").toAbsolutePath().toString();
+    startProcess(Arrays.asList(tool, "HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",
+        "DXLevel_V1", dxlevel));
   }
 
   @Override
   public void openFolder(Path dir) {
     try {
-      Process pr = Runtime.getRuntime().exec("explorer.exe /select," + dir.toString());
-      pr.waitFor();
+      startUncheckedProcess(Arrays.asList("explorer.exe", "/select," + dir.toString()));
     } catch (IOException | InterruptedException e) {
       // fallback to Java desktop API
       super.openFolder(dir);
@@ -133,85 +116,66 @@ public class WindowsInterface extends OSInterface {
   }
 
   private void closeHandle(String pid, String handle) {
-    try {
-      File file = new File("batch", "handle.exe");
-      ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath(), "-c", handle, "-p", pid, "-y");
-      pb.environment().clear();
-      pb.directory(null);
-      Process p = pb.start();
-      try (BufferedReader input = Util.newProcessReader(p)) {
-        String line;
-        int count = 0;
-        while ((line = input.readLine()) != null) {
-          if (count > 7) {
-            log.debug("[handle] " + line);
-          }
-          count++;
+    String tool = Paths.get("lwrt/tools/handle/handle.exe").toAbsolutePath().toString();
+    startProcess(Arrays.asList(tool, "-c", handle, "-p", pid, "-y"), new Consumer<String>() {
+
+      int count = 0;
+
+      @Override
+      public void consume(String line) {
+        if (count > 7) {
+          log.debug("[handle] {}", line);
         }
+        count++;
       }
-      p.waitFor();
-    } catch (InterruptedException | IOException e) {
-      log.warn("", e);
-    }
+    });
   }
 
   @Override
   public void closeHandles(Path path) {
-    try {
-      File file = new File("batch", "handle.exe");
-      ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath(), path.toString());
-      pb.environment().clear();
-      pb.directory(null);
-      Process p = pb.start();
-      try (BufferedReader input = Util.newProcessReader(p)) {
-        String line;
-        int count = 0;
-        while ((line = input.readLine()) != null) {
-          if (count > 4) {
-            String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
-            if (columns.length == 4) {
-              log.debug("[handle] Closing handle {} opened by {}", columns[3], columns[0]);
-              closeHandle(columns[1], columns[2]);
-            } else {
-              log.debug("[handle] " + line);
-            }
+    String tool = Paths.get("lwrt/tools/handle/handle.exe").toAbsolutePath().toString();
+    startProcess(Arrays.asList(tool, path.toString()), new Consumer<String>() {
+
+      int count = 0;
+
+      @Override
+      public void consume(String line) {
+        if (count > 4) {
+          String[] columns = line.split("[ ]+type: [A-Za-z]+[ ]+|: |[ ]+pid: ");
+          if (columns.length == 4) {
+            log.debug("[handle] Closing handle {} opened by {}", columns[3], columns[0]);
+            closeHandle(columns[1], columns[2]);
+          } else {
+            log.debug("[handle] {}", line);
           }
-          count++;
         }
+        count++;
       }
-      p.waitFor();
-    } catch (InterruptedException | IOException e) {
-      log.warn("", e);
-    }
+    });
   }
 
   @Override
   public void delete(Path path) {
-    try {
-      ProcessBuilder pb = new ProcessBuilder("del", "/f", "/s", "/q", "/a", path.toString());
-      Process p = pb.start();
-      try (BufferedReader input = Util.newProcessReader(p)) {
-        String line;
-        while ((line = input.readLine()) != null) {
-          log.debug("[delete] " + line);
-        }
-      }
-      p.waitFor();
-    } catch (InterruptedException | IOException e) {
-      log.warn("", e);
-    }
+    startProcess(Arrays.asList("cmd", "/c", "del", "/f", "/s", "/q", "/a", path.toString()),
+        new Consumer<String>() {
+
+          @Override
+          public void consume(String line) {
+            log.debug("[delete] {}", line);
+          }
+        });
   }
 
   @Override
   public String getVTFCmdLocation() {
-    return "vtfcmd/VTFCmd.exe";
+    return Paths.get("lwrt/tools/vtfcmd/VTFCmd.exe").toAbsolutePath().toString();
   }
 
   @Override
   public String chooseSingleFolder(Frame parent, String title, String path) {
     if (parent == null) {
       log.warn("Parent frame must not be null to use native dialog");
-      return super.chooseSingleFolder(parent, title, path);
+      return super.chooseSingleFolder(null, title, path);
     } else {
       XFileDialog dialog = new XFileDialog(parent);
       dialog.setTitle(title);
@@ -227,7 +191,7 @@ public class WindowsInterface extends OSInterface {
       List<ExtensionsFilter> filters) {
     if (parent == null) {
       log.warn("Parent frame must not be null to use native dialog");
-      return super.chooseSaveFile(parent, title, path, filters);
+      return super.chooseSaveFile(null, title, path, filters);
     } else {
       XFileDialog dialog = new XFileDialog(parent);
       dialog.setTitle(title);
@@ -244,7 +208,7 @@ public class WindowsInterface extends OSInterface {
       List<ExtensionsFilter> filters) {
     if (parent == null) {
       log.warn("Parent frame must not be null to use native dialog");
-      return super.chooseSingleFile(parent, title, path, filters);
+      return super.chooseSingleFile(null, title, path, filters);
     } else {
       XFileDialog dialog = new XFileDialog(parent);
       dialog.setTitle(title);

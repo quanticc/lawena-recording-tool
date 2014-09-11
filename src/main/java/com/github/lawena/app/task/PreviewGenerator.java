@@ -57,14 +57,15 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
     }
     int count = 0;
     List<String> boxes = Arrays.asList("lf", "bk", "rt", "ft");
-    String outputDir = "skybox-preview";
+    String inputDir = "lwrt/tf/skybox/vtf";
+    String outputDir = "lwrt/tf/skybox-preview";
     String format = "png";
     for (String name : skyboxNames) {
       count++;
       setProgress((int) (100 * ((double) count / skyboxNames.size())));
       status.info("Generating skybox preview: {}", name);
       if (!model.getSkyboxes().getMap().containsKey(name)) {
-        List<Path> inputs = withParams("skybox", name, boxes, ".vtf");
+        List<Path> inputs = withParams(inputDir, name, boxes, ".vtf");
         List<Path> outputs = withParams(outputDir, name, boxes, "." + format);
         List<Path> vtfin = new ArrayList<>();
         for (int i = 0; i < inputs.size(); i++) {

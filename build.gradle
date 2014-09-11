@@ -136,6 +136,21 @@ task copyLauncherNew(type: Copy, dependsOn: 'copyLauncher') {
     rename 'lawena.exe', 'lawena-new.exe'
 }
 
+task buildExecutable {
+    inputs.file 'launcher/lawena-start.xml'
+    outputs.file 'launcher/lawena-start.exe'
+    doLast {
+        exec {
+            workingDir 'launcher'
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', launch4jPath, 'lawena-start.xml'
+            } else {
+                commandLine launch4jPath, 'lawena-start.xml'
+            }
+        }
+    }
+}
+
 task copyGetdownClient(type: Copy, dependsOn: 'copyLauncherNew') {
     from 'launcher/getdown-client.jar'
     into 'src/main/dist/lawena'
@@ -171,28 +186,28 @@ task packResources(type: Zip) {
     archiveName = 'lwrtresources.jar'
     destinationDir = file('src/main/dist/lawena')
     from projectDir
-    includes = ['cfg/**', 'hud/**']
+    includes = ['lwrt/tf/config/cfg/**', 'lwrt/tf/hud/**']
 }
 
 task packVpks(type: Zip) {
     archiveName = 'lwrtvpks.jar'
     destinationDir = file('src/main/dist/lawena')
     from projectDir
-    includes = ['custom/**']
+    includes = ['lwrt/tf/default/**', 'lwrt/tf/custom/**']
 }
 
 task packWinBatches(type: Zip) {
     archiveName = 'lwrtwinstuff.jar'
     destinationDir = file('src/main/dist/lawena')
     from projectDir
-    includes = ['batch/**', 'vtfcmd/**', '*.dll']
+    includes = ['lwrt/tools/**', '*.dll']
 }
 
 task packSkyboxes(type: Zip) {
     archiveName = 'skybox.jar'
     destinationDir = file('src/main/dist/lawena')
     from projectDir
-    includes = ['skybox/**']
+    includes = ['lwrt/tf/skybox/**']
     excludes = ['**/*.db']
 }
 

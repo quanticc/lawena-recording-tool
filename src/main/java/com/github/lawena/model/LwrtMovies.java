@@ -35,7 +35,8 @@ public class LwrtMovies {
         alias = "alias namescroll noslots";
       }
     }
-    Files.write(Paths.get("cfg/namescroll.cfg"), Arrays.asList(alias), Charset.forName("UTF-8"));
+    Files.write(Paths.get("lwrt/tf/config/cfg/namescroll.cfg"), Arrays.asList(alias),
+        Charset.forName("UTF-8"));
   }
 
   public void createMovienameCfgs() throws IOException {
@@ -49,7 +50,7 @@ public class LwrtMovies {
       String line =
           "startmovie \"" + cfg.getMoviePath() + "/" + prefix + "_\" " + video + " " + audio
               + (video.equals("jpg") ? " jpeg_quality " + quality : "");
-      Files.write(Paths.get("cfg/mov/" + prefix + ".cfg"), Arrays.asList(line),
+      Files.write(Paths.get("lwrt/tf/config/cfg/mov/" + prefix + ".cfg"), Arrays.asList(line),
           Charset.forName("UTF-8"));
     }
   }

@@ -1,18 +1,16 @@
-/**
- * Copyright (C) 2010 Leon Blakey <lord.quackstar at gmail.com>
- *
- * Based on LoggingAppender from https://code.google.com/p/quackedcube/
- */
 package com.github.lawena.util;
 
 import java.awt.Color;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -30,20 +28,64 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(LoggingAppender.class);
+  private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss");
 
-  private final JTextPane pane;
-  private final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss");
+  private JTextPane pane;
+  private JScrollPane scroll;
   private boolean printStackTrace = false;
   private Level level = Level.DEBUG;
+  private DocumentListener listener;
+  private Queue<ILoggingEvent> queue = new ArrayDeque<>();
 
-  public LoggingAppender(JTextPane pane, JScrollPane scroll, LoggerContext context) {
-    this.pane = pane;
+  public LoggingAppender(LoggerContext context) {
     setName("LoggingAppender");
     setContext(context);
     start();
-    DefaultCaret caret = (DefaultCaret) pane.getCaret();
-    caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-    pane.getDocument().addDocumentListener(new ScrollingDocumentListener(pane, scroll));
+  }
+
+  public JTextPane getPane() {
+    return pane;
+  }
+
+  public void setPane(JTextPane pane) {
+    removeListener();
+    this.pane = pane;
+    addListener();
+    dequeueAllEvents();
+  }
+
+  private void dequeueAllEvents() {
+    if (pane != null) {
+      while (!queue.isEmpty()) {
+        SwingUtilities.invokeLater(new WriteOutput(queue.poll()));
+      }
+    }
+  }
+
+  public JScrollPane getScroll() {
+    return scroll;
+  }
+
+  public void setScroll(JScrollPane scroll) {
+    removeListener();
+    this.scroll = scroll;
+    addListener();
+    dequeueAllEvents();
+  }
+
+  private void removeListener() {
+    if (pane != null && scroll != null && listener != null) {
+      pane.getDocument().removeDocumentListener(listener);
+    }
+  }
+
+  private void addListener() {
+    if (pane != null && scroll != null) {
+      DefaultCaret caret = (DefaultCaret) pane.getCaret();
+      caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+      listener = new ScrollingDocumentListener(pane, scroll);
+      pane.getDocument().addDocumentListener(listener);
+    }
   }
 
   public boolean isPrintStackTrace() {
@@ -66,9 +108,17 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   public void append(ILoggingEvent event) {
     if (!event.getLoggerName().equals("status") && event.getLevel().isGreaterOrEqual(level)) {
       if (event.getMarker() == null || !event.getMarker().contains("no-ui-log")) {
-        SwingUtilities.invokeLater(new WriteOutput(event));
+        if (pane != null) {
+          SwingUtilities.invokeLater(new WriteOutput(event));
+        } else {
+          queue(event);
+        }
       }
     }
+  }
+
+  private void queue(ILoggingEvent event) {
+    queue.add(event);
   }
 
   public class WriteOutput implements Runnable {

@@ -24,42 +24,20 @@ public class LwrtSettings {
 
   public enum Key {
 
-    TfDir(""),
-    MovieDir(""),
-    Width(1280, 640, Integer.MAX_VALUE),
-    Height(720, 360, Integer.MAX_VALUE),
-    Framerate(120, 24, Integer.MAX_VALUE),
-    DxLevel("98", "80", "81", "90", "95", "98"),
-    Hud("hud_medic", "hud_killnotices", "hud_medic", "hud_default", "custom"),
-    Skybox("Default"),
-    CustomResources("no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"),
-    ViewmodelSwitch("on", "on", "off", "default"),
-    ViewmodelFov(70, Integer.MIN_VALUE, Integer.MAX_VALUE),
-    MotionBlur(true),
-    Crosshair(false),
-    CrosshairSwitch(false),
-    CombatText(false),
-    Hitsounds(false),
-    Voice(false),
-    SteamCloud(false),
-    HudMinmode(true),
-    HudPlayerModel(false),
-    Particles(""),
-    LaunchTimeout(120, 0, Integer.MAX_VALUE),
-    @Deprecated
-    Insecure(false),
-    VdmSrcDemoFix(false),
-    CustomSettings("// Custom User Settings"),
-    SourceRecorderVideoFormat("tga", "tga", "jpg"),
-    SourceRecorderAudioFormat("wav", "wav", ""),
-    SourceRecorderJpegQuality(50, 1, 100),
-    DeleteBackupsWhenRestoring(true),
-    SkyboxDataSavePath("skybox.ser.gz"),
-    BigFolderMBThreshold(200, 0, Integer.MAX_VALUE),
-    DemosRelativeFolder(""),
-    LoadKillstreakFile(true),
-    KillstreakFileName("KillStreaks.txt"),
-    LaunchOptions("-novid -console");
+    TfDir(""), MovieDir(""), Width(1280, 640, Integer.MAX_VALUE), Height(720, 360,
+        Integer.MAX_VALUE), Framerate(120, 24, Integer.MAX_VALUE), DxLevel("98", "80", "81", "90",
+        "95", "98"), Hud("hud_medic", "hud_killnotices", "hud_medic", "hud_default", "custom"), Skybox(
+        "Default"), CustomResources(
+        "no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"), ViewmodelSwitch(
+        "on", "on", "off", "default"), ViewmodelFov(70, Integer.MIN_VALUE, Integer.MAX_VALUE), MotionBlur(
+        true), Crosshair(false), CrosshairSwitch(false), CombatText(false), Hitsounds(false), Voice(
+        false), SteamCloud(false), HudMinmode(true), HudPlayerModel(false), Particles(""), LaunchTimeout(
+        120, 0, Integer.MAX_VALUE), @Deprecated
+    Insecure(false), VdmSrcDemoFix(false), CustomSettings("// Custom User Settings"), SourceRecorderVideoFormat(
+        "tga", "tga", "jpg"), SourceRecorderAudioFormat("wav", "wav", ""), SourceRecorderJpegQuality(
+        50, 1, 100), DeleteBackupsWhenRestoring(true), SkyboxDataSavePath("skybox.ser.gz"), BigFolderMBThreshold(
+        200, 0, Integer.MAX_VALUE), DemosRelativeFolder(""), LoadKillstreakFile(true), KillstreakFileName(
+        "KillStreaks.txt"), LaunchOptions("-novid -console");
 
     private Object value;
     private List<String> allowedValues;
@@ -231,13 +209,13 @@ public class LwrtSettings {
     lines.add((getViewmodelSwitch().equals("on") ? "//" : "") + "lockviewmodelsoff");
     lines.add((crosshairswitch ? "//" : "") + "lockcrosshair");
     lines.add((crosshairswitch ? "//" : "") + "alias toggle \"\"");
-    Files.write(Paths.get("cfg/settings.cfg"), lines, Charset.forName("UTF-8"));
+    Files.write(Paths.get("lwrt/tf/config/cfg/settings.cfg"), lines, Charset.forName("UTF-8"));
 
     if (demoname != null) {
-      Files.write(Paths.get("cfg/lawena.cfg"), Arrays.asList("playdemo \"" + demoname + "\""),
-          Charset.forName("UTF-8"));
+      Files.write(Paths.get("lwrt/tf/config/cfg/lawena.cfg"),
+          Arrays.asList("playdemo \"" + demoname + "\""), Charset.forName("UTF-8"));
     } else {
-      Files.deleteIfExists(Paths.get("cfg/lawena.cfg"));
+      Files.deleteIfExists(Paths.get("lwrt/tf/config/cfg/lawena.cfg"));
     }
   }
 

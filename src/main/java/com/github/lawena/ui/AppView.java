@@ -41,7 +41,7 @@ import javax.swing.border.TitledBorder;
 
 import com.github.lawena.app.task.LinkRunner;
 
-public class LawenaView extends JFrame {
+public class AppView extends JFrame {
 
   private static final long serialVersionUID = 1L;
 
@@ -117,6 +117,7 @@ public class LawenaView extends JFrame {
   private JMenuItem mntmChangeTfDirectory;
   private JMenuItem mntmChangeMovieDirectory;
   private JMenuItem mntmSaveSettings;
+  private JMenuItem mntmSelectEnhancedParticles;
   private JMenuItem mntmAddCustomSettings;
   private JMenuItem mntmOpenMovieFolder;
   private JMenuItem mntmOpenCustomFolder;
@@ -128,8 +129,9 @@ public class LawenaView extends JFrame {
   private JMenuItem switchUpdaterBranchMenuItem;
   private JMenuItem showLogMenuItem;
   private JMenuItem customLaunchOptionsMenuItem;
+  private JTable resourcesTable;
 
-  public LawenaView() {
+  public AppView() {
     super();
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -174,6 +176,9 @@ public class LawenaView extends JFrame {
     JMenu mnAdvanced = new JMenu(" Advanced ");
     menuBar.add(mnAdvanced);
 
+    JMenuItem mntmSelectEnhancedParticles = new JMenuItem("Enhanced Particles...");
+    mnAdvanced.add(mntmSelectEnhancedParticles);
+
     JMenuItem mntmAddCustomSettings = new JMenuItem("Custom Settings/CVars...");
     mnAdvanced.add(mntmAddCustomSettings);
 
@@ -200,7 +205,7 @@ public class LawenaView extends JFrame {
     menuBar.add(mnHelp);
 
     JMenuItem showLogMenuItem = new JMenuItem("Show Log");
-    showLogMenuItem.setIcon(new ImageIcon(LawenaView.class
+    showLogMenuItem.setIcon(new ImageIcon(AppView.class
         .getResource("/com/github/lawena/ui/fugue/clock.png")));
     mnHelp.add(showLogMenuItem);
 
@@ -321,6 +326,7 @@ public class LawenaView extends JFrame {
     panelCustomContent.setLayout(gbl_panelCustomContent);
 
     JScrollPane scrollPane = new JScrollPane();
+    scrollPane.setToolTipText("Copy folders to lawena/custom folder to make them appear here");
     GridBagConstraints gbc_scrollPane = new GridBagConstraints();
     gbc_scrollPane.fill = GridBagConstraints.BOTH;
     gbc_scrollPane.gridx = 0;
@@ -638,6 +644,7 @@ public class LawenaView extends JFrame {
     this.mntmAbout = mntmAbout;
     this.mntmSaveSettings = mntmSaveSettings;
     this.useHudMinmode = useHudMinmode;
+    this.mntmSelectEnhancedParticles = mntmSelectEnhancedParticles;
     this.mntmAddCustomSettings = mntmAddCustomSettings;
     this.mntmOpenMovieFolder = mntmOpenMovieFolder;
     this.mntmOpenCustomFolder = mntmOpenCustomFolder;
@@ -648,6 +655,189 @@ public class LawenaView extends JFrame {
     this.spinnerJpegQuality = spinnerJpegQuality;
     this.lblViewmodelFov = lblViewmodelFov;
     this.lblJpegQuality = lblJpegQuality;
+
+    JPanel mainPanel = new JPanel();
+    mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+    tabbedPane.addTab("Lawena Settings", null, mainPanel, null);
+    mainPanel.setLayout(new BorderLayout(5, 5));
+
+    JPanel rightPanel = new JPanel();
+    mainPanel.add(rightPanel, BorderLayout.EAST);
+    GridBagLayout gbl_rightPanel = new GridBagLayout();
+    gbl_rightPanel.columnWidths = new int[] {0, 0, 0};
+    gbl_rightPanel.rowHeights = new int[] {0, 0, 0, 0};
+    gbl_rightPanel.columnWeights = new double[] {0.0, 1.0, Double.MIN_VALUE};
+    gbl_rightPanel.rowWeights = new double[] {0.0, 0.0, 1.0, Double.MIN_VALUE};
+    rightPanel.setLayout(gbl_rightPanel);
+
+    JLabel hudLabel = new JLabel("HUD:");
+    GridBagConstraints gbc_hudLabel = new GridBagConstraints();
+    gbc_hudLabel.anchor = GridBagConstraints.EAST;
+    gbc_hudLabel.insets = new Insets(0, 0, 5, 5);
+    gbc_hudLabel.gridx = 0;
+    gbc_hudLabel.gridy = 0;
+    rightPanel.add(hudLabel, gbc_hudLabel);
+
+    JComboBox<String> hudComboBox = new JComboBox<>();
+    GridBagConstraints gbc_hudComboBox = new GridBagConstraints();
+    gbc_hudComboBox.insets = new Insets(0, 0, 5, 0);
+    gbc_hudComboBox.fill = GridBagConstraints.HORIZONTAL;
+    gbc_hudComboBox.gridx = 1;
+    gbc_hudComboBox.gridy = 0;
+    rightPanel.add(hudComboBox, gbc_hudComboBox);
+
+    JLabel skyboxLabel = new JLabel("Skybox:");
+    GridBagConstraints gbc_skyboxLabel = new GridBagConstraints();
+    gbc_skyboxLabel.anchor = GridBagConstraints.EAST;
+    gbc_skyboxLabel.insets = new Insets(0, 0, 5, 5);
+    gbc_skyboxLabel.gridx = 0;
+    gbc_skyboxLabel.gridy = 1;
+    rightPanel.add(skyboxLabel, gbc_skyboxLabel);
+
+    JComboBox<String> skyboxComboBox = new JComboBox<>();
+    GridBagConstraints gbc_skyboxComboBox = new GridBagConstraints();
+    gbc_skyboxComboBox.insets = new Insets(0, 0, 5, 0);
+    gbc_skyboxComboBox.fill = GridBagConstraints.HORIZONTAL;
+    gbc_skyboxComboBox.gridx = 1;
+    gbc_skyboxComboBox.gridy = 1;
+    rightPanel.add(skyboxComboBox, gbc_skyboxComboBox);
+
+    JScrollPane resourcesTableScrollPane = new JScrollPane();
+    GridBagConstraints gbc_resourcesTableScrollPane = new GridBagConstraints();
+    gbc_resourcesTableScrollPane.gridwidth = 2;
+    gbc_resourcesTableScrollPane.fill = GridBagConstraints.BOTH;
+    gbc_resourcesTableScrollPane.gridx = 0;
+    gbc_resourcesTableScrollPane.gridy = 2;
+    rightPanel.add(resourcesTableScrollPane, gbc_resourcesTableScrollPane);
+
+    resourcesTable = new JTable();
+    resourcesTable.setPreferredScrollableViewportSize(new Dimension(250, 0));
+    resourcesTableScrollPane.setViewportView(resourcesTable);
+
+    JPanel centerPanel = new JPanel();
+    mainPanel.add(centerPanel, BorderLayout.CENTER);
+    GridBagLayout gbl_centerPanel = new GridBagLayout();
+    gbl_centerPanel.columnWidths = new int[] {0, 120, 0, 0, 0};
+    gbl_centerPanel.rowHeights = new int[] {0, 0, 0, 0, 0};
+    gbl_centerPanel.columnWeights = new double[] {0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+    gbl_centerPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+    centerPanel.setLayout(gbl_centerPanel);
+
+    JLabel resolutionLabel = new JLabel("Resolution:");
+    GridBagConstraints gbc_resolutionLabel = new GridBagConstraints();
+    gbc_resolutionLabel.anchor = GridBagConstraints.EAST;
+    gbc_resolutionLabel.insets = new Insets(0, 0, 5, 5);
+    gbc_resolutionLabel.gridx = 0;
+    gbc_resolutionLabel.gridy = 0;
+    centerPanel.add(resolutionLabel, gbc_resolutionLabel);
+
+    JComboBox<String> resolutionComboBox = new JComboBox<>();
+    resolutionComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"1920x1080"}));
+    GridBagConstraints gbc_resolutionComboBox = new GridBagConstraints();
+    gbc_resolutionComboBox.insets = new Insets(0, 0, 5, 5);
+    gbc_resolutionComboBox.fill = GridBagConstraints.HORIZONTAL;
+    gbc_resolutionComboBox.gridx = 1;
+    gbc_resolutionComboBox.gridy = 0;
+    centerPanel.add(resolutionComboBox, gbc_resolutionComboBox);
+
+    JLabel dxlevelLabel = new JLabel("DxLevel:");
+    GridBagConstraints gbc_dxlevelLabel = new GridBagConstraints();
+    gbc_dxlevelLabel.insets = new Insets(0, 0, 5, 5);
+    gbc_dxlevelLabel.anchor = GridBagConstraints.EAST;
+    gbc_dxlevelLabel.gridx = 2;
+    gbc_dxlevelLabel.gridy = 0;
+    centerPanel.add(dxlevelLabel, gbc_dxlevelLabel);
+
+    JComboBox<String> dxlevelComboBox = new JComboBox<>();
+    dxlevelComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"98", "95", "90", "81",
+        "80"}));
+    GridBagConstraints gbc_dxlevelComboBox = new GridBagConstraints();
+    gbc_dxlevelComboBox.insets = new Insets(0, 0, 5, 0);
+    gbc_dxlevelComboBox.fill = GridBagConstraints.HORIZONTAL;
+    gbc_dxlevelComboBox.gridx = 3;
+    gbc_dxlevelComboBox.gridy = 0;
+    centerPanel.add(dxlevelComboBox, gbc_dxlevelComboBox);
+
+    JLabel fpsLabel = new JLabel("Recording FPS:");
+    GridBagConstraints gbc_fpsLabel = new GridBagConstraints();
+    gbc_fpsLabel.anchor = GridBagConstraints.EAST;
+    gbc_fpsLabel.insets = new Insets(0, 0, 5, 5);
+    gbc_fpsLabel.gridx = 0;
+    gbc_fpsLabel.gridy = 1;
+    centerPanel.add(fpsLabel, gbc_fpsLabel);
+
+    JComboBox<String> fpsComboBox = new JComboBox<>();
+    GridBagConstraints gbc_fpsComboBox = new GridBagConstraints();
+    gbc_fpsComboBox.insets = new Insets(0, 0, 5, 5);
+    gbc_fpsComboBox.fill = GridBagConstraints.HORIZONTAL;
+    gbc_fpsComboBox.gridx = 1;
+    gbc_fpsComboBox.gridy = 1;
+    centerPanel.add(fpsComboBox, gbc_fpsComboBox);
+
+    JLabel frameOutputLabel = new JLabel("Frame Output:");
+    GridBagConstraints gbc_frameOutputLabel = new GridBagConstraints();
+    gbc_frameOutputLabel.anchor = GridBagConstraints.EAST;
+    gbc_frameOutputLabel.insets = new Insets(0, 0, 5, 5);
+    gbc_frameOutputLabel.gridx = 0;
+    gbc_frameOutputLabel.gridy = 2;
+    centerPanel.add(frameOutputLabel, gbc_frameOutputLabel);
+
+    JComboBox<String> frameOutputComboBox = new JComboBox<>();
+    frameOutputComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"TGA", "JPEG"}));
+    GridBagConstraints gbc_frameOutputComboBox = new GridBagConstraints();
+    gbc_frameOutputComboBox.insets = new Insets(0, 0, 5, 5);
+    gbc_frameOutputComboBox.fill = GridBagConstraints.HORIZONTAL;
+    gbc_frameOutputComboBox.gridx = 1;
+    gbc_frameOutputComboBox.gridy = 2;
+    centerPanel.add(frameOutputComboBox, gbc_frameOutputComboBox);
+
+    JLabel jpegQualityLabel = new JLabel("Quality:");
+    GridBagConstraints gbc_jpegQualityLabel = new GridBagConstraints();
+    gbc_jpegQualityLabel.anchor = GridBagConstraints.EAST;
+    gbc_jpegQualityLabel.insets = new Insets(0, 0, 5, 5);
+    gbc_jpegQualityLabel.gridx = 2;
+    gbc_jpegQualityLabel.gridy = 2;
+    centerPanel.add(jpegQualityLabel, gbc_jpegQualityLabel);
+
+    JSpinner jpegQualitySpinner = new JSpinner();
+    GridBagConstraints gbc_jpegQualitySpinner = new GridBagConstraints();
+    gbc_jpegQualitySpinner.insets = new Insets(0, 0, 5, 0);
+    gbc_jpegQualitySpinner.fill = GridBagConstraints.HORIZONTAL;
+    gbc_jpegQualitySpinner.gridx = 3;
+    gbc_jpegQualitySpinner.gridy = 2;
+    centerPanel.add(jpegQualitySpinner, gbc_jpegQualitySpinner);
+
+    JLabel viewmodelsLabel = new JLabel("Viewmodels:");
+    GridBagConstraints gbc_viewmodelsLabel = new GridBagConstraints();
+    gbc_viewmodelsLabel.anchor = GridBagConstraints.EAST;
+    gbc_viewmodelsLabel.insets = new Insets(0, 0, 0, 5);
+    gbc_viewmodelsLabel.gridx = 0;
+    gbc_viewmodelsLabel.gridy = 3;
+    centerPanel.add(viewmodelsLabel, gbc_viewmodelsLabel);
+
+    JComboBox<String> viewmodelsComboBox = new JComboBox<>();
+    viewmodelsComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"Force Enable",
+        "Force Disable", "Keep Default"}));
+    GridBagConstraints gbc_viewmodelsComboBox = new GridBagConstraints();
+    gbc_viewmodelsComboBox.insets = new Insets(0, 0, 0, 5);
+    gbc_viewmodelsComboBox.fill = GridBagConstraints.HORIZONTAL;
+    gbc_viewmodelsComboBox.gridx = 1;
+    gbc_viewmodelsComboBox.gridy = 3;
+    centerPanel.add(viewmodelsComboBox, gbc_viewmodelsComboBox);
+
+    JLabel vmodelLabel = new JLabel("Vmodel FOV:");
+    GridBagConstraints gbc_vmodelLabel = new GridBagConstraints();
+    gbc_vmodelLabel.insets = new Insets(0, 0, 0, 5);
+    gbc_vmodelLabel.gridx = 2;
+    gbc_vmodelLabel.gridy = 3;
+    centerPanel.add(vmodelLabel, gbc_vmodelLabel);
+
+    JSpinner vmodelFovSpinner = new JSpinner();
+    GridBagConstraints gbc_vmodelFovSpinner = new GridBagConstraints();
+    gbc_vmodelFovSpinner.fill = GridBagConstraints.HORIZONTAL;
+    gbc_vmodelFovSpinner.gridx = 3;
+    gbc_vmodelFovSpinner.gridy = 3;
+    centerPanel.add(vmodelFovSpinner, gbc_vmodelFovSpinner);
     this.chckbxmntmBackupMode = chckbxmntmBackupMode;
     this.checkForUpdatesMenuItem = checkForUpdatesMenuItem;
     this.switchUpdaterBranchMenuItem = switchUpdaterBranchMenuItem;
@@ -769,6 +959,10 @@ public class LawenaView extends JFrame {
 
   public JCheckBox getUseHudMinmode() {
     return useHudMinmode;
+  }
+
+  public JMenuItem getMntmSelectEnhancedParticles() {
+    return mntmSelectEnhancedParticles;
   }
 
   public JMenuItem getMntmAddCustomSettings() {
