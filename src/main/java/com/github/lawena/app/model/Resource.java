@@ -1,6 +1,7 @@
 package com.github.lawena.app.model;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,6 +41,27 @@ public class Resource {
     this.file = file;
   }
 
+  public Path getPath() {
+    return file.toPath();
+  }
+
+  public void setPath(Path path) {
+    this.file = path.toFile();
+  }
+
+  public Path getAbsolutePath() {
+    return file.toPath().toAbsolutePath();
+  }
+
+  /**
+   * Returns the absolute parent <code>Path</code> of this <code>Resource</code>.
+   * 
+   * @return a <code>Path</code> to the parent of this <code>Resource</code>
+   */
+  public Path getParentPath() {
+    return file.toPath().toAbsolutePath().getParent();
+  }
+
   public Set<String> getTags() {
     return tags;
   }
@@ -71,6 +93,11 @@ public class Resource {
     } else if (!file.equals(other.file))
       return false;
     return true;
+  }
+
+  @Override
+  public String toString() {
+    return (name != null ? name : file.toString());
   }
 
 }

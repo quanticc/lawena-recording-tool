@@ -37,7 +37,7 @@ public class LwrtSettings {
         "tga", "tga", "jpg"), SourceRecorderAudioFormat("wav", "wav", ""), SourceRecorderJpegQuality(
         50, 1, 100), DeleteBackupsWhenRestoring(true), SkyboxDataSavePath("skybox.ser.gz"), BigFolderMBThreshold(
         200, 0, Integer.MAX_VALUE), DemosRelativeFolder(""), LoadKillstreakFile(true), KillstreakFileName(
-        "KillStreaks.txt"), LaunchOptions("-novid -console");
+        "KillStreaks.txt"), LaunchOptions("-novid -console"), LogLevel("DEBUG");
 
     private Object value;
     private List<String> allowedValues;

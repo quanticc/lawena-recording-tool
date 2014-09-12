@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import com.github.lawena.model.LwrtResource;
+import com.github.lawena.app.model.Resource;
 import com.github.lawena.model.LwrtSettings;
 
 public class TooltipRenderer extends DefaultTableCellRenderer {
@@ -22,7 +22,7 @@ public class TooltipRenderer extends DefaultTableCellRenderer {
   @Override
   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
       boolean hasFocus, int row, int column) {
-    LwrtResource cp = (LwrtResource) value;
+    Resource cp = (Resource) value;
     Path tfpath = cfg.getTfPath();
     Path path = cp.getPath();
     StringBuilder sb = new StringBuilder();

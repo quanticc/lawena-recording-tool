@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,16 +75,6 @@ public abstract class OSInterface {
   public abstract boolean isRunningTF2();
 
   /**
-   * Returns the {@link Path} where the VPK included with TF2 is located. This will be used to
-   * extract skyboxes for preview generation and loading, and could be used for other features like
-   * packing, extracting, listing, etc.
-   * 
-   * @param tfpath the path where the HL2 executable for TF2 is located
-   * @return The <code>Path</code> to the VPK tool resolved from the tfpath.
-   */
-  public abstract Path resolveVpkToolPath(Path tfpath);
-
-  /**
    * Store the set DirectX level in the filesystem for future use, like with the
    * {@link #getSystemDxLevel()} method. If the operation is not supported this should be
    * implemented as a no-op method or with a simple log message.
@@ -109,87 +97,6 @@ public abstract class OSInterface {
    * @param path the path to delete
    */
   public abstract void delete(Path path);
-
-  /**
-   * Extracts VPK-packed files to a specified path only if they not exist in the destination path.
-   * 
-   * @param tfpath The {@link Path} where HL2 main executable for TF2 is located
-   * @param vpkname The name of the VPK file to possibly extract the files
-   * @param dest The <code>Path</code> where the files will be extracted to
-   * @param files The filenames included in the VPK that might be extracted
-   * @throws IOException If an error occurred while creating the destination folder
-   * @deprecated VPK utility might crash so this method is not completely reliable.
-   */
-  @Deprecated
-  public void extractIfNeeded(Path tfpath, String vpkname, Path dest, Iterable<String> files)
-      throws IOException {
-    List<String> fileList = new ArrayList<>();
-    for (String file : files) {
-      if (!Files.exists(dest.resolve(file))) {
-        if (Files.exists(Paths.get(vpkname))) {
-          if (!Files.exists(dest) || !Files.isDirectory(dest)) {
-            Files.createDirectory(dest);
-          }
-          fileList.add(file);
-        } else {
-          log.info("Required file was not found: " + file);
-        }
-      }
-    }
-    if (!fileList.isEmpty()) {
-      extractVpkFile(tfpath, vpkname, dest, fileList);
-    }
-  }
-
-  private void extractVpkFile(Path tfpath, String vpkname, Path dest, List<String> files) {
-    List<String> cmds = new ArrayList<>();
-    try {
-      Path vpktool = resolveVpkToolPath(tfpath);
-      cmds.add(vpktool.toString());
-      cmds.add("x");
-      cmds.add(Paths.get(vpkname).toAbsolutePath().toString());
-      cmds.addAll(files);
-      ProcessBuilder pb = new ProcessBuilder(cmds);
-      pb.directory(dest.toFile());
-      Process p = pb.start();
-      try (BufferedReader input = Util.newProcessReader(p)) {
-        String line;
-        while ((line = input.readLine()) != null) {
-          log.debug("[vpk] " + line);
-        }
-      }
-      p.waitFor();
-    } catch (InterruptedException | IOException e) {
-      log.warn("Problem extracting contents from VPK file", e);
-    }
-  }
-
-  /**
-   * List the files of a specified VPK file.
-   * 
-   * @param tfpath The {@link Path} where HL2 main executable for TF2 is located
-   * @param vpkpath The <code>Path</code> where the VPK file to search is located
-   * @return A {@link List} of <code>String</code>s of all the files inside the specified VPK file.
-   */
-  public List<String> getVpkContents(Path tfpath, Path vpkpath) {
-    List<String> files = new ArrayList<>();
-    try {
-      Path vpktool = resolveVpkToolPath(tfpath);
-      ProcessBuilder pb = new ProcessBuilder(vpktool.toString(), "l", vpkpath.toString());
-      Process p = pb.start();
-      try (BufferedReader input = Util.newProcessReader(p)) {
-        String line;
-        while ((line = input.readLine()) != null) {
-          files.add(line);
-        }
-      }
-      p.waitFor();
-      log.trace("[" + vpkpath.getFileName() + "] Contents scanned: " + files.size() + " file(s)");
-    } catch (InterruptedException | IOException e) {
-      log.warn("Problem retrieving contents of VPK file", e);
-    }
-    return files;
-  }
 
   /**
    * Stop or kill the TF2 process, whether it's being run from the tool or not.

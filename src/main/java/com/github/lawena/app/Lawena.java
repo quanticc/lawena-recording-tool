@@ -14,8 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
@@ -37,13 +37,12 @@ import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 
+import com.github.lawena.app.model.MainModel;
+import com.github.lawena.app.model.Resource;
+import com.github.lawena.app.model.Resources;
 import com.github.lawena.app.task.FileOpener;
-import com.github.lawena.model.LwrtResource;
-import com.github.lawena.model.LwrtResource.PathContents;
-import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.LwrtSettings.Key;
-import com.github.lawena.model.MainModel;
 import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LaunchOptionsDialog;
 import com.github.lawena.ui.LawenaView;
@@ -66,7 +65,7 @@ public class Lawena {
 
   private LwrtSettings settings;
   private DemoEditor demos;
-  private LwrtResources resources;
+  private Resources resources;
 
   private Tasks tasks;
   private Segments segments;
@@ -214,26 +213,25 @@ public class Lawena {
     table.setModel(resources);
     table.getColumnModel().getColumn(0).setMaxWidth(20);
     table.getColumnModel().getColumn(2).setMaxWidth(50);
-    table.setDefaultRenderer(LwrtResource.class, new TooltipRenderer(settings));
+    table.setDefaultRenderer(Resource.class, new TooltipRenderer(settings));
     table.getModel().addTableModelListener(new TableModelListener() {
 
       @Override
       public void tableChanged(TableModelEvent e) {
-        if (e.getColumn() == LwrtResources.Column.SELECTED.ordinal()) {
+        if (e.getColumn() == Resources.Column.ENABLED.ordinal()) {
           int row = e.getFirstRow();
           TableModel model = (TableModel) e.getSource();
-          LwrtResource cp =
-              (LwrtResource) model.getValueAt(row, LwrtResources.Column.PATH.ordinal());
+          Resource cp = (Resource) model.getValueAt(row, Resources.Column.NAME.ordinal());
           checkCustomHud(cp);
         }
       }
     });
-    TableRowSorter<LwrtResources> sorter = new TableRowSorter<>(resources);
+    TableRowSorter<Resources> sorter = new TableRowSorter<>(resources);
     table.setRowSorter(sorter);
-    RowFilter<LwrtResources, Object> filter = new RowFilter<LwrtResources, Object>() {
-      public boolean include(Entry<? extends LwrtResources, ? extends Object> entry) {
-        LwrtResource cp = (LwrtResource) entry.getValue(LwrtResources.Column.PATH.ordinal());
-        return !cp.getContents().contains(PathContents.READONLY);
+    RowFilter<Resources, Object> filter = new RowFilter<Resources, Object>() {
+      public boolean include(Entry<? extends Resources, ? extends Object> entry) {
+        Resource resource = (Resource) entry.getValue(Resources.Column.NAME.ordinal());
+        return !resources.isParentForcefullyLoaded(resource);
       }
     };
     sorter.setRowFilter(filter);
@@ -279,7 +277,7 @@ public class Lawena {
         settings.loadDefaults();
         settings.setMoviePath(movies);
         loadSettings();
-        resources.loadResourceSettings();
+        resources.enableFromList(settings.getList(Key.CustomResources));
         loadHudComboState();
         saveSettings();
       }
@@ -429,17 +427,17 @@ public class Lawena {
     branches.start();
   }
 
-  private boolean checkCustomHud(LwrtResource cp) {
-    EnumSet<PathContents> set = cp.getContents();
-    if (cp.isSelected()) {
-      if (set.contains(PathContents.HUD)) {
+  private boolean checkCustomHud(Resource resource) {
+    Set<String> set = resource.getTags();
+    if (resource.isEnabled()) {
+      if (set.contains(Resource.HUD)) {
         lastHud = view.getCmbHud().getSelectedItem();
         view.getCmbHud().setSelectedItem("Custom");
         view.getCmbHud().setEnabled(false);
         return true;
       }
     } else {
-      if (set.contains(PathContents.HUD)) {
+      if (set.contains(Resource.HUD)) {
         if (lastHud != null) {
           view.getCmbHud().setSelectedItem(lastHud);
         }
@@ -452,7 +450,7 @@ public class Lawena {
 
   void loadHudComboState() {
     boolean detected = false;
-    for (LwrtResource cp : resources.getList()) {
+    for (Resource cp : resources.getResourceList()) {
       if (detected) {
         break;
       }
@@ -490,6 +488,7 @@ public class Lawena {
     view.getCmbSourceVideoFormat().setSelectedItem(
         settings.getString(Key.SourceRecorderVideoFormat).toUpperCase());
     view.getSpinnerJpegQuality().setValue(settings.getInt(Key.SourceRecorderJpegQuality));
+    logView.getLevelComboBox().setSelectedItem(settings.getString(Key.LogLevel));
     checkViewmodelState();
     checkFrameFormatState();
   }
@@ -518,17 +517,7 @@ public class Lawena {
     settings.setHitsounds(!view.getDisableHitSounds().isSelected());
     settings.setVoice(!view.getDisableVoiceChat().isSelected());
     settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
-    Path tfpath = settings.getTfPath();
-    List<String> selected = new ArrayList<>();
-    for (LwrtResource cp : resources.getList()) {
-      Path path = cp.getPath();
-      if (!cp.getContents().contains(PathContents.READONLY) && cp.isSelected()) {
-        String key = (path.startsWith(tfpath) ? "tf*" : "");
-        key += path.getFileName().toString();
-        selected.add(key);
-      }
-    }
-    settings.setCustomResources(selected);
+    settings.setList(Key.CustomResources, resources.getEnabledStringList());
     settings.setHudMinmode(view.getUseHudMinmode().isSelected());
     settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
     settings
@@ -538,6 +527,7 @@ public class Lawena {
     settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
         .getSelectedItem().toString().toLowerCase());
     settings.setInt(Key.SourceRecorderJpegQuality, (int) view.getSpinnerJpegQuality().getValue());
+    settings.setString(Key.LogLevel, (String) logView.getLevelComboBox().getSelectedItem());
     settings.save();
     log.info("Settings saved");
   }

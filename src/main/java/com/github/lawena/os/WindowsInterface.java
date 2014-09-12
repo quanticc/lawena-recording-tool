@@ -94,11 +94,6 @@ public class WindowsInterface extends OSInterface {
   }
 
   @Override
-  public Path resolveVpkToolPath(Path tfpath) {
-    return tfpath.resolve("../bin/vpk.exe");
-  }
-
-  @Override
   public void setSystemDxLevel(String dxlevel) {
     String tool = Paths.get("lwrt/tools/regedit/rg.bat").toAbsolutePath().toString();
     startProcess(Arrays.asList(tool, "HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",

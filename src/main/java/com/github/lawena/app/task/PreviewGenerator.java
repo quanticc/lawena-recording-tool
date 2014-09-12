@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
-import com.github.lawena.model.MainModel;
+import com.github.lawena.app.model.MainModel;
 import com.github.lawena.util.StatusAppender;
 import com.github.lawena.util.Util;
 

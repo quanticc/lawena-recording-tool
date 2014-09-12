@@ -79,17 +79,6 @@ public class LinuxInterface extends OSInterface {
   }
 
   @Override
-  public Path resolveVpkToolPath(Path tfpath) {
-    Path path = tfpath.resolve("../bin/vpk_linux32");
-    try {
-      Files.setPosixFilePermissions(path, perms777);
-    } catch (IOException e) {
-      log.warn("Could not set file permissions to VPK tool", e);
-    }
-    return path;
-  }
-
-  @Override
   public void setSystemDxLevel(String dxlevel) {
     log.info("[linux] SystemDxLevel won't be set");
   }

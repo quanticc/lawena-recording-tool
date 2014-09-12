@@ -20,12 +20,12 @@ public class Skyboxes implements Serializable {
     return map;
   }
 
-  void load(File src) throws ClassNotFoundException, IOException {
+  public void load(File src) throws ClassNotFoundException, IOException {
     Skyboxes loaded = Serials.gzRead(Skyboxes.class, src);
     map.putAll(loaded.map);
   }
 
-  void save(File dest) throws IOException {
+  public void save(File dest) throws IOException {
     Serials.gzWrite(this, dest);
   }
 

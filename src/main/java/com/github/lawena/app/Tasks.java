@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -18,11 +17,12 @@ import javax.swing.SwingWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.app.model.MainModel;
+import com.github.lawena.app.model.Resources;
 import com.github.lawena.app.task.Launcher;
 import com.github.lawena.app.task.PreviewGenerator;
-import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.MainModel;
+import com.github.lawena.model.LwrtSettings.Key;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.update.Build;
 import com.github.lawena.update.UpdateResult;
@@ -188,16 +188,14 @@ public class Tasks {
     }
 
     private void scan() {
-      resources.clear();
-      resources.addPaths(Paths.get("lwrt/tf/default"));
-      resources.addPaths(Paths.get("lwrt/tf/custom"));
-      resources.addPaths(settings.getTfPath().resolve("custom"));
-      resources.validateRequired();
+      resources.addFolder(new File("lwrt/tf/default"), true);
+      resources.addFolder(new File("lwrt/tf/custom"), false);
+      resources.addFolder(settings.getTfPath().resolve("custom").toFile(), false);
     }
 
     @Override
     protected void done() {
-      resources.loadResourceSettings();
+      resources.enableFromList(settings.getList(Key.CustomResources));
       presenter.loadHudComboState();
     }
   }
@@ -242,7 +240,7 @@ public class Tasks {
   private Lawena presenter;
   private LawenaView view;
 
-  private LwrtResources resources;
+  private Resources resources;
   private LwrtSettings settings;
 
   private SegmentCleaner clearMoviesTask = null;

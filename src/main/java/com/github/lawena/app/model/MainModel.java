@@ -1,4 +1,4 @@
-package com.github.lawena.model;
+package com.github.lawena.app.model;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,9 @@ import javax.swing.JFileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.app.model.Linker;
+import com.github.lawena.model.LwrtMovies;
+import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.model.Skyboxes;
 import com.github.lawena.model.LwrtSettings.Key;
 import com.github.lawena.os.LinuxInterface;
 import com.github.lawena.os.OSInterface;
@@ -39,7 +41,7 @@ public class MainModel {
   private JFileChooser gameFileChooser;
 
   private LwrtMovies movies;
-  private LwrtResources resources;
+  private Resources resources;
   private DemoEditor demos;
   private Skyboxes skyboxes;
 
@@ -83,7 +85,7 @@ public class MainModel {
     linker = new Linker(this);
     linker.unlink();
 
-    resources = new LwrtResources(settings, osInterface);
+    resources = new Resources();
 
     demos = new DemoEditor(settings, osInterface);
     skyboxes = new Skyboxes();
@@ -213,7 +215,7 @@ public class MainModel {
     return movies;
   }
 
-  public LwrtResources getResources() {
+  public Resources getResources() {
     return resources;
   }
 

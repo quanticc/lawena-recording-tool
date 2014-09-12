@@ -27,11 +27,8 @@ import net.lingala.zip4j.util.Zip4jConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.model.LwrtResource;
-import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.LwrtSettings.Key;
-import com.github.lawena.model.MainModel;
 import com.github.lawena.util.Consumer;
 import com.github.lawena.util.LawenaException;
 import com.github.lawena.util.Util;
@@ -120,7 +117,7 @@ public class Linker {
     try {
       String sky = cfg.getString(Key.Skybox);
       if (sky != null && !sky.isEmpty() && !sky.equals(Key.Skybox.defValue())) {
-        log.info("Linking selected skybox files");
+        log.debug("Linking selected skybox files");
         Files.createDirectories(contentSkyboxPath);
         Set<Path> vtfPaths = new HashSet<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(base.resolve("skybox/vtf"))) {
@@ -168,11 +165,11 @@ public class Linker {
 
     // Other resources
     Path srcDefaultPath = base.resolve("default");
-    LwrtResources resources = model.getResources();
+    Resources resources = model.getResources();
     log.info("Linking enabled custom vpks and folders");
     List<Path> list = new ArrayList<>();
-    for (LwrtResource r : resources.getList()) {
-      if (r.isSelected()) {
+    for (Resource r : resources.getEnabledResources()) {
+      if (r.isEnabled()) {
         list.add(r.getPath());
       }
     }
@@ -185,6 +182,7 @@ public class Linker {
     }
     for (Path src : list) {
       // relocate user custom paths since they have been moved
+      // TODO: remove game custom path by default
       if (src.startsWith(customPath)) {
         src = userCustomPath.resolve(src.getFileName());
       }
@@ -222,7 +220,7 @@ public class Linker {
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         removeLink(file);
         if (Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
-          log.debug("Deleting regular file: {}", file);
+          log.trace("Deleting regular file: {}", file);
           file.toFile().setWritable(true);
           Files.delete(file);
         }
@@ -234,7 +232,7 @@ public class Linker {
         if (exc == null) {
           removeDirectoryLink(dir);
           if (Files.exists(dir, LinkOption.NOFOLLOW_LINKS)) {
-            log.debug("Deleting regular directory: {}", dir);
+            log.trace("Deleting regular directory: {}", dir);
             Files.delete(dir);
           }
         } else {
@@ -246,25 +244,25 @@ public class Linker {
   }
 
   private void createDirectories(Path dir) throws IOException {
-    log.info("Creating directory: {}", dir);
+    log.trace("Creating directory: {}", dir);
     Files.createDirectories(dir);
   }
 
   private void move(Path src, Path dest) throws IOException {
-    log.info("Moving folder: {} -> {}", src, dest);
+    log.trace("Moving folder: {} -> {}", src, dest);
     src.toFile().setWritable(true);
     Files.move(src, dest);
   }
 
   private void createLink(Path link, Path target) {
-    log.debug("Linking: {} <-> {}", link, target);
+    log.trace("Linking: {} <-> {}", link, target);
     Util.startProcess(Arrays.asList("cmd", "/c", "mklink", link.toAbsolutePath().toString(), target
         .toAbsolutePath().toString()), printer);
     links.put(link, target);
   }
 
   private void createDirectoryLink(Path link, Path target) {
-    log.debug("Linking directory: {} <-> {}", link, target);
+    log.trace("Linking directory: {} <-> {}", link, target);
     Util.startProcess(Arrays.asList("cmd", "/c", "mklink", "/d", link.toAbsolutePath().toString(),
         target.toAbsolutePath().toString()), printer);
     links.put(link, target);
@@ -291,7 +289,7 @@ public class Linker {
       try {
         delete(launchPath);
       } catch (IOException e) {
-        log.info("Could not remove launch folder: " + e);
+        log.warn("Could not remove launch folder: " + e);
       }
     }
 
@@ -308,17 +306,17 @@ public class Linker {
     try {
       if (Files.exists(userCustomPath)) {
         removeDirectoryLink(customPath);
-        log.info("Moving folder: {} -> {}", userCustomPath, customPath);
+        log.debug("Moving folder: {} -> {}", userCustomPath, customPath);
         Files.move(userCustomPath, customPath);
       }
       if (Files.exists(userConfigPath)) {
         removeDirectoryLink(configPath);
-        log.info("Moving folder: {} -> {}", userConfigPath, configPath);
+        log.debug("Moving folder: {} -> {}", userConfigPath, configPath);
         Files.move(userConfigPath, configPath);
       }
       restored = true;
     } catch (IOException e) {
-      log.info("Could not restore original folders: " + e);
+      log.warn("Could not restore original folders: " + e);
     }
 
     if (!restored) {
@@ -400,7 +398,7 @@ public class Linker {
   private void removeLink(Path link) {
     if (Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
       if (isSymbolicLink(link)) {
-        log.debug("Unlinking file: {}", link);
+        log.trace("Unlinking file: {}", link);
         Util.startProcess(Arrays.asList("cmd", "/c", "del", link.toAbsolutePath().toString()));
       }
     }
@@ -409,7 +407,7 @@ public class Linker {
   private void removeDirectoryLink(Path link) {
     if (Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
       if (isSymbolicLink(link)) {
-        log.debug("Unlinking directory: {}", link);
+        log.trace("Unlinking directory: {}", link);
         Util.startProcess(Arrays.asList("cmd", "/c", "rd", link.toAbsolutePath().toString()));
       }
     }

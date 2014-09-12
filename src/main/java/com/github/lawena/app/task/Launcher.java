@@ -2,7 +2,6 @@ package com.github.lawena.app.task;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.EnumSet;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JOptionPane;
@@ -15,13 +14,12 @@ import org.slf4j.LoggerFactory;
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
 import com.github.lawena.app.model.Linker;
+import com.github.lawena.app.model.MainModel;
+import com.github.lawena.app.model.Resource;
+import com.github.lawena.app.model.Resources;
 import com.github.lawena.model.LwrtMovies;
-import com.github.lawena.model.LwrtResource;
-import com.github.lawena.model.LwrtResource.PathContents;
-import com.github.lawena.model.LwrtResources;
 import com.github.lawena.model.LwrtSettings;
 import com.github.lawena.model.LwrtSettings.Key;
-import com.github.lawena.model.MainModel;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.util.LawenaException;
@@ -41,7 +39,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
   private OSInterface os;
   private LwrtSettings settings;
   private LwrtMovies movies;
-  private LwrtResources resources;
+  private Resources resources;
   private Linker linker;
 
   public Launcher(Tasks tasks) {
@@ -239,11 +237,17 @@ public class Launcher extends SwingWorker<Boolean, Void> {
 
   private boolean verifyCustomHud() {
     if (view.getCmbHud().getSelectedItem().equals("Custom")) {
-      for (LwrtResource cp : resources.getList()) {
-        resources.update(cp);
-        EnumSet<PathContents> set = cp.getContents();
-        if (cp.isSelected() && set.contains(PathContents.HUD)) {
-          return true;
+      for (Resource resource : resources.getResourceList()) {
+        if (resource.isEnabled()) {
+          try {
+            resources.updateTags(resource);
+            if (resource.getTags().contains(Resource.HUD)) {
+              log.debug("Custom HUD verified with {}", resource);
+              return true;
+            }
+          } catch (IOException e) {
+            log.warn("Could not determine resource tags", e);
+          }
         }
       }
       return false;
