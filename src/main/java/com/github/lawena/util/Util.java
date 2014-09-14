@@ -19,7 +19,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.JarFile;
 
@@ -33,6 +36,8 @@ import javax.swing.text.JTextComponent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.reflect.TypeToken;
 
 public class Util {
 
@@ -231,6 +236,45 @@ public class Util {
     }
     sb.append(str);
     return sb.toString();
+  }
+
+  public static String listToString(List<String> list, char separator) {
+    Iterator<String> it = list.iterator();
+    if (!it.hasNext())
+      return "";
+
+    StringBuilder sb = new StringBuilder();
+    for (;;) {
+      String e = it.next();
+      sb.append(e);
+      if (!it.hasNext())
+        return sb.toString();
+      sb.append(separator);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> T getFromTree(Map<String, Object> root, TypeToken<T> type, String key) {
+    String[] paths = key.split("\\.");
+    Map<String, Object> map = root;
+    for (int i = 0; i < paths.length - 1; i++) {
+      map = (Map<String, Object>) map.get(paths[i]);
+    }
+    return (T) map.get(paths[paths.length - 1]);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> void setToTree(Map<String, Object> root, String key, T value) {
+    String[] paths = key.split("\\.");
+    Map<String, Object> map = root;
+    for (int i = 0; i < paths.length - 1; i++) {
+      String path = paths[i];
+      if (!map.containsKey(path)) {
+        map.put(path, new LinkedHashMap<String, Object>());
+      }
+      map = (Map<String, Object>) map.get(paths[i]);
+    }
+    map.put(key, value);
   }
 
 }
