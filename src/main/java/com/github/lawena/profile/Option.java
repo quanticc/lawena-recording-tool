@@ -58,7 +58,7 @@ public class Option<T> {
       value = provider.get(type, key);
     }
     // handle Double to Integer conversion
-    if (type.getRawType().equals(Integer.class)) {
+    if (type.getRawType().equals(Integer.class) && (value instanceof Double)) {
       return (T) Integer.valueOf(((Double) value).intValue());
     }
     return value;
