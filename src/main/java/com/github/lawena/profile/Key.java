@@ -73,11 +73,8 @@ public class Key {
   /**
    * Name of the hud folder to load into the game. Must be present in one of the resources folders.
    */
-  public static final Option<String> hud =
-      newOption("files.hud", String.class, "hud_killnotices")
-          .validatedBy(
-              new ValuesValidator("hud_medic", "hud_killnotices", "hud_medic", "hud_default",
-                  "custom"));
+  public static final Option<String> hud = newOption("files.hud", String.class, "hud_killnotices")
+      .validatedBy(new ValuesValidator("hud_killnotices", "hud_medic", "hud_default", "custom"));
   /**
    * Name of the skybox to load into the game. Must be present in one of the resources folders.
    */
