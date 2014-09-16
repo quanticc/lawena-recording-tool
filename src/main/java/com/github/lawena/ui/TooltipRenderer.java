@@ -1,5 +1,7 @@
 package com.github.lawena.ui;
 
+import static com.github.lawena.util.Util.toPath;
+
 import java.awt.Component;
 import java.nio.file.Path;
 
@@ -7,23 +9,24 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import com.github.lawena.app.model.Resource;
-import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.app.model.Settings;
+import com.github.lawena.profile.Key;
 
 public class TooltipRenderer extends DefaultTableCellRenderer {
 
   private static final long serialVersionUID = 1L;
 
-  private LwrtSettings cfg;
+  private Settings settings;
 
-  public TooltipRenderer(LwrtSettings cfg) {
-    this.cfg = cfg;
+  public TooltipRenderer(Settings settings) {
+    this.settings = settings;
   }
 
   @Override
   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
       boolean hasFocus, int row, int column) {
     Resource cp = (Resource) value;
-    Path tfpath = cfg.getTfPath();
+    Path tfpath = toPath(Key.gamePath.getValue(settings));
     Path path = cp.getPath();
     StringBuilder sb = new StringBuilder();
     sb.append("<html>Filename: <b>");

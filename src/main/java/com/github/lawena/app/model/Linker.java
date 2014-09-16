@@ -1,5 +1,6 @@
 package com.github.lawena.app.model;
 
+import static com.github.lawena.util.Util.toPath;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
@@ -17,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.JOptionPane;
-
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
@@ -27,8 +26,7 @@ import net.lingala.zip4j.util.Zip4jConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.profile.Key;
 import com.github.lawena.util.Consumer;
 import com.github.lawena.util.LawenaException;
 import com.github.lawena.util.Util;
@@ -38,12 +36,12 @@ public class Linker {
   private static final Logger log = LoggerFactory.getLogger(Linker.class);
 
   private MainModel model;
-  private LwrtSettings cfg;
+  private Settings settings;
   private Map<Path, Path> links = new LinkedHashMap<>();
 
   public Linker(MainModel model) {
     this.model = model;
-    this.cfg = model.getSettings();
+    this.settings = model.getSettings();
   }
 
   /**
@@ -53,8 +51,8 @@ public class Linker {
    */
   public void link() throws LawenaException {
     links.clear();
-    Path gamePath = Paths.get(cfg.getString(Key.TfDir));
-    Path base = Paths.get("lwrt/tf");
+    Path gamePath = toPath(Key.gamePath.getValue(settings));
+    Path base = settings.getParentDataPath(); // should be lwrt/tf
 
     // Abort if user folders exist, that means cleanup is not complete
     Path userConfigPath = gamePath.resolve("lawena-user-cfg");
@@ -106,7 +104,7 @@ public class Linker {
 
     // Hud files
     Path srcHudPath = base.resolve("hud");
-    String hudFolderName = cfg.getString(Key.Hud);
+    String hudFolderName = Key.hud.getValue(settings);
     if (!hudFolderName.equals("custom")) {
       linkedPaths.add(srcHudPath.resolve(hudFolderName));
     }
@@ -115,8 +113,8 @@ public class Linker {
     Path launchSkyboxPath = base.resolve("launch/skybox");
     Path contentSkyboxPath = launchSkyboxPath.resolve("materials/skybox");
     try {
-      String sky = cfg.getString(Key.Skybox);
-      if (sky != null && !sky.isEmpty() && !sky.equals(Key.Skybox.defValue())) {
+      String sky = Key.skybox.getValue(settings);
+      if (sky != null && !sky.isEmpty() && !sky.equals(Key.skybox.getDefaultValue())) {
         log.debug("Linking selected skybox files");
         Files.createDirectories(contentSkyboxPath);
         Set<Path> vtfPaths = new HashSet<>();
@@ -298,7 +296,7 @@ public class Linker {
     Path backupPath = createUserBackup();
 
     // move user folders back to original location
-    Path gamePath = cfg.getTfPath();
+    Path gamePath = toPath(Key.gamePath.getValue(settings));
     Path configPath = gamePath.resolve("cfg");
     Path customPath = gamePath.resolve("custom");
     Path userConfigPath = gamePath.resolve("lawena-user-cfg");
@@ -332,7 +330,7 @@ public class Linker {
       links.clear();
       log.info("*** Restore and cleanup completed");
       // Created zip file is safe to delete since the process was completed
-      if (cfg.getBoolean(Key.DeleteBackupsWhenRestoring)) {
+      if (Key.deleteUnneededBackups.getValue(settings)) {
         try {
           if (Files.deleteIfExists(backupPath)) {
             log.info("Deleted last backup: " + backupPath);
@@ -347,34 +345,17 @@ public class Linker {
 
   private Path createUserBackup() {
     // always make a backup, later decide if it's useful
-    Path gamePath = cfg.getTfPath();
+    Path gamePath = toPath(Key.gamePath.getValue(settings));
     Path zip = gamePath.resolve("lawena-user." + Util.now("yyMMddHHmmss") + ".bak.zip");
     Path userConfigPath = gamePath.resolve("lawena-user-cfg");
     Path userCustomPath = gamePath.resolve("lawena-user-custom");
     boolean doBackup = true;
     if (Files.exists(userConfigPath) || Files.exists(userCustomPath)) {
-      try {
-        long bytes = Util.sizeOfPath(userConfigPath) + Util.sizeOfPath(userCustomPath);
-        String size = Util.humanReadableByteCount(bytes, true);
-        log.debug("Backup folders size: " + size);
-        if (bytes / 1024 / 1024 > cfg.getInt(Key.BigFolderMBThreshold)) {
-          int answer =
-              JOptionPane
-                  .showConfirmDialog(
-                      null,
-                      "Your cfg and custom folders are "
-                          + size
-                          + " in size.\nThis might cause Lawena to hang or crash while it creates a backup."
-                          + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
-                          + "\nDo you still want to create a backup?", "Backup Folder",
-                      JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-          if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
-            log.info("Backup creation skipped by the user");
-            doBackup = false;
-          }
-        }
-      } catch (IOException e) {
-        log.info("Could not determine folder size: " + e);
+      doBackup =
+          Util.notifyBigFolder(Key.bigFolderThreshold.getValue(settings), userConfigPath,
+              userCustomPath);
+      if (!doBackup) {
+        log.info("Backup creation skipped by the user");
       }
     }
     if (doBackup && (Files.exists(userConfigPath) || Files.exists(userCustomPath))) {

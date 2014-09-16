@@ -1,5 +1,7 @@
 package com.github.lawena.app;
 
+import static com.github.lawena.util.Util.toPath;
+
 import java.awt.Desktop;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -19,10 +21,10 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.app.model.MainModel;
 import com.github.lawena.app.model.Resources;
+import com.github.lawena.app.model.Settings;
 import com.github.lawena.app.task.Launcher;
 import com.github.lawena.app.task.PreviewGenerator;
-import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.profile.Key;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.update.Build;
 import com.github.lawena.update.UpdateResult;
@@ -112,9 +114,9 @@ public class Tasks {
             return null;
           }
         }
+        Path recPath = toPath(Key.recordingPath.getValue(settings));
         try (DirectoryStream<Path> stream =
-            Files.newDirectoryStream(model.getSettings().getMoviePath(), segmentsGlob
-                + "*.{tga,wav}")) {
+            Files.newDirectoryStream(recPath, segmentsGlob + "*.{tga,wav}")) {
 
           clearMoviesTask = this;
           setCurrentWorker(this, true);
@@ -177,6 +179,7 @@ public class Tasks {
   }
 
   private class ResourceScanner extends SwingWorker<Void, Void> {
+
     @Override
     protected Void doInBackground() throws Exception {
       try {
@@ -188,14 +191,14 @@ public class Tasks {
     }
 
     private void scan() {
-      resources.addFolder(new File("lwrt/tf/default"), true);
-      resources.addFolder(new File("lwrt/tf/custom"), false);
-      resources.addFolder(settings.getTfPath().resolve("custom").toFile(), false);
+      Path base = settings.getParentDataPath();
+      resources.addFolder(base.resolve("default").toFile(), true);
+      resources.addFolder(base.resolve("custom").toFile(), false);
     }
 
     @Override
     protected void done() {
-      resources.enableFromList(settings.getList(Key.CustomResources));
+      resources.enableFromList(Key.resources.getValue(settings));
       presenter.loadHudComboState();
     }
   }
@@ -241,7 +244,7 @@ public class Tasks {
   private LawenaView view;
 
   private Resources resources;
-  private LwrtSettings settings;
+  private Settings settings;
 
   private SegmentCleaner clearMoviesTask = null;
   private Launcher currentLaunchTask = null;

@@ -1,7 +1,10 @@
 package com.github.lawena.profile;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +16,17 @@ public class Profiles implements ValueProvider {
 
   private static final Logger log = LoggerFactory.getLogger(Profiles.class);
 
-  private String selected;
-  private List<Profile> profiles;
-  private Map<String, Object> global;
+  private String selected = "Default";
+  private List<Profile> profiles = new ArrayList<>();
+  private Map<String, Object> global = new LinkedHashMap<>();
+
+  public Profiles() {
+    for (Entry<String, Option<?>> e : Options.getOptions().entrySet()) {
+      if (e.getKey().startsWith("lawena.")) {
+        set(e.getKey(), e.getValue().getDefaultValue());
+      }
+    }
+  }
 
   public String getSelected() {
     return selected;
@@ -153,7 +164,6 @@ public class Profiles implements ValueProvider {
 
   @Override
   public <T> void set(String key, T value) {
-    // no validation checks will be performed at this level
     Util.setToTree(global, key, value);
   }
 

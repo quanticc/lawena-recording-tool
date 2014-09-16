@@ -20,8 +20,8 @@ import net.tomahawk.ExtensionsFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.app.model.Settings;
+import com.github.lawena.profile.Key;
 import com.github.lawena.util.Util;
 
 /**
@@ -126,15 +126,15 @@ public abstract class OSInterface {
    *        resolution
    * @see #getBuilderStartTF2()
    */
-  public void startTf(LwrtSettings cfg) {
+  public void launchSteam(Settings settings) {
     try {
-      String opts = cfg.getString(Key.LaunchOptions);
+      String opts = Key.launchOptions.getValue(settings);
       Map<String, String> options = new LinkedHashMap<>();
       // these options will be overridden if the user wants
-      options.put("-applaunch", "440");
-      options.put("-dxlevel", cfg.getDxlevel());
-      options.put("-w", cfg.getWidth() + "");
-      options.put("-h", cfg.getHeight() + "");
+      options.put("-applaunch", Key.applaunch.getValue(settings).toString());
+      options.put("-dxlevel", Key.dxlevel.getValue(settings));
+      options.put("-w", Key.width.getValue(settings).toString());
+      options.put("-h", Key.height.getValue(settings).toString());
       String[] params = opts.trim().replaceAll("\\s+", " ").split(" ");
       for (int i = 0; i < params.length; i++) {
         String key = params[i];
@@ -170,7 +170,7 @@ public abstract class OSInterface {
       }
       // prepare list of options
       log.info("Launching Steam AppID {} in {}x{} {} with dxlevel {}", options.get("-applaunch"),
-          options.get("-w"), options.get("-h"), fs ? "Fullscreen" : "Windowed",
+          options.get("-w"), options.get("-h"), fs ? "fullscreen" : "windowed",
           options.get("-dxlevel"));
       log.debug("Parameters: {}", options);
       ProcessBuilder pb = getBuilderStartTF2();
@@ -182,7 +182,7 @@ public abstract class OSInterface {
         pb.command().add(e.getValue());
       }
       // keeping this for compatibility
-      if (cfg.getInsecure()) {
+      if (Key.insecure.getValue(settings)) {
         log.debug("Using -insecure in launch options");
         pb.command().add("-insecure");
       }

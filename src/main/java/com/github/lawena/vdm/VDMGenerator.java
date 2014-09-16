@@ -1,5 +1,6 @@
 package com.github.lawena.vdm;
 
+import static com.github.lawena.util.Util.toPath;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -13,18 +14,19 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.app.model.Settings;
+import com.github.lawena.profile.Key;
 
 public class VDMGenerator {
 
   private static final Logger log = LoggerFactory.getLogger(VDMGenerator.class);
 
   private List<Tick> ticklist;
-  private LwrtSettings cfg;
+  private Settings settings;
 
-  public VDMGenerator(List<Tick> ticklist, LwrtSettings cfg) {
+  public VDMGenerator(List<Tick> ticklist, Settings settings) {
     this.ticklist = ticklist;
-    this.cfg = cfg;
+    this.settings = settings;
   }
 
   public List<Path> generate() throws IOException {
@@ -57,7 +59,7 @@ public class VDMGenerator {
       int count = 1;
       int previousEndTick = 0;
       for (Tick tick : e.getValue()) {
-        if (cfg.getVdmSrcDemoFix()) {
+        if (Key.vdmNoSkipToTick.getValue(settings)) {
           lines.add(segment(count++, "SkipAhead", "skip", "starttick \"" + (previousEndTick + 1)
               + "\""));
         } else {
@@ -81,8 +83,10 @@ public class VDMGenerator {
       lines.add("}\n");
 
       Path added =
-          Files.write(cfg.getTfPath().resolve(demo.substring(0, demo.indexOf(".dem")) + ".vdm"),
-              lines, Charset.defaultCharset());
+          Files.write(
+              toPath(Key.gamePath.getValue(settings)).resolve(
+                  demo.substring(0, demo.indexOf(".dem")) + ".vdm"), lines,
+              Charset.defaultCharset());
       paths.add(added);
       log.debug("VDM file written to " + added);
 

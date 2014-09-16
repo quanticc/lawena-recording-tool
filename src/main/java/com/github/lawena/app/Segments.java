@@ -1,5 +1,7 @@
 package com.github.lawena.app;
 
+import static com.github.lawena.util.Util.toPath;
+
 import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +21,8 @@ import javax.swing.table.DefaultTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.app.model.Settings;
+import com.github.lawena.profile.Key;
 import com.github.lawena.ui.SegmentsDialog;
 
 public class Segments {
@@ -28,7 +31,7 @@ public class Segments {
 
   private SegmentsDialog view;
   private Lawena parent;
-  private LwrtSettings settings;
+  private Settings settings;
 
   public Segments(Lawena parent) {
     this.parent = parent;
@@ -55,7 +58,8 @@ public class Segments {
 
   private List<String> getExistingSegments() {
     List<String> existingSegments = new ArrayList<>();
-    try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getMoviePath(), "*.wav")) {
+    Path recPath = toPath(Key.recordingPath.getValue(settings));
+    try (DirectoryStream<Path> stream = Files.newDirectoryStream(recPath, "*.wav")) {
       for (Path path : stream) {
         String segname = path.getFileName().toString();
         String key = segname.substring(0, segname.indexOf("_"));

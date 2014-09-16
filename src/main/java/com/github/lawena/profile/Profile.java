@@ -1,5 +1,6 @@
 package com.github.lawena.profile;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,22 +11,18 @@ public class Profile implements ValueProvider {
 
   public static Profile newDefaultProfile() {
     Profile profile = new Profile();
-    for (Entry<String, Option<?>> e : Options.getOptions().entrySet()) {
-      profile.settings.put(e.getKey(), e.getValue().getDefaultValue());
-    }
+    profile.loadDefaultValues();
     return profile;
   }
 
   public static Profile newDuplicateProfile(Profile base) {
     Profile profile = new Profile();
-    for (Entry<String, Object> e : base.settings.entrySet()) {
-      profile.settings.put(e.getKey(), e.getValue());
-    }
+    profile.loadValuesFrom(base);
     return profile;
   }
 
   private String name;
-  private Map<String, Object> settings;
+  private Map<String, Object> settings = new LinkedHashMap<>();
 
   private Profile() {}
 
@@ -45,6 +42,22 @@ public class Profile implements ValueProvider {
   @Override
   public <T> void set(String key, T value) {
     Util.setToTree(settings, key, value);
+  }
+
+  public void loadDefaultValues() {
+    for (Entry<String, Option<?>> e : Options.getOptions().entrySet()) {
+      if (!e.getKey().startsWith("lawena.")) {
+        set(e.getKey(), e.getValue().getDefaultValue());
+      }
+    }
+  }
+
+  public void loadValuesFrom(Profile other) {
+    for (Entry<String, Object> e : other.settings.entrySet()) {
+      if (!e.getKey().startsWith("lawena.")) {
+        set(e.getKey(), e.getValue());
+      }
+    }
   }
 
 }

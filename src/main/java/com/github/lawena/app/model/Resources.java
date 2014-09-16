@@ -158,14 +158,14 @@ public class Resources extends AbstractTableModel {
       int index = list.indexOf(r);
       boolean enabled;
       if (index > 0) {
-        log.debug("Updating resource {} from {}", r, r.getAbsolutePath());
+        log.debug("Updating '{}' from {}", r, r.getAbsolutePath());
         Resource old = list.get(index);
         list.remove(index);
         list.add(index, r);
         enabled = old.isEnabled();
         fireTableRowsUpdated(index, index);
       } else {
-        log.debug("Adding resource {} from {}", r, r.getAbsolutePath());
+        log.debug("Adding '{}' from {}", r, r.getAbsolutePath());
         list.add(r);
         enabled = false;
         int row = list.size() - 1;
@@ -218,7 +218,7 @@ public class Resources extends AbstractTableModel {
         tags.add(Resource.SKYBOX);
       }
     }
-    log.trace("Tagging resource {} with: {}", resource, tags);
+    log.trace("Tagging '{}' with: {}", resource, tags);
     resource.setTags(tags);
   }
 
@@ -262,7 +262,7 @@ public class Resources extends AbstractTableModel {
     for (Resource resource : list) {
       ResourceFolder folder = folders.get(resource.getParentPath().toString());
       if (folder == null) {
-        log.warn("Parent folder of resource {} was not found on record", folder);
+        log.warn("Parent folder of '{}' was not found on record", folder);
       } else {
         if (folder.isEnabled() && folder.isForceLoad()) {
           resource.setEnabled(true);
@@ -280,7 +280,7 @@ public class Resources extends AbstractTableModel {
   public boolean isParentForcefullyLoaded(Resource resource) {
     ResourceFolder folder = folders.get(resource.getParentPath().toString());
     if (folder == null) {
-      log.warn("Parent folder of resource {} was not found on record", folder);
+      log.warn("Parent folder of '{}' was not found on record", folder);
     } else {
       return folder.isForceLoad();
     }

@@ -1,5 +1,6 @@
 package com.github.lawena.vdm;
 
+import static com.github.lawena.util.Util.toPath;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -39,9 +40,9 @@ import net.tomahawk.ExtensionsFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.app.model.Settings;
 import com.github.lawena.os.OSInterface;
+import com.github.lawena.profile.Key;
 import com.github.lawena.ui.DemoEditorView;
 import com.github.lawena.ui.DemoRenderer;
 import com.github.lawena.util.StatusAppender;
@@ -106,7 +107,7 @@ public class DemoEditor {
       }
       // attempt to get a demo path relative to game path
       try {
-        demoPath = settings.getTfPath().relativize(demoPath);
+        demoPath = toPath(Key.gamePath.getValue(settings)).relativize(demoPath);
       } catch (IllegalArgumentException ex) {
         log.warn("Demos folder is not relative to game folder. VDM files created might not work anymore");
       }
@@ -166,7 +167,8 @@ public class DemoEditor {
           view.getDeleteVdmFilesButton().setEnabled(false);
         }
       });
-      try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getTfPath(), "*.vdm")) {
+      try (DirectoryStream<Path> stream =
+          Files.newDirectoryStream(toPath(Key.gamePath.getValue(settings)), "*.vdm")) {
 
         for (Path path : stream) {
           if (isCancelled()) {
@@ -212,18 +214,21 @@ public class DemoEditor {
   private DemoEditorView view;
   private final TickTableModel tickModel = new TickTableModel();
   private DemoTableModel demoModel;
-  private LwrtSettings settings;
+  private Settings settings;
   private OSInterface osInterface;
   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-  public DemoEditor(LwrtSettings settings, OSInterface osInterface) {
+  public DemoEditor(Settings settings, OSInterface osInterface) {
     this.settings = settings;
     this.osInterface = osInterface;
-    String relative = settings.getString(Key.DemosRelativeFolder);
-    Path demoPath = settings.getTfPath();
-    if (!relative.equals("")) {
-      demoPath = demoPath.resolve(relative);
+    Path demoPath = toPath(Key.demosPath.getValue(settings));
+    Path gamePath = toPath(Key.gamePath.getValue(settings));
+    if (demoPath.equals("")) {
+      demoPath = gamePath;
+    } else if (!Files.exists(demoPath) && Files.exists(gamePath.resolve(demoPath))) {
+      demoPath = gamePath.resolve(demoPath);
     }
+    demoPath = demoPath.toAbsolutePath();
     this.demoModel = new DemoTableModel(settings);
     this.demoModel.setDemosPath(demoPath);
   }
@@ -289,12 +294,12 @@ public class DemoEditor {
         }
       }
     });
-    view.getNoSkipToTickCheckBox().setSelected(settings.getBoolean(Key.VdmSrcDemoFix));
+    view.getNoSkipToTickCheckBox().setSelected(Key.vdmNoSkipToTick.getValue(settings));
     view.getNoSkipToTickCheckBox().addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        settings.setBoolean(Key.VdmSrcDemoFix, view.getNoSkipToTickCheckBox().isSelected());
+        Key.vdmNoSkipToTick.setValue(settings, view.getNoSkipToTickCheckBox().isSelected());
       }
     });
 
@@ -447,14 +452,28 @@ public class DemoEditor {
     return view;
   }
 
-  public String getDemoname() {
+  private String getDemoname() {
     if (!tickModel.getTickList().isEmpty()) {
       return tickModel.getTickList().get(0).getDemoname();
     }
     return "";
   }
 
-  public boolean isAutoplay() {
+  private boolean isAutoplay() {
     return view.getAutoplayFirstDemoCheckBox().isSelected();
+  }
+
+  public void writeAutoplay() {
+    try {
+      Path path = settings.getParentDataPath().resolve("config/cfg/lawena.cfg");
+      String demoname = getDemoname();
+      if (isAutoplay() && !demoname.equals("")) {
+        Files.write(path, Arrays.asList("playdemo \"" + demoname + "\""), Charset.forName("UTF-8"));
+      } else {
+        Files.deleteIfExists(path);
+      }
+    } catch (IOException e) {
+      log.warn("Could not write autoplay data to file: " + e);
+    }
   }
 }

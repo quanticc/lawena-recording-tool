@@ -1,4 +1,4 @@
-package com.github.lawena.model;
+package com.github.lawena.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +8,7 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import com.github.lawena.util.Serials;
-
-public class Skyboxes implements Serializable {
+public class ImageStore implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -21,7 +19,7 @@ public class Skyboxes implements Serializable {
   }
 
   public void load(File src) throws ClassNotFoundException, IOException {
-    Skyboxes loaded = Serials.gzRead(Skyboxes.class, src);
+    ImageStore loaded = Serials.gzRead(ImageStore.class, src);
     map.putAll(loaded.map);
   }
 

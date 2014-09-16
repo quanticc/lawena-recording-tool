@@ -1,5 +1,7 @@
 package com.github.lawena.app.task;
 
+import static com.github.lawena.util.Util.toPath;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
@@ -13,14 +15,14 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
+import com.github.lawena.app.model.ConfigWriter;
 import com.github.lawena.app.model.Linker;
 import com.github.lawena.app.model.MainModel;
 import com.github.lawena.app.model.Resource;
 import com.github.lawena.app.model.Resources;
-import com.github.lawena.model.LwrtMovies;
-import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.app.model.Settings;
 import com.github.lawena.os.OSInterface;
+import com.github.lawena.profile.Key;
 import com.github.lawena.ui.LawenaView;
 import com.github.lawena.util.LawenaException;
 import com.github.lawena.util.StatusAppender;
@@ -37,10 +39,10 @@ public class Launcher extends SwingWorker<Boolean, Void> {
   private Lawena presenter;
 
   private OSInterface os;
-  private LwrtSettings settings;
-  private LwrtMovies movies;
+  private Settings settings;
   private Resources resources;
   private Linker linker;
+  private ConfigWriter writer;
 
   public Launcher(Tasks tasks) {
     this.tasks = tasks;
@@ -50,9 +52,9 @@ public class Launcher extends SwingWorker<Boolean, Void> {
 
     this.os = model.getOsInterface();
     this.settings = model.getSettings();
-    this.movies = model.getMovies();
     this.resources = model.getResources();
     this.linker = model.getLinker();
+    this.writer = new ConfigWriter(settings);
   }
 
   @Override
@@ -81,32 +83,15 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       }
 
       // Check for big custom folders, mitigate OOM errors with custom folder > 2 GB
-      Path tfpath = settings.getTfPath();
+      Path tfpath = toPath(Key.gamePath.getValue(settings));
       Path customPath = tfpath.resolve("custom");
       Path configPath = tfpath.resolve("cfg");
-      try {
-        long bytes = Util.sizeOfPath(configPath) + Util.sizeOfPath(customPath);
-        String size = Util.humanReadableByteCount(bytes, true);
-        log.info("Config and Custom folders size: " + size);
-        if (bytes / 1024 / 1024 > settings.getInt(Key.BigFolderMBThreshold)) {
-          int answer =
-              JOptionPane
-                  .showConfirmDialog(
-                      null,
-                      "Your cfg and custom folders are "
-                          + size
-                          + " in size."
-                          + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
-                          + "\nDo you still want to proceed?", "Copying Folders before Launch",
-                      JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-          if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
-            log.info("Launch aborted by the user");
-            status.info("Launch aborted by the user");
-            return false;
-          }
-        }
-      } catch (IOException e) {
-        log.info("Could not determine folder size: " + e);
+      boolean ok =
+          Util.notifyBigFolder(Key.bigFolderThreshold.getValue(settings), configPath, customPath);
+      if (!ok) {
+        log.info("Launch aborted by the user");
+        status.info("Launch aborted by the user");
+        return false;
       }
 
       setProgress(5);
@@ -122,27 +107,13 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       status.info("Saving settings and generating cfg files");
       try {
         presenter.saveSettings();
-        if (model.getDemos().isAutoplay()) {
-          String demoname = model.getDemos().getDemoname();
-          if (demoname != null && !demoname.isEmpty()) {
-            settings.setDemoname(demoname);
-          }
-        }
-        settings.saveToCfg();
-        movies.createMovienameCfgs();
+        writer.writeAll();
+        model.getDemos().writeAutoplay();
       } catch (IOException e) {
         log.warn("Problem while saving settings to file", e);
         status.info(StatusAppender.ERROR, "Failed to save lawena settings to file");
         return false;
       }
-      // Allow failing this without cancelling launch, notify user
-      // See https://github.com/iabarca/lawena-recording-tool/issues/36
-      try {
-        movies.movieOffset();
-      } catch (IOException e) {
-        log.info("Could not detect current movie slot");
-      }
-
       setProgress(50);
 
       // Backing up user files and copying lawena files
@@ -157,7 +128,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
 
       // Launching process
       status.info("Launching TF2 process");
-      os.startTf(settings);
+      os.launchSteam(settings);
 
       SwingUtilities.invokeAndWait(new Runnable() {
 
@@ -170,7 +141,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       setProgress(100);
 
       int timeout = 0;
-      int cfgtimeout = settings.getLaunchTimeout();
+      int cfgtimeout = Key.launchTimeout.getValue(settings);
       int millis = 5000;
       int maxtimeout = cfgtimeout / (millis / 1000);
       setProgress(0);
@@ -230,9 +201,9 @@ public class Launcher extends SwingWorker<Boolean, Void> {
 
   private void closeTf2Handles() {
     status.info("Closing open handles in TF2 'cfg' folder...");
-    os.closeHandles(settings.getTfPath().resolve("cfg"));
+    os.closeHandles(toPath(Key.gamePath.getValue(settings)).resolve("cfg"));
     status.info("Closing open handles in TF2 'custom' folder...");
-    os.closeHandles(settings.getTfPath().resolve("custom"));
+    os.closeHandles(toPath(Key.gamePath.getValue(settings)).resolve("custom"));
   }
 
   private boolean verifyCustomHud() {

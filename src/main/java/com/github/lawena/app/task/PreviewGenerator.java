@@ -64,7 +64,7 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
       count++;
       setProgress((int) (100 * ((double) count / skyboxNames.size())));
       status.info("Generating skybox preview: {}", name);
-      if (!model.getSkyboxes().getMap().containsKey(name)) {
+      if (!model.getSkyboxPreviewStore().getMap().containsKey(name)) {
         List<Path> inputs = withParams(inputDir, name, boxes, ".vtf");
         List<Path> outputs = withParams(outputDir, name, boxes, "." + format);
         List<Path> vtfin = new ArrayList<>();
@@ -80,7 +80,7 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
         }
         ImageIcon icon = concatenate(outputs);
         log.debug("Adding skybox preview: {}", name);
-        model.getSkyboxes().getMap().put(name, icon);
+        model.getSkyboxPreviewStore().getMap().put(name, icon);
         deleteTempFiles(outputs);
       }
     }

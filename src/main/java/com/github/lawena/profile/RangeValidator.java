@@ -1,7 +1,20 @@
 package com.github.lawena.profile;
 
-
+/**
+ * Numeric validator for ranges, allowing a minimum and maximum value.
+ * 
+ * @author Ivan
+ *
+ */
 public class RangeValidator implements Validator<Integer> {
+
+  public static RangeValidator atLeast(int min) {
+    return new RangeValidator(min, Integer.MAX_VALUE);
+  }
+
+  public static RangeValidator atMost(int max) {
+    return new RangeValidator(Integer.MIN_VALUE, max);
+  }
 
   private int min;
   private int max;

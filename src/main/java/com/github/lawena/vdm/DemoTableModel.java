@@ -15,8 +15,8 @@ import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.app.model.Settings;
+import com.github.lawena.profile.Key;
 
 public class DemoTableModel extends AbstractTableModel {
 
@@ -27,15 +27,19 @@ public class DemoTableModel extends AbstractTableModel {
     DEMONAME, MAP, PLAYER, TICKS, TIME, SERVER, STREAKS;
   }
 
-  private LwrtSettings cfg;
+  private Settings settings;
   private List<Demo> list = new ArrayList<>();
   private Path demosPath;
 
-  public DemoTableModel(LwrtSettings cfg) {
-    this.cfg = cfg;
+  public DemoTableModel(Settings settings) {
+    this.settings = settings;
   }
 
   public void setDemosPath(Path path) {
+    if (this.demosPath != null) {
+      Key.demosPath.setValueEx(settings, path.toAbsolutePath().toString());
+      settings.save();
+    }
     this.demosPath = path;
     clear();
     log.info("Scanning for demos in folder: {}", path);
@@ -48,12 +52,11 @@ public class DemoTableModel extends AbstractTableModel {
     } catch (IOException e) {
       log.warn("Problem while scanning .dem files: " + e);
     }
-    // TODO: Make KillStreak loading optional
-    if (cfg.getBoolean(Key.LoadKillstreakFile)) {
+    final Path streaksPath = demosPath.resolve(Key.relativeKillstreakPath.getValue(settings));
+    if (Key.loadKillstreaks.getValue(settings) && Files.exists(streaksPath)) {
       new SwingWorker<Void, Void>() {
         protected Void doInBackground() throws Exception {
           try {
-            Path streaksPath = demosPath.resolve(cfg.getString(Key.KillstreakFileName));
             log.debug("Loading Killstreak data from {}", streaksPath);
             int lineNumber = 1;
             for (String line : Files.readAllLines(streaksPath, Charset.forName("UTF-8"))) {
@@ -73,7 +76,7 @@ public class DemoTableModel extends AbstractTableModel {
               lineNumber++;
             }
           } catch (IOException e) {
-            log.warn("Problem while reading KillStreaks.txt", e);
+            log.warn("Problem while reading KillStreaks.txt: " + e);
           }
           return null;
         };

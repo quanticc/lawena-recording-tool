@@ -14,6 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -30,6 +31,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
@@ -39,6 +41,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.reflect.TypeToken;
 
+/**
+ * Utility methods for Lawena Recording Tool.
+ * 
+ * @author Ivan
+ *
+ */
 public class Util {
 
   private static final Logger log = LoggerFactory.getLogger(Util.class);
@@ -253,28 +261,108 @@ public class Util {
     }
   }
 
+  /**
+   * Retrieve a value from a <code>Map</code> tree given a path, creating all needed intermediate
+   * paths that do not exist.
+   * 
+   * @param root - a <code>Map</code> representing the root to explore
+   * @param type - the type of the value retrieved
+   * @param key - the key, a path separated by <code>.</code> (dot), where the value will be set
+   * @return the value from the map at the given path or <code>null</code> if there is no such value
+   *         stored at the given path
+   */
   @SuppressWarnings("unchecked")
   public static <T> T getFromTree(Map<String, Object> root, TypeToken<T> type, String key) {
+    if (root == null)
+      throw new IllegalArgumentException("root must not be null");
+    if (type == null)
+      throw new IllegalArgumentException("type must not be null");
+    if (key == null)
+      throw new IllegalArgumentException("null keys are not allowed");
     String[] paths = key.split("\\.");
-    Map<String, Object> map = root;
-    for (int i = 0; i < paths.length - 1; i++) {
-      map = (Map<String, Object>) map.get(paths[i]);
-    }
+    Map<String, Object> map = getParentMap(root, paths);
     return (T) map.get(paths[paths.length - 1]);
   }
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Set a value to a <code>Map</code> tree given a path, creating all needed intermediate paths
+   * that do not exist.
+   * 
+   * @param root - a <code>Map</code> representing the root to explore
+   * @param key - a <code>String</code> separated by <code>.</code> (dot), where the value will be
+   *        set
+   * @param value - the value to set within the map
+   */
   public static <T> void setToTree(Map<String, Object> root, String key, T value) {
+    if (root == null)
+      throw new IllegalArgumentException("root must not be null");
+    if (key == null)
+      throw new IllegalArgumentException("null keys are not allowed");
+    if (value == null)
+      throw new IllegalArgumentException("null values are not allowed");
     String[] paths = key.split("\\.");
+    Map<String, Object> map = getParentMap(root, paths);
+    map.put(paths[paths.length - 1], value);
+  }
+
+  /**
+   * Traverse the tree given by a root through a supplied path array until the parent of the last
+   * path is reached, and then return it. If an intermediate path does not exist, it is created
+   * within the tree.
+   * 
+   * @param root - a <code>Map</code> representing the root to explore
+   * @param paths - a <code>String</code> array describing the path to walk through the tree
+   * @return a <code>Map</code> that holds the last path supplied as a key. It is never
+   *         <code>null</code>
+   */
+  @SuppressWarnings("unchecked")
+  public static Map<String, Object> getParentMap(Map<String, Object> root, String[] paths) {
+    if (root == null)
+      throw new IllegalArgumentException("root must not be null");
+    if (paths == null)
+      throw new IllegalArgumentException("a path array must be supplied");
     Map<String, Object> map = root;
     for (int i = 0; i < paths.length - 1; i++) {
       String path = paths[i];
       if (!map.containsKey(path)) {
         map.put(path, new LinkedHashMap<String, Object>());
       }
-      map = (Map<String, Object>) map.get(paths[i]);
+      map = (Map<String, Object>) map.get(path);
     }
-    map.put(key, value);
+    return map;
+  }
+
+  public static boolean notifyBigFolder(int thresholdInMB, Path... paths) {
+    try {
+      long bytes = 0L;
+      for (Path path : paths) {
+        bytes += Util.sizeOfPath(path);
+      }
+      String size = Util.humanReadableByteCount(bytes, true);
+      log.debug("Backup folders size: " + size);
+      if (bytes / 1024 / 1024 > thresholdInMB) {
+        int answer =
+            JOptionPane
+                .showConfirmDialog(
+                    null,
+                    "Your cfg and custom folders are "
+                        + size
+                        + " in size.\nThis might cause Lawena to hang or crash while it creates a backup."
+                        + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
+                        + "\nDo you still want to create a backup?", "Backup Folder",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
+          return false;
+        }
+      }
+    } catch (IOException e) {
+      log.info("Could not determine folder size: " + e);
+    }
+    return true;
+  }
+
+  public static Path toPath(String path) {
+    return path == null ? Paths.get("") : Paths.get(path);
   }
 
 }

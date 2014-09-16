@@ -1,6 +1,7 @@
 package com.github.lawena.app.model;
 
-import java.io.File;
+import static com.github.lawena.util.Util.toPath;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,20 +9,18 @@ import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.swing.JFileChooser;
+import joptsimple.OptionSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.model.LwrtMovies;
-import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.Skyboxes;
-import com.github.lawena.model.LwrtSettings.Key;
 import com.github.lawena.os.LinuxInterface;
 import com.github.lawena.os.OSInterface;
 import com.github.lawena.os.OSXInterface;
 import com.github.lawena.os.WindowsInterface;
+import com.github.lawena.profile.Key;
 import com.github.lawena.update.Updater;
+import com.github.lawena.util.ImageStore;
 import com.github.lawena.util.Util;
 import com.github.lawena.vdm.DemoEditor;
 
@@ -29,56 +28,31 @@ public class MainModel {
 
   private static final Logger log = LoggerFactory.getLogger(MainModel.class);
 
-  private LwrtSettings settings;
   private Map<String, String> versionData;
   private OSInterface osInterface;
   private Updater updater;
   private Linker linker;
 
   private String originalDxLevel;
-  private Path steamPath;
-  private JFileChooser movieFileChooser;
-  private JFileChooser gameFileChooser;
-
-  private LwrtMovies movies;
   private Resources resources;
   private DemoEditor demos;
-  private Skyboxes skyboxes;
+  private ImageStore skyboxPreviewStore;
+  private Settings settings;
 
-  public MainModel(LwrtSettings settingsManager) {
-    this.settings = settingsManager;
+  public MainModel(OptionSet optionSet) {
+    this.settings = new Settings(optionSet);
     this.versionData = loadVersionData();
     this.updater = new Updater();
-
     logVMInfo();
-    loadOsInterface();
+    configureOSInterface();
 
     originalDxLevel = osInterface.getSystemDxLevel();
-    steamPath = osInterface.getSteamPath();
 
-    Path tfpath = settings.getTfPath();
-    if (tfpath == null || tfpath.toString().isEmpty()) {
-      tfpath = steamPath.resolve("SteamApps/common/Team Fortress 2/tf");
+    Path gamePath = toPath(Key.gamePath.getValue(settings));
+    if (gamePath == null || gamePath.toString().isEmpty()) {
+      gamePath = osInterface.getSteamPath().resolve(Key.relativeDefaultGamePath.getValue(settings));
     }
-    if (!Files.exists(tfpath)) {
-      tfpath = getChosenTfPath();
-      if (tfpath == null) {
-        log.info("No tf directory specified, exiting.");
-        throw new IllegalArgumentException("Must set a game folder");
-      }
-    }
-    settings.setTfPath(tfpath);
-
-    Path moviepath = settings.getMoviePath();
-    if (moviepath == null || moviepath.toString().isEmpty() || !Files.exists(moviepath)) {
-      moviepath = getChosenMoviePath();
-      if (moviepath == null) {
-        log.info("No movie directory specified, exiting.");
-        throw new IllegalArgumentException("Must set a segment folder");
-      }
-    }
-    movies = new LwrtMovies(settings);
-    settings.setMoviePath(moviepath);
+    Key.gamePath.setValueEx(settings, gamePath.toString());
 
     settings.save();
 
@@ -88,11 +62,11 @@ public class MainModel {
     resources = new Resources();
 
     demos = new DemoEditor(settings, osInterface);
-    skyboxes = new Skyboxes();
+    skyboxPreviewStore = new ImageStore();
     loadSkyboxData();
   }
 
-  private void loadOsInterface() {
+  private void configureOSInterface() {
     String osname = System.getProperty("os.name");
     if (osname.contains("Windows")) {
       osInterface = new WindowsInterface();
@@ -122,6 +96,9 @@ public class MainModel {
   }
 
   private void logVMInfo() {
+    Path emptyPath = toPath("");
+    Path gamePath = toPath(Key.gamePath.getValue(settings));
+    Path recPath = toPath(Key.recordingPath.getValue(settings));
     // saving essential info to log for troubleshooting
     log.debug("----------------- Lawena Recording Tool -----------------");
     log.debug("v {} {} [{}]", getFullVersion(), getBuildTime(), updater.getCurrentBranchName());
@@ -130,8 +107,16 @@ public class MainModel {
     log.debug("Java version: {}", System.getProperty("java.version"));
     log.debug("Java home: {}", System.getProperty("java.home"));
     log.debug("------------------------ Folders ------------------------");
-    log.debug("Game: {}", settings.getTfPath());
-    log.debug("Segments: {}", settings.getMoviePath());
+    if (emptyPath.equals(gamePath)) {
+      log.warn("Game: <No folder defined>");
+    } else {
+      log.debug("Game: {}", gamePath);
+    }
+    if (emptyPath.equals(recPath)) {
+      log.warn("Segments: <No folder defined>");
+    } else {
+      log.debug("Segments: {}", recPath);
+    }
     log.debug("Lawena: {}", Paths.get("").toAbsolutePath());
     log.debug("---------------------------------------------------------");
   }
@@ -148,7 +133,7 @@ public class MainModel {
     return versionData.get("build");
   }
 
-  public LwrtSettings getSettings() {
+  public Settings getSettings() {
     return settings;
   }
 
@@ -164,71 +149,25 @@ public class MainModel {
     return originalDxLevel;
   }
 
-  public Path getSteamPath() {
-    return steamPath;
-  }
-
-  public Path getChosenMoviePath() {
-    Path selected = null;
-    int ret = 0;
-    while ((selected == null && ret == 0) || (selected != null && !Files.exists(selected))) {
-      movieFileChooser = new JFileChooser();
-      movieFileChooser.setDialogTitle("Choose a directory to store your movie files");
-      movieFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      ret = movieFileChooser.showOpenDialog(null);
-      if (ret == JFileChooser.APPROVE_OPTION) {
-        selected = movieFileChooser.getSelectedFile().toPath();
-      } else {
-        selected = null;
-      }
-    }
-    return selected;
-  }
-
-  public Path getChosenTfPath() {
-    Path selected = null;
-    int ret = 0;
-    while ((selected == null && ret == 0)
-        || (selected != null && (!Files.exists(selected) || !selected.toFile().getName().toString()
-            .equals("tf")))) {
-      gameFileChooser = new JFileChooser();
-      gameFileChooser.setDialogTitle("Choose your \"tf\" directory");
-      gameFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      gameFileChooser.setCurrentDirectory(steamPath.toFile());
-      gameFileChooser.setFileHidingEnabled(false);
-      ret = gameFileChooser.showOpenDialog(null);
-      if (ret == JFileChooser.APPROVE_OPTION) {
-        selected = gameFileChooser.getSelectedFile().toPath();
-      } else {
-        selected = null;
-      }
-      log.debug("Selected path: " + selected);
-    }
-    return selected;
-  }
-
   public DemoEditor getDemos() {
     return demos;
-  }
-
-  public LwrtMovies getMovies() {
-    return movies;
   }
 
   public Resources getResources() {
     return resources;
   }
 
-  public Skyboxes getSkyboxes() {
-    return skyboxes;
+  public ImageStore getSkyboxPreviewStore() {
+    return skyboxPreviewStore;
   }
 
   public void loadSkyboxData() {
-    File skySerialFile = new File(settings.getString(Key.SkyboxDataSavePath));
-    if (!Files.exists(skySerialFile.toPath()))
+    Path base = settings.getParentDataPath();
+    Path skySerialFile = base.resolve(Key.skyPreviewSavePath.getValue(settings));
+    if (!Files.exists(skySerialFile))
       return;
     try {
-      skyboxes.load(skySerialFile);
+      skyboxPreviewStore.load(skySerialFile.toFile());
       log.debug("Skybox data loaded from {}", skySerialFile);
     } catch (ClassNotFoundException | IOException e) {
       log.warn("Could not read skybox data from file: " + e);
@@ -236,9 +175,10 @@ public class MainModel {
   }
 
   public void saveSkyboxData() {
-    File skySerialFile = new File(settings.getString(Key.SkyboxDataSavePath));
+    Path base = settings.getParentDataPath();
+    Path skySerialFile = base.resolve(Key.skyPreviewSavePath.getValue(settings));
     try {
-      skyboxes.save(skySerialFile);
+      skyboxPreviewStore.save(skySerialFile.toFile());
       log.debug("Skybox data saved to {}", skySerialFile);
     } catch (IOException e) {
       log.warn("Could not save skybox data to file: " + e);

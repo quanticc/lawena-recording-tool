@@ -2,7 +2,6 @@ package com.github.lawena.profile;
 
 import static com.github.lawena.profile.Options.newOption;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,23 +20,22 @@ public class Key {
   /**
    * Full path to the game base path. Must finish with {@link #gameFolderName}.
    */
-  public static final Option<File> gamePath = newOption("path.game", File.class, new File(""));
+  public static final Option<String> gamePath = newOption("path.game", String.class, "");
   /**
    * Full path to a folder used as output for recording frames. This path will be forwarded to
    * Source Recorder.
    */
-  public static final Option<File> recordingPath = newOption("path.recording", File.class,
-      new File(""));
+  public static final Option<String> recordingPath = newOption("path.recording", String.class, "");
   /**
    * A path to store skybox previews.
    */
-  public static final Option<File> skyPreviewSavePath = newOption("path.skyboxPreviews",
-      File.class, new File("skybox-previews.lwf"));
+  public static final Option<String> skyPreviewSavePath = newOption("path.skyboxPreviews",
+      String.class, "skybox-previews.lwf");
   /**
    * The folder where Lawena will scan for demos. If no path is specified, it will use
    * {@link #gamePath}
    */
-  public static final Option<File> demosPath = newOption("path.demos", File.class, new File(""));
+  public static final Option<String> demosPath = newOption("path.demos", String.class, "");
 
   // Launch related options
 
@@ -45,12 +43,12 @@ public class Key {
    * Resolution width, to be input as launch option when the game is run. Must be higher than 640.
    */
   public static final Option<Integer> width = newOption("launch.width", Integer.class, 1280)
-      .validatedBy(new RangeValidator(640, Integer.MAX_VALUE));
+      .validatedBy(RangeValidator.atLeast(640));
   /**
    * Resolution height to be input as launch option when the game is run. Must be higher than 480.
    */
   public static final Option<Integer> height = newOption("launch.height", Integer.class, 720)
-      .validatedBy(new RangeValidator(480, Integer.MAX_VALUE));
+      .validatedBy(RangeValidator.atLeast(480));
   /**
    * DirectX Level to be used with the engine when the game launches. Must be equals to one of the
    * following values: 80, 81, 90, 95, 98.
@@ -61,20 +59,25 @@ public class Key {
    * Seconds to wait for the game before launch routine is aborted. Use 0 to disable.
    */
   public static final Option<Integer> launchTimeout = newOption("launch.timeout", Integer.class,
-      120).validatedBy(new RangeValidator(0, Integer.MAX_VALUE));
+      120).validatedBy(RangeValidator.atLeast(0));
   /**
    * Extra launch options provided by the user. Can be used to override other settings like
    * resolution, dxlevel or applaunch id.
    */
   public static final Option<String> launchOptions = newOption("launch.options", String.class,
       "-novid -console");
+  public static final Option<Boolean> insecure = newOption("launch.insecure", Boolean.class, false);
 
   // File and custom resource related options
 
   /**
    * Name of the hud folder to load into the game. Must be present in one of the resources folders.
    */
-  public static final Option<String> hud = newOption("files.hud", String.class, "killnotices");
+  public static final Option<String> hud =
+      newOption("files.hud", String.class, "hud_killnotices")
+          .validatedBy(
+              new ValuesValidator("hud_medic", "hud_killnotices", "hud_medic", "hud_default",
+                  "custom"));
   /**
    * Name of the skybox to load into the game. Must be present in one of the resources folders.
    */
@@ -84,11 +87,17 @@ public class Key {
           "no_applause_sounds.vpk", "no_domination_sounds.vpk"));
   public static final Option<List<String>> extraFolders = newOption("files.extFolders",
       new TypeToken<List<String>>() {}, Arrays.asList(""));
+  public static final Option<Integer> bigFolderThreshold = newOption("files.bigFolderLimit",
+      Integer.class, 200);
+  public static final Option<Boolean> deleteUnneededBackups = newOption(
+      "files.deleteUnneededBackups", Boolean.class, true);
+  public static final Option<String> loglevel = newOption("files.loglevel", String.class, "DEBUG")
+      .validatedBy(new ValuesValidator("OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"));
 
   // config/cvar (in-game) related options
 
   public static final Option<Integer> framerate = newOption("cfg.framerate", Integer.class, 120)
-      .validatedBy(new RangeValidator(24, Integer.MAX_VALUE));
+      .validatedBy(RangeValidator.atLeast(24));
   public static final Option<String> viewmodelSwitch = newOption("cfg.viewmodels", String.class,
       "on").validatedBy(new ValuesValidator("on", "off", "default"));
   public static final Option<Integer> viewmodelFov = newOption("cfg.vmodelFov", Integer.class, 70);
@@ -114,6 +123,10 @@ public class Key {
 
   public static final Option<Boolean> vdmNoSkipToTick = newOption("vdm.noSkipToTick",
       Boolean.class, false);
+  public static final Option<Boolean> loadKillstreaks = newOption("vdm.loadKillstreak",
+      Boolean.class, true);
+  public static final Option<String> relativeKillstreakPath = newOption(
+      "vdm.relativeKillstreakPath", String.class, "KillStreaks.txt");
 
   // Source Recorder options
 
@@ -135,17 +148,14 @@ public class Key {
    * 
    * @see com.github.lawena.os.OSInterface#getSteamPath()
    */
-  public static final Option<String> relativeGamePath = newOption("lawena.gamePath", String.class,
-      "SteamApps/common/Team Fortress 2/tf");
+  public static final Option<String> relativeDefaultGamePath = newOption("lawena.defaultGamePath",
+      String.class, "SteamApps/common/Team Fortress 2/tf");
   /**
    * Required folder name for {@link #gamePath} to be validated against. For instance, Team Fortress
    * 2 uses <code>tf</code> as folder name.
    */
   public static final Option<String> gameFolderName = newOption("lawena.gameFolderName",
       String.class, "tf");
-
-  public static final Option<File> lawenaGameFolder = newOption("lawena.contentFolder", File.class,
-      new File("lwrt/tf"));
 
   private Key() {}
 

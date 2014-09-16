@@ -27,4 +27,8 @@ public class ValuesValidator implements Validator<String> {
     }
   }
 
+  public List<String> getAllowedValues() {
+    return allowedValues;
+  }
+
 }

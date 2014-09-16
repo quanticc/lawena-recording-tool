@@ -72,7 +72,6 @@ public class Updater {
     try {
       return ConfigUtil.parseConfig(path.toFile(), false);
     } catch (IOException e) {
-      log.info("No updater configuration could be loaded at {}", path);
       standalone = true;
       return new HashMap<>();
     }

@@ -3,12 +3,14 @@ package com.github.lawena.app;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import joptsimple.OptionSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import com.github.lawena.app.model.MainModel;
-import com.github.lawena.model.LwrtSettings;
+import com.github.lawena.profile.Options;
 import com.github.lawena.util.LoggingAppender;
 
 /**
@@ -31,7 +33,8 @@ public class Main {
       LoggingAppender appender = new LoggingAppender(rootLog.getLoggerContext());
       rootLog.addAppender(appender);
 
-      LwrtSettings cfg = new LwrtSettings("settings.lwf");
+      final OptionSet optionSet = Options.getParser().parse(args);
+
       Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 
         private boolean shown = false;
@@ -47,7 +50,7 @@ public class Main {
         }
       });
 
-      final Lawena lawena = new Lawena(new MainModel(cfg));
+      final Lawena lawena = new Lawena(new MainModel(optionSet));
       lawena.setAppender(appender);
 
       SwingUtilities.invokeAndWait(new Runnable() {

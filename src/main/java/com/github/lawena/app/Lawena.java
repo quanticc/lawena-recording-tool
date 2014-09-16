@@ -1,5 +1,7 @@
 package com.github.lawena.app;
 
+import static com.github.lawena.util.Util.toPath;
+
 import java.awt.Dialog.ModalityType;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -8,6 +10,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -16,6 +19,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
@@ -40,9 +45,10 @@ import ch.qos.logback.classic.Level;
 import com.github.lawena.app.model.MainModel;
 import com.github.lawena.app.model.Resource;
 import com.github.lawena.app.model.Resources;
+import com.github.lawena.app.model.Settings;
 import com.github.lawena.app.task.FileOpener;
-import com.github.lawena.model.LwrtSettings;
-import com.github.lawena.model.LwrtSettings.Key;
+import com.github.lawena.profile.Key;
+import com.github.lawena.profile.ValuesValidator;
 import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LaunchOptionsDialog;
 import com.github.lawena.ui.LawenaView;
@@ -63,7 +69,7 @@ public class Lawena {
   private MainModel model;
   private LawenaView view;
 
-  private LwrtSettings settings;
+  private Settings settings;
   private DemoEditor demos;
   private Resources resources;
 
@@ -245,9 +251,9 @@ public class Lawena {
       @Override
       public void actionPerformed(ActionEvent e) {
         if (tasks.getCurrentLaunchTask() == null) {
-          Path newpath = model.getChosenTfPath();
+          Path newpath = validateGamePath(null);
           if (newpath != null) {
-            settings.setTfPath(newpath);
+            Key.gamePath.setValueEx(settings, newpath.toString());
             tasks.scanResources();
           }
         } else {
@@ -260,9 +266,9 @@ public class Lawena {
       @Override
       public void actionPerformed(ActionEvent e) {
         if (tasks.getCurrentLaunchTask() == null) {
-          Path newpath = model.getChosenMoviePath();
+          Path newpath = validateRecordingPath(null);
           if (newpath != null) {
-            settings.setMoviePath(newpath);
+            Key.recordingPath.setValueEx(settings, newpath.toString());
           }
         } else {
           JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
@@ -273,11 +279,11 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        Path movies = settings.getMoviePath();
-        settings.loadDefaults();
-        settings.setMoviePath(movies);
+        Path movies = toPath(Key.recordingPath.getValue(settings));
+        settings.loadDefaultValues();
+        Key.recordingPath.setValueEx(settings, movies.toString());
         loadSettings();
-        resources.enableFromList(settings.getList(Key.CustomResources));
+        resources.enableFromList(Key.resources.getValue(settings));
         loadHudComboState();
         saveSettings();
       }
@@ -314,21 +320,22 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        tasks.openFile(settings.getMoviePath().toFile());
+        tasks.openFile(new File(Key.recordingPath.getValue(settings)).getAbsoluteFile());
       }
     });
     view.getMntmOpenCustomFolder().addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        tasks.openFile(Paths.get("lwrt/tf/custom").toFile());
+        Path data = settings.getParentDataPath();
+        tasks.openFile(data.resolve("custom").toFile());
       }
     });
     view.getChckbxmntmInsecure().addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
+        Key.insecure.setValueEx(settings, view.getChckbxmntmInsecure().isSelected());
       }
     });
     view.getMntmLaunchTimeout().addActionListener(new ActionListener() {
@@ -339,11 +346,11 @@ public class Lawena {
             JOptionPane.showInputDialog(view, "Enter the number of seconds to wait\n"
                 + "before interrupting TF2 launch.\n" + "Enter 0 to disable timeout.",
                 "Launch Timeout", JOptionPane.PLAIN_MESSAGE, null, null,
-                settings.getLaunchTimeout());
+                Key.launchTimeout.getValue(settings));
         if (answer != null) {
           try {
             int value = Integer.parseInt(answer.toString());
-            settings.setLaunchTimeout(value);
+            Key.launchTimeout.setValueEx(settings, value);
           } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(view, "Invalid value, must be 0 or higher integer.",
                 "Launch Options", JOptionPane.WARNING_MESSAGE);
@@ -358,13 +365,13 @@ public class Lawena {
         if (launchOptionsDialog == null) {
           launchOptionsDialog = new LaunchOptionsDialog();
         }
-        launchOptionsDialog.getOptionsTextField().setText(settings.getString(Key.LaunchOptions));
+        launchOptionsDialog.getOptionsTextField().setText(Key.launchOptions.getValue(settings));
         int result = launchOptionsDialog.showDialog();
         if (result == JOptionPane.YES_OPTION) {
           String launchOptions = launchOptionsDialog.getOptionsTextField().getText();
-          settings.setString(Key.LaunchOptions, launchOptions);
+          Key.launchOptions.setValueEx(settings, launchOptions);
         } else if (result == 1) {
-          settings.setString(Key.LaunchOptions, (String) Key.LaunchOptions.defValue());
+          Key.launchOptions.setDefaultValue(settings);
         }
       }
     });
@@ -389,6 +396,18 @@ public class Lawena {
 
     view.getTabbedPane().addTab("VDM", null, demos.start());
     view.setVisible(true);
+
+    new Timer().schedule(new TimerTask() {
+
+      @Override
+      public void run() {
+        Path newGamePath = validateGamePath(toPath(Key.gamePath.getValue(settings)));
+        Key.gamePath.setValue(settings, newGamePath.toString());
+        Path newRecPath = validateRecordingPath(toPath(Key.recordingPath.getValue(settings)));
+        Key.recordingPath.setValue(settings, newRecPath.toString());
+        settings.save();
+      }
+    }, 1000);
   }
 
   private void checkViewmodelState() {
@@ -462,33 +481,34 @@ public class Lawena {
     Util.registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
         view.getLblResolution());
     Util.registerValidation(view.getCmbFramerate(), "[1-9][0-9]*", view.getLblFrameRate());
-    Util.selectComboItem(view.getCmbHud(), settings.getHud(), Key.Hud.getAllowedValues());
-    Util.selectComboItem(view.getCmbQuality(), settings.getDxlevel(),
-        Key.DxLevel.getAllowedValues());
-    Util.selectComboItem(view.getCmbViewmodel(), settings.getViewmodelSwitch(),
-        Key.ViewmodelSwitch.getAllowedValues());
+    Util.selectComboItem(view.getCmbHud(), Key.hud.getValue(settings),
+        ((ValuesValidator) Key.hud.getValidator()).getAllowedValues());
+    Util.selectComboItem(view.getCmbQuality(), Key.dxlevel.getValue(settings),
+        ((ValuesValidator) Key.dxlevel.getValidator()).getAllowedValues());
+    Util.selectComboItem(view.getCmbViewmodel(), Key.viewmodelSwitch.getValue(settings),
+        ((ValuesValidator) Key.viewmodelSwitch.getValidator()).getAllowedValues());
     selectSkyboxFromSettings();
-    view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
-    view.getCmbFramerate().setSelectedItem(settings.getFramerate() + "");
+    view.getCmbResolution().setSelectedItem(
+        Key.width.getValue(settings).intValue() + "x" + Key.height.getValue(settings).intValue());
+    view.getCmbFramerate().setSelectedItem(Key.framerate.getValue(settings).intValue() + "");
     try {
-      view.getSpinnerViewmodelFov().setValue(settings.getViewmodelFov());
+      view.getSpinnerViewmodelFov().setValue(Key.viewmodelFov.getValue(settings));
     } catch (IllegalArgumentException e) {
     }
-    view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
-    view.getDisableCombatText().setSelected(!settings.getCombattext());
-    view.getDisableCrosshair().setSelected(!settings.getCrosshair());
-    view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
-    view.getDisableHitSounds().setSelected(!settings.getHitsounds());
-    view.getDisableVoiceChat().setSelected(!settings.getVoice());
-    view.getUseHudMinmode().setSelected(settings.getHudMinmode());
-    view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
-    view.getChckbxmntmBackupMode().setSelected(settings.getBoolean(Key.DeleteBackupsWhenRestoring));
-    view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
-    getCustomSettingsTextArea().setText(settings.getCustomSettings());
-    view.getCmbSourceVideoFormat().setSelectedItem(
-        settings.getString(Key.SourceRecorderVideoFormat).toUpperCase());
-    view.getSpinnerJpegQuality().setValue(settings.getInt(Key.SourceRecorderJpegQuality));
-    logView.getLevelComboBox().setSelectedItem(settings.getString(Key.LogLevel));
+    view.getEnableMotionBlur().setSelected(Key.motionBlur.getValue(settings));
+    view.getDisableCombatText().setSelected(Key.noDamageNumbers.getValue(settings));
+    view.getDisableCrosshair().setSelected(Key.noCrosshair.getValue(settings));
+    view.getDisableCrosshairSwitch().setSelected(Key.noCrosshairSwitch.getValue(settings));
+    view.getDisableHitSounds().setSelected(Key.noHitsounds.getValue(settings));
+    view.getDisableVoiceChat().setSelected(Key.noVoice.getValue(settings));
+    view.getUseHudMinmode().setSelected(Key.hudMinmode.getValue(settings));
+    view.getChckbxmntmInsecure().setSelected(Key.insecure.getValue(settings));
+    view.getChckbxmntmBackupMode().setSelected(Key.deleteUnneededBackups.getValue(settings));
+    view.getUsePlayerModel().setSelected(Key.hudPlayerModel.getValue(settings));
+    getCustomSettingsTextArea().setText(Key.extConVars.getValue(settings));
+    view.getCmbSourceVideoFormat().setSelectedItem(Key.recorderVideoFormat.getValue(settings));
+    view.getSpinnerJpegQuality().setValue(Key.recorderJpegQuality.getValue(settings));
+    logView.getLevelComboBox().setSelectedItem(Key.loglevel.getValue(settings));
     checkViewmodelState();
     checkFrameFormatState();
   }
@@ -496,38 +516,39 @@ public class Lawena {
   public void saveSettings() {
     String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
     if (resolution.length == 2) {
-      settings.setWidth(Integer.parseInt(resolution[0]));
-      settings.setHeight(Integer.parseInt(resolution[1]));
+      Key.width.setValueEx(settings, Integer.parseInt(resolution[0]));
+      Key.height.setValueEx(settings, Integer.parseInt(resolution[1]));
     } else {
       log.warn("Bad resolution format, reverting to previously saved");
-      view.getCmbResolution().setSelectedItem(settings.getWidth() + "x" + settings.getHeight());
+      view.getCmbResolution().setSelectedItem(
+          Key.width.getValue(settings) + "x" + Key.height.getValue(settings));
     }
-    String framerate = (String) view.getCmbFramerate().getSelectedItem();
-    settings.setFramerate(Integer.parseInt(framerate));
-    settings.setHud(Key.Hud.getAllowedValues().get(view.getCmbHud().getSelectedIndex()));
-    settings.setViewmodelSwitch(Key.ViewmodelSwitch.getAllowedValues().get(
-        view.getCmbViewmodel().getSelectedIndex()));
-    settings.setViewmodelFov((int) view.getSpinnerViewmodelFov().getValue());
-    settings
-        .setDxlevel(Key.DxLevel.getAllowedValues().get(view.getCmbQuality().getSelectedIndex()));
-    settings.setMotionBlur(view.getEnableMotionBlur().isSelected());
-    settings.setCombattext(!view.getDisableCombatText().isSelected());
-    settings.setCrosshair(!view.getDisableCrosshair().isSelected());
-    settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
-    settings.setHitsounds(!view.getDisableHitSounds().isSelected());
-    settings.setVoice(!view.getDisableVoiceChat().isSelected());
-    settings.setSkybox((String) view.getCmbSkybox().getSelectedItem());
-    settings.setList(Key.CustomResources, resources.getEnabledStringList());
-    settings.setHudMinmode(view.getUseHudMinmode().isSelected());
-    settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
-    settings
-        .setBoolean(Key.DeleteBackupsWhenRestoring, view.getChckbxmntmBackupMode().isSelected());
-    settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
-    settings.setCustomSettings(getCustomSettingsTextArea().getText());
-    settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
-        .getSelectedItem().toString().toLowerCase());
-    settings.setInt(Key.SourceRecorderJpegQuality, (int) view.getSpinnerJpegQuality().getValue());
-    settings.setString(Key.LogLevel, (String) logView.getLevelComboBox().getSelectedItem());
+    Key.hud.setValueEx(
+        settings,
+        ((ValuesValidator) Key.hud.getValidator()).getAllowedValues().get(
+            view.getCmbHud().getSelectedIndex()));
+    Key.viewmodelSwitch.setValueEx(settings, ((ValuesValidator) Key.viewmodelSwitch.getValidator())
+        .getAllowedValues().get(view.getCmbViewmodel().getSelectedIndex()));
+    Key.dxlevel.setValueEx(settings, ((ValuesValidator) Key.dxlevel.getValidator())
+        .getAllowedValues().get(view.getCmbQuality().getSelectedIndex()));
+    Key.viewmodelFov.setValueEx(settings, (int) view.getSpinnerViewmodelFov().getValue());
+    Key.motionBlur.setValueEx(settings, view.getEnableMotionBlur().isSelected());
+    Key.noDamageNumbers.setValueEx(settings, view.getDisableCombatText().isSelected());
+    Key.noCrosshair.setValueEx(settings, view.getDisableCrosshair().isSelected());
+    Key.noCrosshairSwitch.setValueEx(settings, view.getDisableCrosshairSwitch().isSelected());
+    Key.noHitsounds.setValueEx(settings, view.getDisableHitSounds().isSelected());
+    Key.noVoice.setValueEx(settings, view.getDisableVoiceChat().isSelected());
+    Key.skybox.setValueEx(settings, (String) view.getCmbSkybox().getSelectedItem());
+    Key.resources.setValueEx(settings, resources.getEnabledStringList());
+    Key.hudMinmode.setValueEx(settings, view.getUseHudMinmode().isSelected());
+    Key.insecure.setValueEx(settings, view.getChckbxmntmInsecure().isSelected());
+    Key.deleteUnneededBackups.setValueEx(settings, view.getChckbxmntmBackupMode().isSelected());
+    Key.hudPlayerModel.setValueEx(settings, view.getUsePlayerModel().isSelected());
+    Key.extConVars.setValueEx(settings, getCustomSettingsTextArea().getText());
+    Key.recorderVideoFormat.setValueEx(settings, view.getCmbSourceVideoFormat().getSelectedItem()
+        .toString());
+    Key.recorderJpegQuality.setValueEx(settings, (int) view.getSpinnerJpegQuality().getValue());
+    Key.loglevel.setValueEx(settings, (String) logView.getLevelComboBox().getSelectedItem());
     settings.save();
     log.info("Settings saved");
   }
@@ -558,13 +579,13 @@ public class Lawena {
       }
     }
     tasks.generateSkyboxPreviews(new ArrayList<>(data));
-    data.add(0, (String) Key.Skybox.defValue());
+    data.add(0, Key.skybox.getDefaultValue());
     combo.setModel(new DefaultComboBoxModel<String>(data));
-    combo.setRenderer(new SkyboxListRenderer(model.getSkyboxes().getMap()));
+    combo.setRenderer(new SkyboxListRenderer(model.getSkyboxPreviewStore().getMap()));
   }
 
   public void selectSkyboxFromSettings() {
-    view.getCmbSkybox().setSelectedItem(settings.getSkybox());
+    view.getCmbSkybox().setSelectedItem(Key.skybox.getValue(settings));
   }
 
   MainModel getModel() {
@@ -611,5 +632,52 @@ public class Lawena {
 
   public void setAppender(LoggingAppender appender) {
     this.appender = appender;
+  }
+
+  public Path validateRecordingPath(Path initial) {
+    Path steamPath = model.getOsInterface().getSteamPath();
+    Path selected = initial;
+    int ret = 0;
+    while ((selected == null && ret == 0)
+        || (selected != null && (!Files.exists(selected) || Paths.get("").equals(selected)))) {
+      log.debug("Validating current recording folder: {}",
+          (selected != null ? selected.toAbsolutePath() : "<None>"));
+      String dir =
+          model.getOsInterface()
+              .chooseSingleFolder(view, "Choose a directory to store your movie files",
+                  steamPath.toAbsolutePath().toString());
+      if (dir != null) {
+        selected = Paths.get(dir);
+      } else {
+        ret = 1;
+        selected = null;
+      }
+      log.debug("Selected recording folder: " + selected);
+    }
+    return selected;
+  }
+
+  public Path validateGamePath(Path initial) {
+    Path steamPath = model.getOsInterface().getSteamPath();
+    Path selected = initial;
+    int ret = 0;
+    String dirName = Key.gameFolderName.getValue(settings);
+    while ((selected == null && ret == 0)
+        || (selected != null && (!Files.exists(selected) || !selected.toAbsolutePath().toFile()
+            .getName().toString().equals(dirName)))) {
+      log.debug("Validating current game folder: {}", (selected != null ? selected.toAbsolutePath()
+          : "<None>"));
+      String dir =
+          model.getOsInterface().chooseSingleFolder(view,
+              "Choose your \"" + dirName + "\" directory", steamPath.toAbsolutePath().toString());
+      if (dir != null) {
+        selected = Paths.get(dir);
+      } else {
+        ret = 1;
+        selected = null;
+      }
+      log.debug("Selected game folder: " + selected);
+    }
+    return selected;
   }
 }
