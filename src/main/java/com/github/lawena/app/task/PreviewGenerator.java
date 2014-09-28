@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
 import com.github.lawena.app.model.MainModel;
+import com.github.lawena.profile.Key;
 import com.github.lawena.util.StatusAppender;
 import com.github.lawena.util.Util;
 
@@ -57,8 +58,9 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
     }
     int count = 0;
     List<String> boxes = Arrays.asList("lf", "bk", "rt", "ft");
-    String inputDir = "lwrt/tf/skybox/vtf";
-    String outputDir = "lwrt/tf/skybox-preview";
+    String folder = Key.gameFolderName.getValue(model.getSettings());
+    String inputDir = "lwrt/" + folder + "/skybox/vtf";
+    String outputDir = "lwrt/" + folder + "/skybox-preview";
     String format = "png";
     for (String name : skyboxNames) {
       count++;

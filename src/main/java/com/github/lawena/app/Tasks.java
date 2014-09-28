@@ -30,6 +30,7 @@ import com.github.lawena.update.Build;
 import com.github.lawena.update.UpdateResult;
 import com.github.lawena.update.Updater;
 import com.github.lawena.util.StatusAppender;
+import com.github.lawena.util.Util;
 
 public class Tasks {
 
@@ -194,6 +195,13 @@ public class Tasks {
       Path base = settings.getParentDataPath();
       resources.addFolder(base.resolve("default").toFile(), true);
       resources.addFolder(base.resolve("custom").toFile(), false);
+      for (String s : Key.extraFolders.getValue(settings)) {
+        // ignore appdir
+        if (s.isEmpty())
+          continue;
+        Path path = Util.toPath(s);
+        resources.addFolder(path.toFile(), false);
+      }
     }
 
     @Override

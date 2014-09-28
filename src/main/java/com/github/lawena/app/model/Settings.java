@@ -9,7 +9,11 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.SwingUtilities;
 
 import joptsimple.OptionSet;
 
@@ -18,18 +22,16 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.profile.Options;
 import com.github.lawena.profile.Profile;
+import com.github.lawena.profile.ProfileListener;
 import com.github.lawena.profile.Profiles;
 import com.github.lawena.profile.ValueProvider;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
@@ -49,6 +51,7 @@ public class Settings implements ValueProvider {
       }).create();
   private final OptionSet optionSet;
   private Profiles profiles;
+  private List<ProfileListener> listeners = new ArrayList<>();
 
   public Settings(OptionSet optionSet) {
     this.optionSet = optionSet;
@@ -105,5 +108,37 @@ public class Settings implements ValueProvider {
   public void loadDefaultValues() {
     Profile current = profiles.getProfile();
     current.loadDefaultValues();
+  }
+
+  public void addProfileListener(ProfileListener listener) {
+    listeners.add(listener);
+  }
+
+  public boolean removeProfileListener(ProfileListener listener) {
+    return listeners.remove(listener);
+  }
+
+  public String getSelectedName() {
+    return profiles.getSelected();
+  }
+
+  public void selectProfile(String selected) {
+    if (profiles.select(selected)) {
+      fireSelectedProfile();
+    }
+  }
+
+  private void fireSelectedProfile() {
+    if (!listeners.isEmpty()) {
+      SwingUtilities.invokeLater(new Runnable() {
+
+        @Override
+        public void run() {
+          for (ProfileListener l : listeners) {
+            l.onProfileSelected();
+          }
+        }
+      });
+    }
   }
 }

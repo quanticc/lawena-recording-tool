@@ -142,7 +142,9 @@ public class ConfigWriter {
         + "lockviewmodelsoff");
     lines.add((crosshairswitch ? "//" : "") + "lockcrosshair");
     lines.add((crosshairswitch ? "//" : "") + "alias toggle \"\"");
-    Files.write(Paths.get("lwrt/tf/config/cfg/settings.cfg"), lines, Charset.forName("UTF-8"));
+    Files.write(
+        Paths.get("lwrt", Key.gameFolderName.getValue(settings), "config/cfg/settings.cfg"), lines,
+        Charset.forName("UTF-8"));
   }
 
   private void writeNamescrollConfig() throws IOException {

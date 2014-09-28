@@ -17,6 +17,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
+import java.awt.Toolkit;
 
 public class LogView extends JFrame {
 
@@ -32,7 +33,9 @@ public class LogView extends JFrame {
   private Component horizontalGlue;
 
   public LogView() {
-    setType(Type.UTILITY);
+    setIconImage(Toolkit.getDefaultToolkit().getImage(
+        LogView.class.getResource("/com/github/lawena/ui/fugue/clock.png")));
+    setType(Type.POPUP);
     setTitle("Log");
     setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
     setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);

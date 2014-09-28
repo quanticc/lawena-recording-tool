@@ -48,6 +48,7 @@ import com.github.lawena.app.model.Resources;
 import com.github.lawena.app.model.Settings;
 import com.github.lawena.app.task.FileOpener;
 import com.github.lawena.profile.Key;
+import com.github.lawena.profile.ProfileListener;
 import com.github.lawena.profile.ValuesValidator;
 import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LaunchOptionsDialog;
@@ -62,7 +63,7 @@ import com.github.lawena.util.StatusAppender;
 import com.github.lawena.util.Util;
 import com.github.lawena.vdm.DemoEditor;
 
-public class Lawena {
+public class Lawena implements ProfileListener {
 
   private static final Logger log = LoggerFactory.getLogger(Lawena.class);
 
@@ -241,10 +242,14 @@ public class Lawena {
       }
     };
     sorter.setRowFilter(filter);
-    tasks.scanResources();
-    tasks.loadSkyboxes();
 
-    loadSettings();
+    // ui validators
+    Util.registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
+        view.getLblResolution());
+    Util.registerValidation(view.getCmbFramerate(), "[1-9][0-9]*", view.getLblFrameRate());
+
+    // trigger profile select
+    onProfileSelected();
 
     view.getMntmChangeTfDirectory().addActionListener(new ActionListener() {
 
@@ -254,7 +259,6 @@ public class Lawena {
           Path newpath = validateGamePath(null);
           if (newpath != null) {
             Key.gamePath.setValueEx(settings, newpath.toString());
-            tasks.scanResources();
           }
         } else {
           JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
@@ -279,13 +283,18 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        Path movies = toPath(Key.recordingPath.getValue(settings));
-        settings.loadDefaultValues();
-        Key.recordingPath.setValueEx(settings, movies.toString());
-        loadSettings();
-        resources.enableFromList(Key.resources.getValue(settings));
-        loadHudComboState();
-        saveSettings();
+        int answer =
+            JOptionPane.showConfirmDialog(view,
+                "Are you sure you want to reset this profile settings to defaults?",
+                "Revert to Defaults", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (answer == JOptionPane.YES_OPTION) {
+          Path game = toPath(Key.gamePath.getValue(settings));
+          Path movies = toPath(Key.recordingPath.getValue(settings));
+          settings.loadDefaultValues();
+          Key.gamePath.setValueEx(settings, game.toString());
+          Key.recordingPath.setValueEx(settings, movies.toString());
+          onProfileSelected();
+        }
       }
     });
     view.getMntmExit().addActionListener(new ActionListener() {
@@ -469,18 +478,15 @@ public class Lawena {
 
   void loadHudComboState() {
     boolean detected = false;
-    for (Resource cp : resources.getResourceList()) {
+    for (Resource resource : resources.getResourceList()) {
+      detected = checkCustomHud(resource);
       if (detected) {
         break;
       }
-      detected = checkCustomHud(cp);
     }
   }
 
   private void loadSettings() {
-    Util.registerValidation(view.getCmbResolution(), "[1-9][0-9]*x[1-9][0-9]*",
-        view.getLblResolution());
-    Util.registerValidation(view.getCmbFramerate(), "[1-9][0-9]*", view.getLblFrameRate());
     Util.selectComboItem(view.getCmbHud(), Key.hud.getValue(settings),
         ((ValuesValidator) Key.hud.getValidator()).getAllowedValues());
     Util.selectComboItem(view.getCmbQuality(), Key.dxlevel.getValue(settings),
@@ -564,7 +570,7 @@ public class Lawena {
 
   void configureSkyboxes(final JComboBox<String> combo) {
     final Vector<String> data = new Vector<>();
-    Path dir = Paths.get("lwrt/tf/skybox/vtf");
+    Path dir = Paths.get("lwrt", Key.gameFolderName.getValue(settings), "skybox/vtf");
     if (Files.exists(dir)) {
       log.info("Loading skybox folder");
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*up.vtf")) {
@@ -679,5 +685,22 @@ public class Lawena {
       log.debug("Selected game folder: " + selected);
     }
     return selected;
+  }
+
+  @Override
+  public void onProfileSelected() {
+    // update the combo box
+    // view.getProfilesComboBox().setSelectedItem(settings.getSelectedName());
+    tasks.scanResources();
+    tasks.loadSkyboxes();
+    loadSettings();
+    // TODO: update VDM demos path as well
+    saveSettings();
+  }
+
+  @Override
+  public void onProfileListUpdated() {
+    // TODO Auto-generated method stub
+
   }
 }

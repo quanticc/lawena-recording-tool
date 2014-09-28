@@ -282,7 +282,7 @@ public class Linker {
     }
 
     // cleanup other folders created
-    Path launchPath = Paths.get("lwrt/tf/launch");
+    Path launchPath = Paths.get("lwrt", Key.gameFolderName.getValue(settings), "launch");
     if (Files.exists(launchPath)) {
       try {
         delete(launchPath);

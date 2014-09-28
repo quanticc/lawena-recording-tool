@@ -32,8 +32,16 @@ public class Profiles implements ValueProvider {
     return selected;
   }
 
-  public List<Profile> getProfiles() {
+  private List<Profile> getProfiles() {
     return profiles;
+  }
+
+  public List<String> getProfileNames() {
+    List<String> list = new ArrayList<>();
+    for (Profile p : profiles) {
+      list.add(p.getName());
+    }
+    return list;
   }
 
   public Profile getProfile() {
@@ -50,7 +58,7 @@ public class Profiles implements ValueProvider {
         }
       }
     }
-    select(p);
+    selectProfile(p);
     return p;
   }
 
@@ -67,22 +75,44 @@ public class Profiles implements ValueProvider {
     return findByName(name) != null;
   }
 
-  public void select(Profile newSelectedProfile) {
+  public boolean select(String name) {
+    Profile p;
+    if ((p = findByName(name)) == null)
+      throw new IllegalArgumentException("Profile '" + name + "' does not exist");
+    return selectProfile(p);
+  }
+
+  private boolean selectProfile(Profile newSelectedProfile) {
     if (newSelectedProfile == null)
-      throw new IllegalArgumentException("Must set the profile");
+      throw new IllegalArgumentException("Profile must not be null");
+    if (!profiles.contains(newSelectedProfile))
+      throw new IllegalArgumentException("Profile must exist");
     String selected = getSelected();
     boolean update = (selected == null ? true : !selected.equals(newSelectedProfile.getName()));
     if (update) {
       selected = newSelectedProfile.getName();
     }
+    return update;
   }
 
+  /**
+   * Creates a new profile and adds it to the list, with default values and the given name.
+   * 
+   * @param name - the name of the profile. Must be unique or an
+   *        {@linkplain IllegalArgumentException} will be thrown
+   */
   public void create(String name) {
     Profile p = createNewProfile(name);
     profiles.add(p);
-    select(p);
+    selectProfile(p);
   }
 
+  /**
+   * Renames the given profile with a new name. New name must be unique.
+   * 
+   * @param name - the name of the profile to be renamed
+   * @param newName - the new name of the profile
+   */
   public void rename(String name, String newName) {
     Profile p;
     if ((p = findByName(name)) == null)
@@ -90,13 +120,18 @@ public class Profiles implements ValueProvider {
     renameProfile(p, newName);
   }
 
+  /**
+   * Creates a new profile copying the values of the given one.
+   * 
+   * @param base - the name of the original profile
+   */
   public void duplicate(String base) {
     Profile p;
     if ((p = findByName(base)) == null)
       throw new IllegalArgumentException("Profile '" + base + "' does not exist");
     p = duplicateProfile(p);
     profiles.add(p);
-    select(p);
+    selectProfile(p);
   }
 
   public void duplicate(String base, String newName) {
@@ -105,7 +140,7 @@ public class Profiles implements ValueProvider {
       throw new IllegalArgumentException("Profile '" + base + "' does not exist");
     p = duplicateProfile(p, newName);
     profiles.add(p);
-    select(p);
+    selectProfile(p);
   }
 
   private Profile createNewProfile(String newProfileName) {
