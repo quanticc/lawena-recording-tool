@@ -380,7 +380,7 @@ public class Lawena implements ProfileListener {
           String launchOptions = launchOptionsDialog.getOptionsTextField().getText();
           Key.launchOptions.setValueEx(settings, launchOptions);
         } else if (result == 1) {
-          Key.launchOptions.setDefaultValue(settings);
+          Key.launchOptions.revertToDefault(settings);
         }
       }
     });

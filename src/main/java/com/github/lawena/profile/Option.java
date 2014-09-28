@@ -104,7 +104,7 @@ public class Option<T> {
    * 
    * @param provider - the <code>ValueProvider</code> that will handle the option storage
    */
-  public void setDefaultValue(ValueProvider provider) {
+  public void revertToDefault(ValueProvider provider) {
     provider.set(key, defaultValue);
   }
 
