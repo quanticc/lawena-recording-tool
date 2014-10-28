@@ -33,6 +33,7 @@ public class LwrtGUI {
     });
     try {
       final Lawena lawena = new Lawena(cfg);
+      log.info("Preparing to display main user interface");
       SwingUtilities.invokeAndWait(new Runnable() {
         public void run() {
           try {
@@ -46,10 +47,10 @@ public class LwrtGUI {
           }
         }
       });
-    } catch (Exception e) {
-      log.log(Level.SEVERE, "Problem initializing Lawena", e);
+    } catch (Throwable t) {
+      log.log(Level.SEVERE, "Problem initializing Lawena", t);
       JOptionPane.showMessageDialog(null, "An error occurred while starting Lawena.\nCaused by "
-          + e.toString() + "\nPlease see the logfile for more information.", "Launch Error",
+          + t.toString() + "\nPlease see the logfile for more information.", "Launch Error",
           JOptionPane.ERROR_MESSAGE);
     }
   }

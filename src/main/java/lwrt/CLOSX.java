@@ -101,6 +101,7 @@ public class CLOSX extends CommandLine {
   @Override
   public void setLookAndFeel() {
     // use java default: Nimbus
+    log.fine("Using default Swing L&F");
   }
 
   @Override

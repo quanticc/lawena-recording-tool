@@ -659,12 +659,14 @@ public class Lawena {
     updater.loadChannels();
 
     settings = cfg;
+    log.info("Retrieving current dxlevel and Steam path");
     oDxlevel = cl.getSystemDxLevel();
     steampath = cl.getSteamPath();
     Path tfpath = settings.getTfPath();
     if (tfpath == null || tfpath.toString().isEmpty()) {
       tfpath = steampath.resolve("SteamApps/common/Team Fortress 2/tf");
     }
+    log.info("Checking for TF2 path at " + tfpath);
     if (!Files.exists(tfpath)) {
       tfpath = getChosenTfPath();
       if (tfpath == null) {
@@ -676,6 +678,7 @@ public class Lawena {
     files = new FileManager(settings, cl);
 
     Path moviepath = settings.getMoviePath();
+    log.info("Checking for Movie path at " + moviepath);
     if (moviepath == null || moviepath.toString().isEmpty() || !Files.exists(moviepath)) {
       moviepath = getChosenMoviePath();
       if (moviepath == null) {
@@ -686,7 +689,9 @@ public class Lawena {
     movies = new MovieManager(settings);
     settings.setMoviePath(moviepath);
 
+    log.info("Saving settings to file");
     settings.save();
+    log.info("Restoring TF2 user files if needed");
     files.restoreAll();
 
     customPaths = new CustomPathList(settings, cl);
