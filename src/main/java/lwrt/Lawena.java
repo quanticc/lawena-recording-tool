@@ -659,14 +659,14 @@ public class Lawena {
     updater.loadChannels();
 
     settings = cfg;
-    log.info("Retrieving current dxlevel and Steam path");
+    log.fine("Retrieving current dxlevel and Steam path");
     oDxlevel = cl.getSystemDxLevel();
     steampath = cl.getSteamPath();
     Path tfpath = settings.getTfPath();
     if (tfpath == null || tfpath.toString().isEmpty()) {
       tfpath = steampath.resolve("SteamApps/common/Team Fortress 2/tf");
     }
-    log.info("Checking for TF2 path at " + tfpath);
+    log.fine("Checking for TF2 path at " + tfpath);
     if (!Files.exists(tfpath)) {
       tfpath = getChosenTfPath();
       if (tfpath == null) {
@@ -689,9 +689,9 @@ public class Lawena {
     movies = new MovieManager(settings);
     settings.setMoviePath(moviepath);
 
-    log.info("Saving settings to file");
+    log.fine("Saving settings to file");
     settings.save();
-    log.info("Restoring TF2 user files if needed");
+    log.fine("Restoring TF2 user files if needed");
     files.restoreAll();
 
     customPaths = new CustomPathList(settings, cl);
@@ -731,6 +731,8 @@ public class Lawena {
     watcher.setDaemon(true);
 
     vdm = new DemoEditor(settings, cl);
+
+    log.fine("Init complete - Ready to display GUI");
   }
 
   private String getManifestString(String key, String defaultValue) {

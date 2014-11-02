@@ -33,7 +33,7 @@ public class LwrtGUI {
     });
     try {
       final Lawena lawena = new Lawena(cfg);
-      log.info("Preparing to display main user interface");
+      log.fine("Preparing to display main user interface");
       SwingUtilities.invokeAndWait(new Runnable() {
         public void run() {
           try {
