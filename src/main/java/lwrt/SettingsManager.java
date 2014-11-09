@@ -224,6 +224,7 @@ public class SettingsManager {
     lines.add("tf_training_has_prompted_for_loadout 1");
     lines.add("engine_no_focus_sleep 0");
     lines.add("cl_spec_carrieditems 0");
+    lines.add("tf_hud_target_id_disable_floating_health 1");
     lines.add(getCustomSettings());
     lines.add((getViewmodelSwitch().equals("off") ? "//" : "") + "lockviewmodelson");
     lines.add((getViewmodelSwitch().equals("on") ? "//" : "") + "lockviewmodelsoff");
