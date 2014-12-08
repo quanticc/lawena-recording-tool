@@ -248,6 +248,8 @@ public class Lawena implements ProfileListener {
         view.getLblResolution());
     Util.registerValidation(view.getCmbFramerate(), "[1-9][0-9]*", view.getLblFrameRate());
 
+    view.getCmbSkybox().addItem("Default");
+
     // trigger profile select
     onProfileSelected();
 
