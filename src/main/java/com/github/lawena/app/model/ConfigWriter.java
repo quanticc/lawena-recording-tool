@@ -135,6 +135,7 @@ public class ConfigWriter {
     lines.add("tf_explanations_backpackpanel 1");
     lines.add("engine_no_focus_sleep 0");
     lines.add("cl_spec_carrieditems 0");
+    lines.add("tf_hud_target_id_disable_floating_health 1");
     lines.add(Key.extConVars.getValue(settings));
     lines.add((Key.viewmodelSwitch.getValue(settings).equals("off") ? "//" : "")
         + "lockviewmodelson");
