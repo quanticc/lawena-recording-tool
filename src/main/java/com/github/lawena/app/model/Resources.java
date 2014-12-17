@@ -209,14 +209,21 @@ public class Resources extends AbstractTableModel {
 
   public void updateTags(Resource resource) throws IOException {
     Set<String> tags = new HashSet<>();
+    boolean hasResourceUiFolder = false;
+    boolean hasScriptsFolder = false;
     for (String content : contents(resource)) {
-      if (content.startsWith("resource/") || content.startsWith("scripts/")) {
-        tags.add(Resource.HUD);
+      if (content.startsWith("resource/ui")) {
+        hasResourceUiFolder = true;
+      } else if (content.startsWith("scripts/")) {
+        hasScriptsFolder = true;
       } else if (content.startsWith("cfg/") && content.endsWith(".cfg")) {
         tags.add(Resource.CONFIG);
       } else if (content.startsWith("materials/skybox/")) {
         tags.add(Resource.SKYBOX);
       }
+    }
+    if (hasResourceUiFolder && hasScriptsFolder) {
+      tags.add(Resource.HUD);
     }
     log.trace("Tagging '{}' with: {}", resource, tags);
     resource.setTags(tags);
