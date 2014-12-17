@@ -188,17 +188,24 @@ public class CustomPathList extends AbstractTableModel {
   public void update(CustomPath cp) {
     EnumSet<PathContents> c = cp.getContents();
     Path path = cp.getPath();
+    boolean containsResource = false;
+    boolean containsScripts = false;
     if (!c.contains(PathContents.READONLY)) {
       c.retainAll(EnumSet.of(PathContents.DEFAULT));
       List<String> files = getContentsList(path);
       for (String file : files) {
-        if (file.startsWith("resource/") || file.startsWith("scripts/")) {
-          c.add(PathContents.HUD);
+        if (file.startsWith("resource/ui")) {
+          containsResource = true;
+        } else if (file.startsWith("scripts/")) {
+          containsScripts = true;
         } else if (file.startsWith("cfg/") && file.endsWith(".cfg")) {
           c.add(PathContents.CONFIG);
         } else if (file.startsWith("materials/skybox/")) {
           c.add(PathContents.SKYBOX);
         }
+      }
+      if (containsResource && containsScripts) {
+        c.add(PathContents.HUD);
       }
     }
   }
