@@ -1,17 +1,12 @@
-Lawena Recording Tool [![Build Status](https://img.shields.io/travis/iabarca/lawena-recording-tool/v4.1.x.svg?style=flat)](https://travis-ci.org/iabarca/lawena-recording-tool)
+Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.1.x)](https://travis-ci.org/iabarca/lawena-recording-tool)
 =====================
 
 A simple [Java 7+](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) tool which greatly enhances your TF2 image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.
 
 Easy-to-use and no install required. This tool does not interfere with your regular TF2 configuration, HUD or launch options. Requires [Steam](https://steamcommunity.com/) in order to run.
 
-#### Install Lawena using the launcher
-- [Download the Launcher](http://code.google.com/p/lawenarecordingtool/downloads/detail?name=lawena-recording-tool.v4.zip) and extract it to any folder.
-- Run **lawena.exe** and the launcher will get the latest files and start the program.
-
-#### Install Lawena from this repository
-- [Download this repository](https://github.com/iabarca/lawena-recording-tool/archive/v4.1.x.zip) and extract it to any folder.
-- Run **gradlew.bat** (Windows) or **gradlew** script (Unix) to start the program.
+#### Installing Lawena
+- Follow the instructions from our [latest release](https://github.com/iabarca/lawena-recording-tool/releases/latest)
 
 #### Features
 - Insane max quality graphics configuration. 
