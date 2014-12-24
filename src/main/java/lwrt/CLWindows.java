@@ -109,7 +109,7 @@ public class CLWindows extends CommandLine {
     int number =
         Integer.decode(result.substring(result.lastIndexOf("0x"),
             result.indexOf("\n", result.lastIndexOf("0x"))));
-    log.fine("[regQuery] Found number at key=" + key + ", value=" + value + ": " + number);
+    log.finer("[regQuery] Found number at key=" + key + ", value=" + value + ": " + number);
     return number;
   }
 
@@ -120,7 +120,7 @@ public class CLWindows extends CommandLine {
     String data = null;
     try {
       data = WinRegistry.readString(hkey, key, value);
-      log.fine("[WinRegistry] key=" + hk + key + ", value=" + value + " : " + data);
+      log.finer("[WinRegistry] key=" + hk + key + ", value=" + value + " : " + data);
     } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
       log.warning("[WinRegistry] key=" + hk + key + ", value=" + value + " Lookup Failed: "
           + e.toString());
@@ -133,7 +133,7 @@ public class CLWindows extends CommandLine {
       data =
           result.substring(result.lastIndexOf(":") - 1,
               result.indexOf("\n", result.lastIndexOf(":")));
-      log.fine("[regQuery] Found string at key=" + key + ", value=" + value + ": " + data);
+      log.finer("[regQuery] Found string at key=" + key + ", value=" + value + ": " + data);
       return data;
     } catch (IndexOutOfBoundsException e) {
       log.warning("[regQuery] Invalid data found at key=" + key + ", value=" + value + ": "
