@@ -768,9 +768,9 @@ public class Lawena {
     new StartLogger("status").toLabel(Level.FINE, view.getLblStatus());
     log.fine("Lawena Recording Tool " + version + " build " + build);
     log.fine("TF2 path: " + settings.getTfPath());
+    log.fine("Steam path: " + cl.getSteamPath());
     log.fine("Movie path: " + settings.getMoviePath());
     log.fine("Lawena path: " + Paths.get("").toAbsolutePath());
-    log.fine("Steam path:" + cl.getSteamPath());
 
     view.setTitle("Lawena Recording Tool " + shortver());
     try {
