@@ -3,9 +3,12 @@ package lwrt;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
+
+import util.WinRegistry;
 
 public class CLWindows extends CommandLine {
 
@@ -29,12 +32,20 @@ public class CLWindows extends CommandLine {
 
   @Override
   public Path getSteamPath() {
-    return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1));
+    return Paths.get(regQueryString("Software\\Valve\\Steam", "SteamPath"));
   }
 
   @Override
   public String getSystemDxLevel() {
-    return regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1", 0);
+    try {
+      int result =
+          regQueryNumber("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1");
+      return result + "";
+    } catch (NumberFormatException e) {
+      log.warning("Could not format registry dxlevel value: " + e.toString()
+          + " -- Using dxlevel 98");
+      return "98";
+    }
   }
 
   @Override
@@ -75,7 +86,7 @@ public class CLWindows extends CommandLine {
     }
   }
 
-  private String regQuery(String key, String value, int mode) {
+  private String regQueryLine(String key, String value) {
     StringBuilder result = new StringBuilder();
     try {
       ProcessBuilder pb = new ProcessBuilder("reg", "query", key, "/v", value);
@@ -90,15 +101,44 @@ public class CLWindows extends CommandLine {
     } catch (InterruptedException | IOException e) {
       log.log(Level.INFO, "", e);
     }
+    return result.toString();
+  }
+
+  private int regQueryNumber(String key, String value) {
+    String result = regQueryLine(key, value);
+    int number =
+        Integer.decode(result.substring(result.lastIndexOf("0x"),
+            result.indexOf("\n", result.lastIndexOf("0x"))));
+    log.fine("[regQuery] Found number at key=" + key + ", value=" + value + ": " + number);
+    return number;
+  }
+
+  private String regQueryString(String key, String value) {
+    // first method: WinRegistry
+    String hk = "HKEY_CURRENT_USER\\";
+    int hkey = WinRegistry.HKEY_CURRENT_USER;
+    String data = null;
     try {
-      if (mode == 0) {
-        return result.substring(result.lastIndexOf("0x") + 2,
-            result.indexOf("\n", result.lastIndexOf("0x")));
-      }
-      return result.substring(result.lastIndexOf(":") - 1,
-          result.indexOf("\n", result.lastIndexOf(":")));
+      data = WinRegistry.readString(hkey, key, value);
+      log.fine("[WinRegistry] key=" + hk + key + ", value=" + value + " : " + data);
+    } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+      log.warning("[WinRegistry] key=" + hk + key + ", value=" + value + " Lookup Failed: "
+          + e.toString());
+    }
+    if (data != null)
+      return data;
+    // old method: reg query
+    String result = regQueryLine(key, value);
+    try {
+      data =
+          result.substring(result.lastIndexOf(":") - 1,
+              result.indexOf("\n", result.lastIndexOf(":")));
+      log.fine("[regQuery] Found string at key=" + key + ", value=" + value + ": " + data);
+      return data;
     } catch (IndexOutOfBoundsException e) {
-      return "98";
+      log.warning("[regQuery] Invalid data found at key=" + key + ", value=" + value + ": "
+          + result);
+      return "";
     }
   }
 

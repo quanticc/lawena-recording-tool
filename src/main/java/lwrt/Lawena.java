@@ -37,6 +37,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -202,6 +203,15 @@ public class Lawena {
 
     @Override
     protected Boolean doInBackground() throws Exception {
+      try {
+        return doStuff();
+      } catch (Exception e) {
+        log.log(Level.WARNING, "Start operation was interrupted or failed", e);
+        return false;
+      }
+    }
+
+    private Boolean doStuff() throws InvocationTargetException, InterruptedException {
       SwingUtilities.invokeAndWait(new Runnable() {
 
         @Override
@@ -760,6 +770,7 @@ public class Lawena {
     log.fine("TF2 path: " + settings.getTfPath());
     log.fine("Movie path: " + settings.getMoviePath());
     log.fine("Lawena path: " + Paths.get("").toAbsolutePath());
+    log.fine("Steam path:" + cl.getSteamPath());
 
     view.setTitle("Lawena Recording Tool " + shortver());
     try {
