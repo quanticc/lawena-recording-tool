@@ -304,7 +304,7 @@ public abstract class CommandLine {
       log.finer("Parameters: " + options);
       ProcessBuilder pb;
       Path sp = getSteamPath();
-      if (sp == null || !Files.exists(sp)) {
+      if (sp.equals("") || !sp.getFileName().equals("Steam") || !Files.exists(sp)) {
         log.warning("IMPORTANT: SteamPath from registry is invalid. Check your Steam installation");
         log.warning("Value should be at HKEY_CURRENT_USER\\Software\\Valve\\Steam on key SteamPath");
         // get alternative SteamPath and fallback launch

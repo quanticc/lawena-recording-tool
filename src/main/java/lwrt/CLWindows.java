@@ -138,7 +138,7 @@ public class CLWindows extends CommandLine {
     } catch (IndexOutOfBoundsException e) {
       log.warning("[regQuery] Invalid data found at key=" + key + ", value=" + value + ": "
           + result);
-      return null;
+      return "";
     }
   }
 
