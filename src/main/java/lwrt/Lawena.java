@@ -511,8 +511,6 @@ public class Lawena {
           String img = "skybox/" + skybox + "up.png";
           if (!Files.exists(Paths.get(img))) {
             String filename = skybox + "up.vtf";
-            cl.extractIfNeeded(settings.getTfPath(), "custom/skybox.vpk", Paths.get("skybox"),
-                Arrays.asList(filename));
             cl.generatePreview(filename);
           }
           ImageIcon icon = createPreviewIcon(img);
