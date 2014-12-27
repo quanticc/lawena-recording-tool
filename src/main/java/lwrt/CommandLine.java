@@ -76,8 +76,8 @@ public abstract class CommandLine {
   /**
    * Returns the system DirectX level if it's stored somewhere in the filesystem.
    * 
-   * @return a <code>String</code> representing the dxlevel value to use when launching TF2 or
-   *         <code>null</code> if it couldn't be retrieved.
+   * @return a <code>String</code> representing the dxlevel value in hexadecimal to use when
+   *         launching TF2 or <code>null</code> if it couldn't be retrieved.
    */
   public abstract String getSystemDxLevel();
 
@@ -104,7 +104,7 @@ public abstract class CommandLine {
    * {@link #getSystemDxLevel()} method. If the operation is not supported this should be
    * implemented as a no-op method or with a simple log message.
    * 
-   * @param dxlevel the user-specified DirectX level
+   * @param dxlevel the user-specified DirectX level in hexadecimal
    */
   public abstract void setSystemDxLevel(String dxlevel);
 

@@ -787,7 +787,8 @@ public class Lawena {
         log.info("System dxlevel: 80");
         break;
       default:
-        log.warning("Invalid system dxlevel value found: " + level);
+        log.warning("Invalid system dxlevel value found: " + level + ". Reverting to 95");
+        cl.setSystemDxLevel("5f");
         return "5f";
     }
     return level;
