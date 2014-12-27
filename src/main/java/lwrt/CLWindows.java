@@ -38,13 +38,13 @@ public class CLWindows extends CommandLine {
   @Override
   public String getSystemDxLevel() {
     try {
-      int result =
+      String result =
           regQueryNumber("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1");
-      return result + "";
-    } catch (NumberFormatException e) {
+      return result;
+    } catch (IndexOutOfBoundsException e) {
       log.warning("Could not format registry dxlevel value: " + e.toString()
-          + " -- Using dxlevel 98");
-      return "98";
+          + " -- Using dxlevel 95");
+      return "5f";
     }
   }
 
@@ -104,13 +104,13 @@ public class CLWindows extends CommandLine {
     return result.toString();
   }
 
-  private int regQueryNumber(String key, String value) {
+  private String regQueryNumber(String key, String value) {
     String result = regQueryLine(key, value);
-    int number =
-        Integer.decode(result.substring(result.lastIndexOf("0x"),
-            result.indexOf("\n", result.lastIndexOf("0x"))));
-    log.finer("[regQuery] Found number at key=" + key + ", value=" + value + ": " + number);
-    return number;
+    result =
+        result.substring(result.lastIndexOf("0x") + 2,
+            result.indexOf("\n", result.lastIndexOf("0x")));
+    log.finer("[regQuery] Found number at key=" + key + ", value=" + value + ": " + result);
+    return result;
   }
 
   private String regQueryString(String key, String value) {

@@ -665,8 +665,8 @@ public class Lawena {
     updater.loadChannels();
 
     settings = cfg;
-    log.fine("Retrieving current dxlevel and Steam path");
-    oDxlevel = cl.getSystemDxLevel();
+    log.fine("Retrieving system dxlevel and Steam path");
+    oDxlevel = getOriginalDxlevel();
 
     // retrieve SteamPath, attempt 2 registry queries, user input if all else fails
     Path steampath = cl.getSteamPath();
@@ -766,6 +766,31 @@ public class Lawena {
     vdm = new DemoEditor(settings, cl);
 
     log.fine("Init complete - Ready to display GUI");
+  }
+
+  private String getOriginalDxlevel() {
+    String level = cl.getSystemDxLevel();
+    switch (level) {
+      case "62":
+        log.info("System dxlevel: 98");
+        break;
+      case "5f":
+        log.info("System dxlevel: 95");
+        break;
+      case "5a":
+        log.info("System dxlevel: 90");
+        break;
+      case "51":
+        log.info("System dxlevel: 81");
+        break;
+      case "50":
+        log.info("System dxlevel: 80");
+        break;
+      default:
+        log.warning("Invalid system dxlevel value found: " + level);
+        return "5f";
+    }
+    return level;
   }
 
   private String getManifestString(String key, String defaultValue) {
