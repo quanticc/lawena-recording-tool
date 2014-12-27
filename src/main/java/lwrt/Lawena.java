@@ -904,8 +904,9 @@ public class Lawena {
       }
     };
     sorter.setRowFilter(filter);
-    new PathScanTask().execute();
-    new SwingWorker<Void, Void>() {
+
+    SwingWorker<Void, Void> scannerTask = new PathScanTask();
+    SwingWorker<Void, Void> skySetupTask = new SwingWorker<Void, Void>() {
       @Override
       protected Void doInBackground() throws Exception {
         try {
@@ -920,7 +921,11 @@ public class Lawena {
       protected void done() {
         selectSkyboxFromSettings();
       };
-    }.execute();
+    };
+    scannerTask.execute();
+    skySetupTask.execute();
+    waitForTask(scannerTask);
+    waitForTask(skySetupTask);
 
     loadSettings();
 
@@ -1064,6 +1069,14 @@ public class Lawena {
 
     view.getTabbedPane().addTab("VDM", null, vdm.start());
     view.setVisible(true);
+  }
+
+  private void waitForTask(SwingWorker<?, ?> worker) {
+    try {
+      worker.get();
+    } catch (InterruptedException | ExecutionException e) {
+      log.warning("Task was interrupted or cancelled: " + e.toString());
+    }
   }
 
   private void checkViewmodelState() {
