@@ -15,8 +15,8 @@ public class CLWindows extends CommandLine {
   private String hl2 = "hl2.exe";
 
   @Override
-  public ProcessBuilder getBuilderStartTF2() {
-    return new ProcessBuilder(getSteamPath() + "/steam.exe");
+  public ProcessBuilder getBuilderStartTF2(String steamPath) {
+    return new ProcessBuilder(steamPath + "/steam.exe");
   }
 
   @Override

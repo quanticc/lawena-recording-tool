@@ -24,6 +24,7 @@ public class SettingsManager {
   public enum Key {
     TfDir(""),
     MovieDir(""),
+    SteamDir(""),
     AltSteamDir(""),
     Width(1280, 640, Integer.MAX_VALUE),
     Height(720, 360, Integer.MAX_VALUE),

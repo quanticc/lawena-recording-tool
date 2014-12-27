@@ -631,9 +631,7 @@ public class Lawena {
   private JScrollPane customSettingsScrollPane;
 
   private HashMap<String, ImageIcon> skyboxMap;
-  private JFileChooser choosemovie;
-  private JFileChooser choosedir;
-  private Path steampath;
+  private JFileChooser chooser;
   private String oDxlevel;
   private Thread watcher;
   private Object lastHud;
@@ -671,28 +669,55 @@ public class Lawena {
     settings = cfg;
     log.fine("Retrieving current dxlevel and Steam path");
     oDxlevel = cl.getSystemDxLevel();
-    steampath = cl.getSteamPath();
+
+    // retrieve SteamPath, attempt 2 registry queries, user input if all else fails
+    Path steampath = cl.getSteamPath();
+    if (steampath.toString().isEmpty()) {
+      steampath = Paths.get(settings.getString(Key.AltSteamDir));
+    }
+    log.fine("Checking for Steam path at " + steampath);
+    if (!steampath.getFileName().toString().equalsIgnoreCase("Steam") || !Files.exists(steampath)) {
+      log.warning("IMPORTANT: SteamPath from registry is invalid. Check your Steam installation");
+      log.warning("Value should be at HKEY_CURRENT_USER\\Software\\Valve\\Steam on key SteamPath");
+      log.info("Asking for manual SteamPath");
+      steampath = getChosenSteamPath();
+      if (steampath == null) {
+        log.info("No Steam directory specified, exiting.");
+        JOptionPane.showMessageDialog(null, "No Steam directory specified, program will exit.",
+            "Invalid SteamPath", JOptionPane.WARNING_MESSAGE);
+        throw new IllegalArgumentException("Steam directory must be specified");
+      }
+      settings.setString(Key.AltSteamDir, steampath.toString());
+    }
+    settings.setString(Key.SteamDir, steampath.toString());
+
+    // retrieve GamePath, attempt resolving via SteamPath, otherwise ask user for it
     Path tfpath = settings.getTfPath();
     if (tfpath == null || tfpath.toString().isEmpty()) {
       tfpath = steampath.resolve("SteamApps/common/Team Fortress 2/tf");
     }
-    log.fine("Checking for TF2 path at " + tfpath);
-    if (!Files.exists(tfpath)) {
+    log.fine("Checking for game path at " + tfpath);
+    if (!tfpath.getFileName().toString().equalsIgnoreCase("tf") || !Files.exists(tfpath)) {
       tfpath = getChosenTfPath();
       if (tfpath == null) {
-        log.info("No tf directory specified, exiting.");
+        log.info("No game directory specified, exiting.");
+        JOptionPane.showMessageDialog(null, "No game directory specified, program will exit.",
+            "Invalid GamePath", JOptionPane.WARNING_MESSAGE);
         throw new IllegalArgumentException("A game directory must be specified");
       }
     }
     settings.setTfPath(tfpath);
     files = new FileManager(settings, cl);
 
+    // retrieve MoviePath, always ask user
     Path moviepath = settings.getMoviePath();
-    log.info("Checking for Movie path at " + moviepath);
+    log.info("Checking for movie path at " + moviepath);
     if (moviepath == null || moviepath.toString().isEmpty() || !Files.exists(moviepath)) {
       moviepath = getChosenMoviePath();
       if (moviepath == null) {
         log.info("No movie directory specified, exiting.");
+        JOptionPane.showMessageDialog(null, "No movie directory specified, program will exit.",
+            "Invalid MoviePath", JOptionPane.WARNING_MESSAGE);
         throw new IllegalArgumentException("A segment directory must be specified");
       }
     }
@@ -1440,15 +1465,16 @@ public class Lawena {
     Path selected = null;
     int ret = 0;
     while ((selected == null && ret == 0) || (selected != null && !Files.exists(selected))) {
-      choosemovie = new JFileChooser();
-      choosemovie.setDialogTitle("Choose a directory to store your movie files");
-      choosemovie.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      ret = choosemovie.showOpenDialog(null);
+      chooser = new JFileChooser();
+      chooser.setDialogTitle("Choose a directory to store your movie files");
+      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      ret = chooser.showOpenDialog(null);
       if (ret == JFileChooser.APPROVE_OPTION) {
-        selected = choosemovie.getSelectedFile().toPath();
+        selected = chooser.getSelectedFile().toPath();
       } else {
         selected = null;
       }
+      log.finer("Selected MoviePath: " + selected);
     }
     return selected;
   }
@@ -1457,20 +1483,40 @@ public class Lawena {
     Path selected = null;
     int ret = 0;
     while ((selected == null && ret == 0)
-        || (selected != null && (!Files.exists(selected) || !selected.toFile().getName().toString()
+        || (selected != null && (!Files.exists(selected) || !selected.getFileName().toString()
             .equals("tf")))) {
-      choosedir = new JFileChooser();
-      choosedir.setDialogTitle("Choose your \"tf\" directory");
-      choosedir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      choosedir.setCurrentDirectory(steampath.toFile());
-      choosedir.setFileHidingEnabled(false);
-      ret = choosedir.showOpenDialog(null);
+      chooser = new JFileChooser();
+      chooser.setDialogTitle("Choose your \"tf\" directory");
+      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      chooser.setFileHidingEnabled(false);
+      ret = chooser.showOpenDialog(null);
       if (ret == JFileChooser.APPROVE_OPTION) {
-        selected = choosedir.getSelectedFile().toPath();
+        selected = chooser.getSelectedFile().toPath();
       } else {
         selected = null;
       }
-      log.finer("Selected path: " + selected);
+      log.finer("Selected GamePath: " + selected);
+    }
+    return selected;
+  }
+
+  private Path getChosenSteamPath() {
+    Path selected = null;
+    int ret = 0;
+    while ((selected == null && ret == 0)
+        || (selected != null && (!Files.exists(selected.resolve("steam.exe")) || !selected.toFile()
+            .getName().toString().equals("Steam")))) {
+      chooser = new JFileChooser();
+      chooser.setDialogTitle("Choose your \"Steam\" directory (where steam.exe is)");
+      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      chooser.setFileHidingEnabled(false);
+      ret = chooser.showOpenDialog(null);
+      if (ret == JFileChooser.APPROVE_OPTION) {
+        selected = chooser.getSelectedFile().toPath();
+      } else {
+        selected = null;
+      }
+      log.finer("Selected SteamPath: " + selected);
     }
     return selected;
   }

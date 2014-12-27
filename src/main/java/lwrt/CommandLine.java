@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JFileChooser;
 import javax.swing.UIManager;
 
 import lwrt.SettingsManager.Key;
@@ -40,10 +39,11 @@ public abstract class CommandLine {
    * Returns the necessary {@link ProcessBuilder} to launch TF2. It will be used when
    * {@link #startTf(int, int, String)} is called.
    * 
+   * @param steamPath a <code>String</code> equivalent to the Steam installation path.
    * @return The <code>ProcessBuilder</code> used to create a {@link Process} and launch TF2 with it
    *         or <code>null</code> if it couldn't be created.
    */
-  public abstract ProcessBuilder getBuilderStartTF2();
+  public abstract ProcessBuilder getBuilderStartTF2(String steamPath);
 
   /**
    * Returns the necessary {@link ProcessBuilder} to stop or kill the TF2 process, to abort its
@@ -302,26 +302,7 @@ public abstract class CommandLine {
           + "x" + options.get("-h") + " " + (fs ? "Fullscreen" : "Windowed") + " with dxlevel "
           + options.get("-dxlevel"));
       log.finer("Parameters: " + options);
-      ProcessBuilder pb;
-      Path sp = getSteamPath();
-      if (sp.equals("") || !sp.getFileName().toString().equalsIgnoreCase("Steam")
-          || !Files.exists(sp)) {
-        log.warning("IMPORTANT: SteamPath from registry is invalid. Check your Steam installation");
-        log.warning("Value should be at HKEY_CURRENT_USER\\Software\\Valve\\Steam on key SteamPath");
-        // get alternative SteamPath and fallback launch
-        String altSteamPath = cfg.getString(Key.AltSteamDir);
-        Path steamPath = getChosenSteamPath(Paths.get(altSteamPath));
-        if (steamPath == null) {
-          throw new IllegalArgumentException(
-              "Invalid SteamPath, please configure your AltSteamDir in settings.lwf");
-        }
-        cfg.setString(Key.AltSteamDir, steamPath.toString());
-        cfg.save();
-        log.info("Launching through Steam located in: " + steamPath);
-        pb = new ProcessBuilder(steamPath + "/steam.exe");
-      } else {
-        pb = getBuilderStartTF2();
-      }
+      ProcessBuilder pb = getBuilderStartTF2(cfg.getString(Key.SteamDir));
       pb.command().add("-applaunch");
       pb.command().add(options.get("-applaunch"));
       options.remove("-applaunch");
@@ -345,28 +326,6 @@ public abstract class CommandLine {
     } catch (InterruptedException | IOException e) {
       log.warning("Process was interrupted: " + e);
     }
-  }
-
-  private Path getChosenSteamPath(Path initial) {
-    JFileChooser choosedir = null;
-    Path selected = initial;
-    int ret = 0;
-    while ((selected == null && ret == 0)
-        || (selected != null && (!Files.exists(selected.resolve("steam.exe")) || !selected.toFile()
-            .getName().toString().equals("Steam")))) {
-      choosedir = new JFileChooser();
-      choosedir.setDialogTitle("Choose your \"Steam\" directory (where steam.exe is)");
-      choosedir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      choosedir.setFileHidingEnabled(false);
-      ret = choosedir.showOpenDialog(null);
-      if (ret == JFileChooser.APPROVE_OPTION) {
-        selected = choosedir.getSelectedFile().toPath();
-      } else {
-        selected = null;
-      }
-      log.finer("Selected path: " + selected);
-    }
-    return selected;
   }
 
   /**

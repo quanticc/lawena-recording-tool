@@ -27,8 +27,8 @@ public class CLOSX extends CommandLine {
   }
 
   @Override
-  public ProcessBuilder getBuilderStartTF2() {
-    Path steam = getSteamPath().resolve("Steam.app");
+  public ProcessBuilder getBuilderStartTF2(String steamPath) {
+    Path steam = Paths.get(steamPath).resolve("Steam.app");
     try {
       Files.setPosixFilePermissions(steam, perms777);
       return new ProcessBuilder(steam.toString());
