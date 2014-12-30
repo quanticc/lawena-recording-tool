@@ -15,12 +15,9 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import joptsimple.OptionSet;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.profile.Options;
 import com.github.lawena.profile.Profile;
 import com.github.lawena.profile.ProfileListener;
 import com.github.lawena.profile.Profiles;
@@ -49,13 +46,15 @@ public class Settings implements ValueProvider {
           return new JsonPrimitive(src);
         }
       }).create();
-  private final OptionSet optionSet;
+  
   private Profiles profiles;
+  private File profilesFile;
   private List<ProfileListener> listeners = new ArrayList<>();
 
-  public Settings(OptionSet optionSet) {
-    this.optionSet = optionSet;
-    this.profiles = loadProfiles(Options.getProfilesFileOption().value(optionSet));
+  public Settings(File profilesFile) {
+    this.profilesFile = profilesFile; 
+    // Options.getProfilesFileOption().value(optionSet)
+    this.profiles = loadProfiles(profilesFile);
   }
 
   private Profiles loadProfiles(File file) {
@@ -88,7 +87,7 @@ public class Settings implements ValueProvider {
   }
 
   public void save() {
-    saveProfiles(Options.getProfilesFileOption().value(optionSet));
+    saveProfiles(profilesFile);
   }
 
   private void saveProfiles(File file) {
@@ -101,7 +100,6 @@ public class Settings implements ValueProvider {
   }
 
   public Path getParentDataPath() {
-    File profilesFile = Options.getProfilesFileOption().value(optionSet);
     return profilesFile.toPath().toAbsolutePath().getParent();
   }
 

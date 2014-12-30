@@ -2,14 +2,13 @@ package com.github.lawena.app.model;
 
 import static com.github.lawena.util.Util.toPath;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import joptsimple.OptionSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +38,8 @@ public class MainModel {
   private ImageStore skyboxPreviewStore;
   private Settings settings;
 
-  public MainModel(OptionSet optionSet) {
-    this.settings = new Settings(optionSet);
+  public MainModel(File profilesFile) {
+    this.settings = new Settings(profilesFile);
     this.versionData = loadVersionData();
     this.updater = new Updater();
     logVMInfo();

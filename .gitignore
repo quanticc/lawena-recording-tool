@@ -136,6 +136,9 @@ release.properties
 lwrt/tf/config/cfg/settings.cfg
 lwrt/tf/config/cfg/namescroll.cfg
 lwrt/tf/config/cfg/mov/*.cfg
+lwrt/csgo/config/cfg/settings.cfg
+lwrt/csgo/config/cfg/namescroll.cfg
+lwrt/csgo/config/cfg/mov/*.cfg
 version.txt
 *.lck
 !launcher/*.jar

@@ -1,5 +1,7 @@
 package com.github.lawena.app;
 
+import java.io.File;
+
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -50,7 +52,22 @@ public class Main {
         }
       });
 
-      final Lawena lawena = new Lawena(new MainModel(optionSet));
+      // TODO: make this selector standalone or allow bypassing it via args
+      log.debug("Parsed options from command line: {}", optionSet.asMap());
+      File defaultProfilesFile = null;
+      int o =
+          JOptionPane.showOptionDialog(null, "Select game to run", "Lawena Recording Tool",
+              JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[] {
+                  "Team Fortress 2", "Counter-Strike: Global Offensive"}, "Team Fortress 2");
+      if (o == 0) {
+        defaultProfilesFile = new File("lwrt/tf/profiles.json");
+      } else if (o == 1) {
+        defaultProfilesFile = new File("lwrt/csgo/profiles.json");
+      } else {
+        System.exit(0);
+      }
+
+      final Lawena lawena = new Lawena(new MainModel(defaultProfilesFile));
       lawena.setAppender(appender);
 
       SwingUtilities.invokeAndWait(new Runnable() {
