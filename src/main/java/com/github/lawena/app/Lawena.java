@@ -49,6 +49,7 @@ import com.github.lawena.app.model.Settings;
 import com.github.lawena.app.task.FileOpener;
 import com.github.lawena.profile.Key;
 import com.github.lawena.profile.ProfileListener;
+import com.github.lawena.profile.ValidationResult;
 import com.github.lawena.profile.ValuesValidator;
 import com.github.lawena.ui.AboutDialog;
 import com.github.lawena.ui.LaunchOptionsDialog;
@@ -254,7 +255,7 @@ public class Lawena implements ProfileListener {
     onProfileSelected();
 
     // TODO: add change steam directory presenter action
-    
+
     view.getMntmChangeTfDirectory().addActionListener(new ActionListener() {
 
       @Override
@@ -410,16 +411,40 @@ public class Lawena implements ProfileListener {
     view.getTabbedPane().addTab("VDM", null, demos.start());
     view.setVisible(true);
 
+    // Basic path validation task
+    /*
+     * Makes the user choose the folder if invalid but if dialog is closed no action is done, just
+     * notice through log.
+     */
     new Timer().schedule(new TimerTask() {
 
       @Override
       public void run() {
-        Path newSteamPath = validateSteamPath(toPath(Key.steamPath.getValue(settings)));
-        Key.steamPath.setValue(settings, newSteamPath.toString());
-        Path newGamePath = validateGamePath(toPath(Key.gamePath.getValue(settings)));
-        Key.gamePath.setValue(settings, newGamePath.toString());
-        Path newRecPath = validateRecordingPath(toPath(Key.recordingPath.getValue(settings)));
-        Key.recordingPath.setValue(settings, newRecPath.toString());
+        ValidationResult rs, rg, rr;
+        Path steamPath = toPath(Key.steamPath.getValue(settings));
+        Path gamePath = toPath(Key.gamePath.getValue(settings));
+        Path recPath = toPath(Key.recordingPath.getValue(settings));
+        Path newSteamPath = validateSteamPath(steamPath);
+        rs = Key.steamPath.setValue(settings, newSteamPath.toString());
+        Path newGamePath = validateGamePath(gamePath);
+        rg = Key.gamePath.setValue(settings, newGamePath.toString());
+        Path newRecPath = validateRecordingPath(recPath);
+        rr = Key.recordingPath.setValue(settings, newRecPath.toString());
+        if (!rs.isValid()) {
+          log.warn("No Steam path was defined");
+        } else if (!steamPath.equals(newSteamPath)) {
+          log.info("New Steam path: {}", newSteamPath);
+        }
+        if (!rg.isValid()) {
+          log.warn("No game path was defined");
+        } else if (!gamePath.equals(newGamePath)) {
+          log.debug("New game path: {}", newGamePath);
+        }
+        if (!rr.isValid()) {
+          log.warn("No segments path was defined");
+        } else if (!recPath.equals(newRecPath)) {
+          log.debug("New segments path: {}", newRecPath);
+        }
         settings.save();
       }
     }, 1000);
@@ -698,7 +723,7 @@ public class Lawena implements ProfileListener {
     String fileName = "Steam";
     while ((selected == null && ret == 0)
         || (selected != null && (!Files.exists(selected) || !selected.toAbsolutePath()
-            .getFileName().toString().equals(fileName)))) {
+            .getFileName().toString().equalsIgnoreCase(fileName)))) {
       log.debug("Validating current Steam folder: {}",
           (selected != null ? selected.toAbsolutePath() : "<None>"));
       String dir =

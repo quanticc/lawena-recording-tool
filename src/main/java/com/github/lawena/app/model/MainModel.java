@@ -52,7 +52,7 @@ public class MainModel {
     if (steamPath == null || steamPath.toString().isEmpty()) {
       steamPath = osInterface.getSteamPath();
     }
-    Key.steamPath.setValueEx(settings, steamPath.toString());
+    Key.steamPath.setValue(settings, steamPath.toString());
 
     Path gamePath = toPath(Key.gamePath.getValue(settings));
     if (gamePath == null || gamePath.toString().isEmpty()) {
@@ -129,6 +129,7 @@ public class MainModel {
 
   private void logVMInfo() {
     Path emptyPath = toPath("");
+    Path steamPath = toPath(Key.steamPath.getValue(settings));
     Path gamePath = toPath(Key.gamePath.getValue(settings));
     Path recPath = toPath(Key.recordingPath.getValue(settings));
     // saving essential info to log for troubleshooting
@@ -139,6 +140,11 @@ public class MainModel {
     log.debug("Java version: {}", System.getProperty("java.version"));
     log.debug("Java home: {}", System.getProperty("java.home"));
     log.debug("------------------------ Folders ------------------------");
+    if (emptyPath.equals(steamPath)) {
+      log.warn("Steam: <No folder defined>");
+    } else {
+      log.debug("Steam: {}", steamPath);
+    }
     if (emptyPath.equals(gamePath)) {
       log.warn("Game: <No folder defined>");
     } else {

@@ -77,6 +77,8 @@ public class Option<T> {
    * @return a <code>ValidationResult</code> describing the result of this operation.
    */
   public ValidationResult setValue(ValueProvider provider, T value) {
+    if (value == null)
+      return ValidationResult.invalid(new IllegalArgumentException("Value must not be null"));
     ValidationResult result = validator.validate(value);
     if (result.isValid()) {
       provider.set(key, value);
@@ -91,6 +93,8 @@ public class Option<T> {
    * @param value - the value attempted to set
    */
   public void setValueEx(ValueProvider provider, T value) {
+    if (value == null)
+      throw new IllegalArgumentException("Value can't be null!");
     ValidationResult result = validator.validate(value);
     if (result.isValid()) {
       provider.set(key, value);
