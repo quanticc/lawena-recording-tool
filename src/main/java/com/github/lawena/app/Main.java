@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import joptsimple.OptionSet;
 
@@ -51,6 +52,12 @@ public class Main {
           }
         }
       });
+
+      try {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      } catch (Exception e) {
+        log.warn("Could not set the look and feel", e);
+      }
 
       // TODO: make this selector standalone or allow bypassing it via args
       log.debug("Parsed options from command line: {}", optionSet.asMap());
