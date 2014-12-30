@@ -25,8 +25,8 @@ public class WindowsInterface extends OSInterface {
   private static final Logger log = LoggerFactory.getLogger(WindowsInterface.class);
 
   @Override
-  public ProcessBuilder getBuilderStartTF2() {
-    return new ProcessBuilder(getSteamPath() + "/steam.exe");
+  public ProcessBuilder getBuilderStartTF2(String steamPath) {
+    return new ProcessBuilder(steamPath + "/steam.exe");
   }
 
   @Override
@@ -36,12 +36,12 @@ public class WindowsInterface extends OSInterface {
 
   @Override
   public Path getSteamPath() {
-    return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", 1));
+    return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath"));
   }
 
   @Override
   public String getSystemDxLevel() {
-    return regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1", 0);
+    return regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1");
   }
 
   @Override
@@ -71,7 +71,7 @@ public class WindowsInterface extends OSInterface {
     return false;
   }
 
-  private String regQuery(String key, String value, int mode) {
+  private String regQuery(String key, String value) {
     final StringBuilder result = new StringBuilder();
     startProcess(Arrays.asList("reg", "query", key, "/v", value), new Consumer<String>() {
 
@@ -81,15 +81,17 @@ public class WindowsInterface extends OSInterface {
       }
     });
     try {
-      if (mode == 0) {
+      if (result.lastIndexOf("0x") > 0) {
         return result.substring(result.lastIndexOf("0x") + 2,
             result.indexOf("\n", result.lastIndexOf("0x")));
+      } else {
+        String str = "REG_SZ    ";
+        return result.substring(result.lastIndexOf(str) + str.length(),
+            result.indexOf("\n", result.lastIndexOf(str)));
       }
-      return result.substring(result.lastIndexOf(":") - 1,
-          result.indexOf("\n", result.lastIndexOf(":")));
     } catch (IndexOutOfBoundsException e) {
-      log.debug("Could not find registry value for dxlevel. Using 98 as fallback");
-      return "98";
+      log.debug("Data not found at value {} for key {}", value, key);
+      return "";
     }
   }
 

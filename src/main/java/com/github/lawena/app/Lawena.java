@@ -253,6 +253,8 @@ public class Lawena implements ProfileListener {
     // trigger profile select
     onProfileSelected();
 
+    // TODO: add change steam directory presenter action
+    
     view.getMntmChangeTfDirectory().addActionListener(new ActionListener() {
 
       @Override
@@ -412,6 +414,8 @@ public class Lawena implements ProfileListener {
 
       @Override
       public void run() {
+        Path newSteamPath = validateSteamPath(toPath(Key.steamPath.getValue(settings)));
+        Key.steamPath.setValue(settings, newSteamPath.toString());
         Path newGamePath = validateGamePath(toPath(Key.gamePath.getValue(settings)));
         Key.gamePath.setValue(settings, newGamePath.toString());
         Path newRecPath = validateRecordingPath(toPath(Key.recordingPath.getValue(settings)));
@@ -643,7 +647,6 @@ public class Lawena implements ProfileListener {
   }
 
   public Path validateRecordingPath(Path initial) {
-    Path steamPath = model.getOsInterface().getSteamPath();
     Path selected = initial;
     int ret = 0;
     while ((selected == null && ret == 0)
@@ -651,9 +654,9 @@ public class Lawena implements ProfileListener {
       log.debug("Validating current recording folder: {}",
           (selected != null ? selected.toAbsolutePath() : "<None>"));
       String dir =
-          model.getOsInterface()
-              .chooseSingleFolder(view, "Choose a directory to store your movie files",
-                  steamPath.toAbsolutePath().toString());
+          model.getOsInterface().chooseSingleFolder(view,
+              "Choose a directory to store your movie files",
+              Paths.get("").toAbsolutePath().toString());
       if (dir != null) {
         selected = Paths.get(dir);
       } else {
@@ -666,7 +669,6 @@ public class Lawena implements ProfileListener {
   }
 
   public Path validateGamePath(Path initial) {
-    Path steamPath = model.getOsInterface().getSteamPath();
     Path selected = initial;
     int ret = 0;
     String dirName = Key.gameFolderName.getValue(settings);
@@ -677,7 +679,8 @@ public class Lawena implements ProfileListener {
           : "<None>"));
       String dir =
           model.getOsInterface().chooseSingleFolder(view,
-              "Choose your \"" + dirName + "\" directory", steamPath.toAbsolutePath().toString());
+              "Choose your \"" + dirName + "\" directory",
+              Paths.get("").toAbsolutePath().toString());
       if (dir != null) {
         selected = Paths.get(dir);
       } else {
@@ -685,6 +688,30 @@ public class Lawena implements ProfileListener {
         selected = null;
       }
       log.debug("Selected game folder: " + selected);
+    }
+    return selected;
+  }
+
+  public Path validateSteamPath(Path initial) {
+    Path selected = initial;
+    int ret = 0;
+    String fileName = "Steam";
+    while ((selected == null && ret == 0)
+        || (selected != null && (!Files.exists(selected) || !selected.toAbsolutePath()
+            .getFileName().toString().equals(fileName)))) {
+      log.debug("Validating current Steam folder: {}",
+          (selected != null ? selected.toAbsolutePath() : "<None>"));
+      String dir =
+          model.getOsInterface().chooseSingleFolder(view,
+              "Choose your \"" + fileName + "\" directory",
+              Paths.get("").toAbsolutePath().toString());
+      if (dir != null) {
+        selected = Paths.get(dir);
+      } else {
+        ret = 1;
+        selected = null;
+      }
+      log.debug("Selected Steam folder: " + selected);
     }
     return selected;
   }

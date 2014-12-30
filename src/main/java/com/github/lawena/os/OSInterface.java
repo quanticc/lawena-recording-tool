@@ -36,10 +36,11 @@ public abstract class OSInterface {
    * Returns the necessary {@link ProcessBuilder} to launch TF2. It will be used when
    * {@link #startTf(int, int, String)} is called.
    * 
+   * @param steamPath a <code>String</code> equivalent to the Steam installation path.
    * @return The <code>ProcessBuilder</code> used to create a {@link Process} and launch TF2 with it
    *         or <code>null</code> if it couldn't be created.
    */
-  public abstract ProcessBuilder getBuilderStartTF2();
+  public abstract ProcessBuilder getBuilderStartTF2(String steamPath);
 
   /**
    * Returns the necessary {@link ProcessBuilder} to stop or kill the TF2 process, to abort its
@@ -172,8 +173,9 @@ public abstract class OSInterface {
       log.info("Launching Steam AppID {} in {}x{} {} with dxlevel {}", options.get("-applaunch"),
           options.get("-w"), options.get("-h"), fs ? "fullscreen" : "windowed",
           options.get("-dxlevel"));
-      log.debug("Parameters: {}", options);
-      ProcessBuilder pb = getBuilderStartTF2();
+      String steam = Key.steamPath.getValue(settings);
+      log.debug("SteamPath: {} with parameters: {}", steam, options);
+      ProcessBuilder pb = getBuilderStartTF2(steam);
       pb.command().add("-applaunch");
       pb.command().add(options.get("-applaunch"));
       options.remove("-applaunch");

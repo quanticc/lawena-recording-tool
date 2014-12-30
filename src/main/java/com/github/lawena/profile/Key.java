@@ -18,6 +18,11 @@ public class Key {
   // Pathnames
 
   /**
+   * Full path to the Steam folder, the one that contains Steam main executable.
+   */
+  public static final Option<String> steamPath = newOption("path.steam", String.class, "");
+
+  /**
    * Full path to the game base path. Must finish with {@link #gameFolderName}.
    */
   public static final Option<String> gamePath = newOption("path.game", String.class, "");

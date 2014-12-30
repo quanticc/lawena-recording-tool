@@ -33,8 +33,8 @@ public class LinuxInterface extends OSInterface {
   }
 
   @Override
-  public ProcessBuilder getBuilderStartTF2() {
-    Path steam = getSteamPath().resolve("steam.sh");
+  public ProcessBuilder getBuilderStartTF2(String steamPath) {
+    Path steam = Paths.get(steamPath).resolve("steam.sh");
     try {
       Files.setPosixFilePermissions(steam, perms777);
       return new ProcessBuilder(steam.toString());

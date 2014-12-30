@@ -46,11 +46,17 @@ public class MainModel {
     logVMInfo();
     configureOSInterface();
 
-    originalDxLevel = osInterface.getSystemDxLevel();
+    originalDxLevel = getSystemDxLevel();
+
+    Path steamPath = toPath(Key.steamPath.getValue(settings));
+    if (steamPath == null || steamPath.toString().isEmpty()) {
+      steamPath = osInterface.getSteamPath();
+    }
+    Key.steamPath.setValueEx(settings, steamPath.toString());
 
     Path gamePath = toPath(Key.gamePath.getValue(settings));
     if (gamePath == null || gamePath.toString().isEmpty()) {
-      gamePath = osInterface.getSteamPath().resolve(Key.relativeDefaultGamePath.getValue(settings));
+      gamePath = steamPath.resolve(Key.relativeDefaultGamePath.getValue(settings));
     }
     Key.gamePath.setValueEx(settings, gamePath.toString());
 
@@ -64,6 +70,32 @@ public class MainModel {
     demos = new DemoEditor(settings, osInterface);
     skyboxPreviewStore = new ImageStore();
     loadSkyboxData();
+  }
+
+  private String getSystemDxLevel() {
+    String level = osInterface.getSystemDxLevel();
+    switch (level) {
+      case "62":
+        log.info("System dxlevel: 98");
+        break;
+      case "5f":
+        log.info("System dxlevel: 95");
+        break;
+      case "5a":
+        log.info("System dxlevel: 90");
+        break;
+      case "51":
+        log.info("System dxlevel: 81");
+        break;
+      case "50":
+        log.info("System dxlevel: 80");
+        break;
+      default:
+        log.warn("Invalid system dxlevel value found: {}. Reverting to 95", level);
+        osInterface.setSystemDxLevel("5f");
+        return "5f";
+    }
+    return level;
   }
 
   private void configureOSInterface() {
