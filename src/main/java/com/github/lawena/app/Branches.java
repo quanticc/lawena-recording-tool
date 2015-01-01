@@ -114,7 +114,7 @@ public class Branches {
     log.debug("Initializing branches dialog");
     view = new UpdaterDialog();
     view.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-    view.setLocationRelativeTo(parent.getView());
+    view.setLocationRelativeTo(parent.viewAsComponent());
     view.setModalityType(ModalityType.APPLICATION_MODAL);
     view.getOkButton().addActionListener(new ActionListener() {
 

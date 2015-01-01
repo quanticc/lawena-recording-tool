@@ -139,6 +139,7 @@ lwrt/tf/config/cfg/mov/*.cfg
 lwrt/csgo/config/cfg/settings.cfg
 lwrt/csgo/config/cfg/namescroll.cfg
 lwrt/csgo/config/cfg/mov/*.cfg
+lwrt/csgo/config/cfg/*.txt
 version.txt
 *.lck
 !launcher/*.jar

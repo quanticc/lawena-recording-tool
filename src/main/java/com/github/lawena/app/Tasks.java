@@ -68,7 +68,7 @@ public class Tasks {
           // TODO: add a "never ask me again" checkbox and a changelog to this dialog
           log.info("New version available: {} ({})", details.getDescribe(), details.getName());
           int answer =
-              JOptionPane.showConfirmDialog(view,
+              JOptionPane.showConfirmDialog(presenter.viewAsComponent(),
                   "New version found!\nBranch: " + updater.getCurrentBranchName() + "\nVersion: "
                       + details.getDescribe() + "\nBuild: " + details.getName()
                       + "\n\nDo you want to update to the latest version?"
@@ -108,7 +108,7 @@ public class Tasks {
           log.info("Deleting segments: " + segmentsGlob);
         } else {
           int answer =
-              JOptionPane.showConfirmDialog(view,
+              JOptionPane.showConfirmDialog(presenter.viewAsComponent(),
                   "Are you sure you want to clear ALL movie files?", "Clearing Movie Files",
                   JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
           if (answer != JOptionPane.YES_NO_OPTION) {

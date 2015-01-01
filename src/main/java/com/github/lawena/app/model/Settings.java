@@ -46,18 +46,20 @@ public class Settings implements ValueProvider {
           return new JsonPrimitive(src);
         }
       }).create();
-  
+
   private Profiles profiles;
   private File profilesFile;
+  private File defaultFile;
   private List<ProfileListener> listeners = new ArrayList<>();
 
-  public Settings(File profilesFile) {
-    this.profilesFile = profilesFile; 
+  public Settings(File profilesFile, File defaultFile) throws IOException {
+    this.profilesFile = profilesFile;
+    this.defaultFile = defaultFile;
     // Options.getProfilesFileOption().value(optionSet)
     this.profiles = loadProfiles(profilesFile);
   }
 
-  private Profiles loadProfiles(File file) {
+  private Profiles loadProfiles(File file) throws IOException {
     try (Reader reader = new FileReader(file)) {
       return gson.fromJson(reader, Profiles.class);
     } catch (JsonSyntaxException | JsonIOException e) {
@@ -70,8 +72,10 @@ public class Settings implements ValueProvider {
     return defaultProfiles();
   }
 
-  private Profiles defaultProfiles() {
-    return new Profiles();
+  private Profiles defaultProfiles() throws IOException {
+    try (Reader reader = new FileReader(defaultFile)) {
+      return gson.fromJson(reader, Profiles.class);
+    }
   }
 
   @Override

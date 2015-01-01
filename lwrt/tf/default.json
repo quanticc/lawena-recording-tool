@@ -1,0 +1,66 @@
+{
+  "selected": "Default",
+  "profiles": [
+    {
+      "name": "Default",
+      "settings": {
+        "path": {
+          "skyboxPreviews": "skybox-previews.lwf",
+          "game": "",
+          "recording": "",
+          "demos": "",
+          "steam": ""
+        },
+        "cfg": {
+          "hudMinmode": false,
+          "viewmodels": "on",
+          "motionBlur": false,
+          "noVoice": true,
+          "vmodelFov": 70,
+          "noDamageNumbers": false,
+          "noCrosshair": true,
+          "hudPlayerModel": false,
+          "extConVars": "// Add Extra ConVars here, for example:\n// volume 0.05",
+          "framerate": 120,
+          "noHitsounds": true,
+          "noCrosshairLock": true
+        },
+        "vdm": {
+          "noSkipToTick": false,
+          "loadKillstreak": true,
+          "relativeKillstreakPath": "KillStreaks.txt"
+        },
+        "files": {
+          "hud": "hud_killnotices",
+          "skybox": "Default",
+          "resources": [],
+          "bigFolderLimit": 200,
+          "deleteUnneededBackups": true,
+          "loglevel": "DEBUG",
+          "extFolders": [
+            ""
+          ]
+        },
+        "recorder": {
+          "jpegQuality": 95,
+          "videoFormat": "TGA"
+        },
+        "launch": {
+          "dxlevel": "95",
+          "insecure": false,
+          "width": 1280,
+          "timeout": 120,
+          "height": 720,
+          "options": "-novid -console"
+        }
+      }
+    }
+  ],
+  "global": {
+    "lawena": {
+      "defaultGamePath": "SteamApps/common/Team Fortress 2/tf",
+      "gameFolderName": "tf",
+      "applaunch": 440
+    }
+  }
+}

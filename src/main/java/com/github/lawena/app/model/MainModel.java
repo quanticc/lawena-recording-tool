@@ -13,10 +13,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.lawena.os.LinuxInterface;
 import com.github.lawena.os.OSInterface;
-import com.github.lawena.os.OSXInterface;
-import com.github.lawena.os.WindowsInterface;
 import com.github.lawena.profile.Key;
 import com.github.lawena.update.Updater;
 import com.github.lawena.util.ImageStore;
@@ -28,7 +25,7 @@ public class MainModel {
   private static final Logger log = LoggerFactory.getLogger(MainModel.class);
 
   private Map<String, String> versionData;
-  private OSInterface osInterface;
+  private final OSInterface osInterface;
   private Updater updater;
   private Linker linker;
 
@@ -38,12 +35,17 @@ public class MainModel {
   private ImageStore skyboxPreviewStore;
   private Settings settings;
 
-  public MainModel(File profilesFile) {
-    this.settings = new Settings(profilesFile);
+  public MainModel(File defaultFile, OSInterface os, Linker ln) throws IOException {
+    Path profilesPath = defaultFile.toPath().resolveSibling("profiles.json");
+    if (!Files.exists(profilesPath)) {
+      Files.copy(defaultFile.toPath(), profilesPath);
+    }
+    this.settings = new Settings(profilesPath.toFile(), defaultFile);
     this.versionData = loadVersionData();
     this.updater = new Updater();
+    this.osInterface = os;
     logVMInfo();
-    configureOSInterface();
+    os.setLookAndFeel();
 
     originalDxLevel = getSystemDxLevel();
 
@@ -61,7 +63,8 @@ public class MainModel {
 
     settings.save();
 
-    linker = new Linker(this);
+    linker = ln;
+    linker.setModel(this);
     linker.unlink();
 
     resources = new Resources();
@@ -75,19 +78,19 @@ public class MainModel {
     String level = osInterface.getSystemDxLevel();
     switch (level) {
       case "62":
-        log.info("System dxlevel: 98");
+        log.debug("System dxlevel: 98");
         break;
       case "5f":
-        log.info("System dxlevel: 95");
+        log.debug("System dxlevel: 95");
         break;
       case "5a":
-        log.info("System dxlevel: 90");
+        log.debug("System dxlevel: 90");
         break;
       case "51":
-        log.info("System dxlevel: 81");
+        log.debug("System dxlevel: 81");
         break;
       case "50":
-        log.info("System dxlevel: 80");
+        log.debug("System dxlevel: 80");
         break;
       default:
         log.warn("Invalid system dxlevel value found: {}. Reverting to 95", level);
@@ -95,20 +98,6 @@ public class MainModel {
         return "5f";
     }
     return level;
-  }
-
-  private void configureOSInterface() {
-    String osname = System.getProperty("os.name");
-    if (osname.contains("Windows")) {
-      osInterface = new WindowsInterface();
-    } else if (osname.contains("Linux")) {
-      osInterface = new LinuxInterface();
-    } else if (osname.contains("OS X")) {
-      osInterface = new OSXInterface();
-    } else {
-      throw new UnsupportedOperationException("OS not supported");
-    }
-    osInterface.setLookAndFeel();
   }
 
   private Map<String, String> loadVersionData() {

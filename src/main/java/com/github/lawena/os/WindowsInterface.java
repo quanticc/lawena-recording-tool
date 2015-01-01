@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.tomahawk.ExtensionsFilter;
 import net.tomahawk.XFileDialog;
@@ -20,18 +19,13 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.util.Consumer;
 
-public class WindowsInterface extends OSInterface {
+public abstract class WindowsInterface extends OSInterface {
 
   private static final Logger log = LoggerFactory.getLogger(WindowsInterface.class);
 
   @Override
-  public ProcessBuilder getBuilderStartTF2(String steamPath) {
+  public ProcessBuilder getBuilderSteamLaunch(String steamPath) {
     return new ProcessBuilder(steamPath + "/steam.exe");
-  }
-
-  @Override
-  public ProcessBuilder getBuilderTF2ProcessKiller() {
-    return new ProcessBuilder("taskkill", "/F", "/IM", "hl2.exe");
   }
 
   @Override
@@ -39,39 +33,7 @@ public class WindowsInterface extends OSInterface {
     return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath"));
   }
 
-  @Override
-  public String getSystemDxLevel() {
-    return regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1");
-  }
-
-  @Override
-  public boolean isRunningTF2() {
-    final String hl2 = "hl2.exe";
-    String tool = Paths.get("lwrt/tools/processcheck/procchk.vbs").toAbsolutePath().toString();
-    List<List<String>> commandLists =
-        Arrays.asList(
-            Arrays.asList("tasklist", "/fi", "\"imagename eq " + hl2 + "\"", "/nh", "/fo", "csv"),
-            Arrays.asList("cscript", "//NoLogo", tool, hl2));
-    final AtomicBoolean running = new AtomicBoolean(false);
-    for (List<String> commands : commandLists) {
-      startProcess(commands, new Consumer<String>() {
-
-        @Override
-        public void consume(String line) {
-          if (line.contains(hl2)) {
-            running.set(true);
-          }
-        }
-      });
-      if (running.get()) {
-        return true;
-      }
-    }
-    log.debug("TF2 process not detected");
-    return false;
-  }
-
-  private String regQuery(String key, String value) {
+  protected String regQuery(String key, String value) {
     final StringBuilder result = new StringBuilder();
     startProcess(Arrays.asList("reg", "query", key, "/v", value), new Consumer<String>() {
 
@@ -93,13 +55,6 @@ public class WindowsInterface extends OSInterface {
       log.debug("Data not found at value {} for key {}", value, key);
       return "";
     }
-  }
-
-  @Override
-  public void setSystemDxLevel(String dxlevel) {
-    String tool = Paths.get("lwrt/tools/regedit/rg.bat").toAbsolutePath().toString();
-    startProcess(Arrays.asList(tool, "HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",
-        "DXLevel_V1", dxlevel));
   }
 
   @Override

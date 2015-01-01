@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
@@ -40,7 +41,7 @@ public abstract class OSInterface {
    * @return The <code>ProcessBuilder</code> used to create a {@link Process} and launch TF2 with it
    *         or <code>null</code> if it couldn't be created.
    */
-  public abstract ProcessBuilder getBuilderStartTF2(String steamPath);
+  public abstract ProcessBuilder getBuilderSteamLaunch(String steamPath);
 
   /**
    * Returns the necessary {@link ProcessBuilder} to stop or kill the TF2 process, to abort its
@@ -49,7 +50,7 @@ public abstract class OSInterface {
    * @return The <code>ProcessBuilder</code> used to create a {@link Process} and kill the TF2
    *         process or <code>null</code> if it couldn't be created.
    */
-  public abstract ProcessBuilder getBuilderTF2ProcessKiller();
+  public abstract ProcessBuilder getBuilderGameProcessKiller();
 
   /**
    * Returns the {@link Path} of the Steam installation (where Steam.exe, steam.sh or equivalent is
@@ -73,7 +74,7 @@ public abstract class OSInterface {
    * @return <code>true</code> if TF2 process still runs in the system or <code>false</code> if it
    *         does not.
    */
-  public abstract boolean isRunningTF2();
+  public abstract boolean isGameRunning();
 
   /**
    * Store the set DirectX level in the filesystem for future use, like with the
@@ -102,11 +103,11 @@ public abstract class OSInterface {
   /**
    * Stop or kill the TF2 process, whether it's being run from the tool or not.
    * 
-   * @see #getBuilderTF2ProcessKiller()
+   * @see #getBuilderGameProcessKiller()
    */
   public void killTf2Process() {
     try {
-      ProcessBuilder pb = getBuilderTF2ProcessKiller();
+      ProcessBuilder pb = getBuilderGameProcessKiller();
       Process p = pb.start();
       try (BufferedReader input = Util.newProcessReader(p)) {
         String line;
@@ -175,7 +176,7 @@ public abstract class OSInterface {
           options.get("-dxlevel"));
       String steam = Key.steamPath.getValue(settings);
       log.debug("SteamPath: {} with parameters: {}", steam, options);
-      ProcessBuilder pb = getBuilderStartTF2(steam);
+      ProcessBuilder pb = getBuilderSteamLaunch(steam);
       pb.command().add("-applaunch");
       pb.command().add(options.get("-applaunch"));
       options.remove("-applaunch");
@@ -307,6 +308,18 @@ public abstract class OSInterface {
       return chooser.getSelectedFile().toString();
     } else {
       return null;
+    }
+  }
+
+  public boolean isAdmin() {
+    Preferences prefs = Preferences.systemRoot();
+    try {
+      prefs.put("foo", "bar"); // SecurityException on Windows
+      prefs.remove("foo");
+      prefs.flush(); // BackingStoreException on Linux
+      return true;
+    } catch (Exception e) {
+      return false;
     }
   }
 
