@@ -436,6 +436,10 @@ public abstract class Lawena implements ProfileListener {
      */
     new Timer().schedule(new TimerTask() {
 
+      private String safeToString(Path path) {
+        return path == null ? null : path.toString();
+      }
+
       @Override
       public void run() {
         ValidationResult rs, rg, rr;
@@ -443,11 +447,11 @@ public abstract class Lawena implements ProfileListener {
         Path gamePath = toPath(Key.gamePath.getValue(settings));
         Path recPath = toPath(Key.recordingPath.getValue(settings));
         Path newSteamPath = validateSteamPath(steamPath);
-        rs = Key.steamPath.setValue(settings, newSteamPath.toString());
+        rs = Key.steamPath.setValue(settings, safeToString(newSteamPath));
         Path newGamePath = validateGamePath(gamePath);
-        rg = Key.gamePath.setValue(settings, newGamePath.toString());
+        rg = Key.gamePath.setValue(settings, safeToString(newGamePath));
         Path newRecPath = validateRecordingPath(recPath);
-        rr = Key.recordingPath.setValue(settings, newRecPath.toString());
+        rr = Key.recordingPath.setValue(settings, safeToString(newRecPath));
         if (!rs.isValid()) {
           log.warn("No Steam path was defined");
         } else if (!steamPath.equals(newSteamPath)) {

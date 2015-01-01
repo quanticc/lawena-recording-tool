@@ -44,7 +44,6 @@ public class MainModel {
     this.versionData = loadVersionData();
     this.updater = new Updater();
     this.osInterface = os;
-    logVMInfo();
     os.setLookAndFeel();
 
     originalDxLevel = getSystemDxLevel();
@@ -60,6 +59,8 @@ public class MainModel {
       gamePath = steamPath.resolve(Key.relativeDefaultGamePath.getValue(settings));
     }
     Key.gamePath.setValueEx(settings, gamePath.toString());
+
+    logVMInfo();
 
     settings.save();
 
