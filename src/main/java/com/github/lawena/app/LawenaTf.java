@@ -55,7 +55,6 @@ public class LawenaTf extends Lawena {
     v.getDisableHitSounds().setSelected(Key.noHitsounds.getValue(settings));
     v.getDisableVoiceChat().setSelected(Key.noVoice.getValue(settings));
     v.getUseHudMinmode().setSelected(Key.hudMinmode.getValue(settings));
-    v.getChckbxmntmBackupMode().setSelected(Key.deleteUnneededBackups.getValue(settings));
     v.getUsePlayerModel().setSelected(Key.hudPlayerModel.getValue(settings));
   }
 
@@ -69,7 +68,6 @@ public class LawenaTf extends Lawena {
     Key.noHitsounds.setValueEx(settings, v.getDisableHitSounds().isSelected());
     Key.noVoice.setValueEx(settings, v.getDisableVoiceChat().isSelected());
     Key.hudMinmode.setValueEx(settings, v.getUseHudMinmode().isSelected());
-    Key.deleteUnneededBackups.setValueEx(settings, v.getChckbxmntmBackupMode().isSelected());
     Key.hudPlayerModel.setValueEx(settings, v.getUsePlayerModel().isSelected());
   }
 

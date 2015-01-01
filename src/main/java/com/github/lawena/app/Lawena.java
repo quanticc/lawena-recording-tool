@@ -362,6 +362,13 @@ public abstract class Lawena implements ProfileListener {
         Key.insecure.setValueEx(settings, view.getChckbxmntmInsecure().isSelected());
       }
     });
+    view.getChckbxmntmBackupMode().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        Key.deleteUnneededBackups.setValueEx(settings, view.getChckbxmntmBackupMode().isSelected());
+      }
+    });
     view.getMntmLaunchTimeout().addActionListener(new ActionListener() {
 
       @Override
@@ -546,6 +553,7 @@ public abstract class Lawena implements ProfileListener {
     view.getCmbSourceVideoFormat().setSelectedItem(Key.recorderVideoFormat.getValue(settings));
     view.getSpinnerJpegQuality().setValue(Key.recorderJpegQuality.getValue(settings));
     logView.getLevelComboBox().setSelectedItem(Key.loglevel.getValue(settings));
+    view.getChckbxmntmBackupMode().setSelected(Key.deleteUnneededBackups.getValue(settings));
     checkViewmodelState();
     checkFrameFormatState();
     loadDependentSettings();
@@ -578,6 +586,7 @@ public abstract class Lawena implements ProfileListener {
         .toString());
     Key.recorderJpegQuality.setValueEx(settings, (int) view.getSpinnerJpegQuality().getValue());
     Key.loglevel.setValueEx(settings, (String) logView.getLevelComboBox().getSelectedItem());
+    Key.deleteUnneededBackups.setValueEx(settings, view.getChckbxmntmBackupMode().isSelected());
 
     saveDependentSettings();
 
@@ -758,5 +767,5 @@ public abstract class Lawena implements ProfileListener {
   }
 
   public abstract ConfigWriter newConfigWriter();
-  
+
 }
