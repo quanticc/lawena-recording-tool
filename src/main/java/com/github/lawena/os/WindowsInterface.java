@@ -22,6 +22,8 @@ import com.github.lawena.util.Consumer;
 public abstract class WindowsInterface extends OSInterface {
 
   private static final Logger log = LoggerFactory.getLogger(WindowsInterface.class);
+  private static final String STEAMPATH_REGISTRY_KEY = "HKEY_CURRENT_USER\\Software\\Valve\\Steam";
+  private static final String STEAMPATH_REGISTRY_VALUE = "SteamPath";
 
   @Override
   public ProcessBuilder getBuilderSteamLaunch(String steamPath) {
@@ -30,7 +32,7 @@ public abstract class WindowsInterface extends OSInterface {
 
   @Override
   public Path getSteamPath() {
-    return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath"));
+    return Paths.get(regQuery(STEAMPATH_REGISTRY_KEY, STEAMPATH_REGISTRY_VALUE));
   }
 
   protected String regQuery(String key, String value) {

@@ -2,7 +2,6 @@ package com.github.lawena.os;
 
 import static com.github.lawena.util.Util.startProcess;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -18,18 +17,8 @@ public class WindowsInterfaceGo extends WindowsInterface {
   private static final Logger log = LoggerFactory.getLogger(WindowsInterfaceGo.class);
 
   @Override
-  public ProcessBuilder getBuilderSteamLaunch(String steamPath) {
-    return new ProcessBuilder(steamPath + "/steam.exe");
-  }
-
-  @Override
   public ProcessBuilder getBuilderGameProcessKiller() {
     return new ProcessBuilder("taskkill", "/F", "/IM", "csgo.exe");
-  }
-
-  @Override
-  public Path getSteamPath() {
-    return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath"));
   }
 
   @Override

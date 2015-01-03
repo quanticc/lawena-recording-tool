@@ -15,6 +15,10 @@ import com.github.lawena.util.Consumer;
 public class WindowsInterfaceTf extends WindowsInterface {
 
   private static final Logger log = LoggerFactory.getLogger(WindowsInterfaceTf.class);
+  private static final String DXLEVEL_REGISTRY_KEY =
+      "HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings";
+  private static final String DXLEVEL_REGISTRY_VALUE = "DXLevel_V1";
+
 
   @Override
   public ProcessBuilder getBuilderGameProcessKiller() {
@@ -23,7 +27,7 @@ public class WindowsInterfaceTf extends WindowsInterface {
 
   @Override
   public String getSystemDxLevel() {
-    return regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings", "DXLevel_V1");
+    return regQuery(DXLEVEL_REGISTRY_KEY, DXLEVEL_REGISTRY_VALUE);
   }
 
   @Override
@@ -56,7 +60,6 @@ public class WindowsInterfaceTf extends WindowsInterface {
   @Override
   public void setSystemDxLevel(String dxlevel) {
     String tool = Paths.get("lwrt/tools/regedit/rg.bat").toAbsolutePath().toString();
-    startProcess(Arrays.asList(tool, "HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings",
-        "DXLevel_V1", dxlevel));
+    startProcess(Arrays.asList(tool, DXLEVEL_REGISTRY_KEY, DXLEVEL_REGISTRY_VALUE, dxlevel));
   }
 }
