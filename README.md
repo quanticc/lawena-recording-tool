@@ -1,4 +1,4 @@
-Lawena Recording Tool [![Build Status](https://img.shields.io/travis/iabarca/lawena-recording-tool/v4.x.svg?style=flat)](https://travis-ci.org/iabarca/lawena-recording-tool)
+Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.x)](https://travis-ci.org/iabarca/lawena-recording-tool)
 =====================
 
 A simple [Java 7+](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) tool which greatly enhances your TF2 and other Source games image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.
@@ -12,7 +12,7 @@ If you want to use a stable version, check the [releases](https://github.com/iab
 2. Run **gradlew.bat** (Windows) or **gradlew** script (Unix) to start the program. In this branch make sure you do it as administrator due to the use of symbolic links.
 
 ## About this branch
-The v4.x branch contains the latest development towards a v4.2.0 release. You can switch branches from within the tool using the `Help -> About` menu item.
+The v4.x branch contains the latest development towards a v4.2.0 release. You can switch branches from within the tool using the `Help -> Switch Updater Branch...` menu item.
 
 ### Features
 * Insane max quality graphics configuration. 
