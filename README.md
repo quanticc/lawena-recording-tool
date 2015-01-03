@@ -9,7 +9,7 @@ Easy-to-use and no install required. This tool does not interfere with your regu
 If you want to use a stable version, check the [releases](https://github.com/iabarca/lawena-recording-tool/releases) page. Also there's some pre-releases that preview upcoming content. To download the latest, not particularly stable version:
 
 1. [Download this repository](https://github.com/iabarca/lawena-recording-tool/archive/v4.x.zip) and extract it to any folder.
-2. Run **gradlew.bat** (Windows) or **gradlew** script (Unix) to start the program. In this branch make sure you do it as administrator due to the use of symbolic links.
+2. Run **gradlew.bat** (Windows) or **gradlew** script (Unix) to start the program.
 
 ## About this branch
 The v4.1.x branch tracks the maintenance of all v4.1 series. You can switch branches for more recent stuff from within the tool using the `Help -> About` menu item.
