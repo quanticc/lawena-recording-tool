@@ -187,7 +187,7 @@ task packResources(type: Zip) {
     archiveName = 'lwrtresources.jar'
     destinationDir = file('src/main/dist/lawena')
     from projectDir
-    includes = ['lwrt/tf/config/cfg/**', 'lwrt/tf/hud/**']
+    includes = ['lwrt/tf/config/cfg/**', 'lwrt/tf/hud/**', 'lwrt/csgo/config/cfg/**', 'lwrt/tf/default.json', 'lwrt/csgo/default.json']
 }
 
 task packVpks(type: Zip) {

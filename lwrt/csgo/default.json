@@ -1,0 +1,62 @@
+{
+  "selected": "Default",
+  "profiles": [
+    {
+      "name": "Default",
+      "settings": {
+        "path": {
+          "skyboxPreviews": "skybox-previews.lwf",
+          "game": "",
+          "recording": "",
+          "demos": "",
+          "steam": ""
+        },
+        "cfg": {
+          "viewmodels": "on",
+          "noVoice": true,
+          "vmodelFov": 68,
+          "noCrosshair": true,
+          "extConVars": "// Add Extra ConVars here, for example:\n// volume 0.05",
+          "framerate": 120,
+          "noCrosshairLock": true,
+          "noCasterVoice": true
+        },
+        "vdm": {
+          "noSkipToTick": false,
+          "loadKillstreak": false,
+          "relativeKillstreakPath": ""
+        },
+        "files": {
+          "hud": "hud_killnotices",
+          "skybox": "Default",
+          "resources": [],
+          "bigFolderLimit": 200,
+          "deleteUnneededBackups": false,
+          "loglevel": "DEBUG",
+          "extFolders": [
+            ""
+          ]
+        },
+        "recorder": {
+          "jpegQuality": 95,
+          "videoFormat": "TGA"
+        },
+        "launch": {
+          "dxlevel": "98",
+          "insecure": false,
+          "width": 1280,
+          "timeout": 120,
+          "height": 720,
+          "options": "-novid -console"
+        }
+      }
+    }
+  ],
+  "global": {
+    "lawena": {
+      "applaunch": 730,
+      "defaultGamePath": "SteamApps/common/Counter-Strike Global Offensive/csgo",
+      "gameFolderName": "csgo"
+    }
+  }
+}

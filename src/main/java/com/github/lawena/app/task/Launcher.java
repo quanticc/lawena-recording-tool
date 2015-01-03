@@ -54,7 +54,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
     this.settings = model.getSettings();
     this.resources = model.getResources();
     this.linker = model.getLinker();
-    this.writer = new ConfigWriter(settings);
+    this.writer = presenter.newConfigWriter();
   }
 
   @Override
@@ -63,7 +63,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
 
       @Override
       public void run() {
-        view.getBtnStartTf().setEnabled(false);
+        view.getBtnStartGame().setEnabled(false);
       }
     });
     if (tasks.getCurrentLaunchTask() == null) {
@@ -75,7 +75,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       // Checking if the user selects "Custom" HUD in the dropdown,
       // he or she also selects a "hud" in the sidebar
       if (!verifyCustomHud()) {
-        JOptionPane.showMessageDialog(view,
+        JOptionPane.showMessageDialog(presenter.viewAsComponent(),
             "Please select a custom HUD in the\nCustom Resources table and retry", "Custom HUD",
             JOptionPane.INFORMATION_MESSAGE);
         log.info("Launch aborted because the custom HUD to use was not specified");
@@ -95,7 +95,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       }
 
       setProgress(5);
-      closeTf2Handles();
+      closeGameHandles();
       setProgress(15);
 
       // Restoring user files
@@ -127,15 +127,15 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       setProgress(95);
 
       // Launching process
-      status.info("Launching TF2 process");
+      status.info("Launching game process");
       os.launchSteam(settings);
 
       SwingUtilities.invokeAndWait(new Runnable() {
 
         @Override
         public void run() {
-          view.getBtnStartTf().setEnabled(true);
-          view.getBtnStartTf().setText("Stop Team Fortress 2");
+          view.getBtnStartGame().setEnabled(true);
+          view.getBtnStartGame().setText("Stop Game");
         }
       });
       setProgress(100);
@@ -145,13 +145,13 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       int millis = 5000;
       int maxtimeout = cfgtimeout / (millis / 1000);
       setProgress(0);
-      status.info("Waiting for TF2 to start...");
+      status.info("Waiting for the game to start...");
       if (cfgtimeout > 0) {
-        log.debug("TF2 launch timeout: around " + cfgtimeout + " seconds");
+        log.debug("Game launch timeout: around " + cfgtimeout + " seconds");
       } else {
-        log.debug("TF2 launch timeout disabled");
+        log.debug("Game launch timeout disabled");
       }
-      while (!os.isRunningTF2() && (cfgtimeout == 0 || timeout < maxtimeout)) {
+      while (!os.isGameRunning() && (cfgtimeout == 0 || timeout < maxtimeout)) {
         ++timeout;
         if (cfgtimeout > 0) {
           setProgress((int) ((double) timeout / maxtimeout * 100));
@@ -161,13 +161,13 @@ public class Launcher extends SwingWorker<Boolean, Void> {
 
       if (cfgtimeout > 0 && timeout >= maxtimeout) {
         int s = timeout * (millis / 1000);
-        log.info("TF2 launch timed out after " + s + " seconds");
-        status.info(StatusAppender.WARN, "TF2 did not start after " + s + " seconds");
+        log.info("Game launch timed out after " + s + " seconds");
+        status.info(StatusAppender.WARN, "Game did not start after " + s + " seconds");
         return false;
       }
 
-      log.info("TF2 has started running");
-      status.info("Waiting for TF2 to finish running...");
+      log.info("Game has started running");
+      status.info("Waiting for the game to finish running...");
       SwingUtilities.invokeLater(new Runnable() {
 
         @Override
@@ -175,34 +175,34 @@ public class Launcher extends SwingWorker<Boolean, Void> {
           view.getProgressBar().setIndeterminate(true);
         }
       });
-      while (os.isRunningTF2()) {
+      while (os.isGameRunning()) {
         Thread.sleep(millis);
       }
 
       Thread.sleep(5000);
-      closeTf2Handles();
+      closeGameHandles();
 
     } else {
-      if (os.isRunningTF2()) {
-        status.info("Attempting to finish TF2 process...");
+      if (os.isGameRunning()) {
+        status.info("Attempting to finish game process...");
         os.killTf2Process();
         Thread.sleep(5000);
       } else {
-        status.info("TF2 was not running, cancelling");
+        status.info("Game was not running, cancelling");
       }
-      if (!os.isRunningTF2()) {
+      if (!os.isGameRunning()) {
         tasks.getCurrentLaunchTask().cancel(true);
       }
-      closeTf2Handles();
+      closeGameHandles();
     }
 
     return true;
   }
 
-  private void closeTf2Handles() {
-    status.info("Closing open handles in TF2 'cfg' folder...");
+  private void closeGameHandles() {
+    status.info("Closing open handles in game 'cfg' folder...");
     os.closeHandles(toPath(Key.gamePath.getValue(settings)).resolve("cfg"));
-    status.info("Closing open handles in TF2 'custom' folder...");
+    status.info("Closing open handles in game 'custom' folder...");
     os.closeHandles(toPath(Key.gamePath.getValue(settings)).resolve("custom"));
   }
 
@@ -233,24 +233,24 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       tasks.setCurrentLaunchTask(null);
       tasks.setCurrentWorker(null, false);
       // linker.setParentTask(null);
-      view.getBtnStartTf().setEnabled(false);
-      boolean ranTf2Correctly = false;
+      view.getBtnStartGame().setEnabled(false);
+      boolean ranGameCorrectly = false;
       try {
-        ranTf2Correctly = get();
+        ranGameCorrectly = get();
       } catch (InterruptedException | ExecutionException e) {
       }
       boolean restoredAllFiles = linker.unlink();
-      if (ranTf2Correctly) {
+      if (ranGameCorrectly) {
         if (restoredAllFiles) {
-          status.info(StatusAppender.OK, "TF2 has finished running. All files restored");
+          status.info(StatusAppender.OK, "Game has finished running. All files restored");
         } else {
           status.info(StatusAppender.WARN,
               "Your files could not be restored correctly. Check log for details");
         }
       }
       os.setSystemDxLevel(model.getOriginalDxLevel());
-      view.getBtnStartTf().setText("Start Team Fortress 2");
-      view.getBtnStartTf().setEnabled(true);
+      view.getBtnStartGame().setText("Launch Game");
+      view.getBtnStartGame().setEnabled(true);
     }
   }
 

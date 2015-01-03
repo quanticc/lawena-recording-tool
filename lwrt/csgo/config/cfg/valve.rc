@@ -1,0 +1,2 @@
+// run a user script file if present
+exec autoexec.cfg

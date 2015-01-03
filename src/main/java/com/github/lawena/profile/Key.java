@@ -114,6 +114,8 @@ public class Key {
   public static final Option<Boolean> noHitsounds = newOption("cfg.noHitsounds", Boolean.class,
       true);
   public static final Option<Boolean> noVoice = newOption("cfg.noVoice", Boolean.class, true);
+  public static final Option<Boolean> noCasterVoice = newOption("cfg.noCasterVoice", Boolean.class,
+      true);
   public static final Option<Boolean> hudMinmode =
       newOption("cfg.hudMinmode", Boolean.class, false);
   public static final Option<Boolean> hudPlayerModel = newOption("cfg.hudPlayerModel",
@@ -143,7 +145,7 @@ public class Key {
    * Default Steam application ID to launch. To be used as a launch parameter in -applaunch if the
    * user does not override it and has a default value of 440 (Team Fortress 2).
    */
-  public static final Option<Integer> applaunch = newOption("lawena.applaunch", Integer.class, 440);
+  public static final Option<Integer> applaunch = newOption("lawena.applaunch", Integer.class, 0);
   /**
    * Default game path relative to Steam path. For example, in Team Fortress 2 this path is:
    * <code>SteamApps/common/Team Fortress 2/tf</code>
@@ -151,13 +153,13 @@ public class Key {
    * @see com.github.lawena.os.OSInterface#getSteamPath()
    */
   public static final Option<String> relativeDefaultGamePath = newOption("lawena.defaultGamePath",
-      String.class, "SteamApps/common/Team Fortress 2/tf");
+      String.class, "");
   /**
    * Required folder name for {@link #gamePath} to be validated against. For instance, Team Fortress
    * 2 uses <code>tf</code> as folder name.
    */
   public static final Option<String> gameFolderName = newOption("lawena.gameFolderName",
-      String.class, "tf");
+      String.class, "");
 
   private Key() {}
 

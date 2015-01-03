@@ -180,20 +180,21 @@ public class Resources extends AbstractTableModel {
   }
 
   private List<Resource> scanResourceFolder(Path dir) {
+    List<Resource> newResourceList = new ArrayList<>();
     // path must be a folder or a vpk file
     if (!Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)) {
-      throw new IllegalArgumentException("Path " + dir + " must be a directory");
-    }
-    List<Resource> newResourceList = new ArrayList<>();
-    try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-      for (Path path : stream) {
-        // each resource must be a folder or a vpk file
-        newResourceList.add(newResource(path));
+      log.info("Skipping path {} since it does not exist or is not a folder", dir);
+    } else {
+      try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+        for (Path path : stream) {
+          // each resource must be a folder or a vpk file
+          newResourceList.add(newResource(path));
+        }
+      } catch (NoSuchFileException e) {
+        log.debug("{} does not exist, not scanning this path", dir);
+      } catch (IOException e) {
+        log.warn("Problem while loading custom paths: " + e);
       }
-    } catch (NoSuchFileException e) {
-      log.debug("{} does not exist, not scanning this path", dir);
-    } catch (IOException e) {
-      log.warn("Problem while loading custom paths: " + e);
     }
     return newResourceList;
   }

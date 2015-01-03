@@ -2,8 +2,10 @@ package com.github.lawena.app;
 
 import static com.github.lawena.util.Util.toPath;
 
+import java.awt.Component;
 import java.awt.Dialog.ModalityType;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -24,7 +26,6 @@ import java.util.TimerTask;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 
+import com.github.lawena.app.model.ConfigWriter;
 import com.github.lawena.app.model.MainModel;
 import com.github.lawena.app.model.Resource;
 import com.github.lawena.app.model.Resources;
@@ -64,36 +66,46 @@ import com.github.lawena.util.StatusAppender;
 import com.github.lawena.util.Util;
 import com.github.lawena.vdm.DemoEditor;
 
-public class Lawena implements ProfileListener {
+public abstract class Lawena implements ProfileListener {
 
   private static final Logger log = LoggerFactory.getLogger(Lawena.class);
 
-  private MainModel model;
-  private LawenaView view;
+  protected MainModel model;
+  protected LawenaView view;
 
-  private Settings settings;
-  private DemoEditor demos;
-  private Resources resources;
+  protected Settings settings;
+  protected DemoEditor demos;
+  protected Resources resources;
 
-  private Tasks tasks;
-  private Segments segments;
-  private Branches branches;
+  protected Tasks tasks;
+  protected Segments segments;
+  protected Branches branches;
 
-  private LogView logView;
+  protected LogView logView;
 
-  private AboutDialog dialog;
-  private JTextArea customSettingsTextArea;
-  private JScrollPane customSettingsScrollPane;
-  private Object lastHud;
-  private LaunchOptionsDialog launchOptionsDialog;
-  private LoggingAppender appender;
+  protected AboutDialog dialog;
+  protected JTextArea customSettingsTextArea;
+  protected JScrollPane customSettingsScrollPane;
+  protected Object lastHud;
+  protected LaunchOptionsDialog launchOptionsDialog;
+  protected LoggingAppender appender;
 
   public Lawena(MainModel mainModel) {
     model = mainModel;
   }
 
+  protected abstract void setupView();
+
+  protected abstract void setupIconImage();
+
+  public abstract Component viewAsComponent();
+
+  protected abstract Frame viewAsFrame();
+
   public void start() {
-    view = new LawenaView();
+    setupView();
+    if (view == null)
+      throw new IllegalStateException("View must be configured by this step");
     logView = new LogView();
     tasks = new Tasks(this);
     segments = new Segments(this);
@@ -115,11 +127,7 @@ public class Lawena implements ProfileListener {
     tasks.checkForUpdates();
 
     view.setTitle("Lawena Recording Tool " + model.getShortVersion());
-    try {
-      view.setIconImage(new ImageIcon(getClass().getResource("tf2.png")).getImage());
-    } catch (Exception e) {
-      log.warn("Window icon missing / could not be set");
-    }
+    setupIconImage();
     view.addWindowListener(new WindowAdapter() {
 
       @Override
@@ -147,7 +155,7 @@ public class Lawena implements ProfileListener {
         JTextArea custom = getCustomSettingsTextArea();
         String previous = custom.getText();
         int result =
-            JOptionPane.showConfirmDialog(view, getCustomSettingsScrollPane(),
+            JOptionPane.showConfirmDialog(viewAsComponent(), getCustomSettingsScrollPane(),
                 "Configure Custom Settings", JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
@@ -256,7 +264,7 @@ public class Lawena implements ProfileListener {
 
     // TODO: add change steam directory presenter action
 
-    view.getMntmChangeTfDirectory().addActionListener(new ActionListener() {
+    view.getMntmChangeGameDirectory().addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -266,7 +274,8 @@ public class Lawena implements ProfileListener {
             Key.gamePath.setValueEx(settings, newpath.toString());
           }
         } else {
-          JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
+          JOptionPane.showMessageDialog(viewAsComponent(),
+              "Please wait until the game has stopped running");
         }
       }
     });
@@ -280,7 +289,8 @@ public class Lawena implements ProfileListener {
             Key.recordingPath.setValueEx(settings, newpath.toString());
           }
         } else {
-          JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
+          JOptionPane.showMessageDialog(viewAsComponent(),
+              "Please wait until the game has stopped running");
         }
       }
     });
@@ -289,7 +299,7 @@ public class Lawena implements ProfileListener {
       @Override
       public void actionPerformed(ActionEvent e) {
         int answer =
-            JOptionPane.showConfirmDialog(view,
+            JOptionPane.showConfirmDialog(viewAsComponent(),
                 "Are you sure you want to reset this profile settings to defaults?",
                 "Revert to Defaults", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (answer == JOptionPane.YES_OPTION) {
@@ -316,7 +326,7 @@ public class Lawena implements ProfileListener {
         saveSettings();
       }
     });
-    view.getBtnStartTf().addActionListener(new ActionListener() {
+    view.getBtnStartGame().addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -352,13 +362,20 @@ public class Lawena implements ProfileListener {
         Key.insecure.setValueEx(settings, view.getChckbxmntmInsecure().isSelected());
       }
     });
+    view.getChckbxmntmBackupMode().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        Key.deleteUnneededBackups.setValueEx(settings, view.getChckbxmntmBackupMode().isSelected());
+      }
+    });
     view.getMntmLaunchTimeout().addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
         Object answer =
-            JOptionPane.showInputDialog(view, "Enter the number of seconds to wait\n"
-                + "before interrupting TF2 launch.\n" + "Enter 0 to disable timeout.",
+            JOptionPane.showInputDialog(viewAsComponent(), "Enter the number of seconds to wait\n"
+                + "before interrupting game launch.\n" + "Enter 0 to disable timeout.",
                 "Launch Timeout", JOptionPane.PLAIN_MESSAGE, null, null,
                 Key.launchTimeout.getValue(settings));
         if (answer != null) {
@@ -366,8 +383,9 @@ public class Lawena implements ProfileListener {
             int value = Integer.parseInt(answer.toString());
             Key.launchTimeout.setValueEx(settings, value);
           } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(view, "Invalid value, must be 0 or higher integer.",
-                "Launch Options", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(viewAsComponent(),
+                "Invalid value, must be 0 or higher integer.", "Launch Options",
+                JOptionPane.WARNING_MESSAGE);
           }
         }
       }
@@ -418,6 +436,10 @@ public class Lawena implements ProfileListener {
      */
     new Timer().schedule(new TimerTask() {
 
+      private String safeToString(Path path) {
+        return path == null ? null : path.toString();
+      }
+
       @Override
       public void run() {
         ValidationResult rs, rg, rr;
@@ -425,11 +447,11 @@ public class Lawena implements ProfileListener {
         Path gamePath = toPath(Key.gamePath.getValue(settings));
         Path recPath = toPath(Key.recordingPath.getValue(settings));
         Path newSteamPath = validateSteamPath(steamPath);
-        rs = Key.steamPath.setValue(settings, newSteamPath.toString());
+        rs = Key.steamPath.setValue(settings, safeToString(newSteamPath));
         Path newGamePath = validateGamePath(gamePath);
-        rg = Key.gamePath.setValue(settings, newGamePath.toString());
+        rg = Key.gamePath.setValue(settings, safeToString(newGamePath));
         Path newRecPath = validateRecordingPath(recPath);
-        rr = Key.recordingPath.setValue(settings, newRecPath.toString());
+        rr = Key.recordingPath.setValue(settings, safeToString(newRecPath));
         if (!rs.isValid()) {
           log.warn("No Steam path was defined");
         } else if (!steamPath.equals(newSteamPath)) {
@@ -520,8 +542,6 @@ public class Lawena implements ProfileListener {
   private void loadSettings() {
     Util.selectComboItem(view.getCmbHud(), Key.hud.getValue(settings),
         ((ValuesValidator) Key.hud.getValidator()).getAllowedValues());
-    Util.selectComboItem(view.getCmbQuality(), Key.dxlevel.getValue(settings),
-        ((ValuesValidator) Key.dxlevel.getValidator()).getAllowedValues());
     Util.selectComboItem(view.getCmbViewmodel(), Key.viewmodelSwitch.getValue(settings),
         ((ValuesValidator) Key.viewmodelSwitch.getValidator()).getAllowedValues());
     selectSkyboxFromSettings();
@@ -532,23 +552,18 @@ public class Lawena implements ProfileListener {
       view.getSpinnerViewmodelFov().setValue(Key.viewmodelFov.getValue(settings));
     } catch (IllegalArgumentException e) {
     }
-    view.getEnableMotionBlur().setSelected(Key.motionBlur.getValue(settings));
-    view.getDisableCombatText().setSelected(Key.noDamageNumbers.getValue(settings));
-    view.getDisableCrosshair().setSelected(Key.noCrosshair.getValue(settings));
-    view.getDisableCrosshairSwitch().setSelected(Key.noCrosshairSwitch.getValue(settings));
-    view.getDisableHitSounds().setSelected(Key.noHitsounds.getValue(settings));
-    view.getDisableVoiceChat().setSelected(Key.noVoice.getValue(settings));
-    view.getUseHudMinmode().setSelected(Key.hudMinmode.getValue(settings));
     view.getChckbxmntmInsecure().setSelected(Key.insecure.getValue(settings));
-    view.getChckbxmntmBackupMode().setSelected(Key.deleteUnneededBackups.getValue(settings));
-    view.getUsePlayerModel().setSelected(Key.hudPlayerModel.getValue(settings));
     getCustomSettingsTextArea().setText(Key.extConVars.getValue(settings));
     view.getCmbSourceVideoFormat().setSelectedItem(Key.recorderVideoFormat.getValue(settings));
     view.getSpinnerJpegQuality().setValue(Key.recorderJpegQuality.getValue(settings));
     logView.getLevelComboBox().setSelectedItem(Key.loglevel.getValue(settings));
+    view.getChckbxmntmBackupMode().setSelected(Key.deleteUnneededBackups.getValue(settings));
     checkViewmodelState();
     checkFrameFormatState();
+    loadDependentSettings();
   }
+
+  protected abstract void loadDependentSettings();
 
   public void saveSettings() {
     String[] resolution = ((String) view.getCmbResolution().getSelectedItem()).split("x");
@@ -566,34 +581,29 @@ public class Lawena implements ProfileListener {
             view.getCmbHud().getSelectedIndex()));
     Key.viewmodelSwitch.setValueEx(settings, ((ValuesValidator) Key.viewmodelSwitch.getValidator())
         .getAllowedValues().get(view.getCmbViewmodel().getSelectedIndex()));
-    Key.dxlevel.setValueEx(settings, ((ValuesValidator) Key.dxlevel.getValidator())
-        .getAllowedValues().get(view.getCmbQuality().getSelectedIndex()));
     Key.viewmodelFov.setValueEx(settings, (int) view.getSpinnerViewmodelFov().getValue());
-    Key.motionBlur.setValueEx(settings, view.getEnableMotionBlur().isSelected());
-    Key.noDamageNumbers.setValueEx(settings, view.getDisableCombatText().isSelected());
-    Key.noCrosshair.setValueEx(settings, view.getDisableCrosshair().isSelected());
-    Key.noCrosshairSwitch.setValueEx(settings, view.getDisableCrosshairSwitch().isSelected());
-    Key.noHitsounds.setValueEx(settings, view.getDisableHitSounds().isSelected());
-    Key.noVoice.setValueEx(settings, view.getDisableVoiceChat().isSelected());
     Key.skybox.setValueEx(settings, (String) view.getCmbSkybox().getSelectedItem());
     Key.resources.setValueEx(settings, resources.getEnabledStringList());
-    Key.hudMinmode.setValueEx(settings, view.getUseHudMinmode().isSelected());
     Key.insecure.setValueEx(settings, view.getChckbxmntmInsecure().isSelected());
-    Key.deleteUnneededBackups.setValueEx(settings, view.getChckbxmntmBackupMode().isSelected());
-    Key.hudPlayerModel.setValueEx(settings, view.getUsePlayerModel().isSelected());
     Key.extConVars.setValueEx(settings, getCustomSettingsTextArea().getText());
     Key.recorderVideoFormat.setValueEx(settings, view.getCmbSourceVideoFormat().getSelectedItem()
         .toString());
     Key.recorderJpegQuality.setValueEx(settings, (int) view.getSpinnerJpegQuality().getValue());
     Key.loglevel.setValueEx(settings, (String) logView.getLevelComboBox().getSelectedItem());
+    Key.deleteUnneededBackups.setValueEx(settings, view.getChckbxmntmBackupMode().isSelected());
+
+    saveDependentSettings();
+
     settings.save();
     log.info("Settings saved");
   }
 
+  protected abstract void saveDependentSettings();
+
   void saveAndExit() {
     saveSettings();
     view.setVisible(false);
-    if (!model.getOsInterface().isRunningTF2()) {
+    if (!model.getOsInterface().isGameRunning()) {
       model.getLinker().unlink();
     }
     System.exit(0);
@@ -641,7 +651,8 @@ public class Lawena implements ProfileListener {
     if (details.equals(Build.LATEST)) {
       String notice = "Update is ready. Please restart Lawena to use it";
       log.info(notice);
-      JOptionPane.showMessageDialog(view, notice, "Update Ready", JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(viewAsComponent(), notice, "Update Ready",
+          JOptionPane.INFORMATION_MESSAGE);
       return;
     }
     Updater updater = model.getUpdater();
@@ -653,12 +664,13 @@ public class Lawena implements ProfileListener {
       if (updater.createVersionFile(details.getName())) {
         String notice = "Update is ready. Please restart Lawena to use it";
         log.info(notice);
-        JOptionPane
-            .showMessageDialog(view, notice, "Update Ready", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(viewAsComponent(), notice, "Update Ready",
+            JOptionPane.INFORMATION_MESSAGE);
       } else {
         String notice = "Update could not be completed, please report this issue";
         log.info(notice);
-        JOptionPane.showMessageDialog(view, notice, "Updater Error", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(viewAsComponent(), notice, "Updater Error",
+            JOptionPane.WARNING_MESSAGE);
       }
     }
   }
@@ -679,7 +691,7 @@ public class Lawena implements ProfileListener {
       log.debug("Validating current recording folder: {}",
           (selected != null ? selected.toAbsolutePath() : "<None>"));
       String dir =
-          model.getOsInterface().chooseSingleFolder(view,
+          model.getOsInterface().chooseSingleFolder(viewAsFrame(),
               "Choose a directory to store your movie files",
               Paths.get("").toAbsolutePath().toString());
       if (dir != null) {
@@ -703,7 +715,7 @@ public class Lawena implements ProfileListener {
       log.debug("Validating current game folder: {}", (selected != null ? selected.toAbsolutePath()
           : "<None>"));
       String dir =
-          model.getOsInterface().chooseSingleFolder(view,
+          model.getOsInterface().chooseSingleFolder(viewAsFrame(),
               "Choose your \"" + dirName + "\" directory",
               Paths.get("").toAbsolutePath().toString());
       if (dir != null) {
@@ -727,7 +739,7 @@ public class Lawena implements ProfileListener {
       log.debug("Validating current Steam folder: {}",
           (selected != null ? selected.toAbsolutePath() : "<None>"));
       String dir =
-          model.getOsInterface().chooseSingleFolder(view,
+          model.getOsInterface().chooseSingleFolder(viewAsFrame(),
               "Choose your \"" + fileName + "\" directory",
               Paths.get("").toAbsolutePath().toString());
       if (dir != null) {
@@ -757,4 +769,7 @@ public class Lawena implements ProfileListener {
     // TODO Auto-generated method stub
 
   }
+
+  public abstract ConfigWriter newConfigWriter();
+
 }
