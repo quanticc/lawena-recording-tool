@@ -14,7 +14,7 @@
         "cfg": {
           "viewmodels": "on",
           "noVoice": true,
-          "vmodelFov": 70,
+          "vmodelFov": 68,
           "noCrosshair": true,
           "extConVars": "// Add Extra ConVars here, for example:\n// volume 0.05",
           "framerate": 120,
@@ -31,7 +31,7 @@
           "skybox": "Default",
           "resources": [],
           "bigFolderLimit": 200,
-          "deleteUnneededBackups": true,
+          "deleteUnneededBackups": false,
           "loglevel": "DEBUG",
           "extFolders": [
             ""
