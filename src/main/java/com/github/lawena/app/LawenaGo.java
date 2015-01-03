@@ -2,6 +2,9 @@ package com.github.lawena.app;
 
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.Image;
+
+import javax.swing.ImageIcon;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +30,12 @@ public class LawenaGo extends Lawena {
 
   @Override
   protected void setupIconImage() {
-    // TODO Auto-generated method stub
-
+    try {
+      view.setIconImage(new ImageIcon(getClass().getResource("lawena.png")).getImage()
+          .getScaledInstance(64, 64, Image.SCALE_SMOOTH));
+    } catch (Exception e) {
+      log.warn("Window icon missing / could not be set");
+    }
   }
 
   @Override
