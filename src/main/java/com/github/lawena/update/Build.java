@@ -1,5 +1,6 @@
 package com.github.lawena.update;
 
+@SuppressWarnings("nls")
 public class Build implements Comparable<Build> {
 
   public static final Build LATEST = new Build("", "Latest", Long.MAX_VALUE);

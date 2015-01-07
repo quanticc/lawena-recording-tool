@@ -6,6 +6,7 @@ package com.github.lawena.profile;
  * @author Ivan
  *
  */
+@SuppressWarnings("nls")
 public class RangeValidator implements Validator<Integer> {
 
   public static RangeValidator atLeast(int min) {

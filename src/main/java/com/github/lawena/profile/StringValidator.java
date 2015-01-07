@@ -3,11 +3,12 @@ package com.github.lawena.profile;
 import java.util.Arrays;
 import java.util.List;
 
-public class ValuesValidator implements Validator<String> {
+@SuppressWarnings("nls")
+public class StringValidator implements Validator<String> {
 
   private List<String> allowedValues;
 
-  public ValuesValidator(String... values) {
+  public StringValidator(String... values) {
     if (values == null)
       throw new IllegalArgumentException("Must include a set of values to allow");
     this.allowedValues = Arrays.asList(values);

@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lawena.util.Util;
 
+
+@SuppressWarnings("nls")
 public class OSXInterfaceTf extends OSXInterface {
 
   private static final Logger log = LoggerFactory.getLogger(OSXInterfaceTf.class);

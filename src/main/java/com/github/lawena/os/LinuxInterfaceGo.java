@@ -12,11 +12,13 @@ public class LinuxInterfaceGo extends LinuxInterface {
 
   private static final Logger log = LoggerFactory.getLogger(LinuxInterfaceGo.class);
 
+  @SuppressWarnings("nls")
   @Override
   public ProcessBuilder getBuilderGameProcessKiller() {
     return new ProcessBuilder("pkill", "-9", "csgo_linux");
   }
 
+  @SuppressWarnings("nls")
   @Override
   public boolean isGameRunning() {
     boolean found = false;

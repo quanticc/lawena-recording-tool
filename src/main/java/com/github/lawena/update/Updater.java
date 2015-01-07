@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
@@ -48,9 +47,10 @@ import com.threerings.getdown.util.LaunchUtil;
  * @author Ivan
  *
  */
+@SuppressWarnings("nls")
 public class Updater {
 
-  private static final Logger log = LoggerFactory.getLogger(Updater.class);
+  static final Logger log = LoggerFactory.getLogger(Updater.class);
   private static final String DEFAULT_BRANCHES =
       "https://dl.dropboxusercontent.com/u/74380/lwrt/channels.json";
 
@@ -81,14 +81,14 @@ public class Updater {
     branches = null;
   }
 
-  private SortedSet<Build> getBuildList(Branch branch) {
+  private static SortedSet<Build> getBuildList(Branch branch) {
     if (branch == null)
       throw new IllegalArgumentException("Must set a branch");
     SortedSet<Build> builds = branch.getBuilds();
     if (builds != null) {
       return builds;
     }
-    builds = new TreeSet<Build>();
+    builds = new TreeSet<>();
     if (branch.equals(Branch.STANDALONE)) {
       return builds;
     }
@@ -97,7 +97,7 @@ public class Updater {
       return builds;
     }
     String name = "buildlist.txt";
-    builds = new TreeSet<Build>();
+    builds = new TreeSet<>();
     try {
       File local = new File(name).getAbsoluteFile();
       URL url = new URL(branch.getUrl() + name);
@@ -168,7 +168,7 @@ public class Updater {
     }
   }
 
-  private String[] getMultiValue(Map<String, Object> data, String name) {
+  private static String[] getMultiValue(Map<String, Object> data, String name) {
     // safe way to call this and avoid NPEs
     String[] array = ConfigUtil.getMultiValue(data, name);
     if (array == null)
@@ -176,7 +176,7 @@ public class Updater {
     return array;
   }
 
-  private void upgrade(String desc, File oldgd, File curgd, File newgd) {
+  private static void upgrade(String desc, File oldgd, File curgd, File newgd) {
     if (!newgd.exists() || newgd.length() == curgd.length()
         || Util.compareCreationTime(newgd, curgd) == 0) {
       log.debug("Resource {} is up to date", desc);
@@ -217,14 +217,14 @@ public class Updater {
     }
   }
 
-  private void upgradeLauncher() {
+  private static void upgradeLauncher() {
     File oldgd = new File("../lawena-old.exe");
     File curgd = new File("../lawena.exe");
     File newgd = new File("code/lawena-new.exe");
     upgrade("Lawena launcher", oldgd, curgd, newgd);
   }
 
-  private void upgradeGetdown() {
+  private static void upgradeGetdown() {
     File oldgd = new File("getdown-client-old.jar");
     File curgd = new File("getdown-client.jar");
     File newgd = new File("code/getdown-client-new.exe");
@@ -247,9 +247,7 @@ public class Updater {
       Resource res = new Resource(file.getName(), new URL(url), file, false);
       lastCheck = System.currentTimeMillis();
       if (download(res)) {
-        try {
-          Reader reader =
-              new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8"));
+        try (Reader reader = Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8"))) {
           Type token = new TypeToken<List<Branch>>() {}.getType();
           list = gson.fromJson(reader, token);
           for (Branch branch : list) {
@@ -257,7 +255,6 @@ public class Updater {
               getBuildList(branch);
             }
           }
-          reader.close();
         } catch (JsonSyntaxException | JsonIOException e) {
           log.warn("Invalid latest version file found: " + e);
         } catch (FileNotFoundException e) {
@@ -278,7 +275,7 @@ public class Updater {
     return list;
   }
 
-  private boolean download(Resource... res) {
+  private static boolean download(Resource... res) {
     return new HTTPDownloader(Arrays.asList(res), new Observer() {
 
       @Override
@@ -321,7 +318,7 @@ public class Updater {
     }
   }
 
-  public boolean upgradeApplication(Build build) {
+  public static boolean upgradeApplication(Build build) {
     try {
       return LaunchUtil.updateVersionAndRelaunch(new File("").getAbsoluteFile(),
           "getdown-client.jar", build.getName());
@@ -341,7 +338,7 @@ public class Updater {
     return standalone;
   }
 
-  public boolean createVersionFile(String version) {
+  public static boolean createVersionFile(String version) {
     Path path = Paths.get("version.txt");
     try {
       path = Files.write(path, Arrays.asList(version), Charset.defaultCharset());
@@ -360,13 +357,13 @@ public class Updater {
     return convertTime(lastCheck);
   }
 
-  private String convertTime(long time) {
+  private static String convertTime(long time) {
     Date date = new Date(time);
     Format format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     return format.format(date);
   }
 
-  public void switchBranch(Branch newBranch) throws IOException {
+  public static void switchBranch(Branch newBranch) throws IOException {
     String appbase = newBranch.getUrl() + "latest/";
     Path getdownPath = Paths.get("getdown.txt");
     try {
@@ -389,7 +386,7 @@ public class Updater {
     log.info("New updater metadata file created");
   }
 
-  public List<String> getChangeLog(Branch branch) {
+  public static List<String> getChangeLog(Branch branch) {
     List<String> list = branch.getChangeLog();
     if (list != null) {
       return list;

@@ -33,7 +33,7 @@ public class Archive {
     this.treeLength = 0;
     this.headerLength = 0;
 
-    this.directories = new ArrayList<Directory>();
+    this.directories = new ArrayList<>();
   }
 
   /**
@@ -75,7 +75,10 @@ public class Archive {
           this.readUnsignedInt(fileInputStream);
           this.readUnsignedInt(fileInputStream);
           this.readUnsignedInt(fileInputStream);
+          break;
         }
+        default:
+          break;
       }
 
       // extension loop

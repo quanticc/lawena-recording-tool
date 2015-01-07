@@ -25,15 +25,16 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 
+@SuppressWarnings("nls")
 public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(LoggingAppender.class);
   private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss");
 
-  private JTextPane pane;
+  JTextPane pane;
   private JScrollPane scroll;
-  private boolean printStackTrace = false;
-  private Level level = Level.DEBUG;
+  boolean printStackTrace = false;
+  private Level _level = Level.DEBUG;
   private DocumentListener listener;
   private Queue<ILoggingEvent> queue = new ArrayDeque<>();
 
@@ -97,16 +98,16 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   }
 
   public Level getLevel() {
-    return level;
+    return _level;
   }
 
   public void setLevel(Level level) {
-    this.level = level;
+    this._level = level;
   }
 
   @Override
   public void append(ILoggingEvent event) {
-    if (!event.getLoggerName().equals("status") && event.getLevel().isGreaterOrEqual(level)) {
+    if (!event.getLoggerName().equals("status") && event.getLevel().isGreaterOrEqual(_level)) {
       if (event.getMarker() == null || !event.getMarker().contains("no-ui-log")) {
         if (pane != null) {
           SwingUtilities.invokeLater(new WriteOutput(event));
@@ -124,11 +125,11 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   public class WriteOutput implements Runnable {
 
     private StyledDocument doc;
-    private ILoggingEvent event;
+    private ILoggingEvent _event;
 
     public WriteOutput(ILoggingEvent event) {
       this.doc = pane.getStyledDocument();
-      this.event = event;
+      this._event = event;
 
       if (doc.getStyle("Class") == null) {
         doc.addStyle("Normal", null);
@@ -139,14 +140,15 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
       }
     }
 
+    @SuppressWarnings("synthetic-access")
     @Override
     public void run() {
       try {
-        String message = event.getFormattedMessage().trim();
+        String message = _event.getFormattedMessage().trim();
         if (name.trim().equals(""))
           return;
         Style msgStyle = null;
-        Level level = event.getLevel();
+        Level level = _event.getLevel();
         if (level.isGreaterOrEqual(Level.WARN)) {
           msgStyle = doc.getStyle("Error");
         } else if (level.isGreaterOrEqual(Level.INFO)) {
@@ -154,12 +156,12 @@ public class LoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
         } else {
           msgStyle = doc.getStyle("Debug");
         }
-        String time = dateFormatter.format(event.getTimeStamp());
-        String logger = last(event.getLoggerName());
+        String time = dateFormatter.format(_event.getTimeStamp());
+        String logger = last(_event.getLoggerName());
         int prevLength = doc.getLength();
         doc.insertString(doc.getLength(), "[" + time + "] ", doc.getStyle("Normal"));
         doc.insertString(doc.getLength(), "[" + logger + "] ", doc.getStyle("Class"));
-        doc.insertString(doc.getLength(), formatMsg(event, message), msgStyle);
+        doc.insertString(doc.getLength(), formatMsg(_event, message), msgStyle);
         doc.insertString(doc.getLength(), "\n", doc.getStyle("Normal"));
         pane.setCaretPosition(prevLength);
       } catch (Exception e) {

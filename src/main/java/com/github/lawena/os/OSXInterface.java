@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("nls")
 public abstract class OSXInterface extends UnixInterface {
 
   private static final Logger log = LoggerFactory.getLogger(OSXInterface.class);

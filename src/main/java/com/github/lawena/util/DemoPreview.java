@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("nls")
 public class DemoPreview extends RandomAccessFile {
 
   private static final Logger log = LoggerFactory.getLogger(DemoPreview.class);
@@ -98,7 +99,7 @@ public class DemoPreview extends RandomAccessFile {
     return 0;
   }
 
-  private String formatSeconds(double seconds) {
+  private static String formatSeconds(double seconds) {
     long s = (long) seconds;
     return String.format("%02d:%02d:%02d", TimeUnit.SECONDS.toHours(s),
         TimeUnit.SECONDS.toMinutes(s) - TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(s)),

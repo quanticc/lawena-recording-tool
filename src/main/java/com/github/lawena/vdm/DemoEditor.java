@@ -223,7 +223,7 @@ public class DemoEditor {
     this.osInterface = osInterface;
     Path demoPath = toPath(Key.demosPath.getValue(settings));
     Path gamePath = toPath(Key.gamePath.getValue(settings));
-    if (demoPath.equals("")) {
+    if (demoPath.toString().equals("")) {
       demoPath = gamePath;
     } else if (!Files.exists(demoPath) && Files.exists(gamePath.resolve(demoPath))) {
       demoPath = gamePath.resolve(demoPath);

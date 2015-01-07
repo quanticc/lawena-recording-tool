@@ -105,6 +105,7 @@ public abstract class OSInterface {
    * 
    * @see #getBuilderGameProcessKiller()
    */
+  @SuppressWarnings("nls")
   public void killTf2Process() {
     try {
       ProcessBuilder pb = getBuilderGameProcessKiller();
@@ -128,6 +129,7 @@ public abstract class OSInterface {
    *        resolution
    * @see #getBuilderStartTF2()
    */
+  @SuppressWarnings("nls")
   public void launchSteam(Settings settings) {
     try {
       String opts = Key.launchOptions.getValue(settings);
@@ -206,11 +208,12 @@ public abstract class OSInterface {
    * Set the Look & Feel of the Graphical User Interface of the tool. By default it uses the system
    * L&F.
    */
+  @SuppressWarnings("static-method")
   public void setLookAndFeel() {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
-      log.warn("Could not set the look and feel", e);
+      log.warn("Could not set the look and feel", e); //$NON-NLS-1$
     }
   }
 
@@ -221,13 +224,14 @@ public abstract class OSInterface {
    *        directory, it will open the file's parent.
    * @see Desktop#open(java.io.File)
    */
+  @SuppressWarnings("static-method")
   public void openFolder(Path path) {
     Path parent = path.getParent();
     Path dir = Files.isDirectory(path) ? path : (parent != null ? parent : path);
     try {
       Desktop.getDesktop().open(dir.toFile());
     } catch (IOException e) {
-      log.warn("Could not open directory: " + dir, e);
+      log.warn("Could not open directory: " + dir, e); //$NON-NLS-1$
     }
   }
 
@@ -241,6 +245,7 @@ public abstract class OSInterface {
    * @param path the current directory to point to
    * @return the selected folder or <code>null</code> if none was chosen
    */
+  @SuppressWarnings("static-method")
   public String chooseSingleFolder(Frame parent, String title, String path) {
     JFileChooser chooser = new JFileChooser();
     chooser.setDialogTitle(title);
@@ -265,6 +270,7 @@ public abstract class OSInterface {
    *        filter list
    * @return the selected file or <code>null</code> if none was chosen
    */
+  @SuppressWarnings("static-method")
   public String chooseSaveFile(Frame parent, String title, String path,
       List<ExtensionsFilter> filters) {
     JFileChooser chooser = new JFileChooser();
@@ -293,6 +299,7 @@ public abstract class OSInterface {
    *        filter list
    * @return the selected file or <code>null</code> if none was chosen
    */
+  @SuppressWarnings("static-method")
   public String chooseSingleFile(Frame parent, String title, String path,
       List<ExtensionsFilter> filters) {
     JFileChooser chooser = new JFileChooser();
@@ -311,7 +318,8 @@ public abstract class OSInterface {
     }
   }
 
-  public boolean isAdmin() {
+  @SuppressWarnings("nls")
+  public static boolean isAdmin() {
     Preferences prefs = Preferences.systemRoot();
     try {
       prefs.put("foo", "bar"); // SecurityException on Windows
@@ -321,6 +329,11 @@ public abstract class OSInterface {
     } catch (Exception e) {
       return false;
     }
+  }
+
+  @SuppressWarnings("static-method")
+  public boolean isSymbolicLink(Path path) {
+    return Files.isSymbolicLink(path);
   }
 
 }

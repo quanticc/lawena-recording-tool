@@ -12,11 +12,13 @@ public class LinuxInterfaceTf extends LinuxInterface {
 
   private static final Logger log = LoggerFactory.getLogger(LinuxInterfaceTf.class);
 
+  @SuppressWarnings("nls")
   @Override
   public ProcessBuilder getBuilderGameProcessKiller() {
     return new ProcessBuilder("pkill", "-9", "hl2_linux");
   }
 
+  @SuppressWarnings("nls")
   @Override
   public boolean isGameRunning() {
     boolean found = false;

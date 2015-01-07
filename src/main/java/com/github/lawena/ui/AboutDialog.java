@@ -28,21 +28,27 @@ import javax.swing.text.html.HTMLDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
+
 public class AboutDialog extends JDialog {
 
-  private static final Logger log = LoggerFactory.getLogger(AboutDialog.class);
+  static final Logger log = LoggerFactory.getLogger(AboutDialog.class);
 
   private static final long serialVersionUID = 1L;
 
   private static class AboutTextPaneHyperlinkListener implements HyperlinkListener {
+    public AboutTextPaneHyperlinkListener() {}
+
+    @Override
     public void hyperlinkUpdate(final HyperlinkEvent e) {
       if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
         new SwingWorker<Void, Void>() {
+          @Override
           protected Void doInBackground() throws Exception {
             try {
               Desktop.getDesktop().browse(e.getURL().toURI());
             } catch (IOException | URISyntaxException e1) {
-              log.warn("Could not open URL", e1);
+              log.warn("Could not open URL", e1); //$NON-NLS-1$
             }
             return null;
           }
@@ -52,6 +58,9 @@ public class AboutDialog extends JDialog {
   }
 
   private class BtnOkActionListener implements ActionListener {
+    public BtnOkActionListener() {}
+
+    @Override
     public void actionPerformed(ActionEvent e) {
       setVisible(false);
     }
@@ -64,24 +73,25 @@ public class AboutDialog extends JDialog {
    */
   public AboutDialog(String version, String build) {
     setResizable(false);
-    setTitle("About");
+    setTitle(Messages.getString("AboutDialog.aboutTitle")); //$NON-NLS-1$
     getContentPane().setLayout(new BorderLayout());
     contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
     getContentPane().add(contentPanel, BorderLayout.CENTER);
     contentPanel.setLayout(new BorderLayout(0, 0));
 
-    JLabel lblHeader = new JLabel("");
+    JLabel lblHeader = new JLabel(""); //$NON-NLS-1$
     try {
-      lblHeader.setIcon(new ImageIcon(getClass().getResource("lawena.png")));
+      lblHeader.setIcon(new ImageIcon(getClass().getResource("lawena.png"))); //$NON-NLS-1$
     } catch (Exception e) {
+      // ignore, only effect is not having any icon
     }
     contentPanel.add(lblHeader, BorderLayout.NORTH);
 
-    JLabel lblContent =
-        new JLabel("<html><div style=\\\"text-align: center;\\\"><br>" + "Version <b>" + version
-            + "</b><br>" + build);
+    JLabel lblContent = new JLabel("<html><div style=\\\"text-align: center;\\\"><br>" + //$NON-NLS-1$
+        Messages.getString("AboutDialog.version") + "<b>" + version //$NON-NLS-1$ //$NON-NLS-2$
+        + "</b><br>" + build); //$NON-NLS-1$
     lblContent.setHorizontalAlignment(SwingConstants.CENTER);
-    lblContent.setFont(new Font("Tahoma", Font.PLAIN, 11));
+    lblContent.setFont(new Font("Tahoma", Font.PLAIN, 11)); //$NON-NLS-1$
     contentPanel.add(lblContent, BorderLayout.CENTER);
 
     JTextPane aboutTextPane = new JTextPane();
@@ -89,26 +99,13 @@ public class AboutDialog extends JDialog {
     aboutTextPane.setFocusable(false);
     aboutTextPane.setOpaque(false);
     aboutTextPane.setEditable(false);
-    aboutTextPane.setContentType("text/html");
-    String style =
-        new StringBuilder().append("body { font-family: ")
-            .append(UIManager.getDefaults().getFont("TextPane.font").getFamily()).append("; ")
-            .append("font-size: 10pt; text-align: center}").toString();
+    aboutTextPane.setContentType("text/html"); //$NON-NLS-1$
+    String style = new StringBuilder().append("body { font-family: ") //$NON-NLS-1$
+        .append(UIManager.getDefaults().getFont("TextPane.font").getFamily()).append("; ") //$NON-NLS-1$ //$NON-NLS-2$
+        .append("font-size: 10pt; text-align: center}").toString(); //$NON-NLS-1$
 
     ((HTMLDocument) aboutTextPane.getDocument()).getStyleSheet().addRule(style);
-    aboutTextPane
-        .setText("Simple Team Fortress 2 (TF2) Recording Tool<br>"
-            + "Copyright 2011-2014 Montz, Quantic, contributors and others<br>"
-            + "<a href=\"http://code.google.com/p/lawenarecordingtool/\">http://code.google.com/p/lawenarecordingtool/</a><br><br>"
-            + "Lawena is free software; you can redistribute it and/or modify it under the terms of the <a href=\"https://github.com/iabarca/lawena-recording-tool/blob/master/LICENSE.txt\">GNU GPLv3</a>.<br>"
-            + "Graphical .cfg files are almost entirely based on <a href=\"http://chrisdown.name/tf2/\">Chris' maxquality config</a>, with very slight tweaks.<br>"
-            + "Built-in Killnotices and Medic HUD were made by <a href=\"http://steamcommunity.com/profiles/76561198023136325\">mih</a>. Thanks!<br>"
-            + "Most Skyboxes are from GameBanana, made by <a href=\"http://gamebanana.com/members/submissions/textures/289553\">komaokc</a>, and the rest are from the PLDX recording tool.<br>"
-            + "Enhanced particles included are also from PLDX recording tool.<br><br>"
-            + "Self-Updating mechanism is possible thanks to <a href=\"http://code.google.com/p/getdown/\">Getdown</a>, developed by Third Rings Design, Inc.<br>"
-            + "Microsoft Sysinternals' <a href=\"http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx\">Handle</a> utility by Mark Russinovich.<br>"
-            + "TF2 icon modification made by <a href=\"http://hackcypher.deviantart.com/art/Team-Fortress-2-Icons-87662784\">hackcypher</a>.<br>"
-            + "Team Fortress and the Team Fortress logo are trademarks of <a href=\"http://www.valvesoftware.com\">Valve Corporation</a>.<br>");
+    aboutTextPane.setText(Messages.getString("AboutDialog.aboutTextArea")); //$NON-NLS-1$
     contentPanel.add(aboutTextPane, BorderLayout.SOUTH);
 
     JPanel buttonPane = new JPanel();
@@ -120,7 +117,7 @@ public class AboutDialog extends JDialog {
     gbl_buttonPane.rowWeights = new double[] {0.0, Double.MIN_VALUE};
     buttonPane.setLayout(gbl_buttonPane);
 
-    JButton btnOk = new JButton("OK");
+    JButton btnOk = new JButton(Messages.getString("AboutDialog.OK")); //$NON-NLS-1$
     btnOk.setPreferredSize(new Dimension(80, 23));
     btnOk.addActionListener(new BtnOkActionListener());
     GridBagConstraints gbc_btnOk = new GridBagConstraints();

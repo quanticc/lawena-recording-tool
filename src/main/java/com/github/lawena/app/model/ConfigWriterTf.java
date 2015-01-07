@@ -11,6 +11,7 @@ public class ConfigWriterTf extends ConfigWriter {
     super(settings);
   }
 
+  @SuppressWarnings("nls")
   @Override
   protected List<String> writeGameConfig() {
     List<String> lines = new ArrayList<>();

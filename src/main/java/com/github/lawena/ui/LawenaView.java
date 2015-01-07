@@ -12,7 +12,18 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
+@SuppressWarnings("nls")
 public interface LawenaView {
+
+  public static final String renderingTutorialURL =
+      "http://code.google.com/p/lawenarecordingtool/wiki/RenderingTutorial";
+  public static final String releasesURL =
+      "https://github.com/iabarca/lawena-recording-tool/releases";
+  public static final String projectPageURL = "http://code.google.com/p/lawenarecordingtool/";
+  public static final String vdmTutorialURL =
+      "http://code.google.com/p/lawenarecordingtool/wiki/VDMtutorial";
+  public static final String instructionsURL =
+      "http://code.google.com/p/lawenarecordingtool/wiki/Instructions";
 
   public JLabel getLblStatus();
 

@@ -13,24 +13,25 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
 import com.github.lawena.app.model.Settings;
 import com.github.lawena.profile.Key;
 import com.github.lawena.ui.SegmentsDialog;
 
 public class Segments {
 
-  private static final Logger log = LoggerFactory.getLogger(Segments.class);
+  static final Logger log = LoggerFactory.getLogger(Segments.class);
 
-  private SegmentsDialog view;
-  private Lawena parent;
+  SegmentsDialog view;
+  Lawena parent;
   private Settings settings;
 
   public Segments(Lawena parent) {
@@ -46,7 +47,8 @@ public class Segments {
     tmodel.setRowCount(0);
     List<String> segs = getExistingSegments();
     if (segs.isEmpty()) {
-      JOptionPane.showMessageDialog(view, "There are no segments to delete", "Delete Segments",
+      JOptionPane.showMessageDialog(view, Messages.getString("Segments.noSegmentsToDelete"), //$NON-NLS-1$
+          Messages.getString("Segments.noSegmentsToDeleteTitle"), //$NON-NLS-1$
           JOptionPane.INFORMATION_MESSAGE);
     } else {
       for (String seg : segs) {
@@ -59,25 +61,25 @@ public class Segments {
   private List<String> getExistingSegments() {
     List<String> existingSegments = new ArrayList<>();
     Path recPath = toPath(Key.recordingPath.getValue(settings));
-    try (DirectoryStream<Path> stream = Files.newDirectoryStream(recPath, "*.wav")) {
+    try (DirectoryStream<Path> stream = Files.newDirectoryStream(recPath, "*.wav")) { //$NON-NLS-1$
       for (Path path : stream) {
         String segname = path.getFileName().toString();
-        String key = segname.substring(0, segname.indexOf("_"));
+        String key = segname.substring(0, segname.indexOf("_")); //$NON-NLS-1$
         if (!existingSegments.contains(key))
           existingSegments.add(key);
       }
     } catch (NoSuchFileException e) {
       // TODO: add a check for the reparse point (junction) to confirm it's SrcDemo2
-      log.info("Could not scan for existing segments. Is SrcDemo2 running?");
+      log.info("Could not scan for existing segments. Is SrcDemo2 running?"); //$NON-NLS-1$
     } catch (IOException e) {
-      log.warn("Problem while scanning movie folder", e);
+      log.warn("Problem while scanning movie folder", e); //$NON-NLS-1$
     }
     return existingSegments;
   }
 
   private void init() {
     view = new SegmentsDialog();
-    view.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    view.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     view.setModalityType(ModalityType.APPLICATION_MODAL);
     DefaultTableModel dtm = new DefaultTableModel(0, 2) {
       private static final long serialVersionUID = 1L;
@@ -90,11 +92,11 @@ public class Segments {
       @Override
       public java.lang.Class<?> getColumnClass(int columnIndex) {
         return columnIndex == 0 ? Boolean.class : String.class;
-      };
+      }
 
       @Override
       public String getColumnName(int column) {
-        return column == 0 ? "" : "Segment";
+        return column == 0 ? "" : Messages.getString("Segments.segmentColumnName"); //$NON-NLS-1$ //$NON-NLS-2$
       }
     };
     final JTable tableSegments = view.getTableSegments();
@@ -113,7 +115,7 @@ public class Segments {
         if (selectCount > 0) {
           parent.clearSegmentFiles(selected);
         } else {
-          log.info("No segments selected to remove");
+          log.info("No segments selected to remove"); //$NON-NLS-1$
         }
         view.setVisible(false);
       }

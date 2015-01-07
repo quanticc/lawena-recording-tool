@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+
+@SuppressWarnings("resource")
 public class Serials {
 
   private Serials() {}

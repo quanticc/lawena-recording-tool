@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import com.github.lawena.Messages;
 import com.github.lawena.app.model.LinkerGo;
 import com.github.lawena.app.model.LinkerTf;
 import com.github.lawena.app.model.MainModel;
@@ -31,7 +32,7 @@ import com.github.lawena.util.LoggingAppender;
  */
 public class Main {
 
-  private static final Logger log = LoggerFactory.getLogger(Main.class);
+  static final Logger log = LoggerFactory.getLogger(Main.class);
 
   public static void main(String[] args) throws Exception {
     try {
@@ -39,11 +40,11 @@ public class Main {
       SLF4JBridgeHandler.install();
 
       ch.qos.logback.classic.Logger rootLog =
-          (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
+          (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root"); //$NON-NLS-1$
       LoggingAppender appender = new LoggingAppender(rootLog.getLoggerContext());
       rootLog.addAppender(appender);
 
-      //final OptionSet optionSet = Options.getParser().parse(args);
+      // final OptionSet optionSet = Options.getParser().parse(args);
 
       Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 
@@ -51,62 +52,70 @@ public class Main {
 
         @Override
         public void uncaughtException(Thread t, final Throwable e) {
-          log.error("Unexpected problem in " + t, e);
+          log.error("Unexpected problem in " + t, e); //$NON-NLS-1$
           if (!shown) {
-            showDialog(e, "[" + t.toString() + "] An error occurred while running Lawena.",
-                "Uncaught Exception");
+            showDialog(e,
+                String.format(Messages.getString("Main.uncaughtExceptionBody"), t.toString()), //$NON-NLS-1$
+                Messages.getString("Main.uncaughtExceptionTitle")); //$NON-NLS-1$
             shown = true;
           }
         }
       });
 
-      String osname = System.getProperty("os.name");
-      if (osname.contains("Windows")) {
+      String osname = System.getProperty("os.name"); //$NON-NLS-1$
+      if (osname.contains("Windows")) { //$NON-NLS-1$
         try {
           UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-          log.warn("Could not set the look and feel", e);
+          log.warn("Could not set the look and feel", e); //$NON-NLS-1$
         }
       }
 
       int o =
-          JOptionPane.showOptionDialog(null, "Select game to run", "Lawena Recording Tool",
-              JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[] {
-                  "Team Fortress 2", "Counter-Strike: Global Offensive"}, "Team Fortress 2");
+          JOptionPane
+              .showOptionDialog(
+                  null,
+                  Messages.getString("Main.selectGameToRun"), Messages.getString("Main.lawenaRecordingTool"), //$NON-NLS-1$ //$NON-NLS-2$
+                  JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[] {
+                      "Team Fortress 2", "Counter-Strike: Global Offensive"}, "Team Fortress 2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
       if (o != -1) {
         OSInterface os = newOsInterface(o);
-        if (!os.isAdmin()) {
+        if (!OSInterface.isAdmin()) {
           int opt =
-              JOptionPane.showConfirmDialog(null, "This version of Lawena uses symlinks that\n"
-                  + "requires Administrative permissions.\n\n" + "Do you want to continue?",
-                  "No Administrative Privileges", JOptionPane.YES_NO_OPTION,
+              JOptionPane.showConfirmDialog(null, Messages.getString("Main.noAdminPrivilegesBody"), //$NON-NLS-1$
+                  Messages.getString("Main.noAdminPrivilegesTitle"), JOptionPane.YES_NO_OPTION, //$NON-NLS-1$
                   JOptionPane.WARNING_MESSAGE);
           if (opt != JOptionPane.YES_OPTION) {
             System.exit(0);
           }
         }
         if (o == 0) {
-          start(new LawenaTf(new MainModel(new File("lwrt/tf/default.json"), os, new LinkerTf())), appender);
+          start(new LawenaTf(new MainModel(new File("lwrt/tf/default.json"), os, new LinkerTf())), //$NON-NLS-1$
+              appender);
         } else if (o == 1) {
-          start(new LawenaGo(new MainModel(new File("lwrt/csgo/default.json"), os, new LinkerGo())), appender);
+          start(
+              new LawenaGo(new MainModel(new File("lwrt/csgo/default.json"), os, new LinkerGo())), //$NON-NLS-1$
+              appender);
         }
       }
     } catch (Exception e) {
-      log.error("Exception while initializing Lawena", e);
-      showDialog(e, "An error occurred while starting Lawena.", "Startup Failed");
+      log.error("Exception while initializing Lawena", e); //$NON-NLS-1$
+      showDialog(
+          e,
+          Messages.getString("Main.errorDuringStartupBody"), Messages.getString("Main.errorDuringStartupTitle")); //$NON-NLS-1$ //$NON-NLS-2$
     }
   }
 
   private static OSInterface newOsInterface(int o) {
-    String osname = System.getProperty("os.name");
-    if (osname.contains("Windows")) {
+    String osname = System.getProperty("os.name"); //$NON-NLS-1$
+    if (osname.contains("Windows")) { //$NON-NLS-1$
       return new OSInterface[] {new WindowsInterfaceTf(), new WindowsInterfaceGo()}[o];
-    } else if (osname.contains("Linux")) {
+    } else if (osname.contains("Linux")) { //$NON-NLS-1$
       return new OSInterface[] {new LinuxInterfaceTf(), new LinuxInterfaceGo()}[o];
-    } else if (osname.contains("OS X")) {
+    } else if (osname.contains("OS X")) { //$NON-NLS-1$
       return new OSInterface[] {new OSXInterfaceTf(), new OSXInterfaceGo()}[o];
     } else {
-      throw new UnsupportedOperationException("OS not supported");
+      throw new UnsupportedOperationException("OS not supported"); //$NON-NLS-1$
     }
   }
 
@@ -120,17 +129,20 @@ public class Main {
         try {
           lawena.start();
         } catch (Exception e) {
-          log.warn("Problem while launching the GUI", e);
-          showDialog(e, "An error occurred while displaying the GUI.", "GUI Launch Failed");
+          log.warn("Problem while launching the GUI", e); //$NON-NLS-1$
+          showDialog(
+              e,
+              Messages.getString("Main.uiLaunchErrorBody"), Messages.getString("Main.uiLaunchErrorTitle")); //$NON-NLS-1$ //$NON-NLS-2$
         }
       }
     });
   }
 
-  private static void showDialog(Throwable t, String title, String header) {
+  static void showDialog(Throwable t, String title, String header) {
     String msg = t.toString();
     msg = msg.substring(0, Math.min(80, msg.length()));
-    JOptionPane.showMessageDialog(null, header + "\nCaused by " + msg
-        + "\nLogfile for details. Please report this issue.", title, JOptionPane.ERROR_MESSAGE);
+    JOptionPane.showMessageDialog(null, header + "\n" //$NON-NLS-1$
+        + String.format(Messages.getString("Main.errorDialogDetails"), msg), //$NON-NLS-1$
+        title, JOptionPane.ERROR_MESSAGE);
   }
 }

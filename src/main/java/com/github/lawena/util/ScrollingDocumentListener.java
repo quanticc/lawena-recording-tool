@@ -14,7 +14,7 @@ import javax.swing.event.DocumentListener;
 
 public class ScrollingDocumentListener implements DocumentListener {
 
-  private JComponent component;
+  JComponent component;
   private JScrollPane scrollPane;
 
   public ScrollingDocumentListener(JComponent component, JScrollPane scrollPane) {
@@ -22,14 +22,17 @@ public class ScrollingDocumentListener implements DocumentListener {
     this.scrollPane = scrollPane;
   }
 
+  @Override
   public void changedUpdate(DocumentEvent e) {
     maybeScrollToBottom();
   }
 
+  @Override
   public void insertUpdate(DocumentEvent e) {
     maybeScrollToBottom();
   }
 
+  @Override
   public void removeUpdate(DocumentEvent e) {
     maybeScrollToBottom();
   }
@@ -40,8 +43,10 @@ public class ScrollingDocumentListener implements DocumentListener {
     boolean scrollLock = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_SCROLL_LOCK);
     if (scrollBarAtBottom && !scrollLock) {
       EventQueue.invokeLater(new Runnable() {
+        @Override
         public void run() {
           EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
               scrollToBottom(component);
             }
@@ -56,7 +61,7 @@ public class ScrollingDocumentListener implements DocumentListener {
     return (model.getExtent() + model.getValue()) == model.getMaximum();
   }
 
-  private static void scrollToBottom(JComponent component) {
+  static void scrollToBottom(JComponent component) {
     Rectangle visibleRect = component.getVisibleRect();
     visibleRect.y = component.getHeight() - visibleRect.height;
     component.scrollRectToVisible(visibleRect);

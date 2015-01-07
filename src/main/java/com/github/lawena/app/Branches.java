@@ -12,9 +12,9 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.BadLocationException;
@@ -24,20 +24,21 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
 import com.github.lawena.ui.UpdaterDialog;
-import com.github.lawena.update.Build;
 import com.github.lawena.update.Branch;
+import com.github.lawena.update.Build;
 import com.github.lawena.update.Updater;
 
 public class Branches {
 
-  private static final Logger log = LoggerFactory.getLogger(Branches.class);
+  static final Logger log = LoggerFactory.getLogger(Branches.class);
 
-  private Lawena parent;
-  private UpdaterDialog view;
-  private Updater updater;
+  Lawena parent;
+  UpdaterDialog view;
+  Updater updater;
 
-  private Build buildinfo;
+  Build buildinfo;
 
   public Branches(Lawena parent) {
     this.parent = parent;
@@ -55,8 +56,8 @@ public class Branches {
     view.setVisible(true);
   }
 
-  private void refresh() {
-    log.debug("Refreshing branches dialog data");
+  void refresh() {
+    log.debug("Refreshing branches dialog data"); //$NON-NLS-1$
     JComboBox<Branch> branchCombo = view.getBranchesComboBox();
     // this operation might take a while
     Branch current = updater.getCurrentBranch();
@@ -72,28 +73,28 @@ public class Branches {
     refreshBuilds(current);
   }
 
-  private void refreshChangeLog(Branch ch) {
-    List<String> lines = updater.getChangeLog(ch);
+  void refreshChangeLog(Branch ch) {
+    List<String> lines = Updater.getChangeLog(ch);
     JTextPane pane = view.getBranchTextPane();
     HTMLDocument doc = (HTMLDocument) pane.getDocument();
     try {
       doc.remove(0, doc.getLength());
     } catch (BadLocationException e) {
-      log.warn("Could not clear text pane: " + e);
+      log.warn("Could not clear text pane: {}", e.toString()); //$NON-NLS-1$
     }
     HTMLEditorKit editorKit = (HTMLEditorKit) pane.getEditorKit();
     for (String line : lines) {
       try {
         editorKit.insertHTML(doc, doc.getLength(), line, 0, 0, null);
       } catch (BadLocationException | IOException e) {
-        log.warn("Could not insert text to text pane: " + e);
+        log.warn("Could not insert text to text pane: {}", e.toString()); //$NON-NLS-1$
       }
     }
     pane.setCaretPosition(0);
   }
 
-  private void refreshBuilds(Branch ch) {
-    log.debug("Refreshing builds for branch {}", ch);
+  void refreshBuilds(Branch ch) {
+    log.debug("Refreshing builds for branch {}", ch); //$NON-NLS-1$
     JComboBox<Build> builds = view.getBuildsComboBox();
     builds.removeAllItems();
     if (ch.getType() == Branch.Type.SNAPSHOT) {
@@ -111,9 +112,9 @@ public class Branches {
   }
 
   private void init() {
-    log.debug("Initializing branches dialog");
+    log.debug("Initializing branches dialog"); //$NON-NLS-1$
     view = new UpdaterDialog();
-    view.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    view.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     view.setLocationRelativeTo(parent.viewAsComponent());
     view.setModalityType(ModalityType.APPLICATION_MODAL);
     view.getOkButton().addActionListener(new ActionListener() {
@@ -125,14 +126,14 @@ public class Branches {
         Branch currentBranch = updater.getCurrentBranch();
         Build currentBuild = buildinfo;
         if (currentBranch.equals(newBranch) && currentBuild.equals(newBuild)) {
-          log.debug("No switch will be done since the same branch & build as current was selected");
+          log.debug("No switch will be done since the same branch & build as current was selected"); //$NON-NLS-1$
           return;
         }
         try {
-          updater.switchBranch(newBranch);
+          Updater.switchBranch(newBranch);
           parent.upgrade(newBuild);
         } catch (IOException ex) {
-          log.info("Could not switch update branches", ex);
+          log.info("Could not switch update branches", ex); //$NON-NLS-1$
         }
         view.setVisible(false);
       }
@@ -184,7 +185,7 @@ public class Branches {
               try {
                 Desktop.getDesktop().browse(e.getURL().toURI());
               } catch (IOException | URISyntaxException ex) {
-                log.warn("Could not open URL", ex);
+                log.warn("Could not open URL", ex); //$NON-NLS-1$
               }
               return null;
             }
@@ -194,27 +195,28 @@ public class Branches {
     });
   }
 
-  private void checkValidSwitchState() {
+  void checkValidSwitchState() {
     Branch selectedBranch = (Branch) view.getBranchesComboBox().getSelectedItem();
     Build selectedBuild = (Build) view.getBuildsComboBox().getSelectedItem();
     Branch currentBranch = updater.getCurrentBranch();
     Build currentBuild = buildinfo;
     if (updater.isStandalone()) {
       view.getOkButton().setEnabled(false);
-      view.getSwitchStatusLabel().setText("Standalone builds are not allowed to switch branches");
+      view.getSwitchStatusLabel().setText(
+          Messages.getString("Branches.standaloneBuildsBranchSwitchNotice")); //$NON-NLS-1$
       view.getSwitchStatusLabel().setIcon(
-          new ImageIcon(Branches.class.getResource("/com/github/lawena/ui/fugue/exclamation.png")));
+          new ImageIcon(Branches.class.getResource("/com/github/lawena/ui/fugue/exclamation.png"))); //$NON-NLS-1$
     } else {
       if (selectedBranch.equals(currentBranch) && selectedBuild.equals(currentBuild)) {
         view.getOkButton().setEnabled(false);
-        view.getSwitchStatusLabel().setText("You are currently in this same branch and version");
+        view.getSwitchStatusLabel().setText(Messages.getString("Branches.sameBranchVersionNotice")); //$NON-NLS-1$
         view.getSwitchStatusLabel()
             .setIcon(
                 new ImageIcon(Branches.class
-                    .getResource("/com/github/lawena/ui/fugue/exclamation.png")));
+                    .getResource("/com/github/lawena/ui/fugue/exclamation.png"))); //$NON-NLS-1$
       } else {
         view.getOkButton().setEnabled(true);
-        view.getSwitchStatusLabel().setText(" ");
+        view.getSwitchStatusLabel().setText(" "); //$NON-NLS-1$
         view.getSwitchStatusLabel().setIcon(null);
       }
     }

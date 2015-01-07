@@ -6,9 +6,6 @@ import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.lawena.app.model.ConfigWriter;
 import com.github.lawena.app.model.ConfigWriterGo;
 import com.github.lawena.app.model.MainModel;
@@ -16,8 +13,6 @@ import com.github.lawena.profile.Key;
 import com.github.lawena.ui.LawenaViewGo;
 
 public class LawenaGo extends Lawena {
-
-  private static final Logger log = LoggerFactory.getLogger(LawenaGo.class);
 
   public LawenaGo(MainModel mainModel) {
     super(mainModel);
@@ -29,13 +24,9 @@ public class LawenaGo extends Lawena {
   }
 
   @Override
-  protected void setupIconImage() {
-    try {
-      view.setIconImage(new ImageIcon(getClass().getResource("lawena.png")).getImage()
-          .getScaledInstance(64, 64, Image.SCALE_SMOOTH));
-    } catch (Exception e) {
-      log.warn("Window icon missing / could not be set");
-    }
+  protected Image getIconImage() {
+    return new ImageIcon(getClass().getResource("lawena.png")).getImage() //$NON-NLS-1$
+        .getScaledInstance(64, 64, Image.SCALE_SMOOTH);
   }
 
   @Override

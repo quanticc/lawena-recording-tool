@@ -39,6 +39,7 @@ import javax.swing.text.JTextComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -61,10 +62,10 @@ public class Util {
       Path curp = curgd.toPath();
       BasicFileAttributes curAttributes = Files.readAttributes(curp, BasicFileAttributes.class);
       FileTime curCreationTime = curAttributes.creationTime();
-      log.debug("Comparing creationTime: new={} cur={}", newCreationTime, curCreationTime);
+      log.debug("Comparing creationTime: new={} cur={}", newCreationTime, curCreationTime); //$NON-NLS-1$
       return newCreationTime.compareTo(curCreationTime);
     } catch (IOException e) {
-      log.warn("Could not retrieve file creation time: " + e);
+      log.warn("Could not retrieve file creation time: {}", e.toString()); //$NON-NLS-1$
     }
     return 1;
   }
@@ -103,10 +104,10 @@ public class Util {
         new JarFile(
             new File(Util.class.getProtectionDomain().getCodeSource().getLocation().toURI()))) {
       String value = jar.getManifest().getMainAttributes().getValue(key);
-      return (value == null ? "no-gradle " + defaultValue : value);
+      return (value == null ? "no-gradle " + defaultValue : value); //$NON-NLS-1$
     } catch (IOException | URISyntaxException e) {
     }
-    return "no-jar " + defaultValue;
+    return "no-jar " + defaultValue; //$NON-NLS-1$
   }
 
   public static ImageIcon createPreviewIcon(String imageName) throws IOException {
@@ -160,7 +161,7 @@ public class Util {
   }
 
   public static BufferedReader newProcessReader(Process p) {
-    return new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("UTF-8")));
+    return new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("UTF-8"))); //$NON-NLS-1$
   }
 
   public static long sizeOfPath(Path startPath) throws IOException {
@@ -183,10 +184,10 @@ public class Util {
   public static String humanReadableByteCount(long bytes, boolean si) {
     int unit = si ? 1000 : 1024;
     if (bytes < unit)
-      return bytes + " B";
+      return bytes + " B"; //$NON-NLS-1$
     int exp = (int) (Math.log(bytes) / Math.log(unit));
-    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre); //$NON-NLS-1$
   }
 
   public static int startProcess(List<String> command, Consumer<String> consumer) {
@@ -201,7 +202,7 @@ public class Util {
       }
       return p.waitFor();
     } catch (InterruptedException | IOException e) {
-      log.warn("Process could not be completed", e);
+      log.warn("Process could not be completed", e); //$NON-NLS-1$
     }
     return 1;
   }
@@ -225,7 +226,7 @@ public class Util {
       Process p = builder.start();
       return p.waitFor();
     } catch (InterruptedException | IOException e) {
-      log.warn("Process could not be completed", e);
+      log.warn("Process could not be completed", e); //$NON-NLS-1$
     }
     return 1;
   }
@@ -249,7 +250,7 @@ public class Util {
   public static String listToString(List<String> list, char separator) {
     Iterator<String> it = list.iterator();
     if (!it.hasNext())
-      return "";
+      return ""; //$NON-NLS-1$
 
     StringBuilder sb = new StringBuilder();
     for (;;) {
@@ -274,12 +275,12 @@ public class Util {
   @SuppressWarnings("unchecked")
   public static <T> T getFromTree(Map<String, Object> root, TypeToken<T> type, String key) {
     if (root == null)
-      throw new IllegalArgumentException("root must not be null");
+      throw new IllegalArgumentException("root must not be null"); //$NON-NLS-1$
     if (type == null)
-      throw new IllegalArgumentException("type must not be null");
+      throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
     if (key == null)
-      throw new IllegalArgumentException("null keys are not allowed");
-    String[] paths = key.split("\\.");
+      throw new IllegalArgumentException("null keys are not allowed"); //$NON-NLS-1$
+    String[] paths = key.split("\\."); //$NON-NLS-1$
     Map<String, Object> map = getParentMap(root, paths);
     return (T) map.get(paths[paths.length - 1]);
   }
@@ -295,12 +296,12 @@ public class Util {
    */
   public static <T> void setToTree(Map<String, Object> root, String key, T value) {
     if (root == null)
-      throw new IllegalArgumentException("root must not be null");
+      throw new IllegalArgumentException("root must not be null"); //$NON-NLS-1$
     if (key == null)
-      throw new IllegalArgumentException("null keys are not allowed");
+      throw new IllegalArgumentException("null keys are not allowed"); //$NON-NLS-1$
     if (value == null)
-      throw new IllegalArgumentException("null values are not allowed");
-    String[] paths = key.split("\\.");
+      throw new IllegalArgumentException("null values are not allowed"); //$NON-NLS-1$
+    String[] paths = key.split("\\."); //$NON-NLS-1$
     Map<String, Object> map = getParentMap(root, paths);
     map.put(paths[paths.length - 1], value);
   }
@@ -318,9 +319,9 @@ public class Util {
   @SuppressWarnings("unchecked")
   public static Map<String, Object> getParentMap(Map<String, Object> root, String[] paths) {
     if (root == null)
-      throw new IllegalArgumentException("root must not be null");
+      throw new IllegalArgumentException("root must not be null"); //$NON-NLS-1$
     if (paths == null)
-      throw new IllegalArgumentException("a path array must be supplied");
+      throw new IllegalArgumentException("a path array must be supplied"); //$NON-NLS-1$
     Map<String, Object> map = root;
     for (int i = 0; i < paths.length - 1; i++) {
       String path = paths[i];
@@ -339,30 +340,25 @@ public class Util {
         bytes += Util.sizeOfPath(path);
       }
       String size = Util.humanReadableByteCount(bytes, true);
-      log.debug("Backup folders size: " + size);
+      log.debug("Backup folders size: " + size); //$NON-NLS-1$
       if (bytes / 1024 / 1024 > thresholdInMB) {
         int answer =
-            JOptionPane
-                .showConfirmDialog(
-                    null,
-                    "Your cfg and custom folders are "
-                        + size
-                        + " in size.\nThis might cause Lawena to hang or crash while it creates a backup."
-                        + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
-                        + "\nDo you still want to create a backup?", "Backup Folder",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            JOptionPane.showConfirmDialog(null,
+                String.format(Messages.getString("Util.bigFolderWarning"), size), //$NON-NLS-1$
+                Messages.getString("Util.bigFolderWarningTitle"), JOptionPane.YES_NO_OPTION, //$NON-NLS-1$
+                JOptionPane.QUESTION_MESSAGE);
         if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
           return false;
         }
       }
     } catch (IOException e) {
-      log.info("Could not determine folder size: " + e);
+      log.info("Could not determine folder size: {}", e.toString()); //$NON-NLS-1$
     }
     return true;
   }
 
   public static Path toPath(String path) {
-    return path == null ? Paths.get("") : Paths.get(path);
+    return path == null ? Paths.get("") : Paths.get(path); //$NON-NLS-1$
   }
 
 }

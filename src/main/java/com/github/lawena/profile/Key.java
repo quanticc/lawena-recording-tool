@@ -13,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
  * @author Ivan
  *
  */
+@SuppressWarnings("nls")
 public class Key {
 
   // Pathnames
@@ -59,7 +60,7 @@ public class Key {
    * following values: 80, 81, 90, 95, 98.
    */
   public static final Option<String> dxlevel = newOption("launch.dxlevel", String.class, "98")
-      .validatedBy(new ValuesValidator("80", "81", "90", "95", "98"));
+      .validatedBy(new StringValidator("80", "81", "90", "95", "98"));
   /**
    * Seconds to wait for the game before launch routine is aborted. Use 0 to disable.
    */
@@ -79,7 +80,7 @@ public class Key {
    * Name of the hud folder to load into the game. Must be present in one of the resources folders.
    */
   public static final Option<String> hud = newOption("files.hud", String.class, "hud_killnotices")
-      .validatedBy(new ValuesValidator("hud_killnotices", "hud_medic", "hud_default", "custom"));
+      .validatedBy(new StringValidator("hud_killnotices", "hud_medic", "hud_default", "custom"));
   /**
    * Name of the skybox to load into the game. Must be present in one of the resources folders.
    */
@@ -94,14 +95,14 @@ public class Key {
   public static final Option<Boolean> deleteUnneededBackups = newOption(
       "files.deleteUnneededBackups", Boolean.class, true);
   public static final Option<String> loglevel = newOption("files.loglevel", String.class, "DEBUG")
-      .validatedBy(new ValuesValidator("OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"));
+      .validatedBy(new StringValidator("OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"));
 
   // config/cvar (in-game) related options
 
   public static final Option<Integer> framerate = newOption("cfg.framerate", Integer.class, 120)
       .validatedBy(RangeValidator.atLeast(24));
   public static final Option<String> viewmodelSwitch = newOption("cfg.viewmodels", String.class,
-      "on").validatedBy(new ValuesValidator("on", "off", "default"));
+      "on").validatedBy(new StringValidator("on", "off", "default"));
   public static final Option<Integer> viewmodelFov = newOption("cfg.vmodelFov", Integer.class, 70);
   public static final Option<Boolean> motionBlur =
       newOption("cfg.motionBlur", Boolean.class, false);
@@ -135,7 +136,7 @@ public class Key {
   // Source Recorder options
 
   public static final Option<String> recorderVideoFormat = newOption("recorder.videoFormat",
-      String.class, "TGA").validatedBy(new ValuesValidator("TGA", "JPEG"));
+      String.class, "TGA").validatedBy(new StringValidator("TGA", "JPEG"));
   public static final Option<Integer> recorderJpegQuality = newOption("recorder.jpegQuality",
       Integer.class, 95).validatedBy(new RangeValidator(1, 100));
 

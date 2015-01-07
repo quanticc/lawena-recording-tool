@@ -12,6 +12,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Ivan
  *
  */
+@SuppressWarnings("nls")
 public class Branch {
 
   public enum Type {

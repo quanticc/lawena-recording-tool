@@ -11,6 +11,7 @@ public class ConfigWriterGo extends ConfigWriter {
     super(settings);
   }
 
+  @SuppressWarnings("nls")
   @Override
   protected List<String> writeGameConfig() {
     // in CS:GO you can't alias existing convars or concommands

@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
  *
  * @param <T> the type of this option
  */
+@SuppressWarnings("nls")
 public class Option<T> {
 
   private static final Logger log = LoggerFactory.getLogger(Option.class);
@@ -26,6 +27,7 @@ public class Option<T> {
       return ValidationResult.ok("No validator present");
     }
   };
+
 
   Option(TypeToken<T> type, String key, T defaultValue) {
     if (key == null)
@@ -50,7 +52,7 @@ public class Option<T> {
    * @return the value for this option. It is never <code>null</code>
    */
   @SuppressWarnings("unchecked")
-  public T getValue(ValueProvider provider) {
+  public T getValue(Provider provider) {
     T value = provider.get(type, key);
     if (value == null) {
       log.warn("Key {} should not be null", key);
@@ -76,7 +78,7 @@ public class Option<T> {
    * @param value - the value attempted to set
    * @return a <code>ValidationResult</code> describing the result of this operation.
    */
-  public ValidationResult setValue(ValueProvider provider, T value) {
+  public ValidationResult setValue(Provider provider, T value) {
     if (value == null)
       return ValidationResult.invalid(new IllegalArgumentException("Value must not be null"));
     ValidationResult result = validator.validate(value);
@@ -92,7 +94,7 @@ public class Option<T> {
    * @param provider - the <code>ValueProvider</code> that will handle the option storage
    * @param value - the value attempted to set
    */
-  public void setValueEx(ValueProvider provider, T value) {
+  public void setValueEx(Provider provider, T value) {
     if (value == null)
       throw new IllegalArgumentException("Value can't be null!");
     ValidationResult result = validator.validate(value);
@@ -108,12 +110,12 @@ public class Option<T> {
    * 
    * @param provider - the <code>ValueProvider</code> that will handle the option storage
    */
-  public void revertToDefault(ValueProvider provider) {
+  public void revertToDefault(Provider provider) {
     provider.set(key, defaultValue);
   }
 
-  public Option<T> validatedBy(Validator<T> validator) {
-    this.validator = validator;
+  public Option<T> validatedBy(Validator<T> v) {
+    this.validator = v;
     return this;
   }
 

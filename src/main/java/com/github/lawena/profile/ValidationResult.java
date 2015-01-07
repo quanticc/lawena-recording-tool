@@ -1,12 +1,13 @@
 package com.github.lawena.profile;
 
+@SuppressWarnings("nls")
 public class ValidationResult {
 
   public enum ResultType {
     VALID, INVALID;
   }
 
-  public static ValidationResult OK = new ValidationResult(ResultType.VALID, "OK");
+  public static final ValidationResult OK = new ValidationResult(ResultType.VALID, "OK");
 
   public static ValidationResult ok(String message) {
     return new ValidationResult(ResultType.VALID, message);

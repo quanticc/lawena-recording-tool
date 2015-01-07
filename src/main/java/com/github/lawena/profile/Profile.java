@@ -7,7 +7,9 @@ import java.util.Map.Entry;
 import com.github.lawena.util.Util;
 import com.google.gson.reflect.TypeToken;
 
-public class Profile implements ValueProvider {
+
+@SuppressWarnings("nls")
+public class Profile implements Provider {
 
   public static Profile newDefaultProfile() {
     Profile profile = new Profile();

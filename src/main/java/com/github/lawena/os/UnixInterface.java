@@ -7,7 +7,7 @@ import java.util.Set;
 
 public abstract class UnixInterface extends OSInterface {
 
-  protected static Set<PosixFilePermission> perms777 = new HashSet<PosixFilePermission>();
+  protected static final Set<PosixFilePermission> perms777 = new HashSet<>();
 
   {
     perms777.add(PosixFilePermission.OWNER_READ);
@@ -38,17 +38,17 @@ public abstract class UnixInterface extends OSInterface {
 
   @Override
   public String getSystemDxLevel() {
-    return "90";
+    return "90"; //$NON-NLS-1$
   }
 
   @Override
   public void setSystemDxLevel(String dxlevel) {
-
+    // not used
   }
 
   @Override
   public String getVTFCmdLocation() {
-    throw new UnsupportedOperationException("Skybox previews are not supported on this platform");
+    throw new UnsupportedOperationException("Skybox previews are not supported on this platform"); //$NON-NLS-1$
   }
 
 }

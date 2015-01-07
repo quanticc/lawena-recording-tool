@@ -14,19 +14,19 @@ public abstract class LinuxInterface extends UnixInterface {
 
   @Override
   public ProcessBuilder getBuilderSteamLaunch(String steamPath) {
-    Path steam = Paths.get(steamPath).resolve("steam.sh");
+    Path steam = Paths.get(steamPath).resolve("steam.sh"); //$NON-NLS-1$
     try {
       Files.setPosixFilePermissions(steam, perms777);
       return new ProcessBuilder(steam.toString());
     } catch (IOException e) {
-      log.warn("Problem while settings permissions to steam client", e);
+      log.warn("Problem while settings permissions to steam client", e); //$NON-NLS-1$
     }
     return null;
   }
 
   @Override
   public Path getSteamPath() {
-    return Paths.get(System.getProperty("user.home"), ".local/share/Steam");
+    return Paths.get(System.getProperty("user.home"), ".local/share/Steam"); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
 }

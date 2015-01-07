@@ -2,7 +2,6 @@ package com.github.lawena.app.model;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Type;
@@ -21,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.github.lawena.profile.Profile;
 import com.github.lawena.profile.ProfileListener;
 import com.github.lawena.profile.Profiles;
-import com.github.lawena.profile.ValueProvider;
+import com.github.lawena.profile.Provider;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -32,7 +31,7 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
-public class Settings implements ValueProvider {
+public class Settings implements Provider {
 
   private static final Logger log = LoggerFactory.getLogger(Settings.class);
 
@@ -50,7 +49,7 @@ public class Settings implements ValueProvider {
   private Profiles profiles;
   private File profilesFile;
   private File defaultFile;
-  private List<ProfileListener> listeners = new ArrayList<>();
+  List<ProfileListener> listeners = new ArrayList<>();
 
   public Settings(File profilesFile, File defaultFile) throws IOException {
     this.profilesFile = profilesFile;
@@ -60,33 +59,33 @@ public class Settings implements ValueProvider {
   }
 
   private Profiles loadProfiles(File file) throws IOException {
-    try (Reader reader = new FileReader(file)) {
+    try (Reader reader = Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8"))) { //$NON-NLS-1$
       return gson.fromJson(reader, Profiles.class);
     } catch (JsonSyntaxException | JsonIOException e) {
-      log.warn("Invalid profiles file found, reverting to defaults: " + e);
+      log.warn("Invalid profiles file found, reverting to defaults: " + e); //$NON-NLS-1$
     } catch (FileNotFoundException e) {
-      log.info("No profiles file found, loading defaults");
+      log.info("No profiles file found, loading defaults"); //$NON-NLS-1$
     } catch (IOException e) {
-      log.warn("Problem while reading file, reverting to defaults: " + e);
+      log.warn("Problem while reading file, reverting to defaults: " + e); //$NON-NLS-1$
     }
     return defaultProfiles();
   }
 
   private Profiles defaultProfiles() throws IOException {
-    try (Reader reader = new FileReader(defaultFile)) {
+    try (Reader reader = Files.newBufferedReader(defaultFile.toPath(), Charset.forName("UTF-8"))) { //$NON-NLS-1$
       return gson.fromJson(reader, Profiles.class);
     }
   }
 
   @Override
   public <T> T get(TypeToken<T> type, String key) {
-    ValueProvider provider = (key.startsWith("lawena.") ? profiles : profiles.getProfile());
+    Provider provider = (key.startsWith("lawena.") ? profiles : profiles.getProfile()); //$NON-NLS-1$
     return provider.get(type, key);
   }
 
   @Override
   public <T> void set(String key, T value) {
-    ValueProvider provider = (key.startsWith("lawena.") ? profiles : profiles.getProfile());
+    Provider provider = (key.startsWith("lawena.") ? profiles : profiles.getProfile()); //$NON-NLS-1$
     provider.set(key, value);
   }
 
@@ -97,9 +96,9 @@ public class Settings implements ValueProvider {
   private void saveProfiles(File file) {
     try {
       Files.write(file.toPath(), Arrays.asList(gson.toJson(profiles, Profiles.class)),
-          Charset.forName("UTF-8"));
+          Charset.forName("UTF-8")); //$NON-NLS-1$
     } catch (IOException e) {
-      log.warn("Could not save profiles: " + e);
+      log.warn("Could not save profiles: " + e); //$NON-NLS-1$
     }
   }
 

@@ -12,6 +12,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 
+@SuppressWarnings("nls")
 public class StatusAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(StatusAppender.class);
@@ -35,6 +36,7 @@ public class StatusAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   public void append(final ILoggingEvent event) {
     SwingUtilities.invokeLater(new Runnable() {
 
+      @SuppressWarnings("synthetic-access")
       @Override
       public void run() {
         try {

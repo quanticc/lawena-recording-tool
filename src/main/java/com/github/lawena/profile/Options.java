@@ -17,6 +17,7 @@ public enum Options {
   private Map<String, Option<?>> options = new HashMap<>();
   private OptionParser parser = new OptionParser();
 
+  @SuppressWarnings("nls")
   private OptionSpec<File> profilesFile = parser
       .acceptsAll(Arrays.asList("p", "profiles"), "Location of profiles to load").withRequiredArg()
       .ofType(File.class).defaultsTo(new File("lwrt/tf/profiles.json"));
@@ -26,7 +27,7 @@ public enum Options {
   }
 
   public static <T> Option<T> newOption(String key, TypeToken<T> type, T defaultValue) {
-    Option<T> option = new Option<T>(type, key, defaultValue);
+    Option<T> option = new Option<>(type, key, defaultValue);
     INSTANCE.options.put(key, option);
     return option;
   }

@@ -13,6 +13,7 @@ import javax.swing.SwingWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
 import com.github.lawena.app.model.ConfigWriter;
@@ -31,11 +32,11 @@ import com.github.lawena.util.Util;
 public class Launcher extends SwingWorker<Boolean, Void> {
 
   private static final Logger log = LoggerFactory.getLogger(Launcher.class);
-  private static final Logger status = LoggerFactory.getLogger("status");
+  private static final Logger status = LoggerFactory.getLogger("status"); //$NON-NLS-1$
 
   private Tasks tasks;
   private MainModel model;
-  private LawenaView view;
+  LawenaView view;
   private Lawena presenter;
 
   private OSInterface os;
@@ -75,22 +76,24 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       // Checking if the user selects "Custom" HUD in the dropdown,
       // he or she also selects a "hud" in the sidebar
       if (!verifyCustomHud()) {
-        JOptionPane.showMessageDialog(presenter.viewAsComponent(),
-            "Please select a custom HUD in the\nCustom Resources table and retry", "Custom HUD",
-            JOptionPane.INFORMATION_MESSAGE);
-        log.info("Launch aborted because the custom HUD to use was not specified");
+        JOptionPane
+            .showMessageDialog(
+                presenter.viewAsComponent(),
+                Messages.getString("Launcher.noCustomHudSelectedOnLaunch"), Messages.getString("Launcher.noCustomHudSelectedOnLaunchTitle"), //$NON-NLS-1$ //$NON-NLS-2$
+                JOptionPane.INFORMATION_MESSAGE);
+        log.info("Launch aborted because the custom HUD to use was not specified"); //$NON-NLS-1$
         return false;
       }
 
       // Check for big custom folders, mitigate OOM errors with custom folder > 2 GB
       Path tfpath = toPath(Key.gamePath.getValue(settings));
-      Path customPath = tfpath.resolve("custom");
-      Path configPath = tfpath.resolve("cfg");
+      Path customPath = tfpath.resolve("custom"); //$NON-NLS-1$
+      Path configPath = tfpath.resolve("cfg"); //$NON-NLS-1$
       boolean ok =
           Util.notifyBigFolder(Key.bigFolderThreshold.getValue(settings), configPath, customPath);
       if (!ok) {
-        log.info("Launch aborted by the user");
-        status.info("Launch aborted by the user");
+        log.info("Launch aborted by the user"); //$NON-NLS-1$
+        status.info(Messages.getString("Launcher.launchAbortedByUser")); //$NON-NLS-1$
         return false;
       }
 
@@ -99,25 +102,26 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       setProgress(15);
 
       // Restoring user files
-      status.info("Restoring your files");
+      status.info(Messages.getString("Launcher.restoringYourFiles")); //$NON-NLS-1$
       linker.unlink();
       setProgress(40);
 
       // Saving ui settings to cfg files
-      status.info("Saving settings and generating cfg files");
+      status.info(Messages.getString("Launcher.generatingGameConfigFiles")); //$NON-NLS-1$
       try {
         presenter.saveSettings();
         writer.writeAll();
         model.getDemos().writeAutoplay();
       } catch (IOException e) {
-        log.warn("Problem while saving settings to file", e);
-        status.info(StatusAppender.ERROR, "Failed to save lawena settings to file");
+        log.warn("Problem while saving settings to file", e); //$NON-NLS-1$
+        status.info(StatusAppender.ERROR,
+            Messages.getString("Launcher.failedToGenerateConfigFiles")); //$NON-NLS-1$
         return false;
       }
       setProgress(50);
 
       // Backing up user files and copying lawena files
-      status.info("Copying lawena files to cfg and custom...");
+      status.info(Messages.getString("Launcher.copyingLawenaFilesToGameFolders")); //$NON-NLS-1$
       try {
         linker.link();
       } catch (LawenaException e) {
@@ -127,7 +131,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       setProgress(95);
 
       // Launching process
-      status.info("Launching game process");
+      status.info(Messages.getString("Launcher.launchingGameProcess")); //$NON-NLS-1$
       os.launchSteam(settings);
 
       SwingUtilities.invokeAndWait(new Runnable() {
@@ -135,7 +139,7 @@ public class Launcher extends SwingWorker<Boolean, Void> {
         @Override
         public void run() {
           view.getBtnStartGame().setEnabled(true);
-          view.getBtnStartGame().setText("Stop Game");
+          view.getBtnStartGame().setText(Messages.getString("Launcher.stopGame")); //$NON-NLS-1$
         }
       });
       setProgress(100);
@@ -145,11 +149,11 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       int millis = 5000;
       int maxtimeout = cfgtimeout / (millis / 1000);
       setProgress(0);
-      status.info("Waiting for the game to start...");
+      status.info(Messages.getString("Launcher.waitingForGameProcess")); //$NON-NLS-1$
       if (cfgtimeout > 0) {
-        log.debug("Game launch timeout: around " + cfgtimeout + " seconds");
+        log.debug("Game launch timeout: around {} seconds", cfgtimeout); //$NON-NLS-1$
       } else {
-        log.debug("Game launch timeout disabled");
+        log.debug("Game launch timeout disabled"); //$NON-NLS-1$
       }
       while (!os.isGameRunning() && (cfgtimeout == 0 || timeout < maxtimeout)) {
         ++timeout;
@@ -161,13 +165,14 @@ public class Launcher extends SwingWorker<Boolean, Void> {
 
       if (cfgtimeout > 0 && timeout >= maxtimeout) {
         int s = timeout * (millis / 1000);
-        log.info("Game launch timed out after " + s + " seconds");
-        status.info(StatusAppender.WARN, "Game did not start after " + s + " seconds");
+        log.info("Game launch timed out after {} seconds", s); //$NON-NLS-1$
+        status.info(StatusAppender.WARN,
+            Messages.getString("Launcher.gameProcessNotFoundTimeout"), s); //$NON-NLS-1$
         return false;
       }
 
-      log.info("Game has started running");
-      status.info("Waiting for the game to finish running...");
+      log.info("Game has started running"); //$NON-NLS-1$
+      status.info(Messages.getString("Launcher.waitingForProcessEnd")); //$NON-NLS-1$
       SwingUtilities.invokeLater(new Runnable() {
 
         @Override
@@ -184,11 +189,11 @@ public class Launcher extends SwingWorker<Boolean, Void> {
 
     } else {
       if (os.isGameRunning()) {
-        status.info("Attempting to finish game process...");
+        status.info(Messages.getString("Launcher.attemptingToKillProcess")); //$NON-NLS-1$
         os.killTf2Process();
         Thread.sleep(5000);
       } else {
-        status.info("Game was not running, cancelling");
+        status.info(Messages.getString("Launcher.noGameProcessFoundToStop")); //$NON-NLS-1$
       }
       if (!os.isGameRunning()) {
         tasks.getCurrentLaunchTask().cancel(true);
@@ -200,24 +205,24 @@ public class Launcher extends SwingWorker<Boolean, Void> {
   }
 
   private void closeGameHandles() {
-    status.info("Closing open handles in game 'cfg' folder...");
-    os.closeHandles(toPath(Key.gamePath.getValue(settings)).resolve("cfg"));
-    status.info("Closing open handles in game 'custom' folder...");
-    os.closeHandles(toPath(Key.gamePath.getValue(settings)).resolve("custom"));
+    status.info(Messages.getString("Launcher.closingOpenHandles1")); //$NON-NLS-1$
+    os.closeHandles(toPath(Key.gamePath.getValue(settings)).resolve("cfg")); //$NON-NLS-1$
+    status.info(Messages.getString("Launcher.closingOpenHandles2")); //$NON-NLS-1$
+    os.closeHandles(toPath(Key.gamePath.getValue(settings)).resolve("custom")); //$NON-NLS-1$
   }
 
   private boolean verifyCustomHud() {
-    if (view.getCmbHud().getSelectedItem().equals("Custom")) {
+    if (view.getCmbHud().getSelectedItem().equals("Custom")) { //$NON-NLS-1$
       for (Resource resource : resources.getResourceList()) {
         if (resource.isEnabled()) {
           try {
-            resources.updateTags(resource);
+            Resources.updateTags(resource);
             if (resource.getTags().contains(Resource.HUD)) {
-              log.debug("Custom HUD verified with {}", resource);
+              log.debug("Custom HUD verified with {}", resource); //$NON-NLS-1$
               return true;
             }
           } catch (IOException e) {
-            log.warn("Could not determine resource tags", e);
+            log.warn("Could not determine resource tags", e); //$NON-NLS-1$
           }
         }
       }
@@ -238,18 +243,18 @@ public class Launcher extends SwingWorker<Boolean, Void> {
       try {
         ranGameCorrectly = get();
       } catch (InterruptedException | ExecutionException e) {
+        // ignore
       }
       boolean restoredAllFiles = linker.unlink();
       if (ranGameCorrectly) {
         if (restoredAllFiles) {
-          status.info(StatusAppender.OK, "Game has finished running. All files restored");
+          status.info(StatusAppender.OK, Messages.getString("Launcher.fileRestoreSuccessful")); //$NON-NLS-1$
         } else {
-          status.info(StatusAppender.WARN,
-              "Your files could not be restored correctly. Check log for details");
+          status.info(StatusAppender.WARN, Messages.getString("Launcher.fileRestoreFailed")); //$NON-NLS-1$
         }
       }
       os.setSystemDxLevel(model.getOriginalDxLevel());
-      view.getBtnStartGame().setText("Launch Game");
+      view.getBtnStartGame().setText(Messages.getString("Launcher.launchGame")); //$NON-NLS-1$
       view.getBtnStartGame().setEnabled(true);
     }
   }

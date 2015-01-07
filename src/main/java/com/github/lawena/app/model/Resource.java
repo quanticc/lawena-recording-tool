@@ -7,10 +7,10 @@ import java.util.Set;
 
 public class Resource {
 
-  public static final String CONFIG = "config";
-  public static final String HUD = "hud";
-  public static final String SKYBOX = "skybox";
-  public static final String PARTICLES = "particles";
+  public static final String CONFIG = "config"; //$NON-NLS-1$
+  public static final String HUD = "hud"; //$NON-NLS-1$
+  public static final String SKYBOX = "skybox"; //$NON-NLS-1$
+  public static final String PARTICLES = "particles"; //$NON-NLS-1$
 
   private boolean enabled = false;
   private String name;

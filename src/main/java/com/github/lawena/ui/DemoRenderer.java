@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import com.github.lawena.util.Images;
 import com.github.lawena.vdm.Demo;
 
+@SuppressWarnings("nls")
 public class DemoRenderer extends DefaultTableCellRenderer {
 
   private static final long serialVersionUID = 1L;

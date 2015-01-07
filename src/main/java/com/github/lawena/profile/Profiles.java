@@ -12,11 +12,12 @@ import org.slf4j.LoggerFactory;
 import com.github.lawena.util.Util;
 import com.google.gson.reflect.TypeToken;
 
-public class Profiles implements ValueProvider {
+@SuppressWarnings("nls")
+public class Profiles implements Provider {
 
   private static final Logger log = LoggerFactory.getLogger(Profiles.class);
 
-  private String selected = "Default";
+  private String _selected = "Default";
   private List<Profile> profiles = new ArrayList<>();
   private Map<String, Object> global = new LinkedHashMap<>();
 
@@ -29,7 +30,7 @@ public class Profiles implements ValueProvider {
   }
 
   public String getSelected() {
-    return selected;
+    return _selected;
   }
 
   private List<Profile> getProfiles() {
@@ -90,7 +91,7 @@ public class Profiles implements ValueProvider {
     String selected = getSelected();
     boolean update = (selected == null ? true : !selected.equals(newSelectedProfile.getName()));
     if (update) {
-      selected = newSelectedProfile.getName();
+      _selected = newSelectedProfile.getName();
     }
     return update;
   }

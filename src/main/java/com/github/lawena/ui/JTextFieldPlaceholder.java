@@ -10,7 +10,7 @@ public class JTextFieldPlaceholder extends JTextField {
 
   private static final long serialVersionUID = 1L;
 
-  private String placeholder = "";
+  private String placeholder = ""; //$NON-NLS-1$
 
   public String getPlaceholder() {
     return placeholder;

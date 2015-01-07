@@ -2,23 +2,19 @@ package com.github.lawena.app;
 
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.Image;
 
 import javax.swing.ImageIcon;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.lawena.app.model.ConfigWriter;
 import com.github.lawena.app.model.ConfigWriterTf;
 import com.github.lawena.app.model.MainModel;
 import com.github.lawena.profile.Key;
-import com.github.lawena.profile.ValuesValidator;
+import com.github.lawena.profile.StringValidator;
 import com.github.lawena.ui.LawenaViewTf;
 import com.github.lawena.util.Util;
 
 public class LawenaTf extends Lawena {
-
-  private static final Logger log = LoggerFactory.getLogger(LawenaTf.class);
 
   public LawenaTf(MainModel mainModel) {
     super(mainModel);
@@ -30,12 +26,8 @@ public class LawenaTf extends Lawena {
   }
 
   @Override
-  protected void setupIconImage() {
-    try {
-      view.setIconImage(new ImageIcon(getClass().getResource("tf2.png")).getImage());
-    } catch (Exception e) {
-      log.warn("Window icon missing / could not be set");
-    }
+  protected Image getIconImage() {
+    return new ImageIcon(getClass().getResource("tf2.png")).getImage(); //$NON-NLS-1$
   }
 
   @Override
@@ -47,7 +39,7 @@ public class LawenaTf extends Lawena {
   protected void loadDependentSettings() {
     LawenaViewTf v = (LawenaViewTf) view;
     Util.selectComboItem(v.getCmbQuality(), Key.dxlevel.getValue(settings),
-        ((ValuesValidator) Key.dxlevel.getValidator()).getAllowedValues());
+        ((StringValidator) Key.dxlevel.getValidator()).getAllowedValues());
     v.getEnableMotionBlur().setSelected(Key.motionBlur.getValue(settings));
     v.getDisableCombatText().setSelected(Key.noDamageNumbers.getValue(settings));
     v.getDisableCrosshair().setSelected(Key.noCrosshair.getValue(settings));

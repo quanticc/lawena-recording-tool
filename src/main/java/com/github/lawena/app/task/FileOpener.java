@@ -12,6 +12,8 @@ import javax.swing.SwingWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
+
 public class FileOpener extends SwingWorker<Void, Void> {
 
   private static final Logger log = LoggerFactory.getLogger(FileOpener.class);
@@ -27,14 +29,14 @@ public class FileOpener extends SwingWorker<Void, Void> {
     if (Desktop.isDesktopSupported()) {
       Desktop desktop = Desktop.getDesktop();
       if (desktop.isSupported(Action.OPEN)) {
-        log.info("Opening {}", file);
+        log.info("Opening {}", file); //$NON-NLS-1$
         desktop.open(file);
         return null;
       } else {
-        log.warn("Desktop does not support open action");
+        log.warn("Desktop does not support open action"); //$NON-NLS-1$
       }
     } else {
-      log.warn("Desktop is not supported");
+      log.warn("Desktop is not supported"); //$NON-NLS-1$
     }
     return null;
   }
@@ -51,9 +53,9 @@ public class FileOpener extends SwingWorker<Void, Void> {
   }
 
   private static void handleException(File file, Exception e) {
-    log.warn("A problem occurred while opening {}: {}", file, e);
-    JOptionPane.showMessageDialog(null, "Sorry, a problem occurred while trying to open this file",
-        "A problem occurred", JOptionPane.ERROR_MESSAGE);
+    log.warn("A problem occurred while opening {}: {}", file, e); //$NON-NLS-1$
+    JOptionPane.showMessageDialog(null, Messages.getString("FileOpener.openFileFailed"), //$NON-NLS-1$
+        Messages.getString("FileOpener.openFileFailedTitle"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
   }
 
 }

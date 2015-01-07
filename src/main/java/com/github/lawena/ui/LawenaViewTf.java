@@ -39,47 +39,43 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import com.github.lawena.Constants;
 import com.github.lawena.app.task.LinkRunner;
 
 public class LawenaViewTf extends JFrame implements LawenaView {
 
   private static final long serialVersionUID = 1L;
 
-  private static final String renderingTutorialURL =
-      "http://code.google.com/p/lawenarecordingtool/wiki/RenderingTutorial";
-  private static final String releasesURL =
-      "https://github.com/iabarca/lawena-recording-tool/releases";
-  private static final String projectPageURL = "http://code.google.com/p/lawenarecordingtool/";
-  private static final String vdmTutorialURL =
-      "http://code.google.com/p/lawenarecordingtool/wiki/VDMtutorial";
-  private static final String instructionsURL =
-      "http://code.google.com/p/lawenarecordingtool/wiki/Instructions";
-
   private static class MntmRenderingTutorialActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LinkRunner(renderingTutorialURL).execute();
     }
   }
 
   private static class MntmPatchNotesActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LinkRunner(releasesURL).execute();
     }
   }
 
   private static class MntmProjectPageActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LinkRunner(projectPageURL).execute();
     }
   }
 
   private static class MntmVdmTutorialActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LinkRunner(vdmTutorialURL).execute();
     }
   }
 
   private static class MntmInstructionsActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LinkRunner(instructionsURL).execute();
     }
@@ -268,12 +264,10 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     gbc_lblResolution.gridy = 0;
     panelSettings.add(lblResolution, gbc_lblResolution);
 
-    JComboBox<String> cmbResolution = new JComboBox<String>();
+    JComboBox<String> cmbResolution = new JComboBox<>();
     cmbResolution
         .setToolTipText("<html>Set the resolution for TF2, you can choose<br>an option or input a custom one.");
-    cmbResolution.setModel(new DefaultComboBoxModel<>(new String[] {"640x360", "854x480",
-        "960x540", "1024x576", "1280x720", "1366x768", "1600x900", "1920x1080", "2048x1152",
-        "2560x1440"}));
+    cmbResolution.setModel(new DefaultComboBoxModel<>(Constants.RESOLUTIONS));
     cmbResolution.setEditable(true);
     GridBagConstraints gbc_cmbResolution = new GridBagConstraints();
     gbc_cmbResolution.gridwidth = 3;
@@ -294,8 +288,7 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     JComboBox<String> cmbFramerate = new JComboBox<>();
     cmbFramerate
         .setToolTipText("<html>Set the frames per second of the recording. This value can be<br>changed in-game with the up and down arrow keys. You can<br>also set a custom FPS value here.");
-    cmbFramerate.setModel(new DefaultComboBoxModel<>(new String[] {"60", "120", "240", "480",
-        "960", "1920", "3840"}));
+    cmbFramerate.setModel(new DefaultComboBoxModel<>(Constants.FPS));
     cmbFramerate.setEditable(true);
     GridBagConstraints gbc_cmbFramerate = new GridBagConstraints();
     gbc_cmbFramerate.fill = GridBagConstraints.HORIZONTAL;
@@ -346,8 +339,7 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     JComboBox<String> cmbHud = new JComboBox<>();
     cmbHud
         .setToolTipText("<html>Select your preferred HUD here. You can also you use a custom HUD,<br>in which case you should put the HUD folder into lawena/custom folder<br>and then mark it in the Custom Resources sidebar.");
-    cmbHud.setModel(new DefaultComboBoxModel<String>(new String[] {"Kill notices only",
-        "Medic (hp & ubercharge)", "Default", "Custom"}));
+    cmbHud.setModel(new DefaultComboBoxModel<>(Constants.TF_HUD_OPTIONS));
     GridBagConstraints gbc_cmbHud = new GridBagConstraints();
     gbc_cmbHud.gridwidth = 3;
     gbc_cmbHud.fill = GridBagConstraints.HORIZONTAL;
@@ -365,8 +357,7 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     panelSettings.add(lblDxLevel, gbc_lblDxLevel);
 
     JComboBox<String> cmbQuality = new JComboBox<>();
-    cmbQuality.setModel(new DefaultComboBoxModel<>(new String[] {"80 (Lowest)", "81 (Low)",
-        "90 (Medium)", "95 (High)", "98 (Highest)"}));
+    cmbQuality.setModel(new DefaultComboBoxModel<>(Constants.DXLEVELS));
     GridBagConstraints gbc_cmbQuality = new GridBagConstraints();
     gbc_cmbQuality.fill = GridBagConstraints.HORIZONTAL;
     gbc_cmbQuality.insets = new Insets(0, 0, 5, 5);
@@ -400,7 +391,7 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     panelSettings.add(lblViewmodels, gbc_lblViewmodels);
 
     JComboBox<String> cmbViewmodel = new JComboBox<>();
-    cmbViewmodel.setModel(new DefaultComboBoxModel<String>(new String[] {"On", "Off", "Default"}));
+    cmbViewmodel.setModel(new DefaultComboBoxModel<>(Constants.VIEWMODELS));
     GridBagConstraints gbc_cmbViewmodel = new GridBagConstraints();
     gbc_cmbViewmodel.insets = new Insets(0, 0, 5, 5);
     gbc_cmbViewmodel.fill = GridBagConstraints.HORIZONTAL;
@@ -441,7 +432,7 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     panelSettings.add(lblOutput, gbc_lblOutput);
 
     JComboBox<String> cmbSourceVideoFormat = new JComboBox<>();
-    cmbSourceVideoFormat.setModel(new DefaultComboBoxModel<>(new String[] {"TGA", "JPG"}));
+    cmbSourceVideoFormat.setModel(new DefaultComboBoxModel<>(Constants.FRAME_OUTPUT_FORMATS));
     GridBagConstraints gbc_cmbSourceVideoFormat = new GridBagConstraints();
     gbc_cmbSourceVideoFormat.insets = new Insets(0, 0, 5, 5);
     gbc_cmbSourceVideoFormat.fill = GridBagConstraints.HORIZONTAL;
@@ -659,18 +650,22 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     setLocationByPlatform(true);
   }
 
+  @Override
   public JComboBox<String> getCmbResolution() {
     return cmbResolution;
   }
 
+  @Override
   public JComboBox<String> getCmbSkybox() {
     return cmbSkybox;
   }
 
+  @Override
   public JComboBox<String> getCmbHud() {
     return cmbHud;
   }
 
+  @Override
   public JComboBox<String> getCmbFramerate() {
     return cmbFramerate;
   }
@@ -679,6 +674,7 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     return cmbQuality;
   }
 
+  @Override
   public JSpinner getSpinnerViewmodelFov() {
     return spinnerViewmodelFov;
   }
@@ -707,62 +703,77 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     return disableVoiceChat;
   }
 
+  @Override
   public JButton getBtnStartGame() {
     return btnStartTf;
   }
 
+  @Override
   public JLabel getLblResolution() {
     return lblResolution;
   }
 
+  @Override
   public JLabel getLblFrameRate() {
     return lblFrameRate;
   }
 
+  @Override
   public JButton getBtnClearMovieFolder() {
     return btnClearMovieFolder;
   }
 
+  @Override
   public JTable getTableCustomContent() {
     return tableCustomContent;
   }
 
+  @Override
   public JTabbedPane getTabbedPane() {
     return tabbedPane;
   }
 
+  @Override
   public JMenuItem getMntmChangeGameDirectory() {
     return mntmChangeTfDirectory;
   }
 
+  @Override
   public JMenuItem getMntmChangeMovieDirectory() {
     return mntmChangeMovieDirectory;
   }
 
+  @Override
   public JLabel getLblStatus() {
     return lblStatus;
   }
 
+  @Override
   public JComboBox<String> getCmbViewmodel() {
     return cmbViewmodel;
   }
 
+  @Override
   public JProgressBar getProgressBar() {
     return progressBar;
   }
 
+  @Override
   public JMenuItem getMntmRevertToDefault() {
     return mntmRevertToDefault;
   }
 
+  @Override
   public JMenuItem getMntmExit() {
     return mntmExit;
   }
 
+  @Override
   public JMenuItem getMntmAbout() {
     return mntmAbout;
   }
 
+  @Override
   public JMenuItem getMntmSaveSettings() {
     return mntmSaveSettings;
   }
@@ -771,22 +782,27 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     return useHudMinmode;
   }
 
+  @Override
   public JMenuItem getMntmAddCustomSettings() {
     return mntmAddCustomSettings;
   }
 
+  @Override
   public JMenuItem getMntmOpenMovieFolder() {
     return mntmOpenMovieFolder;
   }
 
+  @Override
   public JMenuItem getMntmOpenCustomFolder() {
     return mntmOpenCustomFolder;
   }
 
+  @Override
   public JMenuItem getMntmLaunchTimeout() {
     return mntmChangeTfLaunch;
   }
 
+  @Override
   public JCheckBoxMenuItem getChckbxmntmInsecure() {
     return chckbxmntmInsecure;
   }
@@ -795,38 +811,47 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     return usePlayerModel;
   }
 
+  @Override
   public JComboBox<String> getCmbSourceVideoFormat() {
     return cmbSourceVideoFormat;
   }
 
+  @Override
   public JSpinner getSpinnerJpegQuality() {
     return spinnerJpegQuality;
   }
 
+  @Override
   public JLabel getLblViewmodelFov() {
     return lblViewmodelFov;
   }
 
+  @Override
   public JLabel getLblJpegQuality() {
     return lblJpegQuality;
   }
 
+  @Override
   public JCheckBoxMenuItem getChckbxmntmBackupMode() {
     return chckbxmntmBackupMode;
   }
 
+  @Override
   public JMenuItem getCheckForUpdatesMenuItem() {
     return checkForUpdatesMenuItem;
   }
 
+  @Override
   public JMenuItem getSwitchUpdaterBranchMenuItem() {
     return switchUpdaterBranchMenuItem;
   }
 
+  @Override
   public JMenuItem getShowLogMenuItem() {
     return showLogMenuItem;
   }
 
+  @Override
   public JMenuItem getCustomLaunchOptionsMenuItem() {
     return customLaunchOptionsMenuItem;
   }

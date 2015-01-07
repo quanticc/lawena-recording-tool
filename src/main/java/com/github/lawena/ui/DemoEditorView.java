@@ -15,6 +15,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
+import com.github.lawena.Messages;
 import com.github.lawena.util.Images;
 
 public class DemoEditorView extends JPanel {
@@ -52,7 +53,7 @@ public class DemoEditorView extends JPanel {
     setLayout(gbl_panelVdm);
 
     demoFilterTextField = new JTextFieldPlaceholder();
-    demoFilterTextField.setPlaceholder("Search");
+    demoFilterTextField.setPlaceholder(Messages.getString("DemoEditorView.search")); //$NON-NLS-1$
     GridBagConstraints gbc_txtFilterDemos = new GridBagConstraints();
     gbc_txtFilterDemos.insets = new Insets(5, 5, 5, 5);
     gbc_txtFilterDemos.fill = GridBagConstraints.HORIZONTAL;
@@ -86,16 +87,16 @@ public class DemoEditorView extends JPanel {
     gbc_panelButtonsCenterLeft.gridy = 3;
     add(panelButtonsCenterLeft, gbc_panelButtonsCenterLeft);
 
-    segmentTypeComboBox = new JComboBox<String>();
+    segmentTypeComboBox = new JComboBox<>();
     panelButtonsCenterLeft.add(segmentTypeComboBox);
 
     startTickTextField = new JTextFieldPlaceholder();
-    startTickTextField.setPlaceholder("Start at");
+    startTickTextField.setPlaceholder(Messages.getString("DemoEditorView.startAt")); //$NON-NLS-1$
     panelButtonsCenterLeft.add(startTickTextField);
     startTickTextField.setColumns(5);
 
     endTickTextField = new JTextFieldPlaceholder();
-    endTickTextField.setPlaceholder("Stop at");
+    endTickTextField.setPlaceholder(Messages.getString("DemoEditorView.stopAt")); //$NON-NLS-1$
     panelButtonsCenterLeft.add(endTickTextField);
     endTickTextField.setColumns(5);
 
@@ -103,34 +104,38 @@ public class DemoEditorView extends JPanel {
     toolbar.setFloatable(false);
     panelButtonsCenterLeft.add(toolbar);
 
-    addButton = new JButton("");
-    addButton.setIcon(Images.get("ui/fugue/plus-button.png"));
-    addButton.setToolTipText("Add a segment for the selected demo for the entered ticks");
+    addButton = new JButton(""); //$NON-NLS-1$
+    addButton.setIcon(Images.get("ui/fugue/plus-button.png")); //$NON-NLS-1$
+    addButton.setToolTipText(Messages.getString("DemoEditorView.addSegmentTooltip")); //$NON-NLS-1$
     toolbar.add(addButton);
 
-    deleteSelectedTickButton = new JButton("");
-    deleteSelectedTickButton.setIcon(Images.get("ui/fugue/minus-button.png"));
-    deleteSelectedTickButton.setToolTipText("Remove the selected segments from the list");
+    deleteSelectedTickButton = new JButton(""); //$NON-NLS-1$
+    deleteSelectedTickButton.setIcon(Images.get("ui/fugue/minus-button.png")); //$NON-NLS-1$
+    deleteSelectedTickButton.setToolTipText(Messages
+        .getString("DemoEditorView.removeSegmentTooltip")); //$NON-NLS-1$
     toolbar.add(deleteSelectedTickButton);
 
-    clearTickListButton = new JButton("");
-    clearTickListButton.setIcon(Images.get("ui/fugue/bin.png"));
-    clearTickListButton.setToolTipText("Clear all segments from the list");
+    clearTickListButton = new JButton(""); //$NON-NLS-1$
+    clearTickListButton.setIcon(Images.get("ui/fugue/bin.png")); //$NON-NLS-1$
+    clearTickListButton.setToolTipText(Messages.getString("DemoEditorView.clearSegmentsTooltip")); //$NON-NLS-1$
     toolbar.add(clearTickListButton);
 
-    saveSegmentListButton = new JButton("");
-    saveSegmentListButton.setIcon(Images.get("ui/fugue/drive-download.png"));
-    saveSegmentListButton.setToolTipText("Save this segment list to a file for later use");
+    saveSegmentListButton = new JButton(""); //$NON-NLS-1$
+    saveSegmentListButton.setIcon(Images.get("ui/fugue/drive-download.png")); //$NON-NLS-1$
+    saveSegmentListButton.setToolTipText(Messages
+        .getString("DemoEditorView.saveSegmentListTooltip")); //$NON-NLS-1$
     toolbar.add(saveSegmentListButton);
 
-    loadSegmentListButton = new JButton("");
-    loadSegmentListButton.setIcon(Images.get("ui/fugue/drive-upload.png"));
-    loadSegmentListButton.setToolTipText("Load a previously saved segment list from a file");
+    loadSegmentListButton = new JButton(""); //$NON-NLS-1$
+    loadSegmentListButton.setIcon(Images.get("ui/fugue/drive-upload.png")); //$NON-NLS-1$
+    loadSegmentListButton.setToolTipText(Messages
+        .getString("DemoEditorView.loadSegmentListTooltip")); //$NON-NLS-1$
     toolbar.add(loadSegmentListButton);
 
-    changeDemoFolderButton = new JButton("");
-    changeDemoFolderButton.setIcon(Images.get("ui/fugue/folder-bookmark.png"));
-    changeDemoFolderButton.setToolTipText("Change demos location");
+    changeDemoFolderButton = new JButton(""); //$NON-NLS-1$
+    changeDemoFolderButton.setIcon(Images.get("ui/fugue/folder-bookmark.png")); //$NON-NLS-1$
+    changeDemoFolderButton.setToolTipText(Messages
+        .getString("DemoEditorView.changeDemosLocationTooltip")); //$NON-NLS-1$
     toolbar.add(changeDemoFolderButton);
 
     scrollPane_1 = new JScrollPane();
@@ -158,18 +163,22 @@ public class DemoEditorView extends JPanel {
     gbc_panelButtonsBottomLeft.gridy = 5;
     add(panelButtonsBottomLeft, gbc_panelButtonsBottomLeft);
 
-    createVdmFilesButton = new JButton("Create VDM Files");
+    createVdmFilesButton = new JButton(Messages.getString("DemoEditorView.createVdmFiles")); //$NON-NLS-1$
     panelButtonsBottomLeft.add(createVdmFilesButton);
 
-    deleteVdmFilesButton = new JButton("Delete VDM Files...");
+    deleteVdmFilesButton = new JButton(Messages.getString("DemoEditorView.deleteVdmFiles")); //$NON-NLS-1$
     panelButtonsBottomLeft.add(deleteVdmFilesButton);
 
-    autoplayFirstDemoCheckBox = new JCheckBox("Auto-play First Demo");
-    autoplayFirstDemoCheckBox.setToolTipText("Plays the first demo on game launch");
+    autoplayFirstDemoCheckBox =
+        new JCheckBox(Messages.getString("DemoEditorView.autoPlayFirstDemo")); //$NON-NLS-1$
+    autoplayFirstDemoCheckBox.setToolTipText(Messages
+        .getString("DemoEditorView.autoPlayFirstDemoTooltip")); //$NON-NLS-1$
     panelButtonsBottomLeft.add(autoplayFirstDemoCheckBox);
 
-    noSkipToTickCheckBox = new JCheckBox("Remove SkipToTick lines");
-    noSkipToTickCheckBox.setToolTipText("Do not add SkipToTick lines to VDM files created");
+    noSkipToTickCheckBox =
+        new JCheckBox(Messages.getString("DemoEditorView.removeSkipToTickLines")); //$NON-NLS-1$
+    noSkipToTickCheckBox.setToolTipText(Messages
+        .getString("DemoEditorView.removeSkipToTickLinesTooltip")); //$NON-NLS-1$
     panelButtonsBottomLeft.add(noSkipToTickCheckBox);
 
   }

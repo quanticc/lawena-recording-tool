@@ -8,7 +8,6 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -27,6 +26,7 @@ import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
 import com.github.lawena.vpk.Archive;
 import com.github.lawena.vpk.ArchiveException;
 import com.github.lawena.vpk.Directory;
@@ -47,9 +47,9 @@ public class Resources extends AbstractTableModel {
   private final List<Resource> list = new ArrayList<>();
 
   public Resources() {
-    alias.put("no_announcer_voices.vpk", "Disable announcer voices");
-    alias.put("no_applause_sounds.vpk", "Disable applause sounds");
-    alias.put("no_domination_sounds.vpk", "Disable domination/revenge sounds");
+    alias.put("no_announcer_voices.vpk", Messages.getString("Resources.disableAnnouncerVoices")); //$NON-NLS-1$ //$NON-NLS-2$
+    alias.put("no_applause_sounds.vpk", Messages.getString("Resources.disableApplauseSounds")); //$NON-NLS-1$ //$NON-NLS-2$
+    alias.put("no_domination_sounds.vpk", Messages.getString("Resources.disableDomRevengeSounds")); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
@@ -83,13 +83,13 @@ public class Resources extends AbstractTableModel {
   public String getColumnName(int column) {
     switch (Column.values()[column]) {
       case TAGS:
-        return "Tags";
+        return "Tags"; //$NON-NLS-1$
       case ENABLED:
-        return "";
+        return ""; //$NON-NLS-1$
       case NAME:
-        return "Resource";
+        return "Resource"; //$NON-NLS-1$
       default:
-        return "";
+        return ""; //$NON-NLS-1$
     }
   }
 
@@ -104,7 +104,7 @@ public class Resources extends AbstractTableModel {
       case NAME:
         return r;
       default:
-        return "";
+        return ""; //$NON-NLS-1$
     }
   }
 
@@ -139,15 +139,14 @@ public class Resources extends AbstractTableModel {
     return count;
   }
 
-  private String cleanCollection(Collection<?> l) {
-    return l.toString().replaceAll("\\[|\\]", "").replaceAll(", ", "\\+");
+  private static String cleanCollection(Collection<?> l) {
+    return l.toString().replaceAll("\\[|\\]", "").replaceAll(", ", "\\+"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 
   public ResourceFolder addFolder(File file, boolean forceLoad) {
     ResourceFolder f = new ResourceFolder(file, forceLoad);
-    folders.remove(f);
     folders.put(file.toPath().toAbsolutePath().toString(), f);
-    log.debug("Adding resources folder: {}", file.getAbsolutePath());
+    log.debug("Adding resources folder: {}", file.getAbsolutePath()); //$NON-NLS-1$
     refreshFolder(f.getFile());
     return f;
   }
@@ -158,14 +157,14 @@ public class Resources extends AbstractTableModel {
       int index = list.indexOf(r);
       boolean enabled;
       if (index > 0) {
-        log.debug("Updating '{}' from {}", r, r.getAbsolutePath());
+        log.debug("Updating '{}' from {}", r, r.getAbsolutePath()); //$NON-NLS-1$
         Resource old = list.get(index);
         list.remove(index);
         list.add(index, r);
         enabled = old.isEnabled();
         fireTableRowsUpdated(index, index);
       } else {
-        log.debug("Adding '{}' from {}", r, r.getAbsolutePath());
+        log.debug("Adding '{}' from {}", r, r.getAbsolutePath()); //$NON-NLS-1$
         list.add(r);
         enabled = false;
         int row = list.size() - 1;
@@ -174,7 +173,7 @@ public class Resources extends AbstractTableModel {
       if (!enabled || isEnableAllowed(r)) {
         r.setEnabled(enabled);
       } else {
-        log.warn("Maximum HUD count selected");
+        log.warn("Maximum HUD count selected"); //$NON-NLS-1$
       }
     }
   }
@@ -183,17 +182,15 @@ public class Resources extends AbstractTableModel {
     List<Resource> newResourceList = new ArrayList<>();
     // path must be a folder or a vpk file
     if (!Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)) {
-      log.info("Skipping path {} since it does not exist or is not a folder", dir);
+      log.info("Skipping invalid or non existant path: {}", dir); //$NON-NLS-1$
     } else {
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
         for (Path path : stream) {
           // each resource must be a folder or a vpk file
           newResourceList.add(newResource(path));
         }
-      } catch (NoSuchFileException e) {
-        log.debug("{} does not exist, not scanning this path", dir);
       } catch (IOException e) {
-        log.warn("Problem while loading custom paths: " + e);
+        log.warn("Problem while loading custom paths: {}", e.toString()); //$NON-NLS-1$
       }
     }
     return newResourceList;
@@ -208,29 +205,29 @@ public class Resources extends AbstractTableModel {
     return resource;
   }
 
-  public void updateTags(Resource resource) throws IOException {
+  public static void updateTags(Resource resource) throws IOException {
     Set<String> tags = new HashSet<>();
     boolean hasResourceUiFolder = false;
     boolean hasScriptsFolder = false;
     for (String content : contents(resource)) {
-      if (content.startsWith("resource/ui")) {
+      if (content.startsWith("resource/ui")) { //$NON-NLS-1$
         hasResourceUiFolder = true;
-      } else if (content.startsWith("scripts/")) {
+      } else if (content.startsWith("scripts/")) { //$NON-NLS-1$
         hasScriptsFolder = true;
-      } else if (content.startsWith("cfg/") && content.endsWith(".cfg")) {
+      } else if (content.startsWith("cfg/") && content.endsWith(".cfg")) { //$NON-NLS-1$ //$NON-NLS-2$
         tags.add(Resource.CONFIG);
-      } else if (content.startsWith("materials/skybox/")) {
+      } else if (content.startsWith("materials/skybox/")) { //$NON-NLS-1$
         tags.add(Resource.SKYBOX);
       }
     }
     if (hasResourceUiFolder && hasScriptsFolder) {
       tags.add(Resource.HUD);
     }
-    log.trace("Tagging '{}' with: {}", resource, tags);
+    log.trace("Tagging '{}' with: {}", resource, tags); //$NON-NLS-1$
     resource.setTags(tags);
   }
 
-  private List<String> contents(Resource resource) throws IOException {
+  private static List<String> contents(Resource resource) throws IOException {
     final Path start = resource.getAbsolutePath();
     final List<String> contents = new ArrayList<>();
     if (Files.isDirectory(start)) {
@@ -244,20 +241,20 @@ public class Resources extends AbstractTableModel {
               return FileVisitResult.CONTINUE;
             }
           });
-    } else if (start.toString().endsWith(".vpk")) {
+    } else if (start.toString().endsWith(".vpk")) { //$NON-NLS-1$
       Archive vpk = new Archive(start.toFile());
       try {
         vpk.load();
         for (Directory dir : vpk.getDirectories()) {
           for (Entry entry : dir.getEntries()) {
-            contents.add(dir.getPath() + "/" + entry.getFullName());
+            contents.add(dir.getPath() + "/" + entry.getFullName()); //$NON-NLS-1$
           }
         }
       } catch (ArchiveException | EntryException e) {
-        throw new IOException("Invalid VPK archive", e);
+        throw new IOException("Invalid VPK archive", e); //$NON-NLS-1$
       }
     }
-    log.trace("Contents found for {}: {}", start, contents);
+    log.trace("Contents found for {}: {}", start, contents); //$NON-NLS-1$
     return contents;
   }
 
@@ -270,7 +267,7 @@ public class Resources extends AbstractTableModel {
     for (Resource resource : list) {
       ResourceFolder folder = folders.get(resource.getParentPath().toString());
       if (folder == null) {
-        log.warn("Parent folder of '{}' was not found on record", folder);
+        log.warn("Parent of resource not found: {}", resource); //$NON-NLS-1$
       } else {
         if (folder.isEnabled() && folder.isForceLoad()) {
           resource.setEnabled(true);
@@ -288,7 +285,7 @@ public class Resources extends AbstractTableModel {
   public boolean isParentForcefullyLoaded(Resource resource) {
     ResourceFolder folder = folders.get(resource.getParentPath().toString());
     if (folder == null) {
-      log.warn("Parent folder of '{}' was not found on record", folder);
+      log.warn("Parent of resource not found: {}", resource); //$NON-NLS-1$
     } else {
       return folder.isForceLoad();
     }
@@ -312,7 +309,7 @@ public class Resources extends AbstractTableModel {
           }
         }
       } catch (InvalidPathException e) {
-        log.warn("{} is not a valid path", pathname);
+        log.warn("Invalid path: {}", pathname); //$NON-NLS-1$
       }
     }
   }

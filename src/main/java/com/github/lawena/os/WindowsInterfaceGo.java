@@ -14,13 +14,15 @@ import com.github.lawena.util.Consumer;
 
 public class WindowsInterfaceGo extends WindowsInterface {
 
-  private static final Logger log = LoggerFactory.getLogger(WindowsInterfaceGo.class);
+  private static final Logger _log = LoggerFactory.getLogger(WindowsInterfaceGo.class);
 
+  @SuppressWarnings("nls")
   @Override
   public ProcessBuilder getBuilderGameProcessKiller() {
     return new ProcessBuilder("taskkill", "/F", "/IM", "csgo.exe");
   }
 
+  @SuppressWarnings("nls")
   @Override
   public boolean isGameRunning() {
     final String hl2 = "csgo.exe";
@@ -44,13 +46,13 @@ public class WindowsInterfaceGo extends WindowsInterface {
         return true;
       }
     }
-    log.debug("CSGO process not detected");
+    _log.debug("CSGO process not detected");
     return false;
   }
 
   @Override
   public String getSystemDxLevel() {
-    return "5f";
+    return "5f"; //$NON-NLS-1$
   }
 
   @Override

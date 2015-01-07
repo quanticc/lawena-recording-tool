@@ -29,7 +29,7 @@ import com.github.lawena.util.Util;
 public class PreviewGenerator extends SwingWorker<Void, Void> {
 
   private static final Logger log = LoggerFactory.getLogger(PreviewGenerator.class);
-  private static final Logger status = LoggerFactory.getLogger("status");
+  private static final Logger status = LoggerFactory.getLogger("status"); //$NON-NLS-1$
 
   private Tasks parent;
   private MainModel model;
@@ -53,22 +53,22 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
       vtfcmd = model.getOsInterface().getVTFCmdLocation();
     } catch (UnsupportedOperationException e) {
       // we can't continue
-      log.warn("Aborting generation: " + e);
+      log.warn("Aborting generation: {}", e.toString()); //$NON-NLS-1$
       return null;
     }
     int count = 0;
-    List<String> boxes = Arrays.asList("lf", "bk", "rt", "ft");
+    List<String> boxes = Arrays.asList("lf", "bk", "rt", "ft"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     String folder = Key.gameFolderName.getValue(model.getSettings());
-    String inputDir = "lwrt/" + folder + "/skybox/vtf";
-    String outputDir = "lwrt/" + folder + "/skybox-preview";
-    String format = "png";
+    String inputDir = "lwrt/" + folder + "/skybox/vtf"; //$NON-NLS-1$ //$NON-NLS-2$
+    String outputDir = "lwrt/" + folder + "/skybox-preview"; //$NON-NLS-1$ //$NON-NLS-2$
+    String format = "png"; //$NON-NLS-1$
     for (String name : skyboxNames) {
       count++;
       setProgress((int) (100 * ((double) count / skyboxNames.size())));
       status.info("Generating skybox preview: {}", name);
       if (!model.getSkyboxPreviewStore().getMap().containsKey(name)) {
-        List<Path> inputs = withParams(inputDir, name, boxes, ".vtf");
-        List<Path> outputs = withParams(outputDir, name, boxes, "." + format);
+        List<Path> inputs = withParams(inputDir, name, boxes, ".vtf"); //$NON-NLS-1$
+        List<Path> outputs = withParams(outputDir, name, boxes, "." + format); //$NON-NLS-1$
         List<Path> vtfin = new ArrayList<>();
         for (int i = 0; i < inputs.size(); i++) {
           Path in = inputs.get(i);
@@ -81,7 +81,7 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
           generate(vtfin, outputDir, format);
         }
         ImageIcon icon = concatenate(outputs);
-        log.debug("Adding skybox preview: {}", name);
+        log.debug("Adding skybox preview: {}", name); //$NON-NLS-1$
         model.getSkyboxPreviewStore().getMap().put(name, icon);
         deleteTempFiles(outputs);
       }
@@ -89,18 +89,18 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
     try {
       Files.deleteIfExists(Paths.get(outputDir));
     } catch (IOException e) {
-      log.warn("Could not remove temporary skybox preview folder: " + e);
+      log.warn("Could not remove temporary skybox preview folder: {}", e.toString()); //$NON-NLS-1$
     }
     model.saveSkyboxData();
     return null;
   }
 
-  private void deleteTempFiles(List<Path> outputs) {
+  private static void deleteTempFiles(List<Path> outputs) {
     for (Path out : outputs) {
       try {
         Files.deleteIfExists(out);
       } catch (IOException e) {
-        log.warn("Could not delete some of the temporary skybox files: " + e);
+        log.warn("Could not delete some of the temporary skybox files: {}", e.toString()); //$NON-NLS-1$
       }
     }
   }
@@ -108,14 +108,14 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
   @Override
   protected void done() {
     presenter.selectSkyboxFromSettings();
-    log.info("Skybox loading complete");
+    log.info("Skybox loading complete"); //$NON-NLS-1$
     status.info(StatusAppender.OK, "Ready");
     if (!isCancelled()) {
       parent.setCurrentWorker(null, false);
     }
   }
 
-  private ImageIcon concatenate(List<Path> outputs) {
+  private static ImageIcon concatenate(List<Path> outputs) {
     int width = 32;
     int height = 32;
     int totalwidth = width * outputs.size();
@@ -123,7 +123,7 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
     for (int i = 0; i < outputs.size(); i++) {
       Path out = outputs.get(i);
       if (!Files.exists(out)) {
-        log.warn("Expected file {} but it does not exist!", out);
+        log.warn("Expected file {} but it does not exist!", out); //$NON-NLS-1$
       } else {
         try {
           File input = out.toFile();
@@ -131,14 +131,14 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
               ImageIO.read(input).getScaledInstance(width, height, Image.SCALE_SMOOTH), i * width,
               0, null);
         } catch (IOException e) {
-          log.warn("Could not read image: " + e);
+          log.warn("Could not read image: {}", e.toString()); //$NON-NLS-1$
         }
       }
     }
     return new ImageIcon(image);
   }
 
-  private List<Path> withParams(String parent, String prefix, List<String> suffixes,
+  private static List<Path> withParams(String parent, String prefix, List<String> suffixes,
       String extension) {
     List<Path> list = new ArrayList<>();
     for (String s : suffixes) {
@@ -150,22 +150,22 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
   private void generate(List<Path> inputs, String outputDir, String ext) {
     try {
       Files.createDirectories(Paths.get(outputDir));
-      ProcessBuilder pb = new ProcessBuilder(vtfcmd, "-output", outputDir, "-exportformat", ext);
+      ProcessBuilder pb = new ProcessBuilder(vtfcmd, "-output", outputDir, "-exportformat", ext); //$NON-NLS-1$ //$NON-NLS-2$
       for (Path in : inputs) {
-        pb.command().add("-file");
+        pb.command().add("-file"); //$NON-NLS-1$
         pb.command().add(in.toString());
       }
-      log.debug("Invoking process: {}", pb.command());
+      log.debug("Invoking process: {}", pb.command()); //$NON-NLS-1$
       Process pr = pb.start();
       try (BufferedReader input = Util.newProcessReader(pr)) {
         String line;
         while ((line = input.readLine()) != null) {
-          log.trace("[vtfcmd] {}", line);
+          log.trace("[vtfcmd] {}", line); //$NON-NLS-1$
         }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
-      log.warn("Problem while generating png from vtf file", e);
+      log.warn("Problem while generating png from vtf file", e); //$NON-NLS-1$
     }
   }
 

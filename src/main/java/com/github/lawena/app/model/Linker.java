@@ -2,6 +2,12 @@ package com.github.lawena.app.model;
 
 import com.github.lawena.util.LawenaException;
 
+/**
+ * Represents a strategy to operate with user files.
+ * 
+ * @author Ivan
+ *
+ */
 public interface Linker {
 
   public void setModel(MainModel model);

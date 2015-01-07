@@ -8,6 +8,7 @@ import javax.swing.ImageIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("nls")
 public enum Images {
 
   INSTANCE;
@@ -38,7 +39,7 @@ public enum Images {
         map.put(key, icon);
       } catch (Exception e) {
         log.warn("Could not load image at {}: {}", key, e);
-        new ImageIcon();
+        icon = new ImageIcon();
       }
     }
     return icon;

@@ -14,12 +14,13 @@ import com.github.lawena.util.Consumer;
 
 public class WindowsInterfaceTf extends WindowsInterface {
 
-  private static final Logger log = LoggerFactory.getLogger(WindowsInterfaceTf.class);
+  private static final Logger _log = LoggerFactory.getLogger(WindowsInterfaceTf.class);
   private static final String DXLEVEL_REGISTRY_KEY =
-      "HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings";
-  private static final String DXLEVEL_REGISTRY_VALUE = "DXLevel_V1";
+      "HKEY_CURRENT_USER\\Software\\Valve\\Source\\tf\\Settings"; //$NON-NLS-1$
+  private static final String DXLEVEL_REGISTRY_VALUE = "DXLevel_V1"; //$NON-NLS-1$
 
 
+  @SuppressWarnings("nls")
   @Override
   public ProcessBuilder getBuilderGameProcessKiller() {
     return new ProcessBuilder("taskkill", "/F", "/IM", "hl2.exe");
@@ -30,6 +31,7 @@ public class WindowsInterfaceTf extends WindowsInterface {
     return regQuery(DXLEVEL_REGISTRY_KEY, DXLEVEL_REGISTRY_VALUE);
   }
 
+  @SuppressWarnings("nls")
   @Override
   public boolean isGameRunning() {
     final String hl2 = "hl2.exe";
@@ -53,13 +55,13 @@ public class WindowsInterfaceTf extends WindowsInterface {
         return true;
       }
     }
-    log.debug("TF2 process not detected");
+    _log.debug("TF2 process not detected");
     return false;
   }
 
   @Override
   public void setSystemDxLevel(String dxlevel) {
-    String tool = Paths.get("lwrt/tools/regedit/rg.bat").toAbsolutePath().toString();
+    String tool = Paths.get("lwrt/tools/regedit/rg.bat").toAbsolutePath().toString(); //$NON-NLS-1$
     startProcess(Arrays.asList(tool, DXLEVEL_REGISTRY_KEY, DXLEVEL_REGISTRY_VALUE, dxlevel));
   }
 }

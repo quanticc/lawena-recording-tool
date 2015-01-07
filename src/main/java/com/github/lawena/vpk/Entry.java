@@ -29,7 +29,7 @@ public class Entry {
   protected Entry(Archive archive, short archiveIndex, byte[] preloadData, String filename,
       String extension, int crc, int offset, int length, short terminator) throws EntryException {
     if (archive == null)
-      throw new EntryException("Parent archive cannot be null");
+      throw new EntryException("Parent archive cannot be null"); //$NON-NLS-1$
 
     this.archive = archive;
     this.archiveIndex = archiveIndex;
