@@ -8,6 +8,17 @@ If you need help or have questions, please use the [issue tracker](#issues). If 
 
 Currently the only one actively developing Lawena Recording Tool is **Quantic** ([github](https://github.com/iabarca)) ([steam](http://steamcommunity.com/id/thepropane/)). Montz is no longer developing the tool so don't bother him with requests. Maybe only to thank him for creating this great little piece of free software. If you want to help [in other ways](#get-involved), tell me about it via Steam.
 
+<a name="get-involved"></a>
+### Get involved
+
+Tasks that need your help:
+
+1. *Making sure Lawena does it's job* &mdash; Sometimes I mess up after an update. Please let me know! Also anything not working out correctly, I'm always listening.
+2. *Contributing to the GitHub Wiki* &mdash; The [wiki](https://github.com/iabarca/lawena-recording-tool/wiki) in this repository is kind of abandoned. This also applies to documentation and help throughout the tool. I will greatly appreciate all contributions.
+3. *Porting Lawena to other games* &mdash; The tool can work out with most Source games with little modifications. If you are interested or want to suggest a game let me know.
+4. *Helping with translations* &mdash; Thank you very much! Contact me on [Steam](http://steamcommunity.com/id/thepropane) for details.
+5. *Increasing Linux/OSX support* &mdash; Lawena theoretically supports those operating systems but the truth is that they are far from optimal. I'm looking for help especially about supporting OSX.
+
 <a name="issues"></a>
 ## Using the issue tracker
 
@@ -87,17 +98,6 @@ And then use the issue tracker again for this.
 ### Submitting Pull Requests
 
 Pull requests are **awesome**. If you're looking to raise a PR for something which doesn't have an open issue, please think carefully about [raising an issue](#raising-issues) which your PR can close, especially if you're fixing a bug. This makes it more likely that there will be enough information available for your PR to be properly tested and merged. The project is small so just submit the pull request and we'll make it work together!
-
-<a name="get-involved"></a>
-### Get involved
-
-You can also get involved helping with:
-
-1. *Making sure Lawena does it's job* &mdash; Sometimes I mess up after an update. Please let me know! Also anything not working out correctly, I'm always listening.
-2. *Contributing to the GitHub Wiki* &mdash; The [wiki](https://github.com/iabarca/lawena-recording-tool/wiki) in this repository is kind of abandoned. This also applies to documentation and help throughout the tool. I will greatly appreciate all contributions.
-3. *Porting Lawena to other games* &mdash; The tool can work out with most Source games with little modifications. If you are interested or want to suggest a game let me know.
-4. *Helping with translations* &mdash; Thank you very much! Contact me on [Steam](http://steamcommunity.com/id/thepropane) for details.
-5. *Increasing Linux/OSX support* &mdash; Lawena theoretically supports those operating systems but the truth is that they are far from optimal. I'm looking for help especially about supporting OSX.
 
 Use Steam for stuff not covered here. Issue tracker also works.
 
