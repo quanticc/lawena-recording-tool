@@ -40,6 +40,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import com.github.lawena.Constants;
+import com.github.lawena.Messages;
 import com.github.lawena.app.task.LinkRunner;
 
 public class LawenaViewGo extends JFrame implements LawenaView {
@@ -126,110 +127,122 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     JMenuBar menuBar = new JMenuBar();
     setJMenuBar(menuBar);
 
-    JMenu mnFile = new JMenu(" File ");
+    JMenu mnFile = new JMenu(Messages.getString("LawenaView.fileMenu")); //$NON-NLS-1$
     menuBar.add(mnFile);
 
-    JMenuItem mntmChangeTfDirectory = new JMenuItem("Change Game Folder...");
+    JMenuItem mntmChangeTfDirectory =
+        new JMenuItem(Messages.getString("LawenaView.changeGameFolder")); //$NON-NLS-1$
     mnFile.add(mntmChangeTfDirectory);
 
-    JMenuItem mntmChangeMovieDirectory = new JMenuItem("Change Movie Folder...");
+    JMenuItem mntmChangeMovieDirectory =
+        new JMenuItem(Messages.getString("LawenaView.changeFramesFolder")); //$NON-NLS-1$
     mnFile.add(mntmChangeMovieDirectory);
 
     JSeparator separator_4 = new JSeparator();
     mnFile.add(separator_4);
 
-    JMenuItem mntmOpenMovieFolder = new JMenuItem("Open Movie Folder");
+    JMenuItem mntmOpenMovieFolder =
+        new JMenuItem(Messages.getString("LawenaView.openFramesFolder")); //$NON-NLS-1$
     mnFile.add(mntmOpenMovieFolder);
 
-    JMenuItem mntmOpenCustomFolder = new JMenuItem("Open Custom Folder");
+    JMenuItem mntmOpenCustomFolder =
+        new JMenuItem(Messages.getString("LawenaView.openCustomFolder")); //$NON-NLS-1$
     mnFile.add(mntmOpenCustomFolder);
 
     JSeparator separator = new JSeparator();
     mnFile.add(separator);
 
-    JMenuItem mntmSaveSettings = new JMenuItem("Save Settings");
+    JMenuItem mntmSaveSettings = new JMenuItem(Messages.getString("LawenaView.saveSettings")); //$NON-NLS-1$
     mntmSaveSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
     mnFile.add(mntmSaveSettings);
 
-    JMenuItem mntmRevertToDefault = new JMenuItem("Revert to Default Settings");
+    JMenuItem mntmRevertToDefault =
+        new JMenuItem(Messages.getString("LawenaView.revertToDefaultSettings")); //$NON-NLS-1$
     mnFile.add(mntmRevertToDefault);
 
     JSeparator separator_1 = new JSeparator();
     mnFile.add(separator_1);
 
-    JMenuItem mntmExit = new JMenuItem("Exit");
+    JMenuItem mntmExit = new JMenuItem(Messages.getString("LawenaView.exit")); //$NON-NLS-1$
     mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_MASK));
     mnFile.add(mntmExit);
 
-    JMenu mnAdvanced = new JMenu(" Advanced ");
+    JMenu mnAdvanced = new JMenu(Messages.getString("LawenaView.advancedMenu")); //$NON-NLS-1$
     menuBar.add(mnAdvanced);
 
-    JMenuItem mntmAddCustomSettings = new JMenuItem("Custom Settings/CVars...");
+    JMenuItem mntmAddCustomSettings =
+        new JMenuItem(Messages.getString("LawenaView.customSettings")); //$NON-NLS-1$
     mnAdvanced.add(mntmAddCustomSettings);
 
-    JMenuItem customLaunchOptionsMenuItem = new JMenuItem("Custom Launch Options...");
+    JMenuItem customLaunchOptionsMenuItem =
+        new JMenuItem(Messages.getString("LawenaView.customLaunchOptions")); //$NON-NLS-1$
     mnAdvanced.add(customLaunchOptionsMenuItem);
 
     JSeparator separator_3 = new JSeparator();
     mnAdvanced.add(separator_3);
 
-    JCheckBoxMenuItem chckbxmntmInsecure = new JCheckBoxMenuItem("Launch using -insecure");
+    JCheckBoxMenuItem chckbxmntmInsecure =
+        new JCheckBoxMenuItem(Messages.getString("LawenaView.useInsecure")); //$NON-NLS-1$
     mnAdvanced.add(chckbxmntmInsecure);
 
     JCheckBoxMenuItem chckbxmntmBackupMode =
-        new JCheckBoxMenuItem("Delete Backup if Files were Restored");
+        new JCheckBoxMenuItem(Messages.getString("LawenaView.deleteBackupFilesOnRestoreSuccess")); //$NON-NLS-1$
     mnAdvanced.add(chckbxmntmBackupMode);
 
     JSeparator separator_5 = new JSeparator();
     mnAdvanced.add(separator_5);
 
-    JMenuItem mntmChangeGameLaunch = new JMenuItem("Change Game Launch Timeout...");
+    JMenuItem mntmChangeGameLaunch =
+        new JMenuItem(Messages.getString("LawenaView.changeGameLaunchTimeout")); //$NON-NLS-1$
     mnAdvanced.add(mntmChangeGameLaunch);
 
-    JMenu mnHelp = new JMenu(" Help ");
+    JMenu mnHelp = new JMenu(Messages.getString("LawenaView.helpMenu")); //$NON-NLS-1$
     menuBar.add(mnHelp);
 
-    JMenuItem showLogMenuItem = new JMenuItem("Show Log");
+    JMenuItem showLogMenuItem = new JMenuItem(Messages.getString("LawenaView.showLog")); //$NON-NLS-1$
     showLogMenuItem.setIcon(new ImageIcon(LawenaViewGo.class
-        .getResource("/com/github/lawena/ui/fugue/clock.png")));
+        .getResource("/com/github/lawena/ui/fugue/clock.png"))); //$NON-NLS-1$
     mnHelp.add(showLogMenuItem);
 
     JSeparator separator_7 = new JSeparator();
     mnHelp.add(separator_7);
 
-    JMenuItem mntmInstructions = new JMenuItem("Instructions and FAQ");
+    JMenuItem mntmInstructions = new JMenuItem(Messages.getString("LawenaView.instructions")); //$NON-NLS-1$
     mntmInstructions.addActionListener(new MntmInstructionsActionListener());
     mnHelp.add(mntmInstructions);
 
-    JMenuItem mntmVdmTutorial = new JMenuItem("VDM Tutorial");
+    JMenuItem mntmVdmTutorial = new JMenuItem(Messages.getString("LawenaView.vdmTutorial")); //$NON-NLS-1$
     mntmVdmTutorial.addActionListener(new MntmVdmTutorialActionListener());
     mnHelp.add(mntmVdmTutorial);
 
-    JMenuItem mntmRenderingTutorial = new JMenuItem("Rendering Tutorial");
+    JMenuItem mntmRenderingTutorial =
+        new JMenuItem(Messages.getString("LawenaView.renderingTutorial")); //$NON-NLS-1$
     mntmRenderingTutorial.addActionListener(new MntmRenderingTutorialActionListener());
     mnHelp.add(mntmRenderingTutorial);
 
     JSeparator separator_2 = new JSeparator();
     mnHelp.add(separator_2);
 
-    JMenuItem checkForUpdatesMenuItem = new JMenuItem("Check for Updates");
+    JMenuItem checkForUpdatesMenuItem =
+        new JMenuItem(Messages.getString("LawenaView.checkForUpdates")); //$NON-NLS-1$
     mnHelp.add(checkForUpdatesMenuItem);
 
-    JMenuItem switchUpdaterBranchMenuItem = new JMenuItem("Switch Updater Branch...");
+    JMenuItem switchUpdaterBranchMenuItem =
+        new JMenuItem(Messages.getString("LawenaView.switchUpdaterBranch")); //$NON-NLS-1$
     mnHelp.add(switchUpdaterBranchMenuItem);
 
-    JMenuItem mntmPatchNotes = new JMenuItem("Release Notes");
+    JMenuItem mntmPatchNotes = new JMenuItem(Messages.getString("LawenaView.releaseNotes")); //$NON-NLS-1$
     mntmPatchNotes.addActionListener(new MntmPatchNotesActionListener());
     mnHelp.add(mntmPatchNotes);
 
-    JMenuItem mntmProjectPage = new JMenuItem("Project Page");
+    JMenuItem mntmProjectPage = new JMenuItem(Messages.getString("LawenaView.projectPage")); //$NON-NLS-1$
     mntmProjectPage.addActionListener(new MntmProjectPageActionListener());
     mnHelp.add(mntmProjectPage);
 
     JSeparator separator_6 = new JSeparator();
     mnHelp.add(separator_6);
 
-    JMenuItem mntmAbout = new JMenuItem("About");
+    JMenuItem mntmAbout = new JMenuItem(Messages.getString("LawenaView.about")); //$NON-NLS-1$
     mnHelp.add(mntmAbout);
     JPanel contentPane = new JPanel();
     contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -241,7 +254,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     contentPane.add(tabbedPane, BorderLayout.CENTER);
 
     JPanel panelSettings = new JPanel();
-    tabbedPane.addTab("Settings", null, panelSettings, null);
+    tabbedPane.addTab(Messages.getString("LawenaView.settings"), null, panelSettings, null); //$NON-NLS-1$
     GridBagLayout gbl_panelSettings = new GridBagLayout();
     gbl_panelSettings.columnWidths = new int[] {0, 1, 1, 1, 0, 1, 1, 0};
     gbl_panelSettings.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -250,7 +263,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
         new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
     panelSettings.setLayout(gbl_panelSettings);
 
-    JLabel lblResolution = new JLabel("Resolution:");
+    JLabel lblResolution = new JLabel(Messages.getString("LawenaView.resolution")); //$NON-NLS-1$
     GridBagConstraints gbc_lblResolution = new GridBagConstraints();
     gbc_lblResolution.insets = new Insets(5, 5, 5, 5);
     gbc_lblResolution.anchor = GridBagConstraints.EAST;
@@ -259,8 +272,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     panelSettings.add(lblResolution, gbc_lblResolution);
 
     JComboBox<String> cmbResolution = new JComboBox<>();
-    cmbResolution
-        .setToolTipText("<html>Set the in-game resolution, you can choose<br>an option or input a custom one.");
+    cmbResolution.setToolTipText(Messages.getString("LawenaView.resolutionTooltip")); //$NON-NLS-1$
     cmbResolution.setModel(new DefaultComboBoxModel<>(Constants.RESOLUTIONS));
     cmbResolution.setEditable(true);
     GridBagConstraints gbc_cmbResolution = new GridBagConstraints();
@@ -271,7 +283,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbc_cmbResolution.gridy = 0;
     panelSettings.add(cmbResolution, gbc_cmbResolution);
 
-    JLabel lblFrameRate = new JLabel("FPS:");
+    JLabel lblFrameRate = new JLabel(Messages.getString("LawenaView.fps")); //$NON-NLS-1$
     GridBagConstraints gbc_lblFrameRate = new GridBagConstraints();
     gbc_lblFrameRate.anchor = GridBagConstraints.EAST;
     gbc_lblFrameRate.insets = new Insets(5, 0, 5, 5);
@@ -280,8 +292,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     panelSettings.add(lblFrameRate, gbc_lblFrameRate);
 
     JComboBox<String> cmbFramerate = new JComboBox<>();
-    cmbFramerate
-        .setToolTipText("<html>Set the frames per second of the recording. This value can be<br>changed in-game with the up and down arrow keys. You can<br>also set a custom FPS value here.");
+    cmbFramerate.setToolTipText(Messages.getString("LawenaView.fpsTooltip")); //$NON-NLS-1$
     cmbFramerate.setModel(new DefaultComboBoxModel<>(Constants.FPS));
     cmbFramerate.setEditable(true);
     GridBagConstraints gbc_cmbFramerate = new GridBagConstraints();
@@ -322,7 +333,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     tableCustomContent.getTableHeader().setReorderingAllowed(false);
     scrollPane.setViewportView(tableCustomContent);
 
-    JLabel lblHud = new JLabel("HUD:");
+    JLabel lblHud = new JLabel(Messages.getString("LawenaView.hud")); //$NON-NLS-1$
     lblHud.setEnabled(false);
     GridBagConstraints gbc_lblHud = new GridBagConstraints();
     gbc_lblHud.anchor = GridBagConstraints.EAST;
@@ -334,9 +345,8 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     // TODO: HUD can't be changed in CS:GO using file replace like in TF2. Remove?
     JComboBox<String> cmbHud = new JComboBox<>();
     cmbHud.setEnabled(false);
-    cmbHud.setToolTipText("<html>Select your preferred HUD here.");
-    cmbHud.setModel(new DefaultComboBoxModel<>(new String[] {"Kill notices only", "Default",
-        "Custom"}));
+    cmbHud.setModel(new DefaultComboBoxModel<>(new String[] {"Kill notices only", "Default", //$NON-NLS-1$ //$NON-NLS-2$
+        "Custom"})); //$NON-NLS-1$
     GridBagConstraints gbc_cmbHud = new GridBagConstraints();
     gbc_cmbHud.gridwidth = 3;
     gbc_cmbHud.fill = GridBagConstraints.HORIZONTAL;
@@ -345,7 +355,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbc_cmbHud.gridy = 1;
     panelSettings.add(cmbHud, gbc_cmbHud);
 
-    JLabel lblSkybox = new JLabel("Skybox:");
+    JLabel lblSkybox = new JLabel(Messages.getString("LawenaView.skybox")); //$NON-NLS-1$
     lblSkybox.setEnabled(false);
     GridBagConstraints gbc_lblSkybox = new GridBagConstraints();
     gbc_lblSkybox.anchor = GridBagConstraints.EAST;
@@ -364,7 +374,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbc_cmbSkybox.gridy = 2;
     panelSettings.add(cmbSkybox, gbc_cmbSkybox);
 
-    JLabel lblViewmodels = new JLabel("Viewmodels:");
+    JLabel lblViewmodels = new JLabel(Messages.getString("LawenaView.viewmodels")); //$NON-NLS-1$
     GridBagConstraints gbc_lblViewmodels = new GridBagConstraints();
     gbc_lblViewmodels.anchor = GridBagConstraints.EAST;
     gbc_lblViewmodels.insets = new Insets(0, 5, 5, 5);
@@ -381,7 +391,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbc_cmbViewmodel.gridy = 3;
     panelSettings.add(cmbViewmodel, gbc_cmbViewmodel);
 
-    JLabel lblViewmodelFov = new JLabel("Vmodel FOV:");
+    JLabel lblViewmodelFov = new JLabel(Messages.getString("LawenaView.viewmodelFov")); //$NON-NLS-1$
     GridBagConstraints gbc_lblViewmodelFov = new GridBagConstraints();
     gbc_lblViewmodelFov.anchor = GridBagConstraints.EAST;
     gbc_lblViewmodelFov.insets = new Insets(0, 5, 5, 5);
@@ -405,7 +415,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbc_horizontalStrut.gridy = 3;
     panelSettings.add(horizontalStrut, gbc_horizontalStrut);
 
-    JLabel lblOutput = new JLabel("Frame Output:");
+    JLabel lblOutput = new JLabel(Messages.getString("LawenaView.frameOutputFormat")); //$NON-NLS-1$
     GridBagConstraints gbc_lblOutput = new GridBagConstraints();
     gbc_lblOutput.anchor = GridBagConstraints.EAST;
     gbc_lblOutput.insets = new Insets(0, 5, 5, 5);
@@ -422,7 +432,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbc_cmbSourceVideoFormat.gridy = 4;
     panelSettings.add(cmbSourceVideoFormat, gbc_cmbSourceVideoFormat);
 
-    JLabel lblJpegQuality = new JLabel("JPG Quality:");
+    JLabel lblJpegQuality = new JLabel(Messages.getString("LawenaView.jpegQuality")); //$NON-NLS-1$
     GridBagConstraints gbc_lblJpegQuality = new GridBagConstraints();
     gbc_lblJpegQuality.anchor = GridBagConstraints.EAST;
     gbc_lblJpegQuality.insets = new Insets(0, 0, 5, 5);
@@ -447,8 +457,10 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     panelSettings.add(verticalStrut, gbc_verticalStrut);
 
     JPanel panelCheckboxes = new JPanel();
-    panelCheckboxes.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), //$NON-NLS-1$
-        "Additional Settings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+    panelCheckboxes
+        .setBorder(new TitledBorder(
+            UIManager.getBorder("TitledBorder.border"), //$NON-NLS-1$
+            Messages.getString("LawenaView.additionalSettings"), TitledBorder.LEADING, TitledBorder.TOP, null, null)); //$NON-NLS-1$
     GridBagConstraints gbc_panelCheckboxes = new GridBagConstraints();
     gbc_panelCheckboxes.insets = new Insets(0, 0, 0, 5);
     gbc_panelCheckboxes.gridheight = 4;
@@ -464,7 +476,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbl_panelCheckboxes.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
     panelCheckboxes.setLayout(gbl_panelCheckboxes);
 
-    JCheckBox disableVoiceChat_1 = new JCheckBox("Disable Voice Chat");
+    JCheckBox disableVoiceChat_1 = new JCheckBox(Messages.getString("LawenaView.disableVoiceChat")); //$NON-NLS-1$
     GridBagConstraints gbc_disableVoiceChat_1 = new GridBagConstraints();
     gbc_disableVoiceChat_1.insets = new Insets(0, 0, 0, 5);
     gbc_disableVoiceChat_1.anchor = GridBagConstraints.WEST;
@@ -473,7 +485,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     panelCheckboxes.add(disableVoiceChat_1, gbc_disableVoiceChat_1);
     this.disableVoiceChat = disableVoiceChat_1;
 
-    JCheckBox disableCrosshair_1 = new JCheckBox("Disable Crosshair");
+    JCheckBox disableCrosshair_1 = new JCheckBox(Messages.getString("LawenaView.disableCrosshair")); //$NON-NLS-1$
     GridBagConstraints gbc_disableCrosshair_1 = new GridBagConstraints();
     gbc_disableCrosshair_1.anchor = GridBagConstraints.WEST;
     gbc_disableCrosshair_1.gridx = 1;
@@ -481,7 +493,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     panelCheckboxes.add(disableCrosshair_1, gbc_disableCrosshair_1);
     this.disableCrosshair = disableCrosshair_1;
 
-    disableCasterVoice = new JCheckBox("Disable Caster Voice");
+    disableCasterVoice = new JCheckBox(Messages.getString("LawenaView.disableCasterVoice")); //$NON-NLS-1$
     GridBagConstraints gbc_disableCasterVoice = new GridBagConstraints();
     gbc_disableCasterVoice.anchor = GridBagConstraints.WEST;
     gbc_disableCasterVoice.insets = new Insets(0, 0, 0, 5);
@@ -501,7 +513,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbc_panelBottomLeft.gridy = 10;
     panelSettings.add(panelBottomLeft, gbc_panelBottomLeft);
 
-    JButton btnClearMovieFolder = new JButton("Delete Movie Segments...");
+    JButton btnClearMovieFolder = new JButton(Messages.getString("LawenaView.deleteMovieSegments")); //$NON-NLS-1$
     panelBottomLeft.add(btnClearMovieFolder);
 
     JPanel panelBottomRight = new JPanel();
@@ -516,7 +528,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbc_panelBottomRight.gridy = 10;
     panelSettings.add(panelBottomRight, gbc_panelBottomRight);
 
-    JButton btnStartGame = new JButton("Launch Game");
+    JButton btnStartGame = new JButton(Messages.getString("LawenaView.launchGame")); //$NON-NLS-1$
     panelBottomRight.add(btnStartGame);
 
     JPanel panelStatusbar = new JPanel();
@@ -528,7 +540,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     gbl_panelStatusbar.rowWeights = new double[] {0.0, Double.MIN_VALUE};
     panelStatusbar.setLayout(gbl_panelStatusbar);
 
-    JLabel lblStatus = new JLabel("");
+    JLabel lblStatus = new JLabel(""); //$NON-NLS-1$
     GridBagConstraints gbc_lblStatus = new GridBagConstraints();
     gbc_lblStatus.insets = new Insets(0, 5, 0, 5);
     gbc_lblStatus.anchor = GridBagConstraints.NORTHWEST;

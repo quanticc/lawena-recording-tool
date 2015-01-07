@@ -8,15 +8,19 @@ import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
+
 public class TickTableModel extends AbstractTableModel {
 
   private static final Logger log = LoggerFactory.getLogger(TickTableModel.class);
   private static final long serialVersionUID = 1L;
 
   public enum Column {
-    DEMO("Demo name"), START("Starting Tick"), END("Ending Tick");
+    DEMO(Messages.getString("TickTableModel.demoName")), //$NON-NLS-1$
+    START(Messages.getString("TickTableModel.startTick")), //$NON-NLS-1$
+    END(Messages.getString("TickTableModel.endTick")); //$NON-NLS-1$
 
-    private String columnName;
+    String columnName;
 
     Column(String columnName) {
       this.columnName = columnName;
@@ -61,7 +65,7 @@ public class TickTableModel extends AbstractTableModel {
           tick.setStart(Integer.parseInt(aValue.toString()));
           fireTableCellUpdated(rowIndex, columnIndex);
         } catch (NumberFormatException e) {
-          log.warn("Cannot set start tick, bad numeric format in: " + aValue);
+          log.warn("Cannot set start tick, bad numeric format in: {}", aValue); //$NON-NLS-1$
         }
         break;
       case END:
@@ -69,7 +73,7 @@ public class TickTableModel extends AbstractTableModel {
           tick.setEnd(Integer.parseInt(aValue.toString()));
           fireTableCellUpdated(rowIndex, columnIndex);
         } catch (NumberFormatException e) {
-          log.warn("Cannot set end tick, bad numeric format in: " + aValue);
+          log.warn("Cannot set end tick, bad numeric format in: {}", aValue); //$NON-NLS-1$
         }
         break;
       default:

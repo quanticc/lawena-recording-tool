@@ -1,6 +1,7 @@
 package com.github.lawena.vdm;
 
 import static com.github.lawena.util.Util.toPath;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.github.lawena.app.model.Settings;
 import com.github.lawena.profile.Key;
 
+@SuppressWarnings("nls")
 public class VDMGenerator {
 
   private static final Logger log = LoggerFactory.getLogger(VDMGenerator.class);
@@ -53,7 +55,7 @@ public class VDMGenerator {
 
     for (Entry<String, List<Tick>> e : demomap.entrySet()) {
       String demo = e.getKey();
-      log.debug("Creating VDM file for demo: " + demo);
+      log.debug("Creating VDM file for demo: {}", demo);
       List<String> lines = new ArrayList<>();
       lines.add("demoactions\n{");
       int count = 1;
@@ -88,13 +90,13 @@ public class VDMGenerator {
                   demo.substring(0, demo.indexOf(".dem")) + ".vdm"), lines,
               Charset.defaultCharset());
       paths.add(added);
-      log.debug("VDM file written to " + added);
+      log.debug("VDM file written to {}", added);
 
     }
     return paths;
   }
 
-  public String segment(int count, String factory, String name, String... args) {
+  public static String segment(int count, String factory, String name, String... args) {
     StringBuilder sb = new StringBuilder();
     sb.append("\t\"" + count + "\"\n");
     sb.append("\t{\n");

@@ -20,6 +20,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.html.HTMLDocument;
 
+import com.github.lawena.Messages;
 import com.github.lawena.update.Build;
 import com.github.lawena.update.Branch;
 
@@ -42,8 +43,8 @@ public class UpdaterDialog extends JDialog {
 
   public UpdaterDialog() {
     setIconImage(Toolkit.getDefaultToolkit().getImage(
-        UpdaterDialog.class.getResource("/com/github/lawena/ui/fugue/globe-green.png")));
-    setTitle("Change Update Branch");
+        UpdaterDialog.class.getResource("/com/github/lawena/ui/fugue/globe-green.png"))); //$NON-NLS-1$
+    setTitle(Messages.getString("UpdaterDialog.title")); //$NON-NLS-1$
     setBounds(100, 100, 600, 400);
     BorderLayout borderLayout = new BorderLayout();
     getContentPane().setLayout(borderLayout);
@@ -56,9 +57,7 @@ public class UpdaterDialog extends JDialog {
     gbl_contentPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
     contentPanel.setLayout(gbl_contentPanel);
     {
-      JLabel lblNewLabel =
-          new JLabel(
-              "<html>Configure the updater to retrieve the latest version from various Update Branches. Press Check Now to get the most recent information and then Switch Update Branch to perform the upgrade.");
+      JLabel lblNewLabel = new JLabel(Messages.getString("UpdaterDialog.description")); //$NON-NLS-1$
       GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
       gbc_lblNewLabel.fill = GridBagConstraints.HORIZONTAL;
       gbc_lblNewLabel.gridwidth = 5;
@@ -68,7 +67,7 @@ public class UpdaterDialog extends JDialog {
       contentPanel.add(lblNewLabel, gbc_lblNewLabel);
     }
     {
-      JLabel lblCurrentBranch = new JLabel("Current Branch:");
+      JLabel lblCurrentBranch = new JLabel(Messages.getString("UpdaterDialog.currentBranch")); //$NON-NLS-1$
       GridBagConstraints gbc_lblCurrentBranch = new GridBagConstraints();
       gbc_lblCurrentBranch.anchor = GridBagConstraints.EAST;
       gbc_lblCurrentBranch.insets = new Insets(0, 0, 5, 5);
@@ -88,7 +87,7 @@ public class UpdaterDialog extends JDialog {
       branchTextField.setColumns(10);
     }
     {
-      JLabel lblVersion_1 = new JLabel("Version:");
+      JLabel lblVersion_1 = new JLabel(Messages.getString("UpdaterDialog.version")); //$NON-NLS-1$
       GridBagConstraints gbc_lblVersion_1 = new GridBagConstraints();
       gbc_lblVersion_1.anchor = GridBagConstraints.EAST;
       gbc_lblVersion_1.insets = new Insets(0, 0, 5, 5);
@@ -109,7 +108,7 @@ public class UpdaterDialog extends JDialog {
       buildTextField.setColumns(10);
     }
     {
-      JLabel lblUpdateBranch = new JLabel("New Branch:");
+      JLabel lblUpdateBranch = new JLabel(Messages.getString("UpdaterDialog.newBranch")); //$NON-NLS-1$
       GridBagConstraints gbc_lblUpdateBranch = new GridBagConstraints();
       gbc_lblUpdateBranch.insets = new Insets(0, 0, 5, 5);
       gbc_lblUpdateBranch.anchor = GridBagConstraints.EAST;
@@ -127,7 +126,7 @@ public class UpdaterDialog extends JDialog {
       contentPanel.add(branchesComboBox, gbc_branchesComboBox);
     }
     {
-      JLabel lblVersion = new JLabel("Version:");
+      JLabel lblVersion = new JLabel(Messages.getString("UpdaterDialog.version")); //$NON-NLS-1$
       GridBagConstraints gbc_lblVersion = new GridBagConstraints();
       gbc_lblVersion.anchor = GridBagConstraints.EAST;
       gbc_lblVersion.insets = new Insets(0, 0, 5, 5);
@@ -146,7 +145,7 @@ public class UpdaterDialog extends JDialog {
       contentPanel.add(buildsComboBox, gbc_buildsComboBox);
     }
     {
-      lblLastCheck = new JLabel("Last Check:");
+      lblLastCheck = new JLabel(Messages.getString("UpdaterDialog.lastCheck")); //$NON-NLS-1$
       GridBagConstraints gbc_lblLastCheck = new GridBagConstraints();
       gbc_lblLastCheck.anchor = GridBagConstraints.EAST;
       gbc_lblLastCheck.insets = new Insets(0, 0, 0, 5);
@@ -155,7 +154,7 @@ public class UpdaterDialog extends JDialog {
       contentPanel.add(lblLastCheck, gbc_lblLastCheck);
     }
     {
-      lastCheckLabel = new JLabel("Never");
+      lastCheckLabel = new JLabel(Messages.getString("UpdaterDialog.never")); //$NON-NLS-1$
       GridBagConstraints gbc_lastCheckLabel = new GridBagConstraints();
       gbc_lastCheckLabel.anchor = GridBagConstraints.WEST;
       gbc_lastCheckLabel.insets = new Insets(0, 0, 0, 5);
@@ -176,7 +175,7 @@ public class UpdaterDialog extends JDialog {
       gbc_panel.gridy = 3;
       contentPanel.add(panel, gbc_panel);
       {
-        refreshButton = new JButton("Check Now");
+        refreshButton = new JButton(Messages.getString("UpdaterDialog.checkNow")); //$NON-NLS-1$
         panel.add(refreshButton);
       }
     }
@@ -186,19 +185,19 @@ public class UpdaterDialog extends JDialog {
       buttonPane.setLayout(fl_buttonPane);
       getContentPane().add(buttonPane, BorderLayout.SOUTH);
       {
-        switchStatusLabel = new JLabel(" ");
+        switchStatusLabel = new JLabel(" "); //$NON-NLS-1$
         switchStatusLabel.setHorizontalTextPosition(SwingConstants.LEFT);
         buttonPane.add(switchStatusLabel);
       }
       {
-        okButton = new JButton("Switch Update Branch");
-        okButton.setActionCommand("OK");
+        okButton = new JButton(Messages.getString("UpdaterDialog.switchUpdateBranch")); //$NON-NLS-1$
+        okButton.setActionCommand("OK"); //$NON-NLS-1$
         buttonPane.add(okButton);
         getRootPane().setDefaultButton(okButton);
       }
       {
-        cancelButton = new JButton("Close");
-        cancelButton.setActionCommand("Cancel");
+        cancelButton = new JButton(Messages.getString("UpdaterDialog.close")); //$NON-NLS-1$
+        cancelButton.setActionCommand("Cancel"); //$NON-NLS-1$
         buttonPane.add(cancelButton);
       }
     }
@@ -211,12 +210,11 @@ public class UpdaterDialog extends JDialog {
         centerPanel.add(scrollPane, BorderLayout.CENTER);
         {
           branchTextPane = new JTextPane();
-          branchTextPane.setContentType("text/html");
+          branchTextPane.setContentType("text/html"); //$NON-NLS-1$
           branchTextPane.setEditable(false);
-          String style =
-              new StringBuilder().append("body { font-family: ")
-                  .append(UIManager.getDefaults().getFont("TextPane.font").getFamily())
-                  .append("; ").append("font-size: 10pt; text-align: left}").toString();
+          String style = new StringBuilder().append("body { font-family: ") //$NON-NLS-1$
+              .append(UIManager.getDefaults().getFont("TextPane.font").getFamily()) //$NON-NLS-1$
+              .append("; ").append("font-size: 10pt; text-align: left}").toString(); //$NON-NLS-1$ //$NON-NLS-2$
 
           ((HTMLDocument) branchTextPane.getDocument()).getStyleSheet().addRule(style);
           scrollPane.setViewportView(branchTextPane);

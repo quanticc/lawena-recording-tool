@@ -18,4 +18,6 @@ public class Constants {
 
   public static final String[] FRAME_OUTPUT_FORMATS = {"TGA", "JPG"};
 
+  public static final String[] LEVELS = {"OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"};
+
 }

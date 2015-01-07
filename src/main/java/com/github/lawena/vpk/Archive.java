@@ -14,6 +14,7 @@ import java.util.List;
  * @author Connor Haigh
  * @see <a href="https://github.com/Contron/JavaVPK">GitHub Repository</a>
  */
+@SuppressWarnings("nls")
 public class Archive {
   /**
    * Creates a new VPK archive.
@@ -49,9 +50,9 @@ public class Archive {
       this.multiPart = this.file.getName().contains("_dir");
 
       // read header
-      this.signature = this.readUnsignedInt(fileInputStream);
-      this.version = this.readUnsignedInt(fileInputStream);
-      this.treeLength = this.readUnsignedInt(fileInputStream);
+      this.signature = readUnsignedInt(fileInputStream);
+      this.version = readUnsignedInt(fileInputStream);
+      this.treeLength = readUnsignedInt(fileInputStream);
 
       // check signature and version
       if (this.signature != Archive.SIGNATURE)
@@ -61,22 +62,20 @@ public class Archive {
 
       // version handling
       switch (this.version) {
-        case Archive.VERSION_ONE: {
+        case Archive.VERSION_ONE:
           this.headerLength = Archive.VERSION_ONE_HEADER_SIZE;
 
           break;
-        }
-        case Archive.VERSION_TWO: {
+        case Archive.VERSION_TWO:
           this.headerLength = Archive.VERSION_TWO_HEADER_SIZE;
 
           // read extra data
           // serves no purpose right now
-          this.readUnsignedInt(fileInputStream);
-          this.readUnsignedInt(fileInputStream);
-          this.readUnsignedInt(fileInputStream);
-          this.readUnsignedInt(fileInputStream);
+          readUnsignedInt(fileInputStream);
+          readUnsignedInt(fileInputStream);
+          readUnsignedInt(fileInputStream);
+          readUnsignedInt(fileInputStream);
           break;
-        }
         default:
           break;
       }
@@ -84,14 +83,14 @@ public class Archive {
       // extension loop
       while (true) {
         // get extension
-        String extension = this.readString(fileInputStream);
+        String extension = readString(fileInputStream);
         if (extension.isEmpty())
           break;
 
         // path loop
         while (true) {
           // get path
-          String path = this.readString(fileInputStream);
+          String path = readString(fileInputStream);
           if (path.isEmpty())
             break;
 
@@ -102,17 +101,17 @@ public class Archive {
           // filename loop
           while (true) {
             // get filename
-            String filename = this.readString(fileInputStream);
+            String filename = readString(fileInputStream);
             if (filename.isEmpty())
               break;
 
             // read data
-            int crc = this.readUnsignedInt(fileInputStream);
-            short preloadSize = this.readUnsignedShort(fileInputStream);
-            short archiveIndex = this.readUnsignedShort(fileInputStream);
-            int entryOffset = this.readUnsignedInt(fileInputStream);
-            int entryLength = this.readUnsignedInt(fileInputStream);
-            short terminator = this.readUnsignedShort(fileInputStream);
+            int crc = readUnsignedInt(fileInputStream);
+            short preloadSize = readUnsignedShort(fileInputStream);
+            short archiveIndex = readUnsignedShort(fileInputStream);
+            int entryOffset = readUnsignedInt(fileInputStream);
+            int entryLength = readUnsignedInt(fileInputStream);
+            short terminator = readUnsignedShort(fileInputStream);
 
             // check preload data
             byte[] preloadData = null;
@@ -165,7 +164,7 @@ public class Archive {
    * @return the assembled string
    * @throws IOException if the stream could not be read
    */
-  private String readString(FileInputStream fileInputStream) throws IOException {
+  private static String readString(FileInputStream fileInputStream) throws IOException {
     // builder
     StringBuilder stringBuilder = new StringBuilder();
 
@@ -184,7 +183,7 @@ public class Archive {
    * @return the unsigned integer
    * @throws IOException if the stream could not be read
    */
-  private int readUnsignedInt(FileInputStream fileInputStream) throws IOException {
+  private static int readUnsignedInt(FileInputStream fileInputStream) throws IOException {
     // byte array
     byte[] buffer = new byte[4];
     fileInputStream.read(buffer);
@@ -203,7 +202,7 @@ public class Archive {
    * @return the unsigned short
    * @throws IOException if the stream could not be read
    */
-  private short readUnsignedShort(FileInputStream fileInputStream) throws IOException {
+  private static short readUnsignedShort(FileInputStream fileInputStream) throws IOException {
     // byte array
     byte[] buffer = new byte[2];
     fileInputStream.read(buffer);

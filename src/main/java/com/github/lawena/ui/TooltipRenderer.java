@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import com.github.lawena.Messages;
 import com.github.lawena.app.model.Resource;
 import com.github.lawena.app.model.Settings;
 import com.github.lawena.profile.Key;
@@ -29,10 +30,11 @@ public class TooltipRenderer extends DefaultTableCellRenderer {
     Path tfpath = toPath(Key.gamePath.getValue(settings));
     Path path = cp.getPath();
     StringBuilder sb = new StringBuilder();
-    sb.append("<html>Filename: <b>");
+    sb.append("<html>" + Messages.getString("TooltipRenderer.filename") + "<b>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     sb.append(cp.getPath().getFileName());
-    sb.append("</b><br>Location: ");
-    sb.append((path.startsWith(tfpath) ? "TF2 Path: " + tfpath.relativize(path) : path).toString());
+    sb.append("</b><br>" + Messages.getString("TooltipRenderer.location")); //$NON-NLS-1$ //$NON-NLS-2$
+    sb.append((path.startsWith(tfpath) ? Messages.getString("TooltipRenderer.gamePath") //$NON-NLS-1$
+        + tfpath.relativize(path) : path).toString());
     setToolTipText(sb.toString());
     return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
   }

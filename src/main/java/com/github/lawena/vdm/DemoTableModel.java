@@ -15,12 +15,13 @@ import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
 import com.github.lawena.app.model.Settings;
 import com.github.lawena.profile.Key;
 
 public class DemoTableModel extends AbstractTableModel {
 
-  private static final Logger log = LoggerFactory.getLogger(DemoTableModel.class);
+  static final Logger log = LoggerFactory.getLogger(DemoTableModel.class);
   private static final long serialVersionUID = 1L;
 
   public enum Columns {
@@ -28,7 +29,7 @@ public class DemoTableModel extends AbstractTableModel {
   }
 
   private Settings settings;
-  private List<Demo> list = new ArrayList<>();
+  List<Demo> list = new ArrayList<>();
   private Path demosPath;
 
   public DemoTableModel(Settings settings) {
@@ -42,24 +43,25 @@ public class DemoTableModel extends AbstractTableModel {
     }
     this.demosPath = path;
     clear();
-    log.info("Scanning for demos in folder: {}", path);
-    try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, "*.dem")) {
+    log.info("Scanning for demos in folder: {}", path); //$NON-NLS-1$
+    try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, "*.dem")) { //$NON-NLS-1$
       int row = getRowCount();
       for (Path demopath : stream) {
         list.add(new Demo(demopath));
       }
       fireTableRowsInserted(row, getRowCount() - 1);
     } catch (IOException e) {
-      log.warn("Problem while scanning .dem files: " + e);
+      log.warn("Problem while scanning .dem files: {}", e.toString()); //$NON-NLS-1$
     }
     final Path streaksPath = demosPath.resolve(Key.relativeKillstreakPath.getValue(settings));
     if (Key.loadKillstreaks.getValue(settings) && Files.exists(streaksPath)) {
       new SwingWorker<Void, Void>() {
+        @Override
         protected Void doInBackground() throws Exception {
           try {
-            log.debug("Loading Killstreak data from {}", streaksPath);
+            log.debug("Loading Killstreak data from {}", streaksPath); //$NON-NLS-1$
             int lineNumber = 1;
-            for (String line : Files.readAllLines(streaksPath, Charset.forName("UTF-8"))) {
+            for (String line : Files.readAllLines(streaksPath, Charset.forName("UTF-8"))) { //$NON-NLS-1$
               if (!line.isEmpty()) {
                 try {
                   KillStreak streak = new KillStreak(line);
@@ -70,16 +72,16 @@ public class DemoTableModel extends AbstractTableModel {
                     }
                   }
                 } catch (IllegalArgumentException e) {
-                  log.warn("Could not parse line {}", lineNumber);
+                  log.warn("Could not parse line {}", lineNumber); //$NON-NLS-1$
                 }
               }
               lineNumber++;
             }
           } catch (IOException e) {
-            log.warn("Problem while reading KillStreaks.txt: " + e);
+            log.warn("Problem while reading KillStreaks.txt: " + e); //$NON-NLS-1$
           }
           return null;
-        };
+        }
       }.execute();
     }
   }
@@ -124,9 +126,9 @@ public class DemoTableModel extends AbstractTableModel {
       case TIME:
         return demo.getPlaybackTime();
       case STREAKS:
-        return demo.getStreaks().toString().replaceAll("\\[|\\]", "");
+        return demo.getStreaks().toString().replaceAll("\\[|\\]", ""); //$NON-NLS-1$ //$NON-NLS-2$
       default:
-        return "";
+        return ""; //$NON-NLS-1$
     }
   }
 
@@ -153,19 +155,21 @@ public class DemoTableModel extends AbstractTableModel {
     Columns c = Columns.values()[column];
     switch (c) {
       case DEMONAME:
-        return "Filename";
+        return Messages.getString("DemoTableModel.filename"); //$NON-NLS-1$
       case MAP:
-        return "Map";
+        return Messages.getString("DemoTableModel.map"); //$NON-NLS-1$
       case PLAYER:
-        return "Player";
+        return Messages.getString("DemoTableModel.player"); //$NON-NLS-1$
       case SERVER:
-        return "Server";
+        return Messages.getString("DemoTableModel.server"); //$NON-NLS-1$
       case TICKS:
-        return "Total Ticks";
+        return Messages.getString("DemoTableModel.ticks"); //$NON-NLS-1$
       case TIME:
-        return "Total Time";
+        return Messages.getString("DemoTableModel.time"); //$NON-NLS-1$
       case STREAKS:
-        return "Killstreaks";
+        return Messages.getString("DemoTableModel.streaks"); //$NON-NLS-1$
+      default:
+        break;
     }
     return super.getColumnName(column);
   }
@@ -173,7 +177,7 @@ public class DemoTableModel extends AbstractTableModel {
   public void addDemo(Path path) {
     for (Demo demo : list) {
       if (demo.getPath().equals(path)) {
-        log.warn(path + " was not added because it already exists in the list");
+        log.warn("No .dem file found at: {}", path); //$NON-NLS-1$
         return;
       }
     }
@@ -182,7 +186,7 @@ public class DemoTableModel extends AbstractTableModel {
       list.add(new Demo(path));
       fireTableRowsInserted(row, row);
     } catch (FileNotFoundException e) {
-      log.warn(path + " was not added because the file does not exist");
+      log.warn("No .dem file found at: {}", path); //$NON-NLS-1$
     }
   }
 

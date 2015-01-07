@@ -1,5 +1,7 @@
 package com.github.lawena.vdm;
 
+import com.github.lawena.Messages;
+
 public class Tick {
 
   private String demoname;
@@ -8,11 +10,11 @@ public class Tick {
 
   public Tick(String demoname, int start, int end) {
     if (demoname == null)
-      throw new IllegalArgumentException("Must enter demoname");
+      throw new IllegalArgumentException(Messages.getString("Tick.mustEnterName")); //$NON-NLS-1$
     if (start < 0 || end < 0)
-      throw new IllegalArgumentException("Tick values must not be negative");
+      throw new IllegalArgumentException(Messages.getString("Tick.tickValuesMustNotBeNegative")); //$NON-NLS-1$
     if (start >= end)
-      throw new IllegalArgumentException("Starting tick must be lower than ending tick");
+      throw new IllegalArgumentException(Messages.getString("Tick.startTickMustBeLowerThanEndTick")); //$NON-NLS-1$
     this.demoname = demoname;
     this.start = start;
     this.end = end;
@@ -71,7 +73,7 @@ public class Tick {
 
   @Override
   public String toString() {
-    return demoname + ": " + start + "-" + end;
+    return demoname + ": " + start + "-" + end; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
 }

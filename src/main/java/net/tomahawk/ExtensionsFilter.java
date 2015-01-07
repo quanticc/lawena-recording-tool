@@ -8,6 +8,7 @@ import javax.swing.filechooser.FileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("nls")
 public class ExtensionsFilter extends FileFilter {
 
   private static final Logger log = LoggerFactory.getLogger(ExtensionsFilter.class);
@@ -41,6 +42,7 @@ public class ExtensionsFilter extends FileFilter {
   }
 
   // key: the accept method
+  @Override
   public boolean accept(File f) {
     if (f.isDirectory())
       return true;
@@ -58,6 +60,7 @@ public class ExtensionsFilter extends FileFilter {
   }
 
   // description
+  @Override
   public String getDescription() {
     return description;
   }

@@ -18,8 +18,8 @@ public class SwingLink extends JLabel {
   
   private static final long serialVersionUID = 1L;
 
-  private String text;
-  private URI uri;
+  String text;
+  URI uri;
 
   public SwingLink(String text, URI uri) {
     super();
@@ -48,14 +48,17 @@ public class SwingLink extends JLabel {
     setToolTipText(uri.toString());
     setCursor(new Cursor(Cursor.HAND_CURSOR));
     addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         open(uri);
       }
 
+      @Override
       public void mouseEntered(MouseEvent e) {
         setText(text, false);
       }
 
+      @Override
       public void mouseExited(MouseEvent e) {
         setText(text, true);
       }
@@ -67,6 +70,7 @@ public class SwingLink extends JLabel {
     setText(text, true);
   }
 
+  @SuppressWarnings("nls")
   public void setText(String text, boolean ul) {
     String link = ul ? "<u>" + text + "</u>" : text;
     super.setText("<html><span style=\"color: #000099;\">" + link + "</span></html>");
@@ -77,7 +81,7 @@ public class SwingLink extends JLabel {
     return text;
   }
 
-  private static void open(URI uri) {
+  static void open(URI uri) {
     new LinkRunner(uri).execute();
   }
 }

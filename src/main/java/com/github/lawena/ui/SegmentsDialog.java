@@ -18,9 +18,14 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 
+import com.github.lawena.Messages;
+
 public class SegmentsDialog extends JDialog {
 
   private class BtnSelectNoneActionListener implements ActionListener {
+    public BtnSelectNoneActionListener() {}
+
+    @Override
     public void actionPerformed(ActionEvent e) {
       for (int i = 0; i < tableSegments.getRowCount(); i++) {
         tableSegments.setValueAt(false, i, 0);
@@ -29,6 +34,9 @@ public class SegmentsDialog extends JDialog {
   }
 
   private class BtnSelectAllActionListener implements ActionListener {
+    public BtnSelectAllActionListener() {}
+
+    @Override
     public void actionPerformed(ActionEvent e) {
       for (int i = 0; i < tableSegments.getRowCount(); i++) {
         tableSegments.setValueAt(true, i, 0);
@@ -39,7 +47,7 @@ public class SegmentsDialog extends JDialog {
   private static final long serialVersionUID = 1L;
 
   private final JPanel contentPanel = new JPanel();
-  private JTable tableSegments;
+  JTable tableSegments;
   private JButton okButton;
   private JButton cancelButton;
 
@@ -47,7 +55,7 @@ public class SegmentsDialog extends JDialog {
    * Create the dialog.
    */
   public SegmentsDialog() {
-    setTitle("Select Segments to Delete");
+    setTitle(Messages.getString("SegmentsDialog.title")); //$NON-NLS-1$
     setModalityType(ModalityType.APPLICATION_MODAL);
     setBounds(100, 100, 450, 300);
     BorderLayout borderLayout = new BorderLayout();
@@ -61,8 +69,7 @@ public class SegmentsDialog extends JDialog {
     gbl_contentPanel.rowWeights = new double[] {0.0, 1.0, Double.MIN_VALUE};
     contentPanel.setLayout(gbl_contentPanel);
     {
-      JLabel lblSelectWhatEnhanced =
-          new JLabel("Select what recording segments will be deleted from your movie folder.");
+      JLabel lblSelectWhatEnhanced = new JLabel(Messages.getString("SegmentsDialog.description")); //$NON-NLS-1$
       GridBagConstraints gbc_lblSelectWhatEnhanced = new GridBagConstraints();
       gbc_lblSelectWhatEnhanced.anchor = GridBagConstraints.WEST;
       gbc_lblSelectWhatEnhanced.insets = new Insets(0, 0, 5, 0);
@@ -97,7 +104,7 @@ public class SegmentsDialog extends JDialog {
       gbl_buttonPane.rowWeights = new double[] {0.0, Double.MIN_VALUE};
       buttonPane.setLayout(gbl_buttonPane);
       {
-        JButton btnSelectAll = new JButton("All");
+        JButton btnSelectAll = new JButton(Messages.getString("SegmentsDialog.all")); //$NON-NLS-1$
         btnSelectAll.addActionListener(new BtnSelectAllActionListener());
         btnSelectAll.setPreferredSize(new Dimension(65, 23));
         GridBagConstraints gbc_btnSelectAll = new GridBagConstraints();
@@ -108,7 +115,7 @@ public class SegmentsDialog extends JDialog {
         buttonPane.add(btnSelectAll, gbc_btnSelectAll);
       }
       {
-        JButton btnSelectNone = new JButton("None");
+        JButton btnSelectNone = new JButton(Messages.getString("SegmentsDialog.none")); //$NON-NLS-1$
         btnSelectNone.addActionListener(new BtnSelectNoneActionListener());
         btnSelectNone.setPreferredSize(new Dimension(65, 23));
         GridBagConstraints gbc_btnSelectNone = new GridBagConstraints();
@@ -119,7 +126,7 @@ public class SegmentsDialog extends JDialog {
         buttonPane.add(btnSelectNone, gbc_btnSelectNone);
       }
       {
-        okButton = new JButton("OK");
+        okButton = new JButton(Messages.getString("SegmentsDialog.OK")); //$NON-NLS-1$
         okButton.setPreferredSize(new Dimension(65, 23));
         GridBagConstraints gbc_okButton = new GridBagConstraints();
         gbc_okButton.anchor = GridBagConstraints.NORTHWEST;
@@ -129,8 +136,7 @@ public class SegmentsDialog extends JDialog {
         buttonPane.add(okButton, gbc_okButton);
       }
       {
-        cancelButton = new JButton("Cancel");
-        cancelButton.setActionCommand("Cancel");
+        cancelButton = new JButton(Messages.getString("SegmentsDialog.cancel")); //$NON-NLS-1$
         GridBagConstraints gbc_cancelButton = new GridBagConstraints();
         gbc_cancelButton.anchor = GridBagConstraints.NORTHWEST;
         gbc_cancelButton.insets = new Insets(0, 0, 5, 5);

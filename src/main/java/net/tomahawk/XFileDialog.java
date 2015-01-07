@@ -12,6 +12,7 @@ import javax.swing.JFileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("nls")
 public class XFileDialog {
 
   private static final Logger log = LoggerFactory.getLogger(XFileDialog.class);
@@ -379,7 +380,7 @@ public class XFileDialog {
     }
   }
 
-  public String byteArray2String(byte[] data) {
+  public static String byteArray2String(byte[] data) {
     if (data == null)
       return null;
     if (data.length == 0)
@@ -414,7 +415,7 @@ public class XFileDialog {
     }
   }
 
-  private void setJavaSelectionMode(Mode mode) {
+  private static void setJavaSelectionMode(Mode mode) {
     switch (mode) {
       case LOAD_FILE:
       case SAVE_FILE:
@@ -432,10 +433,13 @@ public class XFileDialog {
       case LOAD_FOLDERS:
         failsafe.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         failsafe.setMultiSelectionEnabled(true);
+        break;
+      default:
+        break;
     }
   }
 
-  private void showJavaDialog(Component component, Mode mode) {
+  private static void showJavaDialog(Component component, Mode mode) {
     switch (mode) {
       case LOAD_FILE:
       case LOAD_FILES:
@@ -445,6 +449,9 @@ public class XFileDialog {
         break;
       case SAVE_FILE:
         failsafe.showSaveDialog(component);
+        break;
+      default:
+        break;
     }
   }
 

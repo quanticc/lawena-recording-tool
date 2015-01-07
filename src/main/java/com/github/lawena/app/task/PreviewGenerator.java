@@ -19,6 +19,7 @@ import javax.swing.SwingWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.lawena.Messages;
 import com.github.lawena.app.Lawena;
 import com.github.lawena.app.Tasks;
 import com.github.lawena.app.model.MainModel;
@@ -65,7 +66,7 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
     for (String name : skyboxNames) {
       count++;
       setProgress((int) (100 * ((double) count / skyboxNames.size())));
-      status.info("Generating skybox preview: {}", name);
+      status.info(Messages.getString("PreviewGenerator.creatingPreview"), name); //$NON-NLS-1$
       if (!model.getSkyboxPreviewStore().getMap().containsKey(name)) {
         List<Path> inputs = withParams(inputDir, name, boxes, ".vtf"); //$NON-NLS-1$
         List<Path> outputs = withParams(outputDir, name, boxes, "." + format); //$NON-NLS-1$
@@ -109,7 +110,7 @@ public class PreviewGenerator extends SwingWorker<Void, Void> {
   protected void done() {
     presenter.selectSkyboxFromSettings();
     log.info("Skybox loading complete"); //$NON-NLS-1$
-    status.info(StatusAppender.OK, "Ready");
+    status.info(StatusAppender.OK, Messages.getString("PreviewGenerator.ready")); //$NON-NLS-1$
     if (!isCancelled()) {
       parent.setCurrentWorker(null, false);
     }

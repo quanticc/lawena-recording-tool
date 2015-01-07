@@ -1,5 +1,6 @@
 package com.github.lawena.vdm;
 
+@SuppressWarnings("nls")
 public class KillStreak {
 
   private String date;
@@ -39,7 +40,7 @@ public class KillStreak {
 
   @Override
   public String toString() {
-    return description + " at " + tick;
+    return description + " @ " + tick;
   }
 
 }

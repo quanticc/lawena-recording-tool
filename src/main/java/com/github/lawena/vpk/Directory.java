@@ -18,7 +18,7 @@ public class Directory {
    */
   public Directory(String path) {
     this.path = path.trim();
-    this.entries = new ArrayList<Entry>();
+    this.entries = new ArrayList<>();
   }
 
   /**

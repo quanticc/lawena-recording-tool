@@ -137,7 +137,7 @@ public class Entry {
    * @return the full name
    */
   public String getFullName() {
-    return (this.filename + "." + this.extension);
+    return (this.filename + '.' + this.extension);
   }
 
   /**
