@@ -316,7 +316,7 @@ public class LawenaView extends JFrame {
         .setToolTipText("<html>Set the frames per second of the recording. This value can be<br>changed in-game with the up and down arrow keys. You can<br>also set a custom FPS value here.");
     cmbFramerate.setModel(new DefaultComboBoxModel<>(new String[] {"60", "120", "240", "480",
         "960", "1920", "3840"}));
-    cmbFramerate.setEditable(true);
+    cmbFramerate.setEditable(false);
     GridBagConstraints gbc_cmbFramerate = new GridBagConstraints();
     gbc_cmbFramerate.fill = GridBagConstraints.HORIZONTAL;
     gbc_cmbFramerate.insets = new Insets(5, 0, 5, 5);
