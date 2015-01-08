@@ -609,6 +609,8 @@ public abstract class Lawena implements ProfileListener {
         settings,
         ((StringValidator) Key.hud.getValidator()).getAllowedValues().get(
             view.getCmbHud().getSelectedIndex()));
+    Key.framerate.setValueEx(settings,
+        Integer.parseInt((String) view.getCmbFramerate().getSelectedItem()));
     Key.viewmodelSwitch.setValueEx(settings, ((StringValidator) Key.viewmodelSwitch.getValidator())
         .getAllowedValues().get(view.getCmbViewmodel().getSelectedIndex()));
     Key.viewmodelFov.setValueEx(settings, (Integer) view.getSpinnerViewmodelFov().getValue());
