@@ -1,3 +1,6 @@
+@setlocal enableextensions
+@cd /d "%~dp0"
+
 @if "%DEBUG%" == "" @echo off
 @rem ##########################################################################
 @rem
@@ -72,7 +75,7 @@ set CMD_LINE_ARGS=%$
 set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
 
 @rem Execute Gradle
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %CMD_LINE_ARGS% -d
 
 :end
 @rem End local scope for the variables with windows NT shell
@@ -88,3 +91,4 @@ exit /b 1
 if "%OS%"=="Windows_NT" endlocal
 
 :omega
+pause
