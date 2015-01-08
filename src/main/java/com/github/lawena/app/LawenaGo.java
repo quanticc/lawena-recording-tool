@@ -25,8 +25,7 @@ public class LawenaGo extends Lawena {
 
   @Override
   protected Image getIconImage() {
-    return new ImageIcon(getClass().getResource("lawena.png")).getImage() //$NON-NLS-1$
-        .getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+    return new ImageIcon(getClass().getResource("cap-48px.png")).getImage(); //$NON-NLS-1$
   }
 
   @Override

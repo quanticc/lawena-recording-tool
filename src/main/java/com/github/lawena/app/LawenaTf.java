@@ -27,7 +27,7 @@ public class LawenaTf extends Lawena {
 
   @Override
   protected Image getIconImage() {
-    return new ImageIcon(getClass().getResource("tf2.png")).getImage(); //$NON-NLS-1$
+    return new ImageIcon(getClass().getResource("cap-48px.png")).getImage(); //$NON-NLS-1$
   }
 
   @Override
