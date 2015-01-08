@@ -13,5 +13,7 @@ public interface Provider {
   public <T> T get(TypeToken<T> type, String key);
 
   public <T> void set(String key, T value);
+  
+  public <T> T getDefault(TypeToken<T> type, String key);
 
 }

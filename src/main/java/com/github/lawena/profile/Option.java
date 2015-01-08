@@ -48,15 +48,15 @@ public class Option<T> {
   /**
    * Retrieve the option value from the underlying provider.
    * 
-   * @param provider - the <code>ValueProvider</code> that will handle the option storage
+   * @param provider - the <code>Provider</code> that will handle the option storage
    * @return the value for this option. It is never <code>null</code>
    */
   @SuppressWarnings("unchecked")
   public T getValue(Provider provider) {
     T value = provider.get(type, key);
     if (value == null) {
-      log.warn("Key {} should not be null", key);
-      setValueEx(provider, defaultValue);
+      log.warn("Key {} should not have a null value", key);
+      setValueEx(provider, provider.getDefault(type, key));
       value = provider.get(type, key);
     }
     // handle Double to Integer conversion
@@ -74,7 +74,7 @@ public class Option<T> {
    * Attempts to set a value on this option, returning a result object detailing the status of this
    * operation.
    * 
-   * @param provider - the <code>ValueProvider</code> that will handle the option storage
+   * @param provider - the <code>Provider</code> that will handle the option storage
    * @param value - the value attempted to set
    * @return a <code>ValidationResult</code> describing the result of this operation.
    */
@@ -91,7 +91,7 @@ public class Option<T> {
   /**
    * Attempts to set a value on this option, throwing an exception if the value is not permitted.
    * 
-   * @param provider - the <code>ValueProvider</code> that will handle the option storage
+   * @param provider - the <code>Provider</code> that will handle the option storage
    * @param value - the value attempted to set
    */
   public void setValueEx(Provider provider, T value) {
@@ -108,10 +108,14 @@ public class Option<T> {
   /**
    * Sets the default value for this option on the given provider.
    * 
-   * @param provider - the <code>ValueProvider</code> that will handle the option storage
+   * @param provider - the <code>Provider</code> that will handle the option storage
    */
   public void revertToDefault(Provider provider) {
-    provider.set(key, defaultValue);
+    T t = provider.getDefault(type, key);
+    if (t == null) {
+      t = defaultValue;
+    }
+    provider.set(key, t);
   }
 
   public Option<T> validatedBy(Validator<T> v) {

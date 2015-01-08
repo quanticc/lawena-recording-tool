@@ -199,6 +199,12 @@ public class Profiles implements Provider {
   }
 
   @Override
+  public <T> T getDefault(TypeToken<T> type, String key) {
+    // fall to Option defaultValue
+    return null;
+  }
+
+  @Override
   public <T> void set(String key, T value) {
     Util.setToTree(global, key, value);
   }

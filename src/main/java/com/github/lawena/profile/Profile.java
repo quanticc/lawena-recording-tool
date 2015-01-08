@@ -40,6 +40,11 @@ public class Profile implements Provider {
   public <T> T get(TypeToken<T> type, String key) {
     return Util.getFromTree(settings, type, key);
   }
+  
+  @Override
+  public <T> T getDefault(TypeToken<T> type, String key) {
+    return Util.getFromTree(settings, type, key);
+  }
 
   @Override
   public <T> void set(String key, T value) {

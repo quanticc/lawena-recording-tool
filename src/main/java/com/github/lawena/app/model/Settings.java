@@ -47,6 +47,7 @@ public class Settings implements Provider {
       }).create();
 
   private Profiles profiles;
+  private Profiles defaults;
   private File profilesFile;
   private File defaultFile;
   List<ProfileListener> listeners = new ArrayList<>();
@@ -54,25 +55,26 @@ public class Settings implements Provider {
   public Settings(File profilesFile, File defaultFile) throws IOException {
     this.profilesFile = profilesFile;
     this.defaultFile = defaultFile;
-    // Options.getProfilesFileOption().value(optionSet)
-    this.profiles = loadProfiles(profilesFile);
+    this.profiles = loadProfiles();
+    this.defaults = readJsonProfile(defaultFile);
   }
 
-  private Profiles loadProfiles(File file) throws IOException {
-    try (Reader reader = Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8"))) { //$NON-NLS-1$
-      return gson.fromJson(reader, Profiles.class);
+  private Profiles loadProfiles() throws IOException {
+    Profiles p = null;
+    try {
+      p = readJsonProfile(profilesFile);
     } catch (JsonSyntaxException | JsonIOException e) {
-      log.warn("Invalid profiles file found, reverting to defaults: " + e); //$NON-NLS-1$
+      log.warn("Using default profile due to invalid format: ", e.toString()); //$NON-NLS-1$
     } catch (FileNotFoundException e) {
-      log.info("No profiles file found, loading defaults"); //$NON-NLS-1$
+      log.info("Using default profile due to {} file missing", profilesFile); //$NON-NLS-1$
     } catch (IOException e) {
-      log.warn("Problem while reading file, reverting to defaults: " + e); //$NON-NLS-1$
+      log.warn("Using default profile: {}", e.toString()); //$NON-NLS-1$
     }
-    return defaultProfiles();
+    return p == null ? readJsonProfile(defaultFile) : p;
   }
 
-  private Profiles defaultProfiles() throws IOException {
-    try (Reader reader = Files.newBufferedReader(defaultFile.toPath(), Charset.forName("UTF-8"))) { //$NON-NLS-1$
+  private Profiles readJsonProfile(File file) throws IOException {
+    try (Reader reader = Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8"))) { //$NON-NLS-1$
       return gson.fromJson(reader, Profiles.class);
     }
   }
@@ -80,6 +82,12 @@ public class Settings implements Provider {
   @Override
   public <T> T get(TypeToken<T> type, String key) {
     Provider provider = (key.startsWith("lawena.") ? profiles : profiles.getProfile()); //$NON-NLS-1$
+    return provider.get(type, key);
+  }
+
+  @Override
+  public <T> T getDefault(TypeToken<T> type, String key) {
+    Provider provider = (key.startsWith("lawena.") ? defaults : defaults.getProfile()); //$NON-NLS-1$
     return provider.get(type, key);
   }
 
