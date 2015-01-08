@@ -30,7 +30,7 @@ public class DemoFile extends RandomAccessFile {
     map.put("playerName", readString(maxStringLength));
     map.put("mapName", readString(maxStringLength));
     map.put("gameDirectory", readString(maxStringLength));
-    map.put("playbackTime", readFloatBackwards());
+    map.put("playbackTime", (double) readFloatBackwards());
     map.put("tickNumber", readIntBackwards());
     return map;
   }
