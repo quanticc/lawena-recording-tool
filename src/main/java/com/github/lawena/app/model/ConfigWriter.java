@@ -50,6 +50,7 @@ public abstract class ConfigWriter {
   protected void addFramerateLines(List<String> lines) {
     int framerate = Key.framerate.getValue(settings);
     lines.add("alias recframerate host_framerate " + framerate);
+    lines.add("host_framerate " + framerate);
     if (framerate < 60) {
       lines.add("alias currentfpsup 60fps");
       lines.add("alias currentfpsdn 3840fps");
