@@ -100,7 +100,7 @@ public class AboutDialog extends JDialog {
     ((HTMLDocument) aboutTextPane.getDocument()).getStyleSheet().addRule(style);
     aboutTextPane
         .setText("Simple Team Fortress 2 (TF2) Recording Tool<br>"
-            + "Copyright 2011-2014 Montz, Quantic, contributors and others<br>"
+            + "Copyright 2011-2015 Montz, Quantic, contributors and others<br>"
             + "<a href=\"http://code.google.com/p/lawenarecordingtool/\">http://code.google.com/p/lawenarecordingtool/</a><br><br>"
             + "Lawena is free software; you can redistribute it and/or modify it under the terms of the <a href=\"https://github.com/iabarca/lawena-recording-tool/blob/master/LICENSE.txt\">GNU GPLv3</a>.<br>"
             + "Graphical .cfg files are almost entirely based on <a href=\"http://chrisdown.name/tf2/\">Chris' maxquality config</a>, with very slight tweaks.<br>"
@@ -109,8 +109,8 @@ public class AboutDialog extends JDialog {
             + "Enhanced particles included are also from PLDX recording tool.<br><br>"
             + "Self-Updating mechanism is possible thanks to <a href=\"http://code.google.com/p/getdown/\">Getdown</a>, developed by Third Rings Design, Inc.<br>"
             + "Microsoft Sysinternals' <a href=\"http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx\">Handle</a> utility by Mark Russinovich.<br>"
-            + "TF2 icon modification made by <a href=\"http://hackcypher.deviantart.com/art/Team-Fortress-2-Icons-87662784\">hackcypher</a>.<br>"
-            + "Team Fortress and the Team Fortress logo are trademarks of <a href=\"http://www.valvesoftware.com\">Valve Corporation</a>.<br>");
+            + "Source, the Source logo, Steam, the Steam logo, Team Fortress, the Team Fortress logo, Counter-Strike,<br>"
+            + "and the Counter-Strike logo are trademarks and/or registered trademarks of the <a href=\"http://www.valvesoftware.com\">Valve Corporation</a>.<br>");
     contentPanel.add(aboutTextPane, BorderLayout.SOUTH);
 
     JPanel buttonPane = new JPanel();
