@@ -136,7 +136,7 @@ public class Key {
   // Source Recorder options
 
   public static final Option<String> recorderVideoFormat = newOption("recorder.videoFormat",
-      String.class, "TGA").validatedBy(new StringValidator("TGA", "JPEG"));
+      String.class, "TGA").validatedBy(new StringValidator("TGA", "JPG"));
   public static final Option<Integer> recorderJpegQuality = newOption("recorder.jpegQuality",
       Integer.class, 95).validatedBy(new RangeValidator(1, 100));
 
