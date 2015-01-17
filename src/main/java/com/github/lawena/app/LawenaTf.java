@@ -53,6 +53,8 @@ public class LawenaTf extends Lawena {
   @Override
   protected void saveDependentSettings() {
     LawenaViewTf v = (LawenaViewTf) view;
+    Key.dxlevel.setValueEx(settings, ((StringValidator) Key.dxlevel.getValidator())
+        .getAllowedValues().get(v.getCmbQuality().getSelectedIndex()));
     Key.motionBlur.setValueEx(settings, v.getEnableMotionBlur().isSelected());
     Key.noDamageNumbers.setValueEx(settings, v.getDisableCombatText().isSelected());
     Key.noCrosshair.setValueEx(settings, v.getDisableCrosshair().isSelected());
