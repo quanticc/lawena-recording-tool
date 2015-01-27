@@ -298,6 +298,10 @@ public abstract class Lawena implements ProfileListener {
           Path newpath = validateGamePath(null);
           if (newpath != null) {
             Key.gamePath.setValueEx(settings, newpath.toString());
+            JOptionPane.showMessageDialog(viewAsComponent(),
+                String.format(Messages.getString("Lawena.newGamePath"), newpath, //$NON-NLS-1$
+                    Messages.getString("Lawena.newGamePathTitle"), //$NON-NLS-1$
+                    JOptionPane.INFORMATION_MESSAGE));
           }
         } else {
           JOptionPane.showMessageDialog(viewAsComponent(),
@@ -313,6 +317,10 @@ public abstract class Lawena implements ProfileListener {
           Path newpath = validateRecordingPath(null);
           if (newpath != null) {
             Key.recordingPath.setValueEx(settings, newpath.toString());
+            JOptionPane.showMessageDialog(viewAsComponent(),
+                String.format(Messages.getString("Lawena.newRecordingPath"), newpath, //$NON-NLS-1$
+                    Messages.getString("Lawena.newRecordingPathTitle"), //$NON-NLS-1$
+                    JOptionPane.INFORMATION_MESSAGE));
           }
         } else {
           JOptionPane.showMessageDialog(viewAsComponent(),
@@ -720,6 +728,9 @@ public abstract class Lawena implements ProfileListener {
 
   public Path validateRecordingPath(Path initial) {
     Path selected = initial;
+    String folder =
+        initial != null ? initial.toAbsolutePath().toString() : Paths
+            .get(Key.recordingPath.getValue(settings)).toAbsolutePath().toString();
     int ret = 0;
     while ((selected == null && ret == 0)
         || (selected != null && (!Files.exists(selected) || Paths.get("").equals(selected)))) { //$NON-NLS-1$
@@ -728,7 +739,7 @@ public abstract class Lawena implements ProfileListener {
       String dir =
           model.getOsInterface().chooseSingleFolder(viewAsFrame(),
               Messages.getString("Lawena.segmentPathSelectionPrompt"), //$NON-NLS-1$
-              Paths.get("").toAbsolutePath().toString()); //$NON-NLS-1$
+              folder);
       if (dir != null) {
         selected = Paths.get(dir);
       } else {
@@ -742,6 +753,9 @@ public abstract class Lawena implements ProfileListener {
 
   public Path validateGamePath(Path initial) {
     Path selected = initial;
+    String folder =
+        initial != null ? initial.toAbsolutePath().toString() : Paths
+            .get(Key.gamePath.getValue(settings)).toAbsolutePath().toString();
     int ret = 0;
     String dirName = Key.gameFolderName.getValue(settings);
     while ((selected == null && ret == 0)
@@ -752,7 +766,7 @@ public abstract class Lawena implements ProfileListener {
       String dir =
           model.getOsInterface().chooseSingleFolder(viewAsFrame(),
               String.format(Messages.getString("Lawena.gamePathSelectionPrompt"), dirName), //$NON-NLS-1$
-              Paths.get("").toAbsolutePath().toString()); //$NON-NLS-1$
+              folder);
       if (dir != null) {
         selected = Paths.get(dir);
       } else {
@@ -766,6 +780,9 @@ public abstract class Lawena implements ProfileListener {
 
   public Path validateSteamPath(Path initial) {
     Path selected = initial;
+    String folder =
+        initial != null ? initial.toAbsolutePath().toString() : Paths
+            .get(Key.steamPath.getValue(settings)).toAbsolutePath().toString();
     int ret = 0;
     String fileName = "Steam"; //$NON-NLS-1$
     while ((selected == null && ret == 0)
@@ -776,7 +793,7 @@ public abstract class Lawena implements ProfileListener {
       String dir =
           model.getOsInterface().chooseSingleFolder(viewAsFrame(),
               String.format(Messages.getString("Lawena.steamPathSelectionPrompt"), fileName), //$NON-NLS-1$
-              Paths.get("").toAbsolutePath().toString()); //$NON-NLS-1$
+              folder);
       if (dir != null) {
         selected = Paths.get(dir);
       } else {
