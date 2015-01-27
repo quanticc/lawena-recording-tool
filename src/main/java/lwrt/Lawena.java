@@ -93,6 +93,9 @@ public class Lawena {
         Path newpath = getChosenMoviePath();
         if (newpath != null) {
           settings.setMoviePath(newpath);
+          JOptionPane.showMessageDialog(view, String.format("New movie folder: %s", newpath, //$NON-NLS-1$
+              "Change Movie Folder", //$NON-NLS-1$
+              JOptionPane.INFORMATION_MESSAGE));
         }
       } else {
         JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
@@ -549,6 +552,9 @@ public class Lawena {
         if (newpath != null) {
           settings.setTfPath(newpath);
           new PathScanTask().execute();
+          JOptionPane.showMessageDialog(view, String.format("New TF2 folder: %s", newpath, //$NON-NLS-1$
+              "Change TF2 Folder", //$NON-NLS-1$
+              JOptionPane.INFORMATION_MESSAGE));
         }
       } else {
         JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
@@ -1487,11 +1493,13 @@ public class Lawena {
 
   private Path getChosenMoviePath() {
     Path selected = null;
+    File curDir = settings.getMoviePath() != null ? settings.getMoviePath().toFile() : null;
     int ret = 0;
     while ((selected == null && ret == 0) || (selected != null && !Files.exists(selected))) {
       chooser = new JFileChooser();
       chooser.setDialogTitle("Choose a directory to store your movie files");
       chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      chooser.setCurrentDirectory(curDir);
       ret = chooser.showOpenDialog(null);
       if (ret == JFileChooser.APPROVE_OPTION) {
         selected = chooser.getSelectedFile().toPath();
@@ -1505,6 +1513,7 @@ public class Lawena {
 
   private Path getChosenTfPath() {
     Path selected = null;
+    File curDir = settings.getTfPath() != null ? settings.getTfPath().toFile() : null;
     int ret = 0;
     while ((selected == null && ret == 0)
         || (selected != null && (!Files.exists(selected) || !selected.getFileName().toString()
@@ -1512,6 +1521,7 @@ public class Lawena {
       chooser = new JFileChooser();
       chooser.setDialogTitle("Choose your \"tf\" directory");
       chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      chooser.setCurrentDirectory(curDir);
       chooser.setFileHidingEnabled(false);
       ret = chooser.showOpenDialog(null);
       if (ret == JFileChooser.APPROVE_OPTION) {
