@@ -36,13 +36,16 @@ public class MainModel {
   private Updater updater;
   private Linker linker;
 
+  private final SourceGames games;
+
   private String originalDxLevel;
   private Resources resources;
   private DemoEditor demos;
   private ImageStore skyboxPreviewStore;
   private Settings settings;
 
-  public MainModel(File defaultFile, OSInterface os, Linker ln) throws IOException {
+  public MainModel(File defaultFile, OSInterface os, Linker ln, SourceGames games)
+      throws IOException {
     Path profilesPath = defaultFile.toPath().resolveSibling("profiles.json"); //$NON-NLS-1$
     if (!Files.exists(profilesPath)) {
       Files.copy(defaultFile.toPath(), profilesPath);
@@ -51,6 +54,7 @@ public class MainModel {
     this.versionData = loadVersionData();
     this.updater = new Updater();
     this.osInterface = os;
+    this.games = games;
     os.setLookAndFeel();
 
     originalDxLevel = getSystemDxLevel();
@@ -210,6 +214,10 @@ public class MainModel {
 
   public Linker getLinker() {
     return linker;
+  }
+
+  public SourceGames getGames() {
+    return games;
   }
 
 }

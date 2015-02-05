@@ -106,5 +106,7 @@ public interface LawenaView {
   public JProgressBar getProgressBar();
 
   public AbstractButton getChckbxmntmBackupMode();
+  
+  public AbstractButton getCheckRememberGame();
 
 }

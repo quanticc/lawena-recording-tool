@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -119,6 +120,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
   private JMenuItem showLogMenuItem;
   private JMenuItem customLaunchOptionsMenuItem;
   private JCheckBox disableCasterVoice;
+  private JCheckBoxMenuItem checkRememberGame;
 
   public LawenaViewGo() {
     super();
@@ -188,6 +190,10 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     JCheckBoxMenuItem chckbxmntmBackupMode =
         new JCheckBoxMenuItem(Messages.getString("LawenaView.deleteBackupFilesOnRestoreSuccess")); //$NON-NLS-1$
     mnAdvanced.add(chckbxmntmBackupMode);
+
+    JCheckBoxMenuItem checkRememberGame =
+        new JCheckBoxMenuItem(Messages.getString("LawenaView.rememberSelectedGame")); //$NON-NLS-1$
+    mnAdvanced.add(checkRememberGame);
 
     JSeparator separator_5 = new JSeparator();
     mnAdvanced.add(separator_5);
@@ -590,6 +596,7 @@ public class LawenaViewGo extends JFrame implements LawenaView {
     this.switchUpdaterBranchMenuItem = switchUpdaterBranchMenuItem;
     this.showLogMenuItem = showLogMenuItem;
     this.customLaunchOptionsMenuItem = customLaunchOptionsMenuItem;
+    this.checkRememberGame = checkRememberGame;
 
     pack();
     setMinimumSize(new Dimension(750, 480));
@@ -776,5 +783,10 @@ public class LawenaViewGo extends JFrame implements LawenaView {
 
   public JCheckBox getDisableCasterVoice() {
     return disableCasterVoice;
+  }
+  
+  @Override
+  public AbstractButton getCheckRememberGame() {
+    return checkRememberGame;
   }
 }

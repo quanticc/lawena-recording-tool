@@ -404,6 +404,15 @@ public abstract class Lawena implements ProfileListener {
         Key.deleteUnneededBackups.setValueEx(settings, view.getChckbxmntmBackupMode().isSelected());
       }
     });
+    view.getCheckRememberGame().setSelected(model.getGames().isRememberChoice());
+    view.getCheckRememberGame().addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        model.getGames().setRememberChoice(view.getCheckRememberGame().isSelected());
+        model.getGames().save();
+      }
+    });
     view.getMntmLaunchTimeout().addActionListener(new ActionListener() {
 
       @Override
