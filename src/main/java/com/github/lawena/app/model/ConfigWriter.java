@@ -116,7 +116,7 @@ public abstract class ConfigWriter {
   @SuppressWarnings("nls")
   private String getFullSegmentNamescroll() throws IOException {
     String lastmovie = "";
-    String alias = "alias vnamescroll stmov1";
+    String alias = "alias namescroll stmov1";
     Path recPath = toPath(Key.recordingPath.getValue(settings));
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(recPath, "f*.{tga,jpg,jpeg}")) {
       for (Path moviefile : stream) {
@@ -131,9 +131,9 @@ public abstract class ConfigWriter {
       // extension = tga, jpg, jpeg, wav
       int idx = "abcdefghijklmno".indexOf(lastmovie.charAt(1));
       if (idx >= 0) {
-        alias = "alias vnamescroll stmov" + (idx + 2);
+        alias = "alias namescroll stmov" + (idx + 2);
       } else if (lastmovie.charAt(1) == 'p') {
-        alias = "alias vnamescroll noslots";
+        alias = "alias namescroll noslots";
       }
     }
     return alias;
@@ -142,7 +142,7 @@ public abstract class ConfigWriter {
   @SuppressWarnings("nls")
   private String getVideoSegmentNamescroll() throws IOException {
     String lastmovie = "";
-    String alias = "alias anamescroll vorec1";
+    String alias = "alias vnamescroll vorec1";
     Path recPath = toPath(Key.recordingPath.getValue(settings));
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(recPath, "v*.{tga,jpg,jpeg}")) {
       for (Path moviefile : stream) {
@@ -153,9 +153,9 @@ public abstract class ConfigWriter {
     if (!lastmovie.equals("")) {
       int idx = "abcdefghijklmno".indexOf(lastmovie.charAt(1));
       if (idx >= 0) {
-        alias = "alias anamescroll vorec" + (idx + 2);
+        alias = "alias vnamescroll vorec" + (idx + 2);
       } else if (lastmovie.charAt(1) == 'p') {
-        alias = "alias anamescroll novideoslots";
+        alias = "alias vnamescroll novideoslots";
       }
     }
     return alias;
@@ -164,7 +164,7 @@ public abstract class ConfigWriter {
   @SuppressWarnings("nls")
   private String getAudioSegmentNamescroll() throws IOException {
     String lastmovie = "";
-    String alias = "alias namescroll aorec1";
+    String alias = "alias anamescroll aorec1";
     Path recPath = toPath(Key.recordingPath.getValue(settings));
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(recPath, "a*.wav")) {
       for (Path moviefile : stream) {
@@ -175,9 +175,9 @@ public abstract class ConfigWriter {
     if (!lastmovie.equals("")) {
       int idx = "abcdefghijklmno".indexOf(lastmovie.charAt(1));
       if (idx >= 0) {
-        alias = "alias namescroll aorec" + (idx + 2);
+        alias = "alias anamescroll aorec" + (idx + 2);
       } else if (lastmovie.charAt(1) == 'p') {
-        alias = "alias namescroll noaudioslots";
+        alias = "alias anamescroll noaudioslots";
       }
     }
     return alias;
