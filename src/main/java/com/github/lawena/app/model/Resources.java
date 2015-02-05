@@ -182,7 +182,7 @@ public class Resources extends AbstractTableModel {
     List<Resource> newResourceList = new ArrayList<>();
     // path must be a folder or a vpk file
     if (!Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)) {
-      log.info("Skipping invalid or non existant path: {}", dir); //$NON-NLS-1$
+      log.info("Skipping invalid or non existing path: {}", dir); //$NON-NLS-1$
     } else {
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
         for (Path path : stream) {
