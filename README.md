@@ -1,6 +1,8 @@
 Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.x)](https://travis-ci.org/iabarca/lawena-recording-tool)
 =====================
 
+[![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A simple [Java 7+](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) tool which greatly enhances your TF2 and other Source games image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.
 
 Easy-to-use and no install required. This tool does not interfere with your regular TF2 configuration, HUD or launch options. Requires [Steam](https://steamcommunity.com/) in order to run.
