@@ -4,3 +4,6 @@ jdk:
   
 before_install:
   - chmod +x gradlew
+  
+notifications:
+  slack: lawena:V1Ny6wkgPZEcXegxa479P8x5
