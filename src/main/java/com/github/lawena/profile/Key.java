@@ -103,7 +103,8 @@ public class Key {
       .validatedBy(RangeValidator.atLeast(24));
   public static final Option<String> viewmodelSwitch = newOption("cfg.viewmodels", String.class,
       "on").validatedBy(new StringValidator("on", "off", "default"));
-  public static final Option<Integer> viewmodelFov = newOption("cfg.vmodelFov", Integer.class, 70);
+  public static final Option<Integer> viewmodelFov = newOption("cfg.vmodelFov", Integer.class, 70)
+      .validatedBy(RangeValidator.between(1, 179));
   public static final Option<Boolean> motionBlur =
       newOption("cfg.motionBlur", Boolean.class, false);
   public static final Option<Boolean> noCrosshair = newOption("cfg.noCrosshair", Boolean.class,

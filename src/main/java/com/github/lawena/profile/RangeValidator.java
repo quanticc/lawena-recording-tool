@@ -17,6 +17,10 @@ public class RangeValidator implements Validator<Integer> {
     return new RangeValidator(Integer.MIN_VALUE, max);
   }
 
+  public static RangeValidator between(int min, int max) {
+    return new RangeValidator(min, max);
+  }
+
   private int min;
   private int max;
 

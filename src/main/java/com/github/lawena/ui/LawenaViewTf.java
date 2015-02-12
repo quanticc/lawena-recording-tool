@@ -430,7 +430,7 @@ public class LawenaViewTf extends JFrame implements LawenaView {
     gbc_spinnerViewmodelFov.gridx = 3;
     gbc_spinnerViewmodelFov.gridy = 3;
     panelSettings.add(spinnerViewmodelFov, gbc_spinnerViewmodelFov);
-    spinnerViewmodelFov.setModel(new SpinnerNumberModel(70, null, null, 1));
+    spinnerViewmodelFov.setModel(new SpinnerNumberModel(70, 1, 179, 1));
 
     Component horizontalStrut = Box.createHorizontalStrut(24);
     GridBagConstraints gbc_horizontalStrut = new GridBagConstraints();
