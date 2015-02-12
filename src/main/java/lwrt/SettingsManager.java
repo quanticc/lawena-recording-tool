@@ -34,7 +34,7 @@ public class SettingsManager {
     Skybox("Default"),
     CustomResources("no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"),
     ViewmodelSwitch("on", "on", "off", "default"),
-    ViewmodelFov(70, Integer.MIN_VALUE, Integer.MAX_VALUE),
+    ViewmodelFov(70, 1, 179),
     MotionBlur(true),
     Crosshair(false),
     CrosshairSwitch(false),
