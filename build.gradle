@@ -202,11 +202,11 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             min.eachLine { line ->
                 w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', distName) + System.getProperty("line.separator")
             }
-        } 
+        }
     }
-    
+
     tasks.create(name: "build${DistName}Dist", dependsOn: ["setup${DistName}Dist", "${distName}DistZip"]) {}
-    
+
     tasks.create(name: "setup${DistName}Deploy", dependsOn: ["build${DistName}Dist", "cleanInstall${DistName}Dist", "install${DistName}Dist"]) {
         description "Prepares deployment descriptor for deploying ${distName} distribution"
         def base = file("src/${distName}/dist/lawena/getdown.base.txt")
@@ -218,9 +218,9 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             base.eachLine { line ->
                 w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', distName) + System.getProperty("line.separator")
             }
-        } 
+        }
     }
-    
+
     tasks.create(name: "deploy${DistName}", dependsOn: "setup${DistName}Deploy") {
         description "Deploys ${distName} distribution to a local directory"
         doLast {
@@ -257,9 +257,11 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             }
             def output = file("${deployDir}/${distName}/buildlist.txt")
             output.append "${buildtime};${version}\n"
+            // post to webhook about new build
+            "curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}*\" ${notifyUrl}".execute()
         }
     }
-    
+
     tasks.create(name: "diffDeploy${DistName}", dependsOn: "deploy${DistName}") {
         description "Deploys and creates diff patch files for ${distName} distribution"
         doLast {
