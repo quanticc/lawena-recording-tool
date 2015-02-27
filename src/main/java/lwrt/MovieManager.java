@@ -46,6 +46,10 @@ public class MovieManager {
     String video = cfg.getString(Key.SourceRecorderVideoFormat);
     String audio = cfg.getString(Key.SourceRecorderAudioFormat);
     int quality = cfg.getInt(Key.SourceRecorderJpegQuality);
+    Path folder = Paths.get("cfg/mov");
+    if (!Files.exists(folder)) {
+      Files.createDirectories(folder);
+    }
     for (String prefix : prefixes) {
       List<String> lines =
           Arrays.asList("startmovie \"" + cfg.getMoviePath() + "/" + prefix + "_\" " + video + " "
