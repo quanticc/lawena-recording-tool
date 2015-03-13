@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Lawena Recording Tool by iabarca</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Lawena Recording Tool</h1>
+        <p>Simple movie recording tool for Source Engine games</p>
+
+        <p class="view"><a href="https://github.com/iabarca/lawena-recording-tool">View the Project on GitHub <small>iabarca/lawena-recording-tool</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/iabarca/lawena-recording-tool/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/iabarca/lawena-recording-tool/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/iabarca/lawena-recording-tool">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="lawena-recording-tool" class="anchor" href="#lawena-recording-tool" aria-hidden="true"><span class="octicon octicon-link"></span></a>Lawena Recording Tool</h1>
+
+<p><img src="http://i.imgur.com/dlRdaeA.png" alt="Lawena Recording Tool Logo"></p>
+
+<p><a href="https://travis-ci.org/iabarca/lawena-recording-tool"><img src="https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.1.x" alt="Build Status"></a> <a href="https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="Join the chat at https://gitter.im/iabarca/lawena-recording-tool"></a></p>
+
+<p>Please read our <a href="https://github.com/iabarca/lawena-recording-tool/wiki/Instructions">Instructions</a> and <a href="https://github.com/iabarca/lawena-recording-tool/wiki/FAQ">FAQ</a> before asking for help, also check out the <a href="#known-issues">Known Issues</a> below!</p>
+
+<h1>
+<a id="whats-this" class="anchor" href="#whats-this" aria-hidden="true"><span class="octicon octicon-link"></span></a>What's this?</h1>
+
+<p>Lawena is a simple <a href="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html">Java 7+</a> tool which greatly enhances your TF2 and other Source games image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.</p>
+
+<p>Easy-to-use and no install required. This tool does not interfere with your regular TF2 configuration, HUD or launch options. Requires <a href="https://steamcommunity.com/">Steam</a> in order to run.</p>
+
+<p><img src="http://i.imgur.com/kXHsYDu.png" alt="Main Window Preview"></p>
+
+<h1>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h1>
+
+<ul>
+<li>Insane max quality graphics configuration. </li>
+<li>Recorded files are saved to the directory of your choosing for comfort and order.</li>
+<li>Options to enable/disable various game elements which may be unnecessary in the context of a movie.</li>
+<li>Includes built-in moviehuds with different levels of simplicity.</li>
+<li>Supports custom HUDs/materials/models/etc to add a personal touch to your movies.</li>
+<li>Includes a set of built-in skyboxes, and supports custom skyboxes via simple drag-and-drop.</li>
+<li>
+<a href="https://code.google.com/p/srcdemo2/">SrcDemo2</a> support to reduce drive usage and space.</li>
+<li>
+<a href="https://developer.valvesoftware.com/wiki/Demo_Recording_Tools">VDM</a> file support for automatizing your movie recording process.</li>
+<li>Updates automatically, you can see the latest changes <a href="https://github.com/iabarca/lawena-recording-tool/commits/v4.1.x">here</a>.</li>
+</ul>
+
+<h1>
+<a id="installing-lawena" class="anchor" href="#installing-lawena" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installing Lawena</h1>
+
+<p>If you want to use a stable version, check the <a href="https://github.com/iabarca/lawena-recording-tool/releases">releases</a> page. Simply download the zip release, extract it anywhere and run <code>lawena.exe</code>.</p>
+
+<h1>
+<a id="known-issues" class="anchor" href="#known-issues" aria-hidden="true"><span class="octicon octicon-link"></span></a>Known Issues</h1>
+
+<ul>
+<li>If you have your own class configs with <code>bind</code> command in them, you can lose some of the lawena's own keybindings, because class configs get recorded into the <code>.dem</code> files. Just check out <code>recbindings.cfg</code> and execute the equivalent console command.</li>
+<li>Selecting your own custom/mystuff/cfg files to load into TF2 can cause loss of recording quality and lawena's keybindings.</li>
+<li>Some keybindings might be missing, an alternative is to type <code>startrecording</code> into the console, otherwise check out you're not playing a demo that rebinds some keys and if it does, edit <code>recbindings.cfg</code> inside lawena <code>cfg</code> folder accordingly to solve it.</li>
+<li>Custom HUDs can trigger a "Failed to restore files" due to Windows locking a custom font file. In case your custom files somehow get misplaced and disappear upon restoring, there are backup archives of your custom files in your <code>tf</code> folder named lawena-user.<em>timestamp</em>.bak.zip.</li>
+<li>Choosing a movie/recording folder with special characters like brackets or accents might confuse Source Recorder and not save any frames. Use simpler path names.</li>
+</ul>
+
+<h1>
+<a id="latest-development-builds" class="anchor" href="#latest-development-builds" aria-hidden="true"><span class="octicon octicon-link"></span></a>Latest development builds</h1>
+
+<p>There's some pre-releases that preview upcoming content. To download the latest, not particularly stable version:</p>
+
+<ul>
+<li>
+<a href="https://github.com/iabarca/lawena-recording-tool/archive/v4.x.zip">Download this repository</a> and extract it to any folder.</li>
+<li>Run <strong>gradlew.bat</strong> (Windows) or <strong>gradlew</strong> script (Unix) to start the program. Administrative permissions are required due to the use of symbolic links.</li>
+</ul>
+
+<p>You can also switch updater branches from within the tool, just go to the <code>Help -&gt; Switch Updater Branch...</code> menu item, choose one of the branches, press OK and restart the tool to apply the changes. The current branches are:</p>
+
+<ul>
+<li>
+<code>release-v4.1</code> — latest stable version (Recommended)</li>
+<li>
+<code>preview-v4.1</code> — latest updates being tested</li>
+<li>
+<code>release-v4.2</code>/<code>snapshot-v4.2</code> — newer version featuring symbolic links, multiple Source game support and other features. (Unstable!)</li>
+</ul>
+
+<h1>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h1>
+
+<ul>
+<li>Original project by Montz (currently inactive)</li>
+<li>Current developer: Quantic (<a href="http://steamcommunity.com/id/thepropane">steam</a>) since June 2013</li>
+<li>Graphical <code>.cfg</code> files based on those made by <a href="https://chrisdown.name/tf2/">Chris' maxquality</a>
+</li>
+<li>Built-in Killnotices and Medic HUD made by <a href="http://steamcommunity.com/profiles/76561198023136325">mih</a> [<a href="https://github.com/Kuw/recordinghuds">repo</a>]</li>
+<li>Skyboxes included made by komaokc from GameBanana</li>
+<li>Includes some content used in PLDX recording tool</li>
+<li>Valve - Team Fortress and Team Fortress logo</li>
+</ul>
+
+<h1>
+<a id="questions" class="anchor" href="#questions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Questions?</h1>
+
+<p>In case of issues, questions or feature requests you should <a href="https://github.com/iabarca/lawena-recording-tool/issues">create a GitHub issue</a> or ask me via <a href="https://gitter.im/iabarca/lawena-recording-tool?utm_source=share-link&amp;utm_medium=link&amp;utm_campaign=share-link">Gitter chat</a>. I don't monitor forum threads anymore. Also check the wiki! Thanks :D</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/iabarca">iabarca</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-41559116-4");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
