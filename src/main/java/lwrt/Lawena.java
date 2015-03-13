@@ -674,13 +674,13 @@ public class Lawena {
     log.fine("Retrieving system dxlevel and Steam path");
     oDxlevel = getOriginalDxlevel();
 
-    // retrieve SteamPath, attempt 2 registry queries, user input if all else fails
+    // get SteamPath from registry, this value might be invalid or there might not be a value at all
     Path steampath = cl.getSteamPath();
-    if (steampath.toString().isEmpty()) {
+    if (!isValidSteamPath(steampath)) {
       steampath = Paths.get(settings.getString(Key.AltSteamDir));
     }
     log.fine("Checking for Steam path at " + steampath);
-    if (!steampath.getFileName().toString().equalsIgnoreCase("Steam") || !Files.exists(steampath)) {
+    if (!isValidSteamPath(steampath)) {
       log.warning("IMPORTANT: SteamPath from registry is invalid. Check your Steam installation");
       log.warning("Value should be at HKEY_CURRENT_USER\\Software\\Valve\\Steam on key SteamPath");
       log.info("Asking for manual SteamPath");
@@ -772,6 +772,16 @@ public class Lawena {
     vdm = new DemoEditor(settings, cl);
 
     log.fine("Init complete - Ready to display GUI");
+  }
+
+  private static boolean isValidSteamPath(Path p) {
+    // value must not be empty
+    // value must represent a directory named "Steam" (case insensitive)
+    // the directory must have a steam.exe file inside
+    String s = p.toString();
+    return (!s.isEmpty() && Files.isDirectory(p)
+        && p.getFileName().toString().equalsIgnoreCase("Steam") && Files.exists(p
+        .resolve("steam.exe")));
   }
 
   private String getOriginalDxlevel() {
