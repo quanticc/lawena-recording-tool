@@ -223,7 +223,6 @@ public class SettingsManager {
     lines.add("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
     lines.add("cl_hud_playerclass_playermodel_showed_confirm_dialog 1");
     lines.add("cl_hud_playerclass_use_playermodel " + (getHudPlayerModel() ? "1" : "0"));
-    lines.add("tf_training_has_prompted_for_loadout 1");
     lines.add("engine_no_focus_sleep 0");
     lines.add("cl_spec_carrieditems 0");
     lines.add("tf_hud_target_id_disable_floating_health 1");
