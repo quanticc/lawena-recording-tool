@@ -22,42 +22,19 @@ public class SettingsManager {
   private static final Logger log = Logger.getLogger("lawena");
 
   public enum Key {
-    TfDir(""),
-    MovieDir(""),
-    SteamDir(""),
-    AltSteamDir(""),
-    Width(1280, 640, Integer.MAX_VALUE),
-    Height(720, 360, Integer.MAX_VALUE),
-    Framerate(120, 24, Integer.MAX_VALUE),
-    DxLevel("98", "80", "81", "90", "95", "98"),
-    Hud("hud_medic", "hud_killnotices", "hud_medic", "hud_default", "custom"),
-    Skybox("Default"),
-    CustomResources("no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"),
-    ViewmodelSwitch("on", "on", "off", "default"),
-    ViewmodelFov(70, 1, 179),
-    MotionBlur(true),
-    Crosshair(false),
-    CrosshairSwitch(false),
-    CombatText(false),
-    Hitsounds(false),
-    Voice(false),
-    SteamCloud(false),
-    Condebug(true),
-    HudMinmode(true),
-    HudPlayerModel(false),
-    Particles(""),
-    LogConsoleLevel("FINER"),
-    LogFileLevel("FINE"),
-    LogUiLevel("FINE"),
-    LaunchTimeout(120, 0, Integer.MAX_VALUE),
-    Insecure(false),
-    VdmSrcDemoFix(false),
-    CustomSettings("// Custom User Settings"),
-    SourceRecorderVideoFormat("tga", "tga", "jpg"),
-    SourceRecorderAudioFormat("wav", "wav", ""),
-    SourceRecorderJpegQuality(50, 1, 100),
-    DeleteBackupsWhenRestoring(true),
-    BigFolderMBThreshold(200, 0, Integer.MAX_VALUE),
+    TfDir(""), MovieDir(""), SteamDir(""), AltSteamDir(""), Width(1280, 640, Integer.MAX_VALUE),
+    Height(720, 360, Integer.MAX_VALUE), Framerate(120, 24, Integer.MAX_VALUE), DxLevel("98", "80",
+        "81", "90", "95", "98"), Hud("hud_medic", "hud_killnotices", "hud_medic", "hud_default",
+        "custom"), Skybox("Default"), CustomResources(
+        "no_announcer_voices.vpk|no_applause_sounds.vpk|no_domination_sounds.vpk"),
+    ViewmodelSwitch("on", "on", "off", "default"), ViewmodelFov(70, 1, 179), MotionBlur(true),
+    PixelFog(false), Crosshair(false), CrosshairSwitch(false), CombatText(false), Hitsounds(false),
+    Voice(false), SteamCloud(false), Condebug(true), HudMinmode(true), HudPlayerModel(false),
+    Particles(""), LogConsoleLevel("FINER"), LogFileLevel("FINE"), LogUiLevel("FINE"),
+    LaunchTimeout(120, 0, Integer.MAX_VALUE), Insecure(false), VdmSrcDemoFix(false),
+    CustomSettings("// Custom User Settings"), SourceRecorderVideoFormat("tga", "tga", "jpg"),
+    SourceRecorderAudioFormat("wav", "wav", ""), SourceRecorderJpegQuality(50, 1, 100),
+    DeleteBackupsWhenRestoring(true), BigFolderMBThreshold(200, 0, Integer.MAX_VALUE),
     LaunchOptions("-novid -console");
 
     private Object value;
@@ -193,6 +170,7 @@ public class SettingsManager {
     lines.add("mat_motion_blur_enabled " + (getMotionBlur() ? "1" : "0"));
     lines.add("mat_motion_blur_forward_enabled " + (getMotionBlur() ? "1" : "0"));
     lines.add("mat_motion_blur_strength " + (getMotionBlur() ? "1" : "0"));
+    lines.add("r_pixelfog " + (getBoolean(Key.PixelFog) ? "1" : "0"));
     lines.add((getSteamCloud() ? "//" : "") + "cl_cloud_settings 0");
     lines.add((getCondebug() ? "" : "//") + "con_timestamp 1");
     lines.add("viewmodel_fov_demo " + getViewmodelFov());

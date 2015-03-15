@@ -159,6 +159,7 @@ public class LawenaView extends JFrame {
   private JMenuItem mntmRevertToDefault;
   private JCheckBoxMenuItem chckbxmntmBackupMode;
   private JMenuItem customLaunchOptionsMenuItem;
+  private JCheckBox chckbxDisablePixelFog;
 
   /**
    * Create the frame.
@@ -525,9 +526,9 @@ public class LawenaView extends JFrame {
     panelSettings.add(panelCheckboxes, gbc_panelCheckboxes);
     GridBagLayout gbl_panelCheckboxes = new GridBagLayout();
     gbl_panelCheckboxes.columnWidths = new int[] {0, 0, 0};
-    gbl_panelCheckboxes.rowHeights = new int[] {0, 0, 0, 0, 0};
+    gbl_panelCheckboxes.rowHeights = new int[] {0, 0, 0, 0, 0, 0};
     gbl_panelCheckboxes.columnWeights = new double[] {1.0, 1.0, Double.MIN_VALUE};
-    gbl_panelCheckboxes.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+    gbl_panelCheckboxes.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
     panelCheckboxes.setLayout(gbl_panelCheckboxes);
 
     JCheckBox enableMotionBlur = new JCheckBox("Enable Motion Blur");
@@ -538,12 +539,12 @@ public class LawenaView extends JFrame {
     gbc_enableMotionBlur.gridy = 0;
     panelCheckboxes.add(enableMotionBlur, gbc_enableMotionBlur);
 
-    JCheckBox disableCombatText = new JCheckBox("Disable Combat Text");
-    GridBagConstraints gbc_disableCombatText = new GridBagConstraints();
-    gbc_disableCombatText.anchor = GridBagConstraints.WEST;
-    gbc_disableCombatText.gridx = 1;
-    gbc_disableCombatText.gridy = 0;
-    panelCheckboxes.add(disableCombatText, gbc_disableCombatText);
+    chckbxDisablePixelFog = new JCheckBox("Disable Pixel Fog");
+    GridBagConstraints gbc_chckbxDisablePixelFog = new GridBagConstraints();
+    gbc_chckbxDisablePixelFog.anchor = GridBagConstraints.WEST;
+    gbc_chckbxDisablePixelFog.gridx = 1;
+    gbc_chckbxDisablePixelFog.gridy = 0;
+    panelCheckboxes.add(chckbxDisablePixelFog, gbc_chckbxDisablePixelFog);
 
     JCheckBox disableHitSounds = new JCheckBox("Disable Hit Sounds");
     GridBagConstraints gbc_disableHitSounds = new GridBagConstraints();
@@ -553,12 +554,13 @@ public class LawenaView extends JFrame {
     gbc_disableHitSounds.gridy = 1;
     panelCheckboxes.add(disableHitSounds, gbc_disableHitSounds);
 
-    JCheckBox disableCrosshair = new JCheckBox("Disable Crosshair");
-    GridBagConstraints gbc_disableCrosshair = new GridBagConstraints();
-    gbc_disableCrosshair.anchor = GridBagConstraints.WEST;
-    gbc_disableCrosshair.gridx = 1;
-    gbc_disableCrosshair.gridy = 1;
-    panelCheckboxes.add(disableCrosshair, gbc_disableCrosshair);
+    JCheckBox disableCombatText_1 = new JCheckBox("Disable Combat Text");
+    GridBagConstraints gbc_disableCombatText_1 = new GridBagConstraints();
+    gbc_disableCombatText_1.anchor = GridBagConstraints.WEST;
+    gbc_disableCombatText_1.gridx = 1;
+    gbc_disableCombatText_1.gridy = 1;
+    panelCheckboxes.add(disableCombatText_1, gbc_disableCombatText_1);
+    this.disableCombatText = disableCombatText_1;
 
     JCheckBox disableVoiceChat = new JCheckBox("Disable Voice Chat");
     GridBagConstraints gbc_disableVoiceChat = new GridBagConstraints();
@@ -568,12 +570,13 @@ public class LawenaView extends JFrame {
     gbc_disableVoiceChat.gridy = 2;
     panelCheckboxes.add(disableVoiceChat, gbc_disableVoiceChat);
 
-    JCheckBox disableCrosshairSwitch = new JCheckBox("Disable Crosshair Switching");
-    GridBagConstraints gbc_disableCrosshairSwitch = new GridBagConstraints();
-    gbc_disableCrosshairSwitch.anchor = GridBagConstraints.WEST;
-    gbc_disableCrosshairSwitch.gridx = 1;
-    gbc_disableCrosshairSwitch.gridy = 2;
-    panelCheckboxes.add(disableCrosshairSwitch, gbc_disableCrosshairSwitch);
+    JCheckBox disableCrosshair_1 = new JCheckBox("Disable Crosshair");
+    GridBagConstraints gbc_disableCrosshair_1 = new GridBagConstraints();
+    gbc_disableCrosshair_1.anchor = GridBagConstraints.WEST;
+    gbc_disableCrosshair_1.gridx = 1;
+    gbc_disableCrosshair_1.gridy = 2;
+    panelCheckboxes.add(disableCrosshair_1, gbc_disableCrosshair_1);
+    this.disableCrosshair = disableCrosshair_1;
 
     JCheckBox useHudMinmode = new JCheckBox("Minimal HUD");
     useHudMinmode
@@ -584,15 +587,6 @@ public class LawenaView extends JFrame {
     gbc_chckbxUseHudMin.gridx = 0;
     gbc_chckbxUseHudMin.gridy = 3;
     panelCheckboxes.add(useHudMinmode, gbc_chckbxUseHudMin);
-
-    JCheckBox usePlayerModel = new JCheckBox("3D Player Model in HUD");
-    usePlayerModel
-        .setToolTipText("<html>\r\nUse player model in player class HUD, selecting this option<br>\r\nwill add \"cl_hud_playerclass_use_playermodel 1\" to the config.<br>\r\nThis option is useful if you use Custom HUDs.");
-    GridBagConstraints gbc_usePlayerModel = new GridBagConstraints();
-    gbc_usePlayerModel.anchor = GridBagConstraints.WEST;
-    gbc_usePlayerModel.gridx = 1;
-    gbc_usePlayerModel.gridy = 3;
-    panelCheckboxes.add(usePlayerModel, gbc_usePlayerModel);
 
     JPanel panelBottomLeft = new JPanel();
     FlowLayout fl_panelBottomLeft = (FlowLayout) panelBottomLeft.getLayout();
@@ -677,9 +671,6 @@ public class LawenaView extends JFrame {
     this.cmbQuality = cmbQuality;
     this.spinnerViewmodelFov = spinnerViewmodelFov;
     this.enableMotionBlur = enableMotionBlur;
-    this.disableCrosshair = disableCrosshair;
-    this.disableCrosshairSwitch = disableCrosshairSwitch;
-    this.disableCombatText = disableCombatText;
     this.disableHitSounds = disableHitSounds;
     this.disableVoiceChat = disableVoiceChat;
     this.btnStartTf = btnStartTf;
@@ -707,7 +698,25 @@ public class LawenaView extends JFrame {
     this.mntmOpenCustomFolder = mntmOpenCustomFolder;
     this.mntmChangeTfLaunch = mntmChangeTfLaunch;
     this.chckbxmntmInsecure = chckbxmntmInsecure;
-    this.usePlayerModel = usePlayerModel;
+
+    JCheckBox disableCrosshairSwitch_1 = new JCheckBox("Disable Crosshair Switching");
+    GridBagConstraints gbc_disableCrosshairSwitch_1 = new GridBagConstraints();
+    gbc_disableCrosshairSwitch_1.anchor = GridBagConstraints.WEST;
+    gbc_disableCrosshairSwitch_1.gridx = 1;
+    gbc_disableCrosshairSwitch_1.gridy = 3;
+    panelCheckboxes.add(disableCrosshairSwitch_1, gbc_disableCrosshairSwitch_1);
+    this.disableCrosshairSwitch = disableCrosshairSwitch_1;
+
+    JCheckBox usePlayerModel_1 = new JCheckBox("3D Player Model in HUD");
+    usePlayerModel_1
+        .setToolTipText("<html>\r\nUse player model in player class HUD, selecting this option<br>\r\nwill add \"cl_hud_playerclass_use_playermodel 1\" to the config.<br>\r\nThis option is useful if you use Custom HUDs.");
+    GridBagConstraints gbc_usePlayerModel_1 = new GridBagConstraints();
+    gbc_usePlayerModel_1.insets = new Insets(0, 0, 0, 5);
+    gbc_usePlayerModel_1.anchor = GridBagConstraints.WEST;
+    gbc_usePlayerModel_1.gridx = 0;
+    gbc_usePlayerModel_1.gridy = 4;
+    panelCheckboxes.add(usePlayerModel_1, gbc_usePlayerModel_1);
+    this.usePlayerModel = usePlayerModel_1;
     this.cmbSourceVideoFormat = cmbSourceVideoFormat;
     this.spinnerJpegQuality = spinnerJpegQuality;
     this.lblViewmodelFov = lblViewmodelFov;
@@ -896,4 +905,7 @@ public class LawenaView extends JFrame {
     return customLaunchOptionsMenuItem;
   }
 
+  public JCheckBox getDisablePixelFog() {
+    return chckbxDisablePixelFog;
+  }
 }

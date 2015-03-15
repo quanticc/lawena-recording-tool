@@ -1407,6 +1407,7 @@ public class Lawena {
     } catch (IllegalArgumentException e) {
     }
     view.getEnableMotionBlur().setSelected(settings.getMotionBlur());
+    view.getDisablePixelFog().setSelected(!settings.getBoolean(Key.PixelFog));
     view.getDisableCombatText().setSelected(!settings.getCombattext());
     view.getDisableCrosshair().setSelected(!settings.getCrosshair());
     view.getDisableCrosshairSwitch().setSelected(!settings.getCrosshairSwitch());
@@ -1442,6 +1443,7 @@ public class Lawena {
     settings
         .setDxlevel(Key.DxLevel.getAllowedValues().get(view.getCmbQuality().getSelectedIndex()));
     settings.setMotionBlur(view.getEnableMotionBlur().isSelected());
+    settings.setBoolean(Key.PixelFog, !view.getDisablePixelFog().isSelected());
     settings.setCombattext(!view.getDisableCombatText().isSelected());
     settings.setCrosshair(!view.getDisableCrosshair().isSelected());
     settings.setCrosshairSwitch(!view.getDisableCrosshairSwitch().isSelected());
