@@ -196,4 +196,21 @@ public class CLWindows extends CommandLine {
       log.log(Level.INFO, "", e);
     }
   }
+
+  @Override
+  public void registerFonts(Path path) {
+    try {
+      ProcessBuilder pb = new ProcessBuilder("batch\\FontReg.exe", "/copy");
+      pb.directory(path.toAbsolutePath().toFile());
+      Process pr = pb.start();
+      int code = pr.waitFor();
+      if (code != 0) {
+        log.warning("[FontReg] Process at " + pb.directory() + " returned with exit code: " + code);
+      } else {
+        log.info("[FontReg] Registered all fonts found in " + pb.directory());
+      }
+    } catch (InterruptedException | IOException e) {
+      log.log(Level.INFO, "Could not launch FontReg process", e);
+    }
+  }
 }

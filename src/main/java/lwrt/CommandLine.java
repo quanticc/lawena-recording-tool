@@ -360,4 +360,13 @@ public abstract class CommandLine {
   protected BufferedReader newProcessReader(Process p) {
     return new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("UTF-8")));
   }
+
+  /**
+   * Register all .fon, .ttf, .ttc, or .otf files in the given path.
+   * 
+   * @param path
+   */
+  public void registerFonts(Path path) {
+    // no-op, used only in Windows
+  }
 }

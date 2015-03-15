@@ -3,11 +3,15 @@ package lwrt;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,15 +42,15 @@ public class FileManager {
     this.cl = cl;
   }
 
-  private Path copy(Path from, Path to) throws IOException {
+  private static Path copy(Path from, Path to) throws IOException {
     return Files.walkFileTree(from, new CopyDirVisitor(from, to, false));
   }
 
-  private Path copyReadOnly(Path from, Path to) throws IOException {
+  private static Path copyReadOnly(Path from, Path to) throws IOException {
     return Files.walkFileTree(from, new CopyDirVisitor(from, to, true));
   }
 
-  private Path copy(Path from, Path to, Filter<Path> filter) throws IOException {
+  private static Path copy(Path from, Path to, Filter<Path> filter) throws IOException {
     return Files.walkFileTree(from, new CopyDirVisitor(from, to, false, filter));
   }
 
@@ -54,7 +58,7 @@ public class FileManager {
     return Files.walkFileTree(dir, new DeleteDirVisitor(cl));
   }
 
-  private boolean isEmpty(Path dir) {
+  private static boolean isEmpty(Path dir) {
     if (Files.exists(dir)) {
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
         return !stream.iterator().hasNext();
@@ -394,5 +398,19 @@ public class FileManager {
       log.fine("Failed to copy folder to lawena's custom files: " + e);
     }
     return false;
+  }
+
+  public static Set<Path> scanFonts(Path path) throws IOException {
+    final Set<Path> parents = new HashSet<>();
+    Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+      @Override
+      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        if (file.getFileName().toString().matches("^.*\\.(fon|ttf|ttc|otf)$")) {
+          parents.add(file.toAbsolutePath().getParent());
+        }
+        return FileVisitResult.CONTINUE;
+      }
+    });
+    return parents;
   }
 }

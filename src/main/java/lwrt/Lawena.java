@@ -307,6 +307,22 @@ public class Lawena {
         }
         setProgress(80);
 
+        /*
+         * Scan for all .fon, .ttf, .ttc, or .otf files inside custom and get their parent folders
+         * to register every font file using the FontReg utility at
+         * http://code.kliu.org/misc/fontreg/. This is an attempt to fix the
+         * "Windows locking uninstalled fonts used by TF2 custom HUDs" issue.
+         */
+        try {
+          status.info("Registering all custom fonts found...");
+          for (Path folder : files.scanFonts(customPath)) {
+            cl.registerFonts(folder);
+          }
+        } catch (IOException e) {
+          log.warning("Could not scan for custom fonts, you might be susceptible to font locking issue: "
+              + e.toString());
+        }
+
         // Launching process
         status.info("Launching TF2 process");
         cl.startTf(settings);
