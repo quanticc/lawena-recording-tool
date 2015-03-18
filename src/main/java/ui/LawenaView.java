@@ -159,7 +159,7 @@ public class LawenaView extends JFrame {
   private JMenuItem mntmRevertToDefault;
   private JCheckBoxMenuItem chckbxmntmBackupMode;
   private JMenuItem customLaunchOptionsMenuItem;
-  private JCheckBox chckbxDisablePixelFog;
+  private JCheckBox enablePixelFog;
 
   /**
    * Create the frame.
@@ -539,12 +539,12 @@ public class LawenaView extends JFrame {
     gbc_enableMotionBlur.gridy = 0;
     panelCheckboxes.add(enableMotionBlur, gbc_enableMotionBlur);
 
-    chckbxDisablePixelFog = new JCheckBox("Disable Pixel Fog");
+    enablePixelFog = new JCheckBox("Enable Pixel Fog");
     GridBagConstraints gbc_chckbxDisablePixelFog = new GridBagConstraints();
     gbc_chckbxDisablePixelFog.anchor = GridBagConstraints.WEST;
     gbc_chckbxDisablePixelFog.gridx = 1;
     gbc_chckbxDisablePixelFog.gridy = 0;
-    panelCheckboxes.add(chckbxDisablePixelFog, gbc_chckbxDisablePixelFog);
+    panelCheckboxes.add(enablePixelFog, gbc_chckbxDisablePixelFog);
 
     JCheckBox disableHitSounds = new JCheckBox("Disable Hit Sounds");
     GridBagConstraints gbc_disableHitSounds = new GridBagConstraints();
@@ -905,7 +905,7 @@ public class LawenaView extends JFrame {
     return customLaunchOptionsMenuItem;
   }
 
-  public JCheckBox getDisablePixelFog() {
-    return chckbxDisablePixelFog;
+  public JCheckBox getEnablePixelFog() {
+    return enablePixelFog;
   }
 }
