@@ -218,6 +218,8 @@ public class SettingsManager {
     lines.add("alias voice_menu_1 \"\"");
     lines.add("alias voice_menu_2 \"\"");
     lines.add("alias voice_menu_3 \"\"");
+    lines.add("alias +taunt \"\"");
+    lines.add("alias +context_action \"\"");
     lines.add("cl_showfps 0");
     lines.add("alias cl_showfps \"\"");
     lines.add("volume 0.5");
