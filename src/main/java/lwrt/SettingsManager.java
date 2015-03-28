@@ -194,7 +194,7 @@ public class SettingsManager {
     lines.add("mat_motion_blur_enabled " + (getMotionBlur() ? "1" : "0"));
     lines.add("mat_motion_blur_forward_enabled " + (getMotionBlur() ? "1" : "0"));
     lines.add("mat_motion_blur_strength " + (getMotionBlur() ? "1" : "0"));
-    lines.add("r_pixelfog " + (getBoolean(Key.PixelFog) ? "1" : "0"));
+    lines.add("r_pixelfog " + (getBoolean(Key.PixelFog) ? "0" : "1"));
     lines.add((getSteamCloud() ? "//" : "") + "cl_cloud_settings 0");
     lines.add((getCondebug() ? "" : "//") + "con_timestamp 1");
     lines.add("viewmodel_fov_demo " + getViewmodelFov());
