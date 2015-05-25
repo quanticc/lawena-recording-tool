@@ -543,6 +543,14 @@ public class LawenaView extends JFrame {
     gbc_enableMotionBlur.gridy = 0;
     panelCheckboxes.add(enableMotionBlur, gbc_enableMotionBlur);
 
+    JCheckBox disableCombatText_1 = new JCheckBox("Disable Combat Text");
+    GridBagConstraints gbc_disableCombatText_1 = new GridBagConstraints();
+    gbc_disableCombatText_1.anchor = GridBagConstraints.WEST;
+    gbc_disableCombatText_1.gridx = 1;
+    gbc_disableCombatText_1.gridy = 0;
+    panelCheckboxes.add(disableCombatText_1, gbc_disableCombatText_1);
+    this.disableCombatText = disableCombatText_1;
+
     JCheckBox disableHitSounds = new JCheckBox("Disable Hit Sounds");
     GridBagConstraints gbc_disableHitSounds = new GridBagConstraints();
     gbc_disableHitSounds.insets = new Insets(0, 0, 0, 5);
@@ -551,13 +559,13 @@ public class LawenaView extends JFrame {
     gbc_disableHitSounds.gridy = 1;
     panelCheckboxes.add(disableHitSounds, gbc_disableHitSounds);
 
-    JCheckBox disableCombatText_1 = new JCheckBox("Disable Combat Text");
-    GridBagConstraints gbc_disableCombatText_1 = new GridBagConstraints();
-    gbc_disableCombatText_1.anchor = GridBagConstraints.WEST;
-    gbc_disableCombatText_1.gridx = 1;
-    gbc_disableCombatText_1.gridy = 1;
-    panelCheckboxes.add(disableCombatText_1, gbc_disableCombatText_1);
-    this.disableCombatText = disableCombatText_1;
+    JCheckBox disableCrosshair_1 = new JCheckBox("Disable Crosshair");
+    GridBagConstraints gbc_disableCrosshair_1 = new GridBagConstraints();
+    gbc_disableCrosshair_1.anchor = GridBagConstraints.WEST;
+    gbc_disableCrosshair_1.gridx = 1;
+    gbc_disableCrosshair_1.gridy = 1;
+    panelCheckboxes.add(disableCrosshair_1, gbc_disableCrosshair_1);
+    this.disableCrosshair = disableCrosshair_1;
 
     JCheckBox disableVoiceChat = new JCheckBox("Disable Voice Chat");
     GridBagConstraints gbc_disableVoiceChat = new GridBagConstraints();
@@ -567,13 +575,13 @@ public class LawenaView extends JFrame {
     gbc_disableVoiceChat.gridy = 2;
     panelCheckboxes.add(disableVoiceChat, gbc_disableVoiceChat);
 
-    JCheckBox disableCrosshair_1 = new JCheckBox("Disable Crosshair");
-    GridBagConstraints gbc_disableCrosshair_1 = new GridBagConstraints();
-    gbc_disableCrosshair_1.anchor = GridBagConstraints.WEST;
-    gbc_disableCrosshair_1.gridx = 1;
-    gbc_disableCrosshair_1.gridy = 2;
-    panelCheckboxes.add(disableCrosshair_1, gbc_disableCrosshair_1);
-    this.disableCrosshair = disableCrosshair_1;
+    JCheckBox disableCrosshairSwitch_1 = new JCheckBox("Disable Crosshair Switching");
+    GridBagConstraints gbc_disableCrosshairSwitch_1 = new GridBagConstraints();
+    gbc_disableCrosshairSwitch_1.anchor = GridBagConstraints.WEST;
+    gbc_disableCrosshairSwitch_1.gridx = 1;
+    gbc_disableCrosshairSwitch_1.gridy = 2;
+    panelCheckboxes.add(disableCrosshairSwitch_1, gbc_disableCrosshairSwitch_1);
+    this.disableCrosshairSwitch = disableCrosshairSwitch_1;
 
     JCheckBox useHudMinmode = new JCheckBox("Minimal HUD");
     useHudMinmode
@@ -696,22 +704,13 @@ public class LawenaView extends JFrame {
     this.mntmChangeTfLaunch = mntmChangeTfLaunch;
     this.chckbxmntmInsecure = chckbxmntmInsecure;
 
-    JCheckBox disableCrosshairSwitch_1 = new JCheckBox("Disable Crosshair Switching");
-    GridBagConstraints gbc_disableCrosshairSwitch_1 = new GridBagConstraints();
-    gbc_disableCrosshairSwitch_1.anchor = GridBagConstraints.WEST;
-    gbc_disableCrosshairSwitch_1.gridx = 1;
-    gbc_disableCrosshairSwitch_1.gridy = 3;
-    panelCheckboxes.add(disableCrosshairSwitch_1, gbc_disableCrosshairSwitch_1);
-    this.disableCrosshairSwitch = disableCrosshairSwitch_1;
-
     JCheckBox usePlayerModel_1 = new JCheckBox("3D Player Model in HUD");
     usePlayerModel_1
         .setToolTipText("<html>\r\nUse player model in player class HUD, selecting this option<br>\r\nwill add \"cl_hud_playerclass_use_playermodel 1\" to the config.<br>\r\nThis option is useful if you use Custom HUDs.");
     GridBagConstraints gbc_usePlayerModel_1 = new GridBagConstraints();
-    gbc_usePlayerModel_1.insets = new Insets(0, 0, 0, 5);
     gbc_usePlayerModel_1.anchor = GridBagConstraints.WEST;
-    gbc_usePlayerModel_1.gridx = 0;
-    gbc_usePlayerModel_1.gridy = 4;
+    gbc_usePlayerModel_1.gridx = 1;
+    gbc_usePlayerModel_1.gridy = 3;
     panelCheckboxes.add(usePlayerModel_1, gbc_usePlayerModel_1);
     this.usePlayerModel = usePlayerModel_1;
     this.cmbSourceVideoFormat = cmbSourceVideoFormat;
