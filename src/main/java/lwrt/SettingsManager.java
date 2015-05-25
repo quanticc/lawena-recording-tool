@@ -53,6 +53,7 @@ public class SettingsManager {
     LaunchTimeout(120, 0, Integer.MAX_VALUE),
     Insecure(false),
     VdmSrcDemoFix(false),
+    InstallFonts(true),
     CustomSettings("// Custom User Settings"),
     SourceRecorderVideoFormat("tga", "tga", "jpg"),
     SourceRecorderAudioFormat("wav", "wav", ""),

@@ -313,14 +313,18 @@ public class Lawena {
          * http://code.kliu.org/misc/fontreg/. This is an attempt to fix the
          * "Windows locking uninstalled fonts used by TF2 custom HUDs" issue.
          */
-        try {
-          status.info("Registering all custom fonts found...");
-          for (Path folder : files.scanFonts(customPath)) {
-            cl.registerFonts(folder);
+        if (settings.getBoolean(Key.InstallFonts)) {
+          try {
+            status.info("Registering all custom fonts found...");
+            for (Path folder : files.scanFonts(customPath)) {
+              cl.registerFonts(folder);
+            }
+          } catch (IOException e) {
+            log.warning("Could not scan for custom fonts, you might be susceptible to font locking issue: "
+                + e.toString());
           }
-        } catch (IOException e) {
-          log.warning("Could not scan for custom fonts, you might be susceptible to font locking issue: "
-              + e.toString());
+        } else {
+          log.info("Skipping custom HUD font install");
         }
 
         // Launching process
@@ -1416,6 +1420,7 @@ public class Lawena {
     view.getUseHudMinmode().setSelected(settings.getHudMinmode());
     view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
     view.getChckbxmntmBackupMode().setSelected(settings.getBoolean(Key.DeleteBackupsWhenRestoring));
+    view.getInstallFonts().setSelected(settings.getBoolean(Key.InstallFonts));
     view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
     getCustomSettingsTextArea().setText(settings.getCustomSettings());
     view.getCmbSourceVideoFormat().setSelectedItem(
@@ -1465,6 +1470,7 @@ public class Lawena {
     settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
     settings
         .setBoolean(Key.DeleteBackupsWhenRestoring, view.getChckbxmntmBackupMode().isSelected());
+    settings.setBoolean(Key.InstallFonts, view.getInstallFonts().isSelected());
     settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
     settings.setCustomSettings(getCustomSettingsTextArea().getText());
     settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
