@@ -101,14 +101,15 @@ public class AboutDialog extends JDialog {
     aboutTextPane
         .setText("Simple Team Fortress 2 (TF2) Recording Tool<br>"
             + "Copyright 2011-2015 Montz, Quantic, contributors and others<br>"
-            + "<a href=\"http://code.google.com/p/lawenarecordingtool/\">http://code.google.com/p/lawenarecordingtool/</a><br><br>"
+            + "<a href=\"http://iabarca.github.io/lawena-recording-tool/\">http://iabarca.github.io/lawena-recording-tool/</a><br><br>"
             + "Lawena is free software; you can redistribute it and/or modify it under the terms of the <a href=\"https://github.com/iabarca/lawena-recording-tool/blob/master/LICENSE.txt\">GNU GPLv3</a>.<br>"
             + "Graphical .cfg files are almost entirely based on <a href=\"http://chrisdown.name/tf2/\">Chris' maxquality config</a>, with very slight tweaks.<br>"
             + "Built-in Killnotices and Medic HUD were made by <a href=\"http://steamcommunity.com/profiles/76561198023136325\">mih</a>. Thanks!<br>"
             + "Most Skyboxes are from GameBanana, made by <a href=\"http://gamebanana.com/members/submissions/textures/289553\">komaokc</a>, and the rest are from the PLDX recording tool.<br>"
             + "Enhanced particles included are also from PLDX recording tool.<br><br>"
             + "Self-Updating mechanism is possible thanks to <a href=\"http://code.google.com/p/getdown/\">Getdown</a>, developed by Third Rings Design, Inc.<br>"
-            + "Microsoft Sysinternals' <a href=\"http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx\">Handle</a> utility by Mark Russinovich.<br>"
+            + "Microsoft Sysinternals <a href=\"http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx\">Handle</a> utility by Mark Russinovich.<br>"
+            + "FontReg utility by <a href=\"http://code.kliu.org/\">kliu.org</a>.<br>"
             + "Source, the Source logo, Steam, the Steam logo, Team Fortress, the Team Fortress logo, Counter-Strike,<br>"
             + "and the Counter-Strike logo are trademarks and/or registered trademarks of the <a href=\"http://www.valvesoftware.com\">Valve Corporation</a>.<br>");
     contentPanel.add(aboutTextPane, BorderLayout.SOUTH);
