@@ -157,13 +157,13 @@ public class Lawena {
             if (isCancelled()) {
               break;
             }
-            path.toFile().setWritable(true);
             try {
+              path.toFile().setWritable(true);
               Files.delete(path);
+              publish(path);
             } catch (IOException e) {
               log.log(Level.INFO, "Could not delete a file", e);
             }
-            publish(path);
           }
 
         } catch (IOException ex) {
