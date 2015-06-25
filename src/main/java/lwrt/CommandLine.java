@@ -72,6 +72,8 @@ public abstract class CommandLine {
    * @return The <code>Path</code> where Steam and TF2 main executable, can be located.
    */
   public abstract Path getSteamPath();
+  
+  public abstract boolean isValidSteamPath(Path steamPath);
 
   /**
    * Returns the system DirectX level if it's stored somewhere in the filesystem.

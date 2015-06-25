@@ -3,6 +3,7 @@ package lwrt;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -30,6 +31,17 @@ public class CLWindows extends CommandLine {
   @Override
   public Path getSteamPath() {
     return Paths.get(regQuery("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath"));
+  }
+
+  @Override
+  public boolean isValidSteamPath(Path p) {
+    // value must not be empty
+    // value must represent a directory named "Steam" (case insensitive)
+    // the directory must have a steam.exe file inside
+    String s = p.toString();
+    return (!s.isEmpty() && Files.isDirectory(p)
+        && p.getFileName().toString().equalsIgnoreCase("Steam") && Files.exists(p
+        .resolve("steam.exe")));
   }
 
   @Override

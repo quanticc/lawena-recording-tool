@@ -59,6 +59,17 @@ public class CLLinux extends CommandLine {
   }
 
   @Override
+  public boolean isValidSteamPath(Path p) {
+    // value must not be empty
+    // value must represent a directory named "Steam" (case insensitive)
+    // the directory must have a steam.sh file inside
+    String s = p.toString();
+    return (!s.isEmpty() && Files.isDirectory(p)
+        && p.getFileName().toString().equalsIgnoreCase("Steam") && Files.exists(p
+        .resolve("steam.sh")));
+  }
+
+  @Override
   public String getSystemDxLevel() {
     return "90";
   }

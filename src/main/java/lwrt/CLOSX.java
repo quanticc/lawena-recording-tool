@@ -59,6 +59,17 @@ public class CLOSX extends CommandLine {
   }
 
   @Override
+  public boolean isValidSteamPath(Path p) {
+    // value must not be empty
+    // value must represent a directory named "Steam" (case insensitive)
+    // the directory must have a steam.exe file inside
+    String s = p.toString();
+    return (!s.isEmpty() && Files.isDirectory(p)
+        && p.getFileName().toString().equalsIgnoreCase("Steam") && Files.exists(p
+        .resolve("Steam.app")));
+  }
+
+  @Override
   public String getSystemDxLevel() {
     return "90";
   }
