@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -98,7 +99,7 @@ public class FileManager {
       Files.createDirectories(configPath);
       copyReadOnly(Paths.get("cfg"), configPath);
     } catch (IOException e) {
-      log.info("Could not replace cfg files: " + e);
+      log.log(Level.INFO, "Could not replace cfg files", e);
       throw new LawenaException("Failed to replace cfg files", e);
     }
     try {
@@ -109,7 +110,7 @@ public class FileManager {
       customPath.toFile().setWritable(true);
       Files.move(customPath, customBackupPath);
     } catch (IOException e) {
-      log.info("Could not backup custom folder: " + e);
+      log.log(Level.INFO, "Could not backup custom folder", e);
       throw new LawenaException("Failed to replace custom files", e);
     }
     // Copy hud files
@@ -125,7 +126,7 @@ public class FileManager {
         copyReadOnly(Paths.get("hud", hudName, "scripts"), scriptsPath);
       }
     } catch (IOException e) {
-      log.info("Could not replace hud files: " + e);
+      log.log(Level.INFO, "Could not replace hud files", e);
       throw new LawenaException("Failed to replace hud files", e);
     }
     // Copy skybox files
@@ -138,7 +139,7 @@ public class FileManager {
         replaceSkybox();
       }
     } catch (IOException e) {
-      log.info("Could not replace skybox files: " + e);
+      log.log(Level.INFO, "Could not replace skybox files", e);
       try {
         delete(skyboxPath);
         log.fine("Skybox folder deleted, no skybox files were replaced");
