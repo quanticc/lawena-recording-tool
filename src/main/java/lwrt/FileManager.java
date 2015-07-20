@@ -3,6 +3,7 @@ package lwrt;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -59,6 +60,22 @@ public class FileManager {
     return Files.walkFileTree(dir, new DeleteDirVisitor(cl));
   }
 
+  private static void mkdirs(Path dir) throws IOException {
+    try {
+      Files.createDirectories(dir);
+    } catch (FileAlreadyExistsException e) {
+      log.fine("Folder already exists: " + e);
+    }
+  }
+
+  private static void mkdir(Path dir) throws IOException {
+    try {
+      Files.createDirectory(dir);
+    } catch (FileAlreadyExistsException e) {
+      log.fine("Folder already exists: " + e);
+    }
+  }
+
   private static boolean isEmpty(Path dir) {
     if (Files.exists(dir)) {
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
@@ -96,7 +113,7 @@ public class FileManager {
       log.fine("Making a backup of your config files");
       configPath.toFile().setWritable(true);
       Files.move(configPath, configBackupPath);
-      Files.createDirectories(configPath);
+      mkdirs(configPath);
       copyReadOnly(Paths.get("cfg"), configPath);
     } catch (IOException e) {
       log.log(Level.INFO, "Could not replace cfg files", e);
@@ -105,7 +122,7 @@ public class FileManager {
     try {
       log.fine("Making a backup of your custom files");
       if (!Files.exists(customPath) || !Files.isDirectory(customPath)) {
-        Files.createDirectory(customPath);
+        mkdir(customPath);
       }
       customPath.toFile().setWritable(true);
       Files.move(customPath, customBackupPath);
@@ -118,8 +135,8 @@ public class FileManager {
       log.fine("Copying selected hud files");
       Path resourcePath = tfpath.resolve("custom/lawena/resource");
       Path scriptsPath = tfpath.resolve("custom/lawena/scripts");
-      Files.createDirectories(resourcePath);
-      Files.createDirectories(scriptsPath);
+      mkdirs(resourcePath);
+      mkdirs(scriptsPath);
       String hudName = cfg.getHud();
       if (!hudName.equals("custom")) {
         copyReadOnly(Paths.get("hud", hudName, "resource"), resourcePath);
@@ -135,7 +152,7 @@ public class FileManager {
       String sky = cfg.getSkybox();
       if (sky != null && !sky.isEmpty() && !sky.equals(Key.Skybox.defValue())) {
         log.fine("Copying selected skybox files");
-        Files.createDirectories(skyboxPath);
+        mkdirs(skyboxPath);
         replaceSkybox();
       }
     } catch (IOException e) {
@@ -187,7 +204,7 @@ public class FileManager {
               }
               if (!contents.isEmpty()) {
                 log.fine("Copying enhanced particles: " + contents);
-                Files.createDirectories(customParticlesPath);
+                mkdirs(customParticlesPath);
                 // TODO: fix to avoid invoking vpk x
                 cl.extractIfNeeded(tfpath, cp.getPath().toString(),
                     customParticlesPath.getParent(), contents);
