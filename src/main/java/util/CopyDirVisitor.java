@@ -2,6 +2,7 @@ package util;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,8 +39,12 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
     }
     Path targetPath = toPath.resolve(fromPath.relativize(dir));
     if (!Files.exists(targetPath)) {
-      log.finer("Creating directory: " + targetPath);
-      Files.createDirectory(targetPath);
+      try {
+        log.finer("Creating directory: " + targetPath);
+        Files.createDirectory(targetPath);
+      } catch (FileAlreadyExistsException e) {
+        log.fine("Already exists: " + e);
+      }
     }
     return FileVisitResult.CONTINUE;
   }
