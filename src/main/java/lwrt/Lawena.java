@@ -1560,8 +1560,7 @@ public class Lawena {
     Path selected = null;
     int ret = 0;
     while ((selected == null && ret == 0)
-        || (selected != null && (!Files.exists(selected.resolve("steam.exe")) || !selected.toFile()
-            .getName().toString().equals("Steam")))) {
+        || (selected != null && (!Files.exists(selected.resolve("steam.exe"))))) {
       chooser = new JFileChooser();
       chooser.setDialogTitle("Choose your \"Steam\" directory (where steam.exe is)");
       chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
