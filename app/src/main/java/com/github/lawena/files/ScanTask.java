@@ -1,6 +1,6 @@
 package com.github.lawena.files;
 
-import com.github.lawena.Messages;
+import com.github.lawena.i18n.Messages;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

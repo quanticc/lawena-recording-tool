@@ -3,6 +3,7 @@ package com.github.lawena;
 import com.github.lawena.dialog.ExceptionDialog;
 import com.github.lawena.security.PluginPolicy;
 import com.github.lawena.util.LwrtUtils;
+import com.github.lawena.i18n.Messages;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

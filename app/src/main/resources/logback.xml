@@ -1,8 +1,8 @@
 <configuration>
     <property name="CONSOLE_LOG_PATTERN"
-              value="%gray(%d{HH:mm:ss.SSS}) %highlight(%5p) %gray([%-15.15t]) %cyan(%-20.20logger{19}) %gray(:) %m%n"/>
+              value="%gray(%d{HH:mm:ss.SSS}) %highlight(%5p) %gray([%15.-15t]) %cyan(%-20.20logger{19}) %gray(:) %m%n"/>
     <property name="FILE_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p - [%-15.15t] %-30.30logger{29} : %m%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p - [%15.-15t] %-30.30logger{29} : %m%n"/>
 
     <appender name="FILE"
               class="ch.qos.logback.core.rolling.RollingFileAppender">

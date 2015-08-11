@@ -1,6 +1,6 @@
 package com.github.lawena.files;
 
-import com.github.lawena.Messages;
+import com.github.lawena.i18n.Messages;
 import com.github.lawena.exts.TagProvider;
 import com.github.lawena.vpk.Archive;
 import com.github.lawena.vpk.ArchiveException;

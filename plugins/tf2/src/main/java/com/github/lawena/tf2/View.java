@@ -3,9 +3,9 @@ package com.github.lawena.tf2;
 import com.github.lawena.files.Resource;
 import com.github.lawena.game.Group;
 import com.github.lawena.tf2.skybox.Skybox;
-import com.github.lawena.tf2.util.ZeroDoubleStringConverter;
-import com.github.lawena.tf2.util.ZeroIntegerStringConverter;
 import com.github.lawena.util.ExternalString;
+import com.github.lawena.util.ZeroDoubleStringConverter;
+import com.github.lawena.util.ZeroIntegerStringConverter;
 
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;

@@ -2,7 +2,7 @@ package com.github.lawena.task;
 
 import com.github.fge.lambdas.ThrownByLambdaException;
 import com.github.lawena.Controller;
-import com.github.lawena.Messages;
+import com.github.lawena.i18n.Messages;
 import com.github.lawena.exts.FileProvider;
 import com.github.lawena.exts.ViewProvider;
 import com.github.lawena.files.BackupMode;

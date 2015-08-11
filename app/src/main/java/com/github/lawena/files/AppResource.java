@@ -1,6 +1,6 @@
 package com.github.lawena.files;
 
-import com.github.lawena.Messages;
+import com.github.lawena.i18n.Messages;
 
 import java.nio.file.Path;
 import java.util.HashSet;

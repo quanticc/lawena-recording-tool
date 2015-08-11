@@ -11,6 +11,7 @@ import com.github.lawena.task.LaunchService;
 import com.github.lawena.util.FxLogController;
 import com.github.lawena.util.LogController;
 import com.github.lawena.util.LwrtUtils;
+import com.github.lawena.i18n.Messages;
 
 import org.controlsfx.control.StatusBar;
 import org.controlsfx.control.TaskProgressView;
