@@ -1,0 +1,302 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+apply plugin: 'java'
+apply plugin: 'distribution'
+
+def mainClassName = 'com.github.lawena.Start'
+def buildtime = new Date().format("yyyyMMddHHmmss")
+
+description "The desktop application implementation"
+
+repositories {
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    compile project(':api')
+    compile 'com.threerings:getdown:1.4'
+    compile 'net.lingala.zip4j:zip4j:1.+'
+    compile 'com.google.code.gson:gson:2.+'
+    compile 'org.fxmisc.richtext:richtextfx:1.0.0-SNAPSHOT'
+    compile 'org.fusesource.jansi:jansi:1.+'
+    compile 'org.slf4j:jul-to-slf4j:1.+'
+    compile 'ch.qos.logback:logback-core:1.+'
+    compile 'ch.qos.logback:logback-classic:1.+'
+}
+
+sourceSets {
+    main {
+        resources {
+            exclude '**/*.db'
+        }
+    }
+}
+
+try {
+    version "5.0.0"
+    new ByteArrayOutputStream().withStream { execOS ->
+        exec {
+            executable = 'git'
+            args = ['describe', '--tags', '--always', '--long']
+            standardOutput = execOS
+        }
+        version execOS.toString().trim()
+    }
+} catch (Exception e) {
+    println "Could not retrieve version number"
+} finally {
+    def desc = file("describe.tmp")
+    desc.write "${version}\n${buildtime}\n"
+}
+
+jar {
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    archiveName = 'lawena.jar'
+    destinationDir = projectDir
+    def implVersion = version
+    manifest {
+        attributes(
+                'Main-Class': mainClassName,
+                'git-describe': implVersion,
+                'buildtime': buildtime,
+                'SplashScreen-Image': 'splash.png'
+        )
+    }
+}
+
+task run(type: JavaExec, dependsOn: 'classes') {
+    description "Runs this project as a JVM application"
+    main mainClassName
+    classpath project.sourceSets.main.runtimeClasspath
+//    jvmArgs "-Djava.security.debug=failure"
+}
+
+// Deployment tasks
+
+// 1. Configure distributions
+
+distributions {
+    main {}
+    stable {
+        contents {
+            from { ['src/main/dist', 'build/getdown/stable', 'build/gradlew'] }
+            exclude "**/getdown.*.txt"
+            duplicatesStrategy = 'exclude'
+        }
+    }
+    snapshot {
+        contents {
+            from { ['src/main/dist', 'build/getdown/snapshot', 'build/gradlew'] }
+            exclude "**/getdown.*.txt"
+            duplicatesStrategy = 'exclude'
+        }
+    }
+}
+
+// 2. Prepare executables and classpath related files
+
+task buildLauncher {
+    inputs.file 'launcher/lawena-launcher.xml'
+    outputs.file 'launcher/lawena.exe'
+    doLast {
+        exec {
+            workingDir 'launcher'
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', launch4jPath, 'lawena-launcher.xml'
+            } else {
+                commandLine launch4jPath, 'lawena-launcher.xml'
+            }
+        }
+    }
+}
+
+task copyLauncher(type: Copy, dependsOn: 'buildLauncher') {
+    from 'launcher/lawena.exe'
+    into 'src/main/dist'
+}
+
+task copyLauncherNew(type: Copy, dependsOn: 'copyLauncher') {
+    from 'launcher/lawena.exe'
+    into 'src/main/dist/lawena/code'
+    rename 'lawena.exe', 'lawena-new.exe'
+}
+
+task buildExecutable {
+    inputs.file 'launcher/lawena-start.xml'
+    outputs.file 'launcher/lawena-start.exe'
+    doLast {
+        exec {
+            workingDir 'launcher'
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', launch4jPath, 'lawena-start.xml'
+            } else {
+                commandLine launch4jPath, 'lawena-start.xml'
+            }
+        }
+    }
+}
+
+task copyGetdownClient(type: Copy, dependsOn: 'copyLauncherNew') {
+    from 'launcher/getdown-client.jar'
+    into 'src/main/dist/lawena'
+}
+
+task copyGetdownClientNew(type: Copy, dependsOn: 'copyGetdownClient') {
+    from 'launcher/getdown-client.jar'
+    into 'src/main/dist/lawena/code'
+    rename 'getdown-client.jar', 'getdown-client-new.jar'
+}
+
+task copyMainJar(type: Copy, dependsOn: 'jar') {
+    from 'lawena.jar'
+    into 'src/main/dist/lawena'
+}
+
+task copyGradleLauncher(type: Copy) {
+    from(projectDir) {
+        include 'gradlew'
+        include 'gradlew.bat'
+    }
+    from 'gradle'
+    into 'build/gradlew/lawena'
+}
+
+task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar', 'copyGradleLauncher']) {
+    description "Copy all required executable and build files"
+}
+
+// 3. Pack additional resources into jar files
+
+task packResources(type: Zip) {
+    archiveName = 'lwrtresources.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['lwrt/tf/config/cfg/**', 'lwrt/tf/hud/**', 'lwrt/csgo/config/cfg/**', 'lwrt/tf/default.json', 'lwrt/csgo/default.json']
+}
+
+task packVpks(type: Zip) {
+    archiveName = 'lwrtvpks.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['lwrt/tf/default/**', 'lwrt/tf/custom/**']
+}
+
+task packWinBatches(type: Zip) {
+    archiveName = 'lwrtwinstuff.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['lwrt/tools/**', '*.dll']
+}
+
+task packSkyboxes(type: Zip) {
+    archiveName = 'skybox.jar'
+    destinationDir = file('src/main/dist/lawena')
+    from projectDir
+    includes = ['lwrt/tf/skybox/**']
+    excludes = ['**/*.db']
+}
+
+task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkyboxes']) {
+    description "Create packages of application resources"
+}
+
+// 4. Create deployment-ready archives for each distribution and deploy them
+
+['stable', 'snapshot'].each { def distName ->
+    def DistName = distName.substring(0, 1).toUpperCase() + distName.substring(1)
+    def latestFolder = 'latest'
+    tasks.create(name: "setup${DistName}Dist", dependsOn: ['copyLibs', 'pack']) {
+        description "Prepares deployment descriptor for packaging ${distName} distribution"
+        def min = file("src/${distName}/dist/lawena/getdown.min.txt")
+        def getdown = file("build/getdown/${distName}/lawena/getdown.txt")
+        inputs.file min
+        outputs.file getdown
+        getdown.getParentFile().mkdirs()
+        getdown.withWriter { w ->
+            min.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', distName) + System.getProperty("line.separator")
+            }
+        }
+    }
+
+    tasks.create(name: "build${DistName}Dist", dependsOn: ["setup${DistName}Dist", "${distName}DistZip"]) {
+    }
+
+    tasks.create(name: "setup${DistName}Deploy", dependsOn: ["build${DistName}Dist", "cleanInstall${DistName}Dist", "install${DistName}Dist"]) {
+        description "Prepares deployment descriptor for deploying ${distName} distribution"
+        def base = file("src/${distName}/dist/lawena/getdown.base.txt")
+        def getdown = file("build/getdown/${distName}/lawena/getdown.full.txt")
+        inputs.file base
+        outputs.file getdown
+        getdown.getParentFile().mkdirs()
+        getdown.withWriter { w ->
+            base.eachLine { line ->
+                w << line.replaceAll('<version>', buildtime).replaceAll('<channel>', distName) + System.getProperty("line.separator")
+            }
+        }
+    }
+
+    tasks.create(name: "deploy${DistName}", dependsOn: "setup${DistName}Deploy") {
+        description "Deploys ${distName} distribution to a local directory"
+        doLast {
+            def sourceTree = fileTree("build/install/lawena-${distName}/lawena")
+            def stampDestFile = file("${deployDir}/${distName}/${buildtime}")
+            def latestDestFile = file("${deployDir}/${distName}/${latestFolder}")
+            copy {
+                from sourceTree
+                into stampDestFile
+            }
+            copy {
+                from file("build/getdown/${distName}/lawena/getdown.full.txt")
+                into file("${deployDir}/${distName}/${buildtime}")
+                rename "getdown.full.txt", "getdown.txt"
+            }
+            javaexec {
+                main 'com.threerings.getdown.tools.Digester'
+                classpath 'launcher/getdown-client.jar'
+                args = [stampDestFile]
+            }
+            copy {
+                from sourceTree
+                into latestDestFile
+            }
+            copy {
+                from file("build/getdown/${distName}/lawena/getdown.full.txt")
+                into file("${deployDir}/${distName}/${latestFolder}")
+                rename "getdown.full.txt", "getdown.txt"
+            }
+            javaexec {
+                main 'com.threerings.getdown.tools.Digester'
+                classpath 'launcher/getdown-client.jar'
+                args = [latestDestFile]
+            }
+            def output = file("${deployDir}/${distName}/buildlist.txt")
+            output.append "${buildtime};${version}\n"
+            // post to webhook about new build
+            "curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}*\" ${notifyUrl}".execute()
+        }
+    }
+
+    tasks.create(name: "diffDeploy${DistName}", dependsOn: "deploy${DistName}") {
+        description "Deploys and creates diff patch files for ${distName} distribution"
+        doLast {
+            def buildlist = []
+            file("${deployDir}/${distName}").eachDirMatch(~/^[0-9]+$/) { dir ->
+                buildlist.add dir.name
+            }
+            buildlist.sort(java.text.Collator.instance)
+            def latest = buildlist[buildlist.size() - 1]
+            buildlist = buildlist - latest
+            buildlist.each { s ->
+                println "Creating diff between ${s} and latest build ${latest}"
+                javaexec {
+                    main 'com.threerings.getdown.tools.Differ'
+                    classpath 'launcher/getdown-client.jar'
+                    args = ['-verbose', file("${deployDir}/${distName}/${latestFolder}"), file("${deployDir}/${distName}/${s}")]
+                }
+            }
+        }
+    }
+}

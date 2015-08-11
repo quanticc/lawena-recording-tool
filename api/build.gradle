@@ -1,0 +1,10 @@
+description "The shared API for the application"
+
+dependencies {
+    compile 'ro.fortsoft.pf4j:pf4j:0.10.0-SNAPSHOT'
+    compile 'org.slf4j:slf4j-api:1.+'
+    compile 'com.google.code.gson:gson:2.+'
+    compile 'com.github.fge:throwing-lambdas:0.+'
+    compile 'org.controlsfx:controlsfx:8.40.+'
+    compile 'com.github.zafarkhaja:java-semver:0.+'
+}

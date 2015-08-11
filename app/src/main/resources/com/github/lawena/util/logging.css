@@ -1,0 +1,26 @@
+.info {
+	-fx-font-weight: bold;
+}
+
+.debug {
+	-fx-fill: cadetblue;
+	-fx-font-weight: bold;
+}
+
+.time {
+	-fx-fill: darkgray;
+}
+
+.error {
+	-fx-fill: crimson;
+	-fx-font-weight: bold;
+}
+
+.warn {
+	-fx-fill: chocolate;
+	-fx-font-weight: bold;
+}
+
+.comment {
+	-fx-fill: cadetblue;
+}

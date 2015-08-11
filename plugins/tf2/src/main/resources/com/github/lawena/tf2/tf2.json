@@ -1,0 +1,90 @@
+{
+  "name": "Team Fortress 2",
+  "applaunch": 440,
+  "shortName": "tf2",
+  "processName": {
+    "windows": "hl2.exe",
+    "linux": "hl2_linux",
+    "os x": "hl2_osx"
+  },
+  "gameFolderName": "tf",
+  "localGamePath": "lwrt/tf2",
+  "views": [
+    "tf2-view"
+  ],
+  "files": [
+    "tf2-linker"
+  ],
+  "taggers": [
+    "tf2-tagger"
+  ],
+  "groups": [
+    {
+      "type": "Boolean",
+      "name": "tf2.cfg.motionBlur",
+      "commands": [
+        "mat_motion_blur_enabled {}",
+        "mat_motion_blur_forward_enabled {}",
+        "mat_motion_blur_strength {}"
+      ],
+      "skipWhenFalse": false,
+      "defaultValue": true
+    },
+    {
+      "type": "Boolean",
+      "name": "tf2.cfg.noDamageNumbers",
+      "commands": [
+        "hud_combattext {!}",
+        "hud_combattext_healing {!}"
+      ],
+      "skipWhenFalse": false,
+      "defaultValue": true
+    },
+    {
+      "type": "Boolean",
+      "name": "tf2.cfg.noCrosshairSwitch",
+      "commands": [
+        "cl_crosshair_file \"\"",
+        "lockcrosshair"
+      ],
+      "skipWhenFalse": true,
+      "defaultValue": false
+    },
+    {
+      "type": "Boolean",
+      "name": "tf2.cfg.noHitsounds",
+      "commands": [
+        "tf_dingalingaling {!}"
+      ],
+      "skipWhenFalse": false,
+      "defaultValue": true
+    },
+    {
+      "type": "Boolean",
+      "name": "tf2.cfg.noVoice",
+      "commands": [
+        "voice_enable {!}"
+      ],
+      "skipWhenFalse": false,
+      "defaultValue": true
+    },
+    {
+      "type": "Boolean",
+      "name": "tf2.cfg.hudMinmode",
+      "commands": [
+        "cl_hud_minmode {!}"
+      ],
+      "skipWhenFalse": false,
+      "defaultValue": false
+    },
+    {
+      "type": "Boolean",
+      "name": "tf2.cfg.hudPlayerModel",
+      "commands": [
+        "cl_hud_playerclass_use_playermodel {!}"
+      ],
+      "skipWhenFalse": false,
+      "defaultValue": false
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+apply plugin: 'java'
+
+dependencies {
+    compile project(':api')
+}
+
+def pluginBaseName = 'TF2Plugin'
+def pluginVersion = '0.1.0'
+
+jar {
+    baseName = pluginBaseName
+    version = pluginVersion
+    manifest {
+        attributes 'Plugin-Class': 'com.github.lawena.tf2.TF2Plugin',
+                'Plugin-Id': pluginBaseName,
+                'Plugin-Version': pluginVersion,
+                'Plugin-Provider': 'Lawena'
+    }
+}
+
+def pluginsDir = new File(project(':app').projectDir, 'plugins')
+
+clean {
+    delete pluginsDir
+}
+
+check {
+    doLast {
+        pluginsDir.mkdir()
+    }
+}
+
+task plugin(type: Jar) {
+    baseName = pluginBaseName
+    version = pluginVersion
+    // export directly to main app plugins folder
+    destinationDir = pluginsDir
+    into('classes')
+    extension('zip')
+    with jar
+}

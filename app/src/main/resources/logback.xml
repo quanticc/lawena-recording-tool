@@ -1,0 +1,50 @@
+<configuration>
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%gray(%d{HH:mm:ss.SSS}) %highlight(%5p) %gray([%-15.15t]) %cyan(%-20.20logger{19}) %gray(:) %m%n"/>
+    <property name="FILE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p - [%-15.15t] %-30.30logger{29} : %m%n"/>
+
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/lawena.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>logs/lawena.%i.log</fileNamePattern>
+            <minIndex>1</minIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>10MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="java.awt" level="INFO"/>
+    <logger name="javax.swing" level="INFO"/>
+    <logger name="sun.awt" level="INFO"/>
+    <logger name="sun.net" level="INFO"/>
+    <logger name="sun.rmi" level="INFO"/>
+    <logger name="focus" level="INFO"/>
+    <logger name="input" level="INFO"/>
+    <logger name="com.threerings.getdown" level="WARN"/>
+    <logger name="ro.fortsoft.pf4j" level="INFO"/>
+    <logger name="java.util.prefs" level="ERROR"/>
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+</configuration>
