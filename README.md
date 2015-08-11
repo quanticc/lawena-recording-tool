@@ -1,20 +1,17 @@
-Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.x)](https://travis-ci.org/iabarca/lawena-recording-tool)
+Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=javafx)](https://travis-ci.org/iabarca/lawena-recording-tool)
 =====================
 
 [![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-A simple [Java 7+](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) tool which greatly enhances your TF2 and other Source games image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.
+A simple [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) tool which greatly enhances your TF2 and other Source games image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.
 
 Easy-to-use and no install required. This tool does not interfere with your regular TF2 configuration, HUD or launch options. Requires [Steam](https://steamcommunity.com/) in order to run.
 
 ## Installing Lawena
-If you want to use a stable version, check the [releases](https://github.com/iabarca/lawena-recording-tool/releases) page. Also there's some pre-releases that preview upcoming content. To download the latest, not particularly stable version:
-
-1. [Download this repository](https://github.com/iabarca/lawena-recording-tool/archive/v4.x.zip) and extract it to any folder.
-2. Run **gradlew.bat** (Windows) or **gradlew** script (Unix) to start the program. Administrative permissions are required due to the use of symbolic links.
+If you want to use a stable version, check the [releases](https://github.com/iabarca/lawena-recording-tool/releases) page.
 
 ## About this branch
-The v4.x branch contains the latest development towards a v4.2.0 release. You can switch branches from within the tool using the `Help -> Switch Updater Branch...` menu item.
+Development branch towards v5.0.0
 
 ### Features
 * Insane max quality graphics configuration. 
