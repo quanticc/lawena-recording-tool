@@ -10,6 +10,8 @@ import com.github.lawena.tf2.skybox.PreviewTask;
 import com.github.lawena.tf2.skybox.Skybox;
 import com.github.lawena.tf2.skybox.SkyboxStore;
 
+import org.controlsfx.control.action.Action;
+import org.controlsfx.control.action.ActionUtils;
 import org.controlsfx.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,10 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableRow;
 import javafx.util.Pair;
 import ro.fortsoft.pf4j.Extension;
 
@@ -47,21 +53,20 @@ public class Fortress implements ViewProvider {
     private TF2Plugin plugin;
     private GameDescription app;
     private View view;
+    private boolean installed = false;
     private InvalidationListener reloader = o -> refreshResourceSelection(controller.getModel().getProfiles().getSelected());
 
     private static List<String> split(String str) {
-        // TODO: add unit test
         return Arrays.asList(str.split(";")).stream().map(String::trim).collect(Collectors.toList()); //$NON-NLS-1$
     }
 
     private static String join(List<String> list) {
-        // TODO: add unit test
         return list.toString().replace(",", ";").replaceAll("\\[|\\]", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     }
 
     @Override
     public String getName() {
-        return "tf2-view";
+        return "tf2-view"; // NON-NLS
     }
 
     @Override
@@ -74,16 +79,39 @@ public class Fortress implements ViewProvider {
 
     @Override
     public void install() {
+        if (installed) {
+            return;
+        }
         log.debug("Installing {}", getName());
+
         // configure node groups that will be displayed on various UI locations
-        controller.getNodeGroups().getNodes(this, "launch")
+        controller.getNodeGroups().getNodes(this, "launch") // NON-NLS
                 .addAll(Arrays.asList(view.getResolutionBox(), view.getDxlevelBox(), view.getAdvancedBox()));
-        controller.getNodeGroups().getNodes(this, "recorder")
+        controller.getNodeGroups().getNodes(this, "recorder") // NON-NLS
                 .addAll(Arrays.asList(view.getRecordOptionsBox(), view.getRecordInfoBox()));
-        controller.getNodeGroups().getNodes(this, "config")
+        controller.getNodeGroups().getNodes(this, "config") // NON-NLS
                 .addAll(Arrays.asList(view.getHudBox(), view.getSkyboxBox(), view.getViewmodelsBox(), view.getGameConfigBox()));
-        controller.getNodeGroups().getNodes(this, "resources")
+        controller.getNodeGroups().getNodes(this, "resources") // NON-NLS
                 .addAll(Arrays.asList(view.getResInfoBox(), view.getResourcesBox()));
+
+        // setup context menu and actions
+        Action refreshSelectedResource = new Action("Refresh", e -> refreshSelectedResource());
+        Action removeSelectedResource = new Action("Remove", e -> removeSelectedResource());
+        view.getResourcesTable().setRowFactory(
+                tableView -> {
+                    final TableRow<Resource> row = new TableRow<>();
+                    final ContextMenu rowMenu = new ContextMenu();
+                    MenuItem refreshItem = ActionUtils.createMenuItem(refreshSelectedResource);
+                    MenuItem removeItem = ActionUtils.createMenuItem(removeSelectedResource);
+                    rowMenu.getItems().addAll(refreshItem, removeItem);
+
+                    // only display context menu for non-null items:
+                    row.contextMenuProperty().bind(
+                            Bindings.when(Bindings.isNotNull(row.itemProperty()))
+                                    .then(rowMenu)
+                                    .otherwise((ContextMenu) null));
+                    return row;
+                });
 
         // setup recording method (captureMode) combobox changes
         view.captureModeProperty().addListener((obs, oldValue, newValue) -> {
@@ -147,6 +175,26 @@ public class Fortress implements ViewProvider {
 
         Bindings.bindContentBidirectional(view.resourceItemsProperty().get(), controller.getModel()
                 .getResources().resourceListProperty().get());
+
+        installed = true;
+    }
+
+    private void refreshSelectedResource() {
+        log.debug("Refreshing selected resource");
+        final ObservableList<TablePosition> posList = view.getResourcesTable().getSelectionModel().getSelectedCells();
+        posList.forEach(p -> {
+            Resource resource = view.getResourcesTable().getItems().get(p.getRow());
+            controller.getModel().getResources().refreshResource(resource.getPath());
+        });
+    }
+
+    private void removeSelectedResource() {
+        log.debug("Removing selected resource");
+        final ObservableList<TablePosition> posList = view.getResourcesTable().getSelectionModel().getSelectedCells();
+        posList.forEach(p -> {
+            Resource resource = view.getResourcesTable().getItems().get(p.getRow());
+            controller.getModel().getResources().deleteResource(resource.getPath());
+        });
     }
 
     @Override

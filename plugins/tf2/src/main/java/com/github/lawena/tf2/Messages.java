@@ -18,4 +18,12 @@ public final class Messages {
             return '!' + key + '!';
         }
     }
+
+    public static String getString(String key, String fallback) {
+        try {
+            return RESOURCE_BUNDLE.getString(key);
+        } catch (MissingResourceException e) {
+            return fallback;
+        }
+    }
 }

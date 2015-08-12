@@ -105,7 +105,8 @@ public class View {
     }
 
     protected static String local(String key) {
-        return Messages.getString(key);
+        // fallback to original value if not found
+        return Messages.getString(key, key);
     }
 
     private static void configureColumn(TableColumn<?, ?> column, TableView<?> table, double prop) {
@@ -405,6 +406,10 @@ public class View {
         return _resInfo;
     }
 
+    public TableView<Resource> getResourcesTable() {
+        return resourcesTable;
+    }
+
     public HBox getResourcesBox() {
         if (_resources == null) {
             resourcesTable = new TableView<>();
@@ -438,6 +443,7 @@ public class View {
             configureColumn(enabledCol, resourcesTable, (double) 1 / 11);
             configureColumn(nameCol, resourcesTable, (double) 7 / 11);
             configureColumn(tagsCol, resourcesTable, (double) 3 / 11);
+
             _resources = new HBox(5, resourcesTable);
         }
         return _resources;
