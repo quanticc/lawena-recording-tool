@@ -1,7 +1,6 @@
 package com.github.lawena.files;
 
 import com.github.lawena.exts.TagProvider;
-import com.github.lawena.i18n.Messages;
 import com.github.lawena.vpk.Archive;
 import com.github.lawena.vpk.ArchiveException;
 import com.github.lawena.vpk.Directory;
@@ -32,44 +31,34 @@ import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 
 public class AppResources implements Resources {
     private static final Logger log = LoggerFactory.getLogger(AppResources.class);
 
+    private WatchService watcher = new WatchService(this);
     private ListProperty<Path> folders = new SimpleListProperty<>(this, "folders", //$NON-NLS-1$
             FXCollections.observableArrayList());
     private ListProperty<Resource> resourceList = new SimpleListProperty<>(this,
             "resources", FXCollections.observableArrayList()); //$NON-NLS-1$
-    private ObservableList<Task<?>> tasks = FXCollections.observableArrayList();
     // use an empty list as a fallback in case the controller forgot to set one
     private List<TagProvider> providers = Collections.emptyList();
 
-    private WatchService watcher = new WatchService(this);
-    private ListChangeListener<Path> listener = change -> {
-        while (change.next()) {
-            if (change.wasAdded()) {
-                scheduleScan(change.getAddedSubList());
-            }
-            if (change.wasRemoved()) {
-                List<? extends Path> removed = change.getRemoved();
-                Platform.runLater(() -> resourceList.get().removeIf(r -> removed.contains(r.getPath())));
-            }
-        }
-    };
+    @Override
+    public final void startWatch() {
+        Platform.runLater(watcher::start);
+    }
 
-    public AppResources() {
-        folders.get().addListener(listener);
-        watcher.restart();
+    @Override
+    public final void stopWatch() {
+        Platform.runLater(watcher::cancel);
     }
 
     private static List<String> getContents(Resource resource) throws IOException {
         final Path start = resource.getPath().toAbsolutePath();
         final List<String> contents = new ArrayList<>();
         if (Files.isDirectory(start)) {
-            Files.walkFileTree(start, EnumSet.noneOf(FileVisitOption.class), 3,
+            Files.walkFileTree(start, EnumSet.allOf(FileVisitOption.class), 3,
                     new SimpleFileVisitor<Path>() {
                         @Override
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -113,42 +102,47 @@ public class AppResources implements Resources {
         return newResourceList;
     }
 
-    private void scheduleScan(List<? extends Path> list) {
-        Task<Set<Resource>> task = new ScanTask(list) {
+    private boolean isValidPath(Path path) {
+        return Files.isDirectory(path) || path.toString().toLowerCase().endsWith(".vpk");
+    }
 
-            @Override
-            public Set<Resource> scan(Path dir) {
-                updateMessage(String.format(Messages.getString("AppResources.ScanningResources"), dir)); //$NON-NLS-1$
-                return scanForResources(dir);
-            }
+    private Optional<Resource> findResource(Path start) {
+        return resourceList.get().stream().filter(r -> r.getPath().equals(start)).findFirst();
+    }
 
-        };
-        tasks.add(task);
+    private void refreshTags(Resource resource) {
+        try {
+            List<String> contents = getContents(resource);
+            Set<String> tags = providers.stream().flatMap(p -> p.tag(contents).stream()).collect(Collectors.toSet());
+            Platform.runLater(() -> resource.setTags(tags));
+        } catch (IOException e) {
+            log.warn("Could not get contents from {}: {}", resource.getPath(), e.toString()); // NON-NLS
+        }
     }
 
     @Override
     public Optional<Resource> newResource(Path start) {
         // get the resource for this path or create a new one if it doesn't exist
-        Optional<Resource> optional =
-                resourceList.get().stream().filter(r -> r.getPath().equals(start)).findFirst();
+        Optional<Resource> optional = findResource(start);
         Resource resource;
         if (!optional.isPresent()) {
-            resource = new AppResource(start);
-            Platform.runLater(() -> resourceList.get().add(resource));
+            if (isValidPath(start)) {
+                resource = new AppResource(start);
+                Platform.runLater(() -> resourceList.get().add(resource));
+            } else {
+                log.debug("Ignoring invalid resource at {}", start);
+                return Optional.empty();
+            }
         } else {
             resource = optional.get();
         }
-        try {
-            List<String> contents = getContents(resource);
-            Set<String> tags =
-                    providers.stream().flatMap(p -> p.tag(contents).stream()).distinct()
-                            .collect(Collectors.toSet());
-            Platform.runLater(() -> resource.setTags(tags));
-            return Optional.of(resource);
-        } catch (IOException e) {
-            log.warn("Could not create resource at {}: {}", start, e.toString()); //$NON-NLS-1$
-        }
-        return Optional.empty();
+        refreshTags(resource);
+        return Optional.of(resource);
+    }
+
+    @Override
+    public void refreshResource(Path start) {
+        findResource(start).ifPresent(this::refreshTags);
     }
 
     @Override
@@ -192,17 +186,6 @@ public class AppResources implements Resources {
     @Override
     public void setProviders(List<TagProvider> providers) {
         this.providers = providers;
-    }
-
-    @Override
-    public ObservableList<Task<?>> getTasks() {
-        return tasks;
-    }
-
-    @Override
-    public void shutdown() {
-        folders.get().removeListener(listener);
-        Platform.runLater(watcher::cancel);
     }
 
 }

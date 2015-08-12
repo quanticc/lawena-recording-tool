@@ -41,7 +41,7 @@ public class WatchService extends Service<Void> {
 
             @Override
             public void entryModified(Path child) {
-                // ignore these events
+                resources.refreshResource(child);
             }
 
             @Override

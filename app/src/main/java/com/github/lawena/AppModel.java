@@ -9,9 +9,9 @@ import com.github.lawena.exts.TagProvider;
 import com.github.lawena.files.AppResources;
 import com.github.lawena.files.Resources;
 import com.github.lawena.game.GameDescription;
-import com.github.lawena.update.Updater;
 import com.github.lawena.profile.AppProfiles;
 import com.github.lawena.profile.Profiles;
+import com.github.lawena.update.Updater;
 import com.github.lawena.util.FxLogAppender;
 import com.github.lawena.util.LogAppender;
 import com.github.lawena.util.LwrtUtils;
@@ -225,7 +225,7 @@ public class AppModel implements Model {
 
     @Override
     public void exit() {
-        resources.shutdown();
+        resources.stopWatch();
         saveProfiles(Paths.get(parameters.get("profiles"))); //$NON-NLS-1$
         pluginManager.stopPlugins();
     }

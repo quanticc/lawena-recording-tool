@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javafx.beans.property.ListProperty;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 
 /**
  * A repository for {@link Resource} objects that provides actions over their contents, like
@@ -19,6 +18,10 @@ import javafx.concurrent.Task;
  * @author Ivan
  */
 public interface Resources {
+
+    void startWatch();
+
+    void stopWatch();
 
     /**
      * Scan a given directory for {@link Resource} elements. Only the direct children of
@@ -39,6 +42,8 @@ public interface Resources {
      * @return if it could be created or updated, a <code>Resource</code>
      */
     Optional<Resource> newResource(Path path);
+
+    void refreshResource(Path start);
 
     /**
      * Attempt to remove a potential {@link Resource} existing under the given <code>path</code>.
@@ -78,21 +83,11 @@ public interface Resources {
     /**
      * @return
      */
-    ObservableList<Task<?>> getTasks();
-
-    /**
-     * @return
-     */
     List<TagProvider> getProviders();
 
     /**
      * @param providers
      */
     void setProviders(List<TagProvider> providers);
-
-    /**
-     *
-     */
-    void shutdown();
 
 }

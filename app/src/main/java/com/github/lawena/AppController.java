@@ -4,14 +4,16 @@ import com.github.lawena.dialog.NewProfileDialog;
 import com.github.lawena.exts.FileProvider;
 import com.github.lawena.exts.TagProvider;
 import com.github.lawena.exts.ViewProvider;
+import com.github.lawena.files.Resource;
+import com.github.lawena.files.ScanTask;
 import com.github.lawena.game.GameDescription;
+import com.github.lawena.i18n.Messages;
 import com.github.lawena.profile.Profile;
 import com.github.lawena.profile.Profiles;
 import com.github.lawena.task.LaunchService;
 import com.github.lawena.util.FxLogController;
 import com.github.lawena.util.LogController;
 import com.github.lawena.util.LwrtUtils;
-import com.github.lawena.i18n.Messages;
 
 import org.controlsfx.control.StatusBar;
 import org.controlsfx.control.TaskProgressView;
@@ -24,7 +26,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -127,17 +128,24 @@ public class AppController implements Controller {
     private NodeGroups nodeGroups = new AppNodeGroups();
     private LogController logController;
     private List<ViewProvider> viewProviders;
-    private Set<ViewProvider> createdExts = new HashSet<>();
     private List<TagProvider> tagProviders;
     private List<FileProvider> fileProviders;
     private ExecutorService executor = Executors.newCachedThreadPool();
-    private ListChangeListener<Task<?>> resTasksListener = change -> {
-        while (change.next()) {
-            if (change.wasAdded()) {
-                List<? extends Task<?>> added = change.getAddedSubList();
-                taskView.getTasks().addAll(added);
-                Platform.runLater(() -> model.getResources().getTasks().removeIf(added::contains));
-                submit(added);
+    private ListChangeListener<Path> resourceFolderListener = ch -> {
+        while (ch.next()) {
+            if (ch.wasAdded()) {
+                submitTask(new ScanTask(ch.getAddedSubList()) {
+
+                    @Override
+                    public Set<Resource> scan(Path dir) {
+                        updateMessage(String.format(Messages.getString("AppResources.ScanningResources"), dir)); //$NON-NLS-1$
+                        return model.getResources().scanForResources(dir);
+                    }
+
+                });
+            }
+            if (ch.wasRemoved()) {
+                Platform.runLater(() -> model.getResources().getResourceList().removeIf(r -> ch.getRemoved().contains(r.getPath())));
             }
         }
     };
@@ -185,6 +193,7 @@ public class AppController implements Controller {
             } catch (Exception e) {
                 log.warn("Could not save profiles correctly", e);
             }
+            model.getResources().foldersProperty().addListener(resourceFolderListener);
             model.exit();
         }));
 
@@ -201,22 +210,24 @@ public class AppController implements Controller {
         });
         tasksPane.getChildren().add(taskView);
 
+        launchPane.setContent(display("launch", Collections.emptyList())); // NON-NLS
+        recorderPane.setContent(display("recorder", Collections.emptyList())); // NON-NLS
+        configPane.setContent(display("config", Collections.emptyList())); // NON-NLS
+        resourcesPane.setContent(display("resources", Collections.emptyList())); // NON-NLS
+
         // configure additional controls
         statusBar = new StatusBar();
+        mainContainer.getChildren().add(mainContainer.getChildren().size(), statusBar);
+
         logController = new FxLogController(this);
         Platform.runLater(() -> {
             model.getLogAppender().setController(logController);
             logController.startController();
             model.getLogAppender().startAppender();
-            model.getResources().getTasks().addListener(resTasksListener);
+            model.getResources().foldersProperty().addListener(resourceFolderListener);
+            model.getResources().startWatch();
             bindProfileList();
-            mainContainer.getChildren().add(mainContainer.getChildren().size(), statusBar);
         });
-
-        launchPane.setContent(display("launch", Collections.emptyList()));
-        recorderPane.setContent(display("recorder", Collections.emptyList()));
-        configPane.setContent(display("config", Collections.emptyList()));
-        resourcesPane.setContent(display("resources", Collections.emptyList()));
 
         launchButton.setText("Launch Game");
 
@@ -277,11 +288,7 @@ public class AppController implements Controller {
             List<ViewProvider> exts =
                     getViewProviders().stream().filter(x -> app.getViews().contains(x.getName()))
                             .collect(Collectors.toList());
-            // install ui extensions not already installed
-            exts.stream().filter(x -> !createdExts.contains(x)).forEach(x -> {
-                x.install();
-                createdExts.add(x);
-            });
+            exts.forEach(ViewProvider::install);
 
             // load resources folders
             Path custom = Paths.get(app.getLocalGamePath()).resolve("custom"); //$NON-NLS-1$
@@ -340,7 +347,14 @@ public class AppController implements Controller {
         return fileProviders;
     }
 
-    private void submit(List<? extends Task<?>> tasks) {
+    private void submitTask(Task<?> task) {
+        taskView.getTasks().add(task);
+        executor.submit(task);
+    }
+
+    private void submitTasks(List<? extends Task<?>> tasks) {
+        log.debug("Submitting tasks: {}", tasks);
+        taskView.getTasks().addAll(tasks);
         tasks.forEach(executor::submit);
     }
 

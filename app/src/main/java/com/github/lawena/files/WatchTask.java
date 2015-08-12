@@ -76,7 +76,7 @@ public abstract class WatchTask extends Task<Void> {
         if (!keys.containsValue(dir)) {
             try {
                 log.debug("Registering {}", dir); //$NON-NLS-1$
-                WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+                WatchKey key = dir.register(getWatcher(), ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
                 keys.put(key, dir);
             } catch (IOException e) {
                 log.warn("Could not register path: {}", dir); //$NON-NLS-1$
