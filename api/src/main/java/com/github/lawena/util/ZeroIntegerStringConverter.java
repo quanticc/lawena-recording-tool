@@ -4,7 +4,7 @@ import javafx.util.StringConverter;
 
 public class ZeroIntegerStringConverter extends StringConverter<Integer> {
     @Override
-    public Integer fromString(String value) {
+    public final Integer fromString(String value) {
         // If the specified value is null or zero-length, return 0
         if (value == null) {
             return 0;
@@ -17,7 +17,7 @@ public class ZeroIntegerStringConverter extends StringConverter<Integer> {
     }
 
     @Override
-    public String toString(Integer value) {
+    public final String toString(Integer value) {
         // If the specified value is null, return "0"
         if (value == null) {
             return "0";

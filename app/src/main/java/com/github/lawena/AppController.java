@@ -176,20 +176,20 @@ public class AppController implements Controller {
 
     @FXML
     void initialize() {
-        log.debug("Initializing FX UI"); //$NON-NLS-1$
+        log.debug("Initializing FX UI");
 
         // cleanup procedure on close
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 unbindProfile(model.getProfiles().getSelected());
             } catch (Exception e) {
-                log.warn("Could not save profiles correctly", e); //$NON-NLS-1$
+                log.warn("Could not save profiles correctly", e);
             }
             model.exit();
         }));
 
         // configure task list controls
-        Image image = LwrtUtils.image("/ui/fugue/gear.png"); //$NON-NLS-1$
+        Image image = LwrtUtils.image("/ui/fugue/gear.png"); // NON-NLS
         taskView.setGraphicFactory(t -> {
             ImageView icon = new ImageView(image);
             RotateTransition rt = new RotateTransition(Duration.millis(1000), icon);

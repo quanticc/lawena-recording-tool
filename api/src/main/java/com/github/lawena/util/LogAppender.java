@@ -12,21 +12,21 @@ public interface LogAppender {
      * Starts the appender mechanism. Must be called when the target controller is ready to accept
      * the forwarding of logging messages.
      */
-    public void startAppender();
+    void startAppender();
 
     /**
      * Stops the appender mechanism. Messages will not reach the target controller.
      */
-    public void stopAppender();
+    void stopAppender();
 
     /**
      * Obtain the controller for message forwarding.
      */
-    public LogController getController();
+    LogController getController();
 
     /**
      * Define a controller for message forwarding.
      */
-    public void setController(LogController controller);
+    void setController(LogController controller);
 
 }

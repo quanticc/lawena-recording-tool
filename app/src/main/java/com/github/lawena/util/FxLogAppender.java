@@ -40,7 +40,7 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
     }
 
     @Override
-    public void startAppender() {
+    public final void startAppender() {
         log.debug("Starting Log Appender");
         _started = true;
         while (!queue.isEmpty()) {
@@ -49,28 +49,28 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
     }
 
     @Override
-    public void stopAppender() {
+    public final void stopAppender() {
         _started = false;
     }
 
-    public boolean isPrintingTrace() {
+    public final boolean isPrintingTrace() {
         return printingTrace;
     }
 
-    public void setPrintingTrace(boolean printingTrace) {
+    public final void setPrintingTrace(boolean printingTrace) {
         this.printingTrace = printingTrace;
     }
 
-    public Level getMinLevel() {
+    public final Level getMinLevel() {
         return minLevel;
     }
 
-    public void setMinLevel(Level minLevel) {
+    public final void setMinLevel(Level minLevel) {
         this.minLevel = minLevel;
     }
 
     @Override
-    public void append(ILoggingEvent event) {
+    public final void append(ILoggingEvent event) {
         if (!event.getLoggerName().equals("status") && event.getLevel().isGreaterOrEqual(minLevel)) {
             if (event.getMarker() == null || !event.getMarker().contains("no-ui-log")) {
                 if (_started) {
@@ -87,12 +87,12 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
     }
 
     @Override
-    public LogController getController() {
+    public final LogController getController() {
         return controller;
     }
 
     @Override
-    public void setController(LogController controller) {
+    public final void setController(LogController controller) {
         this.controller = controller;
     }
 
@@ -106,11 +106,12 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
 
         @SuppressWarnings("synthetic-access")
         @Override
-        public void run() {
+        public final void run() {
             try {
                 String message = _event.getFormattedMessage().trim();
-                if (name.trim().equals(""))
+                if (name.trim().equals("")) {
                     return;
+                }
                 Level level = _event.getLevel();
                 String time = dateFormatter.format(_event.getTimeStamp());
                 String logger = last(_event.getLoggerName());
@@ -122,10 +123,11 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
         }
 
         @SuppressWarnings("synthetic-access")
-        public String formatMsg(ILoggingEvent event, String message) {
+        public final String formatMsg(ILoggingEvent event, String message) {
             ThrowableProxy throwArr = (ThrowableProxy) event.getThrowableProxy();
-            if (throwArr == null)
+            if (throwArr == null) {
                 return message;
+            }
             StringBuilder builder = new StringBuilder(message);
             Throwable ex = throwArr.getThrowable();
             if (printingTrace) {

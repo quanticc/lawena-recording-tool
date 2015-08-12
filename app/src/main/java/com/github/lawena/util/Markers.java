@@ -3,7 +3,7 @@ package com.github.lawena.util;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-public class Markers {
+public final class Markers {
 
     public static final Marker OK = MarkerFactory.getMarker("OK");
     public static final Marker WARN = MarkerFactory.getMarker("WARN");

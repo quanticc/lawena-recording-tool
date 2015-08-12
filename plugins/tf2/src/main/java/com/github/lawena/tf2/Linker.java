@@ -98,6 +98,9 @@ public class Linker implements FileProvider {
                 // rename selected skybox according to each original skybox name
                 for (Path vtfPath : vtfPaths) {
                     for (Path vmtPath : vmtPaths) {
+                        if (vtfPath.getFileName() == null || vmtPath.getFileName() == null) {
+                            continue;
+                        }
                         String vtf = vtfPath.getFileName().toString();
                         String vmt = vmtPath.getFileName().toString();
                         if ((vtf.endsWith("up.vtf") && vmt.endsWith("up.vmt")) //$NON-NLS-1$ //$NON-NLS-2$
@@ -130,7 +133,7 @@ public class Linker implements FileProvider {
         }
         for (Path src : list) {
             if (Files.exists(src)) {
-                if (Files.isDirectory(src) || src.getFileName().toString().endsWith(".vpk")) { //$NON-NLS-1$
+                if (Files.isDirectory(src) || (src.getFileName() != null && src.getFileName().toString().endsWith(".vpk"))) { //$NON-NLS-1$
                     linkedPaths.add(src);
                 } else {
                     log.warn("Not a valid resource type: {}", src); //$NON-NLS-1$

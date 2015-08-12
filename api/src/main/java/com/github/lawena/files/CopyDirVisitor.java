@@ -33,7 +33,7 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+    public final FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
         if (filter != null && !filter.accept(dir)) {
             return FileVisitResult.SKIP_SUBTREE;
         }
@@ -46,7 +46,7 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+    public final FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         Path dest = toPath.resolve(fromPath.relativize(file));
         log.debug("Copying: " + file + " -> " + dest);
         Path target = Files.copy(file, dest, copyOption);

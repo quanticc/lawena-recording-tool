@@ -21,7 +21,7 @@ public class PluginPolicy extends Policy {
     private PermissionCollection applicationPermissions = applicationPermissions();
 
     @Override
-    public PermissionCollection getPermissions(ProtectionDomain domain) {
+    public final PermissionCollection getPermissions(ProtectionDomain domain) {
         if (isPlugin(domain)) {
             return pluginPermissions;
         } else {
@@ -30,7 +30,7 @@ public class PluginPolicy extends Policy {
     }
 
     @Override
-    public boolean implies(ProtectionDomain domain, Permission permission) {
+    public final boolean implies(ProtectionDomain domain, Permission permission) {
         return !isPlugin(domain) || super.implies(domain, permission);
     }
 

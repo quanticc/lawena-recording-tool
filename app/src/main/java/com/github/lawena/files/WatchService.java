@@ -18,25 +18,25 @@ public class WatchService extends Service<Void> {
     }
 
     @Override
-    protected void running() {
+    protected final void running() {
         log.debug("Service running"); //$NON-NLS-1$
         super.running();
     }
 
     @Override
-    protected void succeeded() {
+    protected final void succeeded() {
         log.debug("SUCCEEDED"); //$NON-NLS-1$
         super.succeeded();
     }
 
     @Override
-    protected void failed() {
+    protected final void failed() {
         log.debug("FAILED", getException()); //$NON-NLS-1$
         super.failed();
     }
 
     @Override
-    protected Task<Void> createTask() {
+    protected final Task<Void> createTask() {
         return new WatchTask(resources.foldersProperty().get()) {
 
             @Override

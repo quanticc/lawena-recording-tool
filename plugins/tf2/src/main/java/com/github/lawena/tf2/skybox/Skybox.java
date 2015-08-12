@@ -27,25 +27,25 @@ public class Skybox {
         this.preview = preview;
     }
 
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return name;
     }
 
-    public Image getPreview() {
+    public final Image getPreview() {
         return preview;
     }
 
-    public void setPreview(Image preview) {
+    public final void setPreview(Image preview) {
         this.preview = preview;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -53,7 +53,7 @@ public class Skybox {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

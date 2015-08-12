@@ -5,7 +5,7 @@ import javafx.util.StringConverter;
 public class ZeroDoubleStringConverter extends StringConverter<Double> {
 
     @Override
-    public Double fromString(String value) {
+    public final Double fromString(String value) {
         // If the specified value is null or zero-length, return 0
         if (value == null) {
             return 0.0;
@@ -18,7 +18,7 @@ public class ZeroDoubleStringConverter extends StringConverter<Double> {
     }
 
     @Override
-    public String toString(Double value) {
+    public final String toString(Double value) {
         // If the specified value is null, return "0"
         if (value == null) {
             return "0";

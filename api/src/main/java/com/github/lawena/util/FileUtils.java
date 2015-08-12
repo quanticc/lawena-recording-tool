@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class FileUtils {
+public final class FileUtils {
     private static final Logger log = LoggerFactory.getLogger(FileUtils.class);
 
     private static final FileVisitor<Path> deleteVisitor = new SimpleFileVisitor<Path>() {

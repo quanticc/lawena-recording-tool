@@ -1,14 +1,11 @@
 package com.github.lawena.exts;
 
 import com.github.lawena.Controller;
-import com.github.lawena.game.GameDescription;
 import com.github.lawena.profile.Profile;
-import com.github.lawena.util.LawenaException;
 
 import org.controlsfx.validation.ValidationResult;
 
 import ro.fortsoft.pf4j.ExtensionPoint;
-import ro.fortsoft.pf4j.Plugin;
 
 /**
  * Extension to modify and enrich the standard user interface.
@@ -23,7 +20,6 @@ public interface ViewProvider extends ExtensionPoint {
      * the set of extensions used in the "modules" list.
      *
      * @return the identifier name for this extension
-     * @see GameDescription#getViews()
      */
     String getName();
 
@@ -43,7 +39,7 @@ public interface ViewProvider extends ExtensionPoint {
 
     /**
      * Removes all created UI controls from the controller. Must be called as part of the cleanup
-     * sequence in case the {@link Plugin} containing this extension is stopped.
+     * sequence in case the Plugin containing this extension is stopped.
      */
     void delete();
 
@@ -60,7 +56,7 @@ public interface ViewProvider extends ExtensionPoint {
      * Unbinds the UI controls to the given profile data. Can also act as a save action, retrieving
      * all current control values and saving them directly to profile data. Called every time a
      * profile related to this object is deselected and also as a cleanup sequence in case the
-     * {@link Plugin} containing this extension is stopped.
+     * Plugin containing this extension is stopped.
      *
      * @param profile the profile that should no longer be bound to the UI controls
      */

@@ -1,7 +1,7 @@
 package com.github.lawena.files;
 
-import com.github.lawena.i18n.Messages;
 import com.github.lawena.exts.TagProvider;
+import com.github.lawena.i18n.Messages;
 import com.github.lawena.vpk.Archive;
 import com.github.lawena.vpk.ArchiveException;
 import com.github.lawena.vpk.Directory;
@@ -80,8 +80,8 @@ public class AppResources implements Resources {
                         }
                     });
         } else if (start.toString().toLowerCase().endsWith(".vpk")) { //$NON-NLS-1$
-            Archive vpk = new Archive(start.toFile());
             try {
+                Archive vpk = new Archive(start.toFile());
                 vpk.load();
                 for (Directory dir : vpk.getDirectories()) {
                     contents.addAll(dir.getEntries().stream().map(entry -> dir.getPath() + "/" + entry.getFullName()).collect(Collectors.toList()));

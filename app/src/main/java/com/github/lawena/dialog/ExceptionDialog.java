@@ -12,7 +12,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-public class ExceptionDialog {
+public final class ExceptionDialog {
 
     private String title = "Exception Dialog";
     private String header = "An exception was found";

@@ -23,9 +23,10 @@ public class AppResource implements Resource {
     }
 
     @Override
-    public String getName() {
-        if (path.get() == null)
+    public final String getName() {
+        if (path == null || path.get() == null || path.get().getFileName() == null) {
             return Messages.getString("AppResource.NoPathDefined"); //$NON-NLS-1$
+        }
         return path.get().getFileName().toString();
     }
 
@@ -57,7 +58,7 @@ public class AppResource implements Resource {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((path.get() == null) ? 0 : path.get().hashCode());
@@ -65,7 +66,7 @@ public class AppResource implements Resource {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

@@ -8,19 +8,19 @@ public class StringGroup extends Group {
     private List<String> validSet;
 
     @Override
-    public String getDefaultValue() {
+    public final String getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
+    public final void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
     }
 
-    public List<String> getValidSet() {
+    public final List<String> getValidSet() {
         return validSet;
     }
 
-    public void setValidSet(List<String> validSet) {
+    public final void setValidSet(List<String> validSet) {
         this.validSet = validSet;
     }
 

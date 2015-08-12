@@ -7,27 +7,27 @@ public class DoubleGroup extends Group {
     private Double max = Double.MAX_VALUE;
 
     @Override
-    public Double getDefaultValue() {
+    public final Double getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(Double defaultValue) {
+    public final void setDefaultValue(Double defaultValue) {
         this.defaultValue = defaultValue;
     }
 
-    public Double getMin() {
+    public final Double getMin() {
         return min;
     }
 
-    public void setMin(Double min) {
+    public final void setMin(Double min) {
         this.min = min;
     }
 
-    public Double getMax() {
+    public final Double getMax() {
         return max;
     }
 
-    public void setMax(Double max) {
+    public final void setMax(Double max) {
         this.max = max;
     }
 

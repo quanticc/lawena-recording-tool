@@ -15,7 +15,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
     private static final Logger log = LoggerFactory.getLogger(DeleteDirVisitor.class);
 
     @Override
-    public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+    public final FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
         try {
             path.toFile().setWritable(true);
             log.debug("Deleting file: " + path);
@@ -37,7 +37,7 @@ public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+    public final FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
         if (exc == null) {
             try {
                 log.debug("Deleting folder: " + dir);

@@ -20,9 +20,11 @@ import javafx.scene.image.Image;
  *
  * @author Ivan
  */
-public class LwrtUtils {
+public final class LwrtUtils {
     public static final String IMAGES_BASE = "/com/github/lawena";
     private static final Logger log = LoggerFactory.getLogger(LwrtUtils.class);
+
+    private LwrtUtils() {}
 
     public static Image image(String location) {
         try (InputStream input = LwrtUtils.class.getResourceAsStream(IMAGES_BASE + location)) {

@@ -9,7 +9,7 @@ import ro.fortsoft.pf4j.Extension;
 public class DescriptionLoader implements DescriptorProvider {
 
     @Override
-    public GameDescription getDescriptor() {
+    public final GameDescription getDescriptor() {
         return GameDescription.load(getClass().getResourceAsStream("tf2.json"));
     }
 }

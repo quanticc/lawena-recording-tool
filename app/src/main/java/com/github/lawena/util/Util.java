@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.jar.JarFile;
@@ -47,7 +48,7 @@ import javax.swing.text.JTextComponent;
  * @deprecated use {@link LwrtUtils} instead
  */
 @Deprecated
-public class Util {
+public final class Util {
 
     private static final Logger log = LoggerFactory.getLogger(Util.class);
 
@@ -73,7 +74,7 @@ public class Util {
     public static void copy(InputStream in, OutputStream out) throws IOException {
         try {
             byte[] buffer = new byte[4096];
-            for (int read = 0; (read = in.read(buffer)) > 0; ) {
+            for (int read; (read = in.read(buffer)) > 0; ) {
                 out.write(buffer, 0, read);
             }
         } catch (IOException e) {
@@ -189,8 +190,9 @@ public class Util {
 
     public static String humanReadableByteCount(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
-        if (bytes < unit)
+        if (bytes < unit) {
             return bytes + " B"; //$NON-NLS-1$
+        }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre); //$NON-NLS-1$
@@ -255,15 +257,16 @@ public class Util {
 
     public static String listToString(List<String> list, char separator) {
         Iterator<String> it = list.iterator();
-        if (!it.hasNext())
+        if (!it.hasNext()) {
             return ""; //$NON-NLS-1$
-
+        }
         StringBuilder sb = new StringBuilder();
         for (; ; ) {
             String e = it.next();
             sb.append(e);
-            if (!it.hasNext())
+            if (!it.hasNext()) {
                 return sb.toString();
+            }
             sb.append(separator);
         }
     }
@@ -280,12 +283,9 @@ public class Util {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getFromTree(Map<String, Object> root, TypeToken<T> type, String key) {
-        if (root == null)
-            throw new IllegalArgumentException("root must not be null"); //$NON-NLS-1$
-        if (type == null)
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        if (key == null)
-            throw new IllegalArgumentException("null keys are not allowed"); //$NON-NLS-1$
+        Objects.requireNonNull(root, "root must not be null");
+        Objects.requireNonNull(type, "type must not be null");
+        Objects.requireNonNull(key, "null keys are not allowed");
         String[] paths = key.split("\\."); //$NON-NLS-1$
         Map<String, Object> map = getParentMap(root, paths);
         return (T) map.get(paths[paths.length - 1]);
@@ -301,12 +301,9 @@ public class Util {
      * @param value - the value to set within the map
      */
     public static <T> void setToTree(Map<String, Object> root, String key, T value) {
-        if (root == null)
-            throw new IllegalArgumentException("root must not be null"); //$NON-NLS-1$
-        if (key == null)
-            throw new IllegalArgumentException("null keys are not allowed"); //$NON-NLS-1$
-        if (value == null)
-            throw new IllegalArgumentException("null values are not allowed"); //$NON-NLS-1$
+        Objects.requireNonNull(root, "root must not be null");
+        Objects.requireNonNull(value, "null values are not allowed");
+        Objects.requireNonNull(key, "null keys are not allowed");
         String[] paths = key.split("\\."); //$NON-NLS-1$
         Map<String, Object> map = getParentMap(root, paths);
         map.put(paths[paths.length - 1], value);
@@ -324,10 +321,8 @@ public class Util {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> getParentMap(Map<String, Object> root, String[] paths) {
-        if (root == null)
-            throw new IllegalArgumentException("root must not be null"); //$NON-NLS-1$
-        if (paths == null)
-            throw new IllegalArgumentException("a path array must be supplied"); //$NON-NLS-1$
+        Objects.requireNonNull(root, "root must not be null");
+        Objects.requireNonNull(paths, "a path array must be supplied");
         Map<String, Object> map = root;
         for (int i = 0; i < paths.length - 1; i++) {
             String path = paths[i];

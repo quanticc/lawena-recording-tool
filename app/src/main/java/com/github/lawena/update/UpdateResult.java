@@ -1,6 +1,6 @@
 package com.github.lawena.update;
 
-public class UpdateResult {
+public final class UpdateResult {
 
     private Status status;
     private Build details;

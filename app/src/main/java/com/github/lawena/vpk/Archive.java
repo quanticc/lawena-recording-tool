@@ -22,6 +22,9 @@ public class Archive {
      * @throws ArchiveException if the archive file is null
      */
     public Archive(File file) throws ArchiveException {
+        if (file == null) {
+            throw new ArchiveException("File must not be null");
+        }
         this.file = file;
         this.multiPart = false;
 
@@ -30,7 +33,7 @@ public class Archive {
         this.treeLength = 0;
         this.headerLength = 0;
 
-        this.directories = new ArrayList<Directory>();
+        this.directories = new ArrayList<>();
     }
 
     /**
@@ -51,10 +54,12 @@ public class Archive {
             this.treeLength = this.readUnsignedInt(fileInputStream);
 
             //check signature and version
-            if (this.signature != Archive.SIGNATURE)
+            if (this.signature != Archive.SIGNATURE) {
                 throw new ArchiveException("Invalid signature");
-            if (this.version < Archive.MINIMUM_VERSION || this.version > Archive.MAXIMUM_VERSION)
+            }
+            if (this.version < Archive.MINIMUM_VERSION || this.version > Archive.MAXIMUM_VERSION) {
                 throw new ArchiveException("Unsupported version");
+            }
 
             //version handling
             switch (this.version) {
@@ -78,14 +83,16 @@ public class Archive {
             while (true) {
                 //get extension
                 String extension = this.readString(fileInputStream);
-                if (extension.isEmpty())
+                if (extension.isEmpty()) {
                     break;
+                }
 
                 while (true) {
                     //get path
                     String path = this.readString(fileInputStream);
-                    if (path.isEmpty())
+                    if (path.isEmpty()) {
                         break;
+                    }
 
                     //directory
                     Directory directory = new Directory(path);
@@ -94,8 +101,9 @@ public class Archive {
                     while (true) {
                         //get filename
                         String filename = this.readString(fileInputStream);
-                        if (filename.isEmpty())
+                        if (filename.isEmpty()) {
                             break;
+                        }
 
                         //read data
                         int crc = this.readUnsignedInt(fileInputStream);
@@ -130,13 +138,15 @@ public class Archive {
      */
     public File getChildArchive(int index) throws ArchiveException {
         //check
-        if (!this.multiPart)
+        if (!this.multiPart) {
             throw new ArchiveException("Archive is not multi-part");
+        }
 
         //get parent
         File parent = this.file.getParentFile();
-        if (parent == null)
+        if (parent == null) {
             throw new ArchiveException("Archive has no parent");
+        }
 
         //get child name
         String fileName = this.file.getName();
@@ -159,8 +169,9 @@ public class Archive {
 
         //read
         int character = 0;
-        while ((character = fileInputStream.read()) != Archive.NULL_TERMINATOR)
+        while ((character = fileInputStream.read()) != Archive.NULL_TERMINATOR) {
             stringBuilder.append((char) character);
+        }
 
         return stringBuilder.toString();
     }

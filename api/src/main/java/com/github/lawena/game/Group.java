@@ -28,27 +28,27 @@ public abstract class Group {
         return group;
     }
 
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public final void setName(String name) {
         this.name = name;
     }
 
-    public List<String> getCommands() {
+    public final List<String> getCommands() {
         return commands;
     }
 
-    public void setCommands(List<String> commands) {
+    public final void setCommands(List<String> commands) {
         this.commands = commands;
     }
 
-    public boolean isGameConfig() {
+    public final boolean isGameConfig() {
         return gameConfig;
     }
 
-    public void setGameConfig(boolean gameConfig) {
+    public final void setGameConfig(boolean gameConfig) {
         this.gameConfig = gameConfig;
     }
 

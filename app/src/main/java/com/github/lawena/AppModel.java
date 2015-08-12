@@ -9,7 +9,7 @@ import com.github.lawena.exts.TagProvider;
 import com.github.lawena.files.AppResources;
 import com.github.lawena.files.Resources;
 import com.github.lawena.game.GameDescription;
-import com.github.lawena.old.update.Updater;
+import com.github.lawena.update.Updater;
 import com.github.lawena.profile.AppProfiles;
 import com.github.lawena.profile.Profiles;
 import com.github.lawena.util.FxLogAppender;

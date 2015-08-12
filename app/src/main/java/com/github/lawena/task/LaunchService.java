@@ -21,44 +21,44 @@ public class LaunchService extends Service<Boolean> {
     }
 
     @Override
-    protected Task<Boolean> createTask() {
+    protected final Task<Boolean> createTask() {
         Task<Boolean> task = new LaunchTask(controller);
         controller.getTasks().add(task);
         return task;
     }
 
     @Override
-    protected void ready() {
+    protected final void ready() {
         log.debug("Ready");
         super.ready();
     }
 
     @Override
-    protected void scheduled() {
+    protected final void scheduled() {
         log.debug("Scheduled");
         super.scheduled();
     }
 
     @Override
-    protected void running() {
+    protected final void running() {
         log.debug("Running");
         super.running();
     }
 
     @Override
-    protected void succeeded() {
+    protected final void succeeded() {
         log.debug("Succeeded");
         super.succeeded();
     }
 
     @Override
-    protected void failed() {
+    protected final void failed() {
         log.debug("Failed");
         super.failed();
     }
 
     @Override
-    protected void cancelled() {
+    protected final void cancelled() {
         log.debug("Cancelled");
         super.cancelled();
     }

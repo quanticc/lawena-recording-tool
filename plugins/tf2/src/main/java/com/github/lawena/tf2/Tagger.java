@@ -12,12 +12,12 @@ import ro.fortsoft.pf4j.Extension;
 public class Tagger implements TagProvider {
 
     @Override
-    public String getName() {
+    public final String getName() {
         return "tf2-tags";
     }
 
     @Override
-    public Collection<String> tag(Collection<String> contents) {
+    public final Collection<String> tag(Collection<String> contents) {
         Set<String> tags = new HashSet<>();
         boolean hasResourceUiFolder = false;
         boolean hasScriptsFolder = false;

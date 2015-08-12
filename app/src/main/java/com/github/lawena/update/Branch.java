@@ -12,7 +12,7 @@ import java.util.SortedSet;
  * @author Ivan
  */
 @SuppressWarnings("nls")
-public class Branch {
+public final class Branch {
 
     /**
      * Represents a branch without a deployment descriptor

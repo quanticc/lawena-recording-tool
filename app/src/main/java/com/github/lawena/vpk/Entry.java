@@ -27,6 +27,9 @@ public class Entry {
      * @throws EntryException if the archive is null
      */
     protected Entry(Archive archive, short archiveIndex, byte[] preloadData, String filename, String extension, int crc, int offset, int length, short terminator) throws EntryException {
+        if (archive == null) {
+            throw new EntryException("Archive must not be null");
+        }
         this.archive = archive;
         this.archiveIndex = archiveIndex;
 
@@ -51,16 +54,18 @@ public class Entry {
      */
     public byte[] readData() throws IOException, ArchiveException {
         //check for preload data
-        if (this.preloadData != null)
+        if (this.preloadData != null) {
             return this.preloadData;
+        }
 
         //get target archive
-        File target = null;
+        File target;
 
-        if (this.archive.isMultiPart())
+        if (this.archive.isMultiPart()) {
             target = this.archive.getChildArchive(this.archiveIndex);
-        else
+        } else {
             target = this.archive.getFile();
+        }
 
         try (FileInputStream fileInputStream = new FileInputStream(target)) {
             if (this.archiveIndex == Entry.TERMINATOR) {

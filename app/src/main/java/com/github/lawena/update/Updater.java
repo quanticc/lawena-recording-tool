@@ -68,8 +68,9 @@ public class Updater {
     }
 
     private static SortedSet<Build> getBuildList(Branch branch) {
-        if (branch == null)
+        if (branch == null) {
             throw new IllegalArgumentException("Must set a branch");
+        }
         SortedSet<Build> builds = branch.getBuilds();
         if (builds != null) {
             return builds;
@@ -114,8 +115,9 @@ public class Updater {
     private static String[] getMultiValue(Map<String, Object> data, String name) {
         // safe way to call this and avoid NPEs
         String[] array = ConfigUtil.getMultiValue(data, name);
-        if (array == null)
+        if (array == null) {
             return new String[0];
+        }
         return array;
     }
 
@@ -282,7 +284,7 @@ public class Updater {
         }
     }
 
-    public void clear() {
+    public final void clear() {
         branches = null;
     }
 
@@ -292,7 +294,7 @@ public class Updater {
      *
      * @return the current {@link Branch}
      */
-    public Branch getCurrentBranch() {
+    public final Branch getCurrentBranch() {
         String branchName = getCurrentBranchName();
         for (Branch branch : getBranches()) {
             if (branch.getId().equals(branchName)) {
@@ -302,17 +304,19 @@ public class Updater {
         return Branch.STANDALONE;
     }
 
-    public String getCurrentBranchName() {
+    public final String getCurrentBranchName() {
         String[] value = getMultiValue(getdown, "channel");
-        if (value.length == 0)
+        if (value.length == 0) {
             return "standalone";
+        }
         return value[0];
     }
 
     private String getCurrentVersion() {
         String[] value = getMultiValue(getdown, "version");
-        if (value.length == 0)
+        if (value.length == 0) {
             return "0";
+        }
         return value[0];
     }
 
@@ -329,7 +333,7 @@ public class Updater {
         }
     }
 
-    public List<Branch> getBranches() {
+    public final List<Branch> getBranches() {
         if (branches == null || branches.isEmpty()) {
             branches = loadBranches();
         }
@@ -374,13 +378,13 @@ public class Updater {
         return list;
     }
 
-    public void fileCleanup() {
+    public final void fileCleanup() {
         deleteOutdatedResources();
         upgradeLauncher();
         upgradeGetdown();
     }
 
-    public UpdateResult checkForUpdates() {
+    public final UpdateResult checkForUpdates() {
         SortedSet<Build> buildList = getBuildList(getCurrentBranch());
         if (buildList.isEmpty()) {
             return UpdateResult.notFound("No builds were found for the current branch");
@@ -405,11 +409,11 @@ public class Updater {
      *
      * @return <code>true</code> if this install is standalone or <code>false</code> if it is not
      */
-    public boolean isStandalone() {
+    public final boolean isStandalone() {
         return standalone;
     }
 
-    public String getLastCheckString() {
+    public final String getLastCheckString() {
         if (lastCheck == 0L) {
             return "Never";
         }

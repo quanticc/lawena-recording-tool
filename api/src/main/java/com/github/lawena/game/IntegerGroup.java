@@ -7,27 +7,27 @@ public class IntegerGroup extends Group {
     private Integer max = Integer.MAX_VALUE;
 
     @Override
-    public Integer getDefaultValue() {
+    public final Integer getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(Integer defaultValue) {
+    public final void setDefaultValue(Integer defaultValue) {
         this.defaultValue = defaultValue;
     }
 
-    public Integer getMin() {
+    public final Integer getMin() {
         return min;
     }
 
-    public void setMin(Integer min) {
+    public final void setMin(Integer min) {
         this.min = min;
     }
 
-    public Integer getMax() {
+    public final Integer getMax() {
         return max;
     }
 
-    public void setMax(Integer max) {
+    public final void setMax(Integer max) {
         this.max = max;
     }
 

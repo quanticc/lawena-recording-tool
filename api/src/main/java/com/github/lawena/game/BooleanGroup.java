@@ -6,19 +6,19 @@ public class BooleanGroup extends Group {
     private boolean skipWhenFalse = false;
 
     @Override
-    public Boolean getDefaultValue() {
+    public final Boolean getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(Boolean defaultValue) {
+    public final void setDefaultValue(Boolean defaultValue) {
         this.defaultValue = defaultValue;
     }
 
-    public boolean isSkipWhenFalse() {
+    public final boolean isSkipWhenFalse() {
         return skipWhenFalse;
     }
 
-    public void setSkipWhenFalse(boolean skipWhenFalse) {
+    public final void setSkipWhenFalse(boolean skipWhenFalse) {
         this.skipWhenFalse = skipWhenFalse;
     }
 

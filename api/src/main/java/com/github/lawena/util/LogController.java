@@ -11,21 +11,21 @@ public interface LogController {
     /**
      * Prepare all required components for the logging mechanism to work.
      */
-    public void startController();
+    void startController();
 
     /**
      * Release all resources used by this controller.
      */
-    public void stopController();
+    void stopController();
 
     /**
      * Appends a message to the logging component.
      */
-    public void append(String text);
+    void append(String text);
 
     /**
      * Clear all messages appended to the logging component.
      */
-    public void clear();
+    void clear();
 
 }
