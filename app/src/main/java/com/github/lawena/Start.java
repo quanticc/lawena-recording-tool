@@ -1,9 +1,9 @@
 package com.github.lawena;
 
 import com.github.lawena.dialog.ExceptionDialog;
+import com.github.lawena.i18n.Messages;
 import com.github.lawena.security.PluginPolicy;
 import com.github.lawena.util.LwrtUtils;
-import com.github.lawena.i18n.Messages;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,12 +106,11 @@ public class Start extends Application {
         Stage mainStage = new Stage();
         mainStage.setOnCloseRequest(evt -> Platform.exit());
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("BaseView.fxml")); //$NON-NLS-1$
-        mainStage.setTitle("Lawena Recording Tool"); //$NON-NLS-1$
-        mainStage.getIcons().addAll(LwrtUtils.image("/cap-64px.png"), LwrtUtils.image("/cap-32px.png"), //$NON-NLS-1$ //$NON-NLS-2$
-                LwrtUtils.image("/cap-16px.png")); //$NON-NLS-1$
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("BaseView.fxml"));
+        mainStage.setTitle("Lawena Recording Tool"); // NON-NLS
+        mainStage.getIcons().addAll(LwrtUtils.image("/cap-64px.png"), LwrtUtils.image("/cap-48px.png"), // NON-NLS
+                LwrtUtils.image("/cap-32px.png"), LwrtUtils.image("/cap-16px.png")); // NON-NLS
         try {
-            // TODO: move init to controller if possible
             mainStage.setScene(new Scene((Pane) loader.load()));
             Controller control = loader.getController();
             control.setStage(mainStage);
