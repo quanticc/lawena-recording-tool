@@ -1,4 +1,4 @@
-package com.github.lawena.old.update;
+package com.github.lawena.update;
 
 @SuppressWarnings("nls")
 public class Build implements Comparable<Build> {
@@ -26,30 +26,30 @@ public class Build implements Comparable<Build> {
         this.timestamp = timestamp;
     }
 
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
-    public String getDescribe() {
+    public final String getDescribe() {
         return describe;
     }
 
-    public long getTimestamp() {
+    public final long getTimestamp() {
         return timestamp;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return describe + " " + name;
     }
 
     @Override
-    public int compareTo(Build o) {
+    public final int compareTo(Build o) {
         return Long.compare(o.timestamp, timestamp);
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -57,7 +57,7 @@ public class Build implements Comparable<Build> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

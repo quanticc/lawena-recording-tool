@@ -1,4 +1,4 @@
-package com.github.lawena.old.update;
+package com.github.lawena.update;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;

@@ -1,4 +1,4 @@
-package com.github.lawena.old.update;
+package com.github.lawena.update;
 
 public class UpdateResult {
 
