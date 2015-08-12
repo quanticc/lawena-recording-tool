@@ -12,17 +12,6 @@ import java.io.IOException;
  * @see <a href="https://github.com/Contron/JavaVPK">GitHub Repository</a>
  */
 public class Entry {
-    public static final int TERMINATOR = 0x7FFF;
-    private Archive archive;
-    private short archiveIndex;
-    private byte[] preloadData;
-    private String filename;
-    private String extension;
-    private int crc;
-    private int offset;
-    private int length;
-    private short terminator;
-
     /***
      * Creates a new VPK archive entry.
      *
@@ -37,11 +26,7 @@ public class Entry {
      * @param terminator   the terminator to this entry
      * @throws EntryException if the archive is null
      */
-    protected Entry(Archive archive, short archiveIndex, byte[] preloadData, String filename,
-                    String extension, int crc, int offset, int length, short terminator) throws EntryException {
-        if (archive == null)
-            throw new EntryException("Parent archive cannot be null"); //$NON-NLS-1$
-
+    protected Entry(Archive archive, short archiveIndex, byte[] preloadData, String filename, String extension, int crc, int offset, int length, short terminator) throws EntryException {
         this.archive = archive;
         this.archiveIndex = archiveIndex;
 
@@ -65,12 +50,13 @@ public class Entry {
      * @throws ArchiveException if a general archive exception occurs
      */
     public byte[] readData() throws IOException, ArchiveException {
-        // check for preload data
+        //check for preload data
         if (this.preloadData != null)
             return this.preloadData;
 
-        // get target archive
+        //get target archive
         File target = null;
+
         if (this.archive.isMultiPart())
             target = this.archive.getChildArchive(this.archiveIndex);
         else
@@ -78,12 +64,12 @@ public class Entry {
 
         try (FileInputStream fileInputStream = new FileInputStream(target)) {
             if (this.archiveIndex == Entry.TERMINATOR) {
-                // skip tree and header
+                //skip tree and header
                 fileInputStream.skip(this.archive.getTreeLength());
                 fileInputStream.skip(this.archive.getHeaderLength());
             }
 
-            // read data
+            //read data
             byte[] data = new byte[this.length];
             fileInputStream.skip(this.offset);
             fileInputStream.read(data, 0, this.length);
@@ -101,7 +87,7 @@ public class Entry {
      */
     public void extract(File file) throws IOException, ArchiveException {
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-            // write
+            //write
             fileOutputStream.write(this.readData());
         }
     }
@@ -148,7 +134,7 @@ public class Entry {
      * @return the full name
      */
     public String getFullName() {
-        return (this.filename + '.' + this.extension);
+        return (this.filename + "." + this.extension);
     }
 
     /**
@@ -186,4 +172,19 @@ public class Entry {
     public int getTerminator() {
         return this.terminator;
     }
+
+    public static final int TERMINATOR = 0x7FFF;
+
+    private Archive archive;
+    private short archiveIndex;
+
+    private byte[] preloadData;
+
+    private String filename;
+    private String extension;
+
+    private int crc;
+    private int offset;
+    private int length;
+    private short terminator;
 }

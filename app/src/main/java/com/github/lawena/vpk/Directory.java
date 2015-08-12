@@ -1,6 +1,5 @@
 package com.github.lawena.vpk;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,15 +10,12 @@ import java.util.List;
  * @see <a href="https://github.com/Contron/JavaVPK">GitHub Repository</a>
  */
 public class Directory {
-    private String path;
-    private ArrayList<Entry> entries;
-
     /**
      * Creates a new VPK directory.
      *
      * @param path the path of the directory
      */
-    public Directory(String path) {
+    protected Directory(String path) {
         this.path = path.trim();
         this.entries = new ArrayList<>();
     }
@@ -40,7 +36,7 @@ public class Directory {
      * @return the full path
      */
     public String getPathFor(Entry entry) {
-        return (this.path + File.separator + entry.getFullName());
+        return (this.path + Directory.SEPARATOR + entry.getFullName());
     }
 
     /**
@@ -69,4 +65,9 @@ public class Directory {
     public List<Entry> getEntries() {
         return this.entries;
     }
+
+    public static final String SEPARATOR = "/";
+
+    private String path;
+    private List<Entry> entries;
 }
