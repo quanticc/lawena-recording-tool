@@ -2,11 +2,11 @@ package com.github.lawena.task;
 
 import com.github.fge.lambdas.ThrownByLambdaException;
 import com.github.lawena.Controller;
-import com.github.lawena.i18n.Messages;
 import com.github.lawena.exts.FileProvider;
 import com.github.lawena.exts.ViewProvider;
 import com.github.lawena.files.BackupMode;
 import com.github.lawena.game.GameDescription;
+import com.github.lawena.i18n.Messages;
 import com.github.lawena.profile.Profile;
 import com.github.lawena.util.LawenaException;
 import com.github.lawena.util.Util;
@@ -157,8 +157,10 @@ public class LaunchTask extends Task<Boolean> {
         updateMessage(Messages.getString("LaunchTask.MessageStart")); //$NON-NLS-1$
         // disable launch game button, rename it to "Launching..."
         // users looking to abort task can head to Tasks tab
-        controller.disable(true);
-        controller.getLaunchButton().setText(Messages.getString("LaunchTask.LaunchButtonText"));
+        Platform.runLater(() -> {
+            controller.disable(true);
+            controller.getLaunchButton().setText(Messages.getString("LaunchTask.LaunchButtonText"));
+        });
         // execute launch validations, requires to call extensions
         GameDescription game = Optional.ofNullable(controller.getModel().getGames().get(profile.getAppId())).get();
         // retrieve all view extensions

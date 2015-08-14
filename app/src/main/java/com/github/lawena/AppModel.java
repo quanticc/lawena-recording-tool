@@ -39,6 +39,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javafx.application.Application.Parameters;
+import javafx.application.Platform;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
@@ -228,5 +229,6 @@ public class AppModel implements Model {
         resources.stopWatch();
         saveProfiles(Paths.get(parameters.get("profiles"))); //$NON-NLS-1$
         pluginManager.stopPlugins();
+        Platform.exit();
     }
 }

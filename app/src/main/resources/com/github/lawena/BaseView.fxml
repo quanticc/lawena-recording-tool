@@ -12,18 +12,20 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="mainContainer" prefHeight="620.0" prefWidth="740.0"
-      xmlns="http://javafx.com/javafx/8.0.40" fx:controller="com.github.lawena.AppController">
+<VBox fx:id="mainContainer" prefHeight="620.0" prefWidth="740.0"
+      xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.github.lawena.AppController">
     <children>
         <HBox spacing="5.0">
             <children>
-                <MenuButton fx:id="menu" mnemonicParsing="false" text="Lawena" visible="false">
+                <MenuButton fx:id="menu" mnemonicParsing="false" text="Lawena">
                     <items>
                         <Menu mnemonicParsing="false" text="File">
                             <items>
@@ -38,7 +40,12 @@
                                 <SeparatorMenuItem mnemonicParsing="false"/>
                                 <MenuItem mnemonicParsing="false" text="Preferences…"/>
                                 <SeparatorMenuItem mnemonicParsing="false"/>
-                                <MenuItem mnemonicParsing="false" text="Quit"/>
+                                <MenuItem mnemonicParsing="false" onAction="#exit" text="Quit">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="DOWN" code="F4" control="UP"
+                                                            meta="UP" shift="UP" shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
@@ -57,7 +64,8 @@
                         </Menu>
                         <Menu mnemonicParsing="false" text="Help">
                             <items>
-                                <MenuItem mnemonicParsing="false" text="About MyHelloApp"/>
+                                <MenuItem mnemonicParsing="false"
+                                          text="About Lawena Recording Tool..."/>
                             </items>
                         </Menu>
                         <MenuItem mnemonicParsing="false" text="Action 1"/>
@@ -67,8 +75,7 @@
                 <Pane HBox.hgrow="ALWAYS"/>
                 <ComboBox fx:id="profilesComboBox" prefWidth="150.0"/>
                 <SplitMenuButton fx:id="profileSplitMenuButton" mnemonicParsing="false"
-                                 onAction="#duplicateProfile"
-                                 text="New">
+                                 onAction="#duplicateProfile" text="New">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#newProfile"
                                   text="New Profile..."/>
@@ -100,23 +107,20 @@
                             </rowConstraints>
                             <children>
                                 <TitledPane fx:id="launchPane" animated="false" collapsible="false"
-                                            prefHeight="170.0"
-                                            text="Launch Settings" GridPane.valignment="TOP"/>
+                                            prefHeight="170.0" text="Launch Settings"
+                                            GridPane.valignment="TOP"/>
                                 <TitledPane fx:id="recorderPane" animated="false"
                                             collapsible="false" prefHeight="170.0"
                                             text="Frame Capturing" GridPane.columnIndex="1"
                                             GridPane.valignment="TOP"/>
                                 <TitledPane fx:id="configPane" animated="false" collapsible="false"
-                                            prefHeight="350.0"
-                                            text="Game Configuration" GridPane.rowIndex="1"
-                                            GridPane.valignment="TOP"
-                                            GridPane.vgrow="ALWAYS"/>
-                                <TitledPane fx:id="resourcesPane" animated="false"
-                                            collapsible="false"
-                                            prefHeight="350.0" text="Resources"
-                                            GridPane.columnIndex="1"
+                                            prefHeight="350.0" text="Game Configuration"
                                             GridPane.rowIndex="1" GridPane.valignment="TOP"
                                             GridPane.vgrow="ALWAYS"/>
+                                <TitledPane fx:id="resourcesPane" animated="false"
+                                            collapsible="false" prefHeight="350.0" text="Resources"
+                                            GridPane.columnIndex="1" GridPane.rowIndex="1"
+                                            GridPane.valignment="TOP" GridPane.vgrow="ALWAYS"/>
                             </children>
                             <padding>
                                 <Insets left="3.0" right="3.0"/>
@@ -177,8 +181,7 @@
                 <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS"/>
                 <Label fx:id="rightStatus" maxWidth="-1.0" HBox.hgrow="NEVER"/>
                 <Button fx:id="launchButton" defaultButton="true" mnemonicParsing="false"
-                        onAction="#launch"
-                        prefHeight="50.0" prefWidth="200.0" text="Launch Game"/>
+                        onAction="#launch" prefHeight="50.0" prefWidth="200.0" text="Launch Game"/>
             </children>
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>

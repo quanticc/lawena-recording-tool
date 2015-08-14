@@ -187,15 +187,7 @@ public class AppController implements Controller {
         log.debug("Initializing FX UI");
 
         // cleanup procedure on close
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                unbindProfile(model.getProfiles().getSelected());
-            } catch (Exception e) {
-                log.warn("Could not save profiles correctly", e);
-            }
-            model.getResources().foldersProperty().addListener(resourceFolderListener);
-            model.exit();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::exit));
 
         // configure task list controls
         Image image = LwrtUtils.image("/ui/fugue/gear.png"); // NON-NLS
@@ -232,6 +224,17 @@ public class AppController implements Controller {
         launchButton.setText("Launch Game");
 
         launchService = new LaunchService(this);
+    }
+
+    @FXML
+    void exit() {
+        try {
+            unbindProfile(model.getProfiles().getSelected());
+        } catch (Exception e) {
+            log.warn("Could not save profiles correctly", e);
+        }
+        model.getResources().foldersProperty().remove(resourceFolderListener);
+        model.exit();
     }
 
     private void bindProfileList() {
@@ -381,7 +384,10 @@ public class AppController implements Controller {
     void launch(ActionEvent event) {
         log.debug("Launch game button pressed");
         // TODO: not fully implemented yet
-        Platform.runLater(launchService::start);
+        Platform.runLater(() -> {
+            launchService.reset();
+            launchService.start();
+        });
     }
 
     @Override
