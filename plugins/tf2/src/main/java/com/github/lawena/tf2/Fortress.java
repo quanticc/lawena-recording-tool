@@ -10,8 +10,6 @@ import com.github.lawena.tf2.skybox.PreviewTask;
 import com.github.lawena.tf2.skybox.Skybox;
 import com.github.lawena.tf2.skybox.SkyboxStore;
 
-import org.controlsfx.control.action.Action;
-import org.controlsfx.control.action.ActionUtils;
 import org.controlsfx.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,15 +92,15 @@ public class Fortress implements ViewProvider {
         controller.getNodeGroups().getNodes(this, "resources") // NON-NLS
                 .addAll(Arrays.asList(view.getResInfoBox(), view.getResourcesBox()));
 
-        // setup context menu and actions
-        Action refreshSelectedResource = new Action("Refresh", e -> refreshSelectedResource());
-        Action removeSelectedResource = new Action("Remove", e -> removeSelectedResource());
+        // setup context menu
         view.getResourcesTable().setRowFactory(
                 tableView -> {
                     final TableRow<Resource> row = new TableRow<>();
                     final ContextMenu rowMenu = new ContextMenu();
-                    MenuItem refreshItem = ActionUtils.createMenuItem(refreshSelectedResource);
-                    MenuItem removeItem = ActionUtils.createMenuItem(removeSelectedResource);
+                    MenuItem refreshItem = new MenuItem("Refresh");
+                    refreshItem.setOnAction(e -> refreshSelectedResource());
+                    MenuItem removeItem = new MenuItem("Remove");
+                    removeItem.setOnAction(e -> removeSelectedResource());
                     rowMenu.getItems().addAll(refreshItem, removeItem);
 
                     // only display context menu for non-null items:
