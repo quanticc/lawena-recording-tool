@@ -63,7 +63,6 @@ public class Start extends Application {
 
     @Override
     public void init() throws Exception {
-        Platform.setImplicitExit(true);
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
         Thread.setDefaultUncaughtExceptionHandler(Start::uncaught);
@@ -76,7 +75,6 @@ public class Start extends Application {
         splashLayout = new VBox();
         splashLayout.getChildren().addAll(splash, loadProgress, progressText);
         progressText.setAlignment(Pos.CENTER);
-//        splashLayout.setStyle("-fx-padding: 5; -fx-background-color: cornsilk; -fx-border-width:5; ");
         splashLayout.setStyle("-fx-padding: 5; -fx-border-width:5; ");
         splashLayout.setEffect(new DropShadow());
     }
@@ -105,12 +103,11 @@ public class Start extends Application {
     private void showMainStage(ReadOnlyObjectProperty<Optional<Model>> model) {
         log.debug("Preparing user interface");
         Stage mainStage = new Stage();
-        mainStage.setOnCloseRequest(evt -> Platform.exit());
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("BaseView.fxml"));
         mainStage.setTitle("Lawena Recording Tool"); // NON-NLS
-        mainStage.getIcons().addAll(LwrtUtils.image("/cap-64px.png"), LwrtUtils.image("/cap-48px.png"), // NON-NLS
-                LwrtUtils.image("/cap-32px.png"), LwrtUtils.image("/cap-16px.png")); // NON-NLS
+        mainStage.getIcons().addAll(LwrtUtils.localImage("/cap-64px.png"), LwrtUtils.localImage("/cap-48px.png"), // NON-NLS
+                LwrtUtils.localImage("/cap-32px.png"), LwrtUtils.localImage("/cap-16px.png")); // NON-NLS
         try {
             mainStage.setScene(new Scene((Pane) loader.load()));
             Controller control = loader.getController();

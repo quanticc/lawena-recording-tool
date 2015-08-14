@@ -68,19 +68,15 @@ public class Fortress implements ViewProvider {
     }
 
     @Override
-    public void init(Controller parent) {
-        this.controller = parent;
-        this.app = controller.getModel().getGames().get(440);
-        this.plugin = (TF2Plugin) controller.getModel().getPluginManager().getPlugin("TF2Plugin").getPlugin();
-        this.view = new View();
-    }
-
-    @Override
-    public void install() {
+    public void install(Controller parent) {
         if (installed) {
             return;
         }
         log.debug("Installing {}", getName());
+        this.controller = parent;
+        this.app = controller.getModel().getGames().get(440);
+        this.plugin = (TF2Plugin) controller.getModel().getPluginManager().getPlugin("TF2Plugin").getPlugin();
+        this.view = new View();
 
         // configure node groups that will be displayed on various UI locations
         controller.getNodeGroups().getNodes(this, "launch") // NON-NLS
@@ -196,8 +192,8 @@ public class Fortress implements ViewProvider {
     }
 
     @Override
-    public void delete() {
-        // do nothing
+    public void remove(Controller parent) {
+        // TODO: perform cleanup
     }
 
     @Override

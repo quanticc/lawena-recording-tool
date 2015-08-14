@@ -189,7 +189,6 @@ public abstract class WatchTask extends Task<Void> {
 
     @Override
     protected void done() {
-        log.debug("Finished: {}", getState());
         folders.removeListener(listener);
         super.done();
     }

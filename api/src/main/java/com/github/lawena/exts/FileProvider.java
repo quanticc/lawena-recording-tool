@@ -11,7 +11,9 @@ import ro.fortsoft.pf4j.ExtensionPoint;
  */
 public interface FileProvider extends ExtensionPoint {
 
-    void init(Controller parent);
+    void install(Controller parent);
+
+    void remove(Controller parent);
 
     String getName();
 

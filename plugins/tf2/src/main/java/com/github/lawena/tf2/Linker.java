@@ -33,10 +33,15 @@ public class Linker implements FileProvider {
     private TF2Plugin plugin;
 
     @Override
-    public void init(Controller parent) {
+    public void install(Controller parent) {
         this.controller = parent;
         this.game = controller.getModel().getGames().get(440);
         this.plugin = (TF2Plugin) controller.getModel().getPluginManager().getPlugin("TF2Plugin").getPlugin();
+    }
+
+    @Override
+    public void remove(Controller parent) {
+        // do nothing
     }
 
     @Override

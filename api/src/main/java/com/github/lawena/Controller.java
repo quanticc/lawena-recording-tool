@@ -1,6 +1,8 @@
 package com.github.lawena;
 
 import com.github.lawena.exts.FileProvider;
+import com.github.lawena.exts.ImageProvider;
+import com.github.lawena.exts.MenuProvider;
 import com.github.lawena.exts.TagProvider;
 import com.github.lawena.exts.ViewProvider;
 
@@ -9,6 +11,8 @@ import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -31,7 +35,15 @@ public interface Controller {
 
     Pane getLogPane();
 
+    TabPane getTabPane();
+
+    MenuButton getMenu();
+
     List<TagProvider> getTagProviders();
+
+    List<MenuProvider> getMenuProviders();
+
+    List<ImageProvider> getImageProviders();
 
     ObservableList<Task<?>> getTasks();
 

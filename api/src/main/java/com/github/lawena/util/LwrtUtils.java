@@ -24,10 +24,11 @@ public final class LwrtUtils {
     public static final String IMAGES_BASE = "/com/github/lawena"; // NON-NLS
     private static final Logger log = LoggerFactory.getLogger(LwrtUtils.class);
 
-    private LwrtUtils() {}
+    private LwrtUtils() {
+    }
 
     public static Image image(String location) {
-        try (InputStream input = LwrtUtils.class.getResourceAsStream(IMAGES_BASE + location)) {
+        try (InputStream input = LwrtUtils.class.getResourceAsStream(location)) {
             if (input != null) {
                 return new Image(input);
             }
@@ -35,6 +36,10 @@ public final class LwrtUtils {
             log.debug("Could not load image from {}: {}", location, e.toString());
         }
         return null;
+    }
+
+    public static Image localImage(String location) {
+        return image(IMAGES_BASE + location);
     }
 
     /**

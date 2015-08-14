@@ -226,6 +226,7 @@ public class AppModel implements Model {
 
     @Override
     public void exit() {
+        log.debug("Exiting model");
         resources.stopWatch();
         saveProfiles(Paths.get(parameters.get("profiles"))); //$NON-NLS-1$
         pluginManager.stopPlugins();

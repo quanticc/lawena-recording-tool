@@ -2,6 +2,8 @@ package com.github.lawena;
 
 import com.github.lawena.dialog.NewProfileDialog;
 import com.github.lawena.exts.FileProvider;
+import com.github.lawena.exts.ImageProvider;
+import com.github.lawena.exts.MenuProvider;
 import com.github.lawena.exts.TagProvider;
 import com.github.lawena.exts.ViewProvider;
 import com.github.lawena.files.Resource;
@@ -130,6 +132,8 @@ public class AppController implements Controller {
     private List<ViewProvider> viewProviders;
     private List<TagProvider> tagProviders;
     private List<FileProvider> fileProviders;
+    private List<ImageProvider> imageProviders;
+    private List<MenuProvider> menuProviders;
     private ExecutorService executor = Executors.newCachedThreadPool();
     private ListChangeListener<Path> resourceFolderListener = ch -> {
         while (ch.next()) {
@@ -182,15 +186,28 @@ public class AppController implements Controller {
         return logPane;
     }
 
+    @Override
+    public TabPane getTabPane() {
+        return tabs;
+    }
+
+    @Override
+    public MenuButton getMenu() {
+        return menu;
+    }
+
     @FXML
     void initialize() {
         log.debug("Initializing FX UI");
 
         // cleanup procedure on close
-        Runtime.getRuntime().addShutdownHook(new Thread(this::exit));
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            log.debug("Shutting down");
+//            exit();
+//        }));
 
         // configure task list controls
-        Image image = LwrtUtils.image("/ui/fugue/gear.png"); // NON-NLS
+        Image image = LwrtUtils.localImage("/ui/fugue/gear.png"); // NON-NLS
         taskView.setGraphicFactory(t -> {
             ImageView icon = new ImageView(image);
             RotateTransition rt = new RotateTransition(Duration.millis(1000), icon);
@@ -213,6 +230,7 @@ public class AppController implements Controller {
 
         logController = new FxLogController(this);
         Platform.runLater(() -> {
+            stage.setOnCloseRequest(e -> exit());
             model.getLogAppender().setController(logController);
             logController.startController();
             model.getLogAppender().startAppender();
@@ -228,17 +246,19 @@ public class AppController implements Controller {
 
     @FXML
     void exit() {
+        log.debug("Exiting controller");
         try {
             unbindProfile(model.getProfiles().getSelected());
         } catch (Exception e) {
             log.warn("Could not save profiles correctly", e);
         }
+        executor.shutdownNow();
         model.getResources().foldersProperty().remove(resourceFolderListener);
         model.exit();
     }
 
     private void bindProfileList() {
-        log.debug("Creating UI bindings"); //$NON-NLS-1$
+        log.debug("Binding profiles to UI"); //$NON-NLS-1$
         Profiles profiles = model.getProfiles();
         Bindings.bindContentBidirectional(profilesComboBox.itemsProperty().get(), profiles
                 .profilesProperty().get());
@@ -251,8 +271,12 @@ public class AppController implements Controller {
                     setGraphic(null);
                     setText(null);
                 } else {
-                    // TODO: add game icon as graphic
-                    setGraphic(null);
+                    GameDescription app = Optional.ofNullable(model.getGames().get(item.getAppId())).get();
+                    ImageView icon = new ImageView(tryImageProviders(app.getIcon())
+                            .orElse(LwrtUtils.image(app.getIcon())));
+                    icon.setFitWidth(16);
+                    icon.setFitHeight(16);
+                    setGraphic(icon);
                     setText(item.getName());
                     // subscribe to this item changes
                     item.addListener(p -> setText(((Profile) p).getName()));
@@ -268,6 +292,17 @@ public class AppController implements Controller {
             bindProfile(_new);
         });
         bindProfile(profiles.getSelected());
+    }
+
+    private Optional<Image> tryImageProviders(String location) {
+        List<ImageProvider> providers = getImageProviders();
+        for (ImageProvider provider : providers) {
+            Image image = provider.get(location);
+            if (image != null) {
+                return Optional.of(image);
+            }
+        }
+        return Optional.empty();
     }
 
     private void unbindProfile(Profile profile) {
@@ -291,7 +326,7 @@ public class AppController implements Controller {
             List<ViewProvider> exts =
                     getViewProviders().stream().filter(x -> app.getViews().contains(x.getName()))
                             .collect(Collectors.toList());
-            exts.forEach(ViewProvider::install);
+            exts.forEach(p -> p.install(this));
 
             // load resources folders
             Path custom = Paths.get(app.getLocalGamePath()).resolve("custom"); //$NON-NLS-1$
@@ -323,12 +358,9 @@ public class AppController implements Controller {
 
     @Override
     public List<ViewProvider> getViewProviders() {
-        // TODO: handle runtime changes
-        // normally there won't be any need to reload this unless the user loads/unloads an extension
-        // during runtime, in which case this list must be invalidated
+        // TODO: handle runtime changes -- applies to all extension load methods
         if (viewProviders == null) {
             viewProviders = model.getPluginManager().getExtensions(ViewProvider.class);
-            viewProviders.forEach(vp -> vp.init(this));
         }
         return viewProviders;
     }
@@ -345,9 +377,27 @@ public class AppController implements Controller {
     public List<FileProvider> getFileProviders() {
         if (fileProviders == null) {
             fileProviders = model.getPluginManager().getExtensions(FileProvider.class);
-            fileProviders.forEach(fp -> fp.init(this));
+            fileProviders.forEach(p -> p.install(this));
         }
         return fileProviders;
+    }
+
+    @Override
+    public List<ImageProvider> getImageProviders() {
+        if (imageProviders == null) {
+            imageProviders = model.getPluginManager().getExtensions(ImageProvider.class);
+            imageProviders.forEach(p -> p.install(this));
+        }
+        return imageProviders;
+    }
+
+    @Override
+    public List<MenuProvider> getMenuProviders() {
+        if (menuProviders == null) {
+            menuProviders = model.getPluginManager().getExtensions(MenuProvider.class);
+            menuProviders.forEach(p -> p.install(this));
+        }
+        return menuProviders;
     }
 
     private void submitTask(Task<?> task) {

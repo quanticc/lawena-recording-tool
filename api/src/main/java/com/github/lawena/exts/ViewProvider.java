@@ -24,29 +24,25 @@ public interface ViewProvider extends ExtensionPoint {
     String getName();
 
     /**
-     * Initialize required objects for this extension. It is advised to keep the controller
-     * reference.
+     * Creates the needed UI controls. Called once a profile related to this object is selected for
+     * the first time. It will also create bindings that are independent of profile data.
      *
-     * @param controller - a reference to the controller that is using this extension
+     * @param parent a reference to the controller that is using this extension
      */
-    void init(Controller controller);
-
-    /**
-     * Creates the needed UI controls. Called only once when a profile related to this object is
-     * selected.
-     */
-    void install();
+    void install(Controller parent);
 
     /**
      * Removes all created UI controls from the controller. Must be called as part of the cleanup
      * sequence in case the Plugin containing this extension is stopped.
+     *
+     * @param parent a reference to the controller that is using this extension
      */
-    void delete();
+    void remove(Controller parent);
 
     /**
-     * Binds the UI controls created by {@link #install()} to the given profile data. Can also act
-     * as a load action, retrieving the given profile values and updating each control value
-     * accordingly. Called every time a profile related to this object is selected.
+     * Binds the UI controls created by {@link #install(Controller)} to the given profile data. Can
+     * also act as a load action, retrieving the given profile values and updating each control
+     * value accordingly. Called every time a profile related to this object is selected.
      *
      * @param profile the profile that should be bound to the UI controls
      */
