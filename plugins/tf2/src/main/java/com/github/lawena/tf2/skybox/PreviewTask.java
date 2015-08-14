@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -37,15 +38,11 @@ public class PreviewTask extends Task<ObservableList<Skybox>> {
 
     private static List<Path> withParams(String parent, String prefix, List<String> suffixes,
                                          String extension) {
-        List<Path> list = new ArrayList<>();
-        for (String s : suffixes) {
-            list.add(Paths.get(parent, prefix + s + extension));
-        }
-        return list;
+        return suffixes.stream().map(s -> Paths.get(parent, prefix + s + extension)).collect(Collectors.toList());
     }
 
     private static BufferedReader newProcessReader(Process p) {
-        return new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("UTF-8"))); //$NON-NLS-1$
+        return new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("UTF-8")));
     }
 
     private static Canvas concatenate(List<Path> outputs) {
@@ -56,14 +53,14 @@ public class PreviewTask extends Task<ObservableList<Skybox>> {
         for (int i = 0; i < outputs.size(); i++) {
             Path out = outputs.get(i);
             if (!Files.exists(out)) {
-                log.warn("Expected file {} but it does not exist!", out); //$NON-NLS-1$
+                log.warn("Expected file {} but it does not exist!", out);
             } else {
                 try {
                     GraphicsContext gc = canvas.getGraphicsContext2D();
                     Image image = new Image(Files.newInputStream(out), width, height, false, true);
                     gc.drawImage(image, i * width, 0);
                 } catch (IOException e) {
-                    log.warn("Could not read image: {}", e.toString()); //$NON-NLS-1$
+                    log.warn("Could not read image: {}", e.toString());
                 }
             }
         }
@@ -75,22 +72,32 @@ public class PreviewTask extends Task<ObservableList<Skybox>> {
             try {
                 Files.deleteIfExists(out);
             } catch (IOException e) {
-                log.warn("Could not delete some of the temporary skybox files: {}", e.toString()); //$NON-NLS-1$
+                log.warn("Could not remove some of the temporary skybox files: {}", e.toString());
             }
         }
     }
 
     @Override
     protected ObservableList<Skybox> call() throws Exception {
-        updateTitle(Messages.getString("PreviewTask.TaskTitle")); //$NON-NLS-1$
+        try {
+            return checkedCall();
+        } catch (Exception e) {
+            log.warn("Could not complete skybox preview task", e);
+        }
+        // TODO: return empty list or null?
+        return null;
+    }
+
+    private ObservableList<Skybox> checkedCall() throws Exception {
+        updateTitle(Messages.getString("PreviewTask.TaskTitle"));
         ObservableList<Skybox> list = FXCollections.observableArrayList();
         if (candidates.isEmpty())
             return list;
         // get the path of the preview generator (vtfcmd.exe)
         int count = 0;
-        List<String> boxes = Arrays.asList("lf", "bk", "rt", "ft"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-        String inputDir = "lwrt/tf2/skybox/vtf"; //$NON-NLS-1$
-        String outputDir = "lwrt/tf2/skybox-preview"; //$NON-NLS-1$
+        List<String> boxes = Arrays.asList("lf", "bk", "rt", "ft"); // NON-NLS
+        String inputDir = "lwrt/tf2/skybox/vtf"; // NON-NLS
+        String outputDir = "lwrt/tf2/skybox-preview"; // NON-NLS
         String format = "png"; //$NON-NLS-1$
         for (Skybox sky : candidates) {
             count++;
@@ -100,10 +107,10 @@ public class PreviewTask extends Task<ObservableList<Skybox>> {
                 continue;
             }
             String name = sky.getName();
-            log.info("Creating skybox preview for {}", name); //$NON-NLS-1$
-            updateMessage(String.format(Messages.getString("PreviewTask.TaskMessage"), name)); //$NON-NLS-1$
-            List<Path> inputs = withParams(inputDir, name, boxes, ".vtf"); //$NON-NLS-1$
-            List<Path> outputs = withParams(outputDir, name, boxes, "." + format); //$NON-NLS-1$
+            log.info("Creating skybox preview for {}", name);
+            updateMessage(String.format(Messages.getString("PreviewTask.TaskMessage"), name));
+            List<Path> inputs = withParams(inputDir, name, boxes, ".vtf"); // NON-NLS
+            List<Path> outputs = withParams(outputDir, name, boxes, "." + format);
             List<Path> vtfin = new ArrayList<>();
             for (int i = 0; i < inputs.size(); i++) {
                 Path in = inputs.get(i);
@@ -115,11 +122,9 @@ public class PreviewTask extends Task<ObservableList<Skybox>> {
             if (!vtfin.isEmpty()) {
                 generate(vtfin, outputDir, format);
             }
-            log.debug("Adding skybox preview: {}", name); //$NON-NLS-1$
+            log.debug("Adding skybox preview: {}", name);
             Canvas canvas = concatenate(outputs);
-            Platform.runLater(() -> {
-                sky.setPreview(canvas.snapshot(null, null));
-            });
+            Platform.runLater(() -> sky.setPreview(canvas.snapshot(null, null)));
             list.add(sky);
             deleteTempFiles(outputs);
         }
@@ -128,11 +133,11 @@ public class PreviewTask extends Task<ObservableList<Skybox>> {
 
     @Override
     protected void done() {
-        String outputDir = "lwrt/tf2/skybox-preview"; //$NON-NLS-1$
+        String outputDir = "lwrt/tf2/skybox-preview"; // NON-NLS
         try {
             Files.deleteIfExists(Paths.get(outputDir));
         } catch (IOException e) {
-            log.warn("Could not remove temporary skybox preview folder: {}", e.toString()); //$NON-NLS-1$
+            log.warn("Could not remove temporary skybox preview folder: {}", e.toString());
         }
     }
 
@@ -140,22 +145,22 @@ public class PreviewTask extends Task<ObservableList<Skybox>> {
         try {
             Files.createDirectories(Paths.get(outputDir));
             ProcessBuilder pb =
-                    new ProcessBuilder(vtfCmdPath.toString(), "-output", outputDir, "-exportformat", ext); //$NON-NLS-1$ //$NON-NLS-2$
+                    new ProcessBuilder(vtfCmdPath.toString(), "-output", outputDir, "-exportformat", ext);
             for (Path in : inputs) {
-                pb.command().add("-file"); //$NON-NLS-1$
+                pb.command().add("-file");
                 pb.command().add(in.toString());
             }
-            log.debug("Invoking process: {}", pb.command()); //$NON-NLS-1$
+            log.debug("Invoking process: {}", pb.command());
             Process pr = pb.start();
             try (BufferedReader input = newProcessReader(pr)) {
                 String line;
                 while ((line = input.readLine()) != null) {
-                    log.trace("[vtfcmd] {}", line); //$NON-NLS-1$
+                    log.trace("[vtfcmd] {}", line);
                 }
             }
             pr.waitFor();
         } catch (InterruptedException | IOException e) {
-            log.warn("Problem while generating png from vtf file", e); //$NON-NLS-1$
+            log.warn("Problem while generating png from vtf file", e);
         }
     }
 

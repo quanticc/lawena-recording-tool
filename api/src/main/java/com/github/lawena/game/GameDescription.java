@@ -33,6 +33,7 @@ public class GameDescription {
 
     private String name;
     private Integer applaunch;
+    private String icon;
     private String shortName;
     private Map<String, String> processName;
     private String gameFolderName;
@@ -126,12 +127,44 @@ public class GameDescription {
         return views;
     }
 
+    public void setViews(List<String> views) {
+        this.views = views;
+    }
+
     public List<Group> getGroups() {
         return groups;
     }
 
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
+    }
+
     public Optional<Group> getGroup(Property<?> property) {
         return groups.stream().filter(g -> g.getName().equals(property.getName())).findFirst();
+    }
+
+    public List<String> getTaggers() {
+        return taggers;
+    }
+
+    public void setTaggers(List<String> taggers) {
+        this.taggers = taggers;
+    }
+
+    public List<String> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<String> files) {
+        this.files = files;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
     @Override
@@ -164,11 +197,4 @@ public class GameDescription {
         return String.format("%s (AppId: %d)", name, applaunch); //$NON-NLS-1$
     }
 
-    public List<String> getTaggers() {
-        return taggers;
-    }
-
-    public List<String> getFiles() {
-        return files;
-    }
 }

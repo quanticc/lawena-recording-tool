@@ -2,6 +2,7 @@
   "name": "Team Fortress 2",
   "applaunch": 440,
   "shortName": "tf2",
+  "icon": "com/github/lawena/tf2/tf2-red-48px.png",
   "processName": {
     "windows": "hl2.exe",
     "linux": "hl2_linux",
