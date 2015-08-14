@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -75,11 +76,11 @@ public abstract class WatchTask extends Task<Void> {
     public void register(Path dir) {
         if (!keys.containsValue(dir)) {
             try {
-                log.debug("Registering {}", dir); //$NON-NLS-1$
+                log.debug("Registering {}", dir);
                 WatchKey key = dir.register(getWatcher(), ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
                 keys.put(key, dir);
             } catch (IOException e) {
-                log.warn("Could not register path: {}", dir); //$NON-NLS-1$
+                log.warn("Could not register path: {}", dir);
             }
         }
     }
@@ -98,12 +99,12 @@ public abstract class WatchTask extends Task<Void> {
                 }
             });
         } catch (IOException e) {
-            log.warn("Could not register path: {}", start); //$NON-NLS-1$
+            log.warn("Could not register path: {}", start);
         }
     }
 
     public void unregister(Path start) {
-        log.debug("Unregistering {}", start); //$NON-NLS-1$
+        log.debug("Unregistering {}", start);
         Map<Path, WatchKey> inverse =
                 keys.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         Optional.ofNullable(inverse.get(start)).ifPresent(WatchKey::cancel);
@@ -116,8 +117,8 @@ public abstract class WatchTask extends Task<Void> {
                 WatchKey key;
                 try {
                     key = getWatcher().take();
-                } catch (InterruptedException x) {
-                    log.debug("Interrupted!");
+                } catch (ClosedWatchServiceException | InterruptedException x) {
+                    log.debug("Watch service was closed or interrupted");
                     return null;
                 }
                 Path dir = keys.get(key);
@@ -132,7 +133,7 @@ public abstract class WatchTask extends Task<Void> {
                     WatchEvent<Path> ev = cast(event);
                     Path name = ev.context();
                     final Path child = dir.resolve(name);
-                    log.debug("{}: {}", event.kind().name(), child); //$NON-NLS-1$
+                    log.debug("{}: {}", event.kind().name(), child);
                     Platform.runLater(() -> {
                         if (kind == ENTRY_CREATE) {
                             entryCreated(child);
@@ -152,13 +153,13 @@ public abstract class WatchTask extends Task<Void> {
                 if (!valid) {
                     keys.remove(key);
                     if (keys.isEmpty()) {
-                        log.debug("Exiting");
+                        log.debug("Exiting watch loop");
                         break;
                     }
                 }
             }
         } catch (Exception e) {
-            log.warn("Exception!", e);
+            log.warn("Exception while watching for changes", e);
         }
         return null;
     }
@@ -175,7 +176,7 @@ public abstract class WatchTask extends Task<Void> {
         try {
             getWatcher().close();
         } catch (IOException e) {
-            log.warn("Could not close underlying watching service: {}", e.toString()); //$NON-NLS-1$
+            log.warn("Could not close underlying watching service: {}", e.toString());
         }
         return super.cancel(mayInterruptIfRunning);
     }

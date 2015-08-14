@@ -21,7 +21,7 @@ import javafx.scene.image.Image;
  * @author Ivan
  */
 public final class LwrtUtils {
-    public static final String IMAGES_BASE = "/com/github/lawena";
+    public static final String IMAGES_BASE = "/com/github/lawena"; // NON-NLS
     private static final Logger log = LoggerFactory.getLogger(LwrtUtils.class);
 
     private LwrtUtils() {}

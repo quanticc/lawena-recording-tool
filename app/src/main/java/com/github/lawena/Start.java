@@ -52,13 +52,13 @@ public class Start extends Application {
     }
 
     private static void uncaught(Thread t, Throwable e) {
-        log.error("Unexpected problem in " + t, e); //$NON-NLS-1$
+        log.error("Unexpected problem in " + t, e);
         ExceptionDialog
                 .show(
-                        Messages.getString("Main.uncaughtExceptionTitle"), //$NON-NLS-1$
-                        Messages.getString("Start.uncaughtExceptionHeader"), //$NON-NLS-1$
+                        Messages.getString("Main.uncaughtExceptionTitle"),
+                        Messages.getString("Start.uncaughtExceptionHeader"),
                         String.format(
-                                Messages.getString("Start.uncaughtExceptionContent"), t.toString(), e.getLocalizedMessage()), e); //$NON-NLS-1$
+                                Messages.getString("Start.uncaughtExceptionContent"), t.toString(), e.getLocalizedMessage()), e);
     }
 
     @Override
@@ -69,14 +69,15 @@ public class Start extends Application {
         Thread.setDefaultUncaughtExceptionHandler(Start::uncaught);
 
         ImageView splash =
-                new ImageView(new Image(getClass().getResource("/splash.png").toExternalForm())); //$NON-NLS-1$
+                new ImageView(new Image(getClass().getResource("/splash.png").toExternalForm()));
         loadProgress = new ProgressBar();
         loadProgress.setPrefWidth(SPLASH_WIDTH - 20);
         progressText = new Label();
         splashLayout = new VBox();
         splashLayout.getChildren().addAll(splash, loadProgress, progressText);
         progressText.setAlignment(Pos.CENTER);
-        splashLayout.setStyle("-fx-padding: 5; -fx-background-color: cornsilk; -fx-border-width:5; "); //$NON-NLS-1$
+//        splashLayout.setStyle("-fx-padding: 5; -fx-background-color: cornsilk; -fx-border-width:5; ");
+        splashLayout.setStyle("-fx-padding: 5; -fx-border-width:5; ");
         splashLayout.setEffect(new DropShadow());
     }
 
@@ -85,10 +86,10 @@ public class Start extends Application {
         final Task<Optional<Model>> preload = new Task<Optional<Model>>() {
             @Override
             protected Optional<Model> call() throws Exception {
-                updateMessage(Messages.getString("Start.Initializing")); //$NON-NLS-1$
+                updateMessage(Messages.getString("Start.Initializing"));
                 try {
                     Model model = new AppModel(getParameters());
-                    updateMessage(Messages.getString("Start.Ready")); //$NON-NLS-1$
+                    updateMessage(Messages.getString("Start.Ready"));
                     return Optional.of(model);
                 } catch (Exception e) {
                     updateMessage("Exception at launch: " + e.toString());
@@ -102,7 +103,7 @@ public class Start extends Application {
     }
 
     private void showMainStage(ReadOnlyObjectProperty<Optional<Model>> model) {
-        log.debug("Preparing user interface"); //$NON-NLS-1$
+        log.debug("Preparing user interface");
         Stage mainStage = new Stage();
         mainStage.setOnCloseRequest(evt -> Platform.exit());
 
@@ -118,7 +119,7 @@ public class Start extends Application {
         } catch (NoSuchElementException e) {
             log.error("Startup was interrupted due to an error");
         } catch (IOException e) {
-            log.warn("Could not show the user interface", e); //$NON-NLS-1$
+            log.warn("Could not show the user interface", e);
         }
         Platform.runLater(mainStage::show);
     }
@@ -152,7 +153,7 @@ public class Start extends Application {
 
     @Override
     public void stop() throws Exception {
-        log.debug("Stopping application"); //$NON-NLS-1$
+        log.debug("Stopping application");
     }
 
     public interface InitCompletionHandler {
