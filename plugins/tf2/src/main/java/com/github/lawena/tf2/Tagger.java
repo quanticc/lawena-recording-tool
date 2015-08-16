@@ -13,27 +13,21 @@ public class Tagger implements TagProvider {
 
     @Override
     public final String getName() {
-        return "tf2-tags";
+        return "tf2-tags"; //NON-NLS
     }
 
     @Override
     public final Collection<String> tag(Collection<String> contents) {
         Set<String> tags = new HashSet<>();
-        boolean hasResourceUiFolder = false;
-        boolean hasScriptsFolder = false;
         for (String content : contents) {
-            if (content.startsWith("resource/ui")) { //$NON-NLS-1$
-                hasResourceUiFolder = true;
-            } else if (content.startsWith("scripts/")) { //$NON-NLS-1$
-                hasScriptsFolder = true;
-            } else if (content.startsWith("cfg/") && content.endsWith(".cfg")) { //$NON-NLS-1$ //$NON-NLS-2$
-                tags.add("config"); //$NON-NLS-1$
-            } else if (content.startsWith("materials/skybox/")) { //$NON-NLS-1$
-                tags.add("skybox"); //$NON-NLS-1$
+            String c = content.toLowerCase();
+            if (c.equals("scripts/hudlayout.res")) { //NON-NLS
+                tags.add("hud"); //NON-NLS
+            } else if (c.startsWith("cfg/") && c.endsWith(".cfg")) { //NON-NLS
+                tags.add("config"); //NON-NLS
+            } else if (c.startsWith("materials/skybox/")) { //NON-NLS
+                tags.add("skybox"); //NON-NLS
             }
-        }
-        if (hasResourceUiFolder && hasScriptsFolder) {
-            tags.add("hud"); //$NON-NLS-1$
         }
         return tags;
     }
