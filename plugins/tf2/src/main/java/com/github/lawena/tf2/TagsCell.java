@@ -17,21 +17,6 @@ public class TagsCell extends TableCell<Resource, ObservableSet<String>> {
 
     private static final Map<String, Color> colors = new HashMap<>();
 
-    private static String toRGBCode(Color color) {
-        return String.format("#%02X%02X%02X",
-                (int) (color.getRed() * 255),
-                (int) (color.getGreen() * 255),
-                (int) (color.getBlue() * 255));
-    }
-
-    private static Color contrast(Color color) {
-        double gamma = 2.2;
-        double l = 0.2126 * Math.pow(color.getRed(), gamma)
-                + 0.7152 * Math.pow(color.getGreen(), gamma)
-                + 0.0722 * Math.pow(color.getBlue(), gamma);
-        return l > 0.5 ? Color.BLACK : Color.WHITE;
-    }
-
     static {
         // #e11d21 - red
         // #0052cc - blue
@@ -46,6 +31,21 @@ public class TagsCell extends TableCell<Resource, ObservableSet<String>> {
     }
 
     private final HBox box = new HBox(3);
+
+    private static String toRGBCode(Color color) {
+        return String.format("#%02X%02X%02X",
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
+    }
+
+    private static Color contrast(Color color) {
+        double gamma = 2.2;
+        double l = 0.2126 * Math.pow(color.getRed(), gamma)
+                + 0.7152 * Math.pow(color.getGreen(), gamma)
+                + 0.0722 * Math.pow(color.getBlue(), gamma);
+        return l > 0.5 ? Color.BLACK : Color.WHITE;
+    }
 
     @Override
     protected void updateItem(ObservableSet<String> item, boolean empty) {

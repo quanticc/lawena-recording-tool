@@ -15,6 +15,21 @@ import java.util.List;
  * @see <a href="https://github.com/Contron/JavaVPK">GitHub Repository</a>
  */
 public class Archive {
+    public static final int SIGNATURE = 0x55AA1234;
+    public static final char NULL_TERMINATOR = 0x0;
+    public static final int MINIMUM_VERSION = 1;
+    public static final int MAXIMUM_VERSION = 2;
+    public static final int VERSION_ONE = 1;
+    public static final int VERSION_TWO = 2;
+    public static final int VERSION_ONE_HEADER_SIZE = 12;
+    public static final int VERSION_TWO_HEADER_SIZE = 28;
+    private File file;
+    private boolean multiPart;
+    private int signature;
+    private int version;
+    private int treeLength;
+    private int headerLength;
+    private List<Directory> directories;
     /**
      * Creates a new VPK archive.
      *
@@ -280,25 +295,4 @@ public class Archive {
     public List<Directory> getDirectories() {
         return this.directories;
     }
-
-    public static final int SIGNATURE = 0x55AA1234;
-    public static final char NULL_TERMINATOR = 0x0;
-
-    public static final int MINIMUM_VERSION = 1;
-    public static final int MAXIMUM_VERSION = 2;
-
-    public static final int VERSION_ONE = 1;
-    public static final int VERSION_TWO = 2;
-    public static final int VERSION_ONE_HEADER_SIZE = 12;
-    public static final int VERSION_TWO_HEADER_SIZE = 28;
-
-    private File file;
-    private boolean multiPart;
-
-    private int signature;
-    private int version;
-    private int treeLength;
-    private int headerLength;
-
-    private List<Directory> directories;
 }

@@ -45,16 +45,6 @@ public class AppResources implements Resources {
     // use an empty list as a fallback in case the controller forgot to set one
     private List<TagProvider> providers = Collections.emptyList();
 
-    @Override
-    public final void startWatch() {
-        Platform.runLater(watcher::start);
-    }
-
-    @Override
-    public final void stopWatch() {
-        Platform.runLater(watcher::cancel);
-    }
-
     private static List<String> getContents(Resource resource) throws IOException {
         final Path start = resource.getPath().toAbsolutePath();
         final List<String> contents = new ArrayList<>();
@@ -82,6 +72,16 @@ public class AppResources implements Resources {
         }
         log.trace("Found at {}: {} file{}", start, contents.size(), contents.size() != 1 ? "s" : "");
         return contents;
+    }
+
+    @Override
+    public final void startWatch() {
+        Platform.runLater(watcher::start);
+    }
+
+    @Override
+    public final void stopWatch() {
+        Platform.runLater(watcher::cancel);
     }
 
     @Override

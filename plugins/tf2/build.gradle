@@ -28,7 +28,7 @@ check {
     doLast {
         pluginsDir.mkdir()
         def empty = new File(pluginsDir, "empty")
-        empty.write ""        
+        empty.write ""
     }
 }
 

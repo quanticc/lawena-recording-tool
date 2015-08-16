@@ -10,6 +10,10 @@ import java.util.List;
  * @see <a href="https://github.com/Contron/JavaVPK">GitHub Repository</a>
  */
 public class Directory {
+    public static final String SEPARATOR = "/";
+    private String path;
+    private List<Entry> entries;
+
     /**
      * Creates a new VPK directory.
      *
@@ -65,9 +69,4 @@ public class Directory {
     public List<Entry> getEntries() {
         return this.entries;
     }
-
-    public static final String SEPARATOR = "/";
-
-    private String path;
-    private List<Entry> entries;
 }

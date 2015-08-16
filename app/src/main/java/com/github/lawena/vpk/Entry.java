@@ -12,6 +12,17 @@ import java.io.IOException;
  * @see <a href="https://github.com/Contron/JavaVPK">GitHub Repository</a>
  */
 public class Entry {
+    public static final int TERMINATOR = 0x7FFF;
+    private Archive archive;
+    private short archiveIndex;
+    private byte[] preloadData;
+    private String filename;
+    private String extension;
+    private int crc;
+    private int offset;
+    private int length;
+    private short terminator;
+
     /***
      * Creates a new VPK archive entry.
      *
@@ -177,19 +188,4 @@ public class Entry {
     public int getTerminator() {
         return this.terminator;
     }
-
-    public static final int TERMINATOR = 0x7FFF;
-
-    private Archive archive;
-    private short archiveIndex;
-
-    private byte[] preloadData;
-
-    private String filename;
-    private String extension;
-
-    private int crc;
-    private int offset;
-    private int length;
-    private short terminator;
 }
