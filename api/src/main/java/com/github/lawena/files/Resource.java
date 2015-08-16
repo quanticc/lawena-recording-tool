@@ -1,7 +1,8 @@
 package com.github.lawena.files;
 
 import java.nio.file.Path;
-import java.util.Set;
+
+import javafx.collections.ObservableSet;
 
 /**
  * Represents a resource folder (like the ones inside "custom" SteamPipe folder) or file (such as a
@@ -25,14 +26,14 @@ public interface Resource {
      *
      * @return a set of String tags
      */
-    Set<String> getTags();
+    ObservableSet<String> getTags();
 
     /**
      * Define the set of String tags for this resource.
      *
      * @param tags the set of String tags
      */
-    void setTags(Set<String> tags);
+    void setTags(ObservableSet<String> tags);
 
     /**
      * The exact Path that this resource points to.

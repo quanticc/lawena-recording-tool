@@ -3,20 +3,22 @@ package com.github.lawena.files;
 import com.github.lawena.i18n.Messages;
 
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleSetProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 
 public class AppResource implements Resource {
 
     private BooleanProperty enabled = new SimpleBooleanProperty(this, "enabled", false); //$NON-NLS-1$
     private ObjectProperty<Path> path = new SimpleObjectProperty<>(this, "path", null); //$NON-NLS-1$
-    private ObjectProperty<Set<String>> tags = new SimpleObjectProperty<>(this, "tags", //$NON-NLS-1$
-            new HashSet<>());
+    private SetProperty<String> tags = new SimpleSetProperty<>(this, "tags", //$NON-NLS-1$
+            FXCollections.emptyObservableSet());
 
     public AppResource(Path path) {
         this.path.set(path);
@@ -82,17 +84,17 @@ public class AppResource implements Resource {
         return true;
     }
 
-    public final ObjectProperty<Set<String>> tagsProperty() {
+    public final SetProperty<String> tagsProperty() {
         return this.tags;
     }
 
     @Override
-    public final java.util.Set<java.lang.String> getTags() {
+    public final ObservableSet<String> getTags() {
         return this.tagsProperty().get();
     }
 
     @Override
-    public final void setTags(final java.util.Set<java.lang.String> tags) {
+    public final void setTags(final ObservableSet<String> tags) {
         this.tagsProperty().set(tags);
     }
 

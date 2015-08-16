@@ -32,6 +32,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 
 public class AppResources implements Resources {
     private static final Logger log = LoggerFactory.getLogger(AppResources.class);
@@ -79,7 +80,7 @@ public class AppResources implements Resources {
                 throw new IOException("Invalid VPK archive", e); //$NON-NLS-1$
             }
         }
-        log.trace("Contents found for {}: {}", start, contents); //$NON-NLS-1$
+        log.trace("Found at {}: {} file{}", start, contents.size(), contents.size() != 1 ? "s" : "");
         return contents;
     }
 
@@ -113,7 +114,11 @@ public class AppResources implements Resources {
     private void refreshTags(Resource resource) {
         try {
             List<String> contents = getContents(resource);
-            Set<String> tags = providers.stream().flatMap(p -> p.tag(contents).stream()).collect(Collectors.toSet());
+            ObservableSet<String> tags = FXCollections.observableSet(providers.stream()
+                    .flatMap(p -> p.tag(contents).stream()).collect(Collectors.toSet()));
+            if (resource.getPath().toString().toLowerCase().endsWith(".vpk")) {
+                tags.add("vpk"); //NON-NLS
+            }
             Platform.runLater(() -> resource.setTags(tags));
         } catch (IOException e) {
             log.warn("Could not get contents from {}: {}", resource.getPath(), e.toString()); // NON-NLS
