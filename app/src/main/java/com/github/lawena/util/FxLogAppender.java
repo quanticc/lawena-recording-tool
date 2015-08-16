@@ -61,12 +61,14 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
         this.printingTrace = printingTrace;
     }
 
-    public final Level getMinLevel() {
-        return minLevel;
+    @Override
+    public final String getMinLevel() {
+        return minLevel.toString();
     }
 
-    public final void setMinLevel(Level minLevel) {
-        this.minLevel = minLevel;
+    @Override
+    public final void setMinLevel(String sArg) {
+        minLevel = Level.toLevel(sArg, minLevel);
     }
 
     @Override

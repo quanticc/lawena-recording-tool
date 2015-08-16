@@ -45,6 +45,10 @@ public interface Controller {
 
     List<ImageProvider> getImageProviders();
 
+    void submitTask(Task<?> task);
+
+    void submitTasks(List<? extends Task<?>> tasks);
+
     ObservableList<Task<?>> getTasks();
 
     Button getLaunchButton();

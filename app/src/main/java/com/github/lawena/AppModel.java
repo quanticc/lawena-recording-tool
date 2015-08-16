@@ -38,7 +38,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javafx.application.Application.Parameters;
+import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
@@ -56,15 +57,17 @@ public class AppModel implements Model {
     private final Map<String, String> parameters = new HashMap<>();
     private final Updater updater;
     private final Resources resources;
+    private final HostServices hostServices;
 
     private Map<Integer, GameDescription> games = new HashMap<>();
     private Profiles profiles = new AppProfiles();
 
-    public AppModel(Parameters params) {
-        Objects.requireNonNull(params);
+    public AppModel(Application application) {
+        Objects.requireNonNull(application);
         logAppender = initLog();
-        params.getUnnamed().forEach(p -> parameters.put(p, null));
-        parameters.putAll(params.getNamed());
+        hostServices = application.getHostServices();
+        application.getParameters().getUnnamed().forEach(p -> parameters.put(p, null));
+        parameters.putAll(application.getParameters().getNamed());
         parameters.putAll(loadVersionData());
         parameters.put("games", "lwrt/games.json"); //$NON-NLS-1$ //$NON-NLS-2$
         parameters.put("profiles", "lwrt/profiles.json"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -216,6 +219,11 @@ public class AppModel implements Model {
     @Override
     public Map<String, String> getParameters() {
         return parameters;
+    }
+
+    @Override
+    public HostServices getHostServices() {
+        return hostServices;
     }
 
     @Override

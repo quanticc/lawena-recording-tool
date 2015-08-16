@@ -41,6 +41,8 @@ import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -200,12 +202,6 @@ public class AppController implements Controller {
     void initialize() {
         log.debug("Initializing FX UI");
 
-        // cleanup procedure on close
-//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-//            log.debug("Shutting down");
-//            exit();
-//        }));
-
         // configure task list controls
         Image image = LwrtUtils.localImage("/ui/fugue/gear.png"); // NON-NLS
         taskView.setGraphicFactory(t -> {
@@ -264,6 +260,9 @@ public class AppController implements Controller {
                 .profilesProperty().get());
         profilesComboBox.setValue(profiles.getSelected());
         Callback<ListView<Profile>, ListCell<Profile>> cellFactory = param -> new ListCell<Profile>() {
+
+            InvalidationListener listener = p -> setText(((Profile) p).getName());
+
             @Override
             protected void updateItem(Profile item, boolean empty) {
                 super.updateItem(item, empty);
@@ -279,7 +278,7 @@ public class AppController implements Controller {
                     setGraphic(icon);
                     setText(item.getName());
                     // subscribe to this item changes
-                    item.addListener(p -> setText(((Profile) p).getName()));
+                    item.addListener(new WeakInvalidationListener(listener));
                 }
             }
         };
@@ -400,12 +399,14 @@ public class AppController implements Controller {
         return menuProviders;
     }
 
-    private void submitTask(Task<?> task) {
+    @Override
+    public void submitTask(Task<?> task) {
         taskView.getTasks().add(task);
         executor.submit(task);
     }
 
-    private void submitTasks(List<? extends Task<?>> tasks) {
+    @Override
+    public void submitTasks(List<? extends Task<?>> tasks) {
         log.debug("Submitting tasks: {}", tasks);
         taskView.getTasks().addAll(tasks);
         tasks.forEach(executor::submit);

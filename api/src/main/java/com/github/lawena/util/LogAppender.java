@@ -19,6 +19,10 @@ public interface LogAppender {
      */
     void stopAppender();
 
+    String getMinLevel();
+
+    void setMinLevel(String sArg);
+
     /**
      * Obtain the controller for message forwarding.
      */

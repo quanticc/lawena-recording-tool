@@ -8,6 +8,7 @@ import com.github.lawena.util.LogAppender;
 import java.nio.file.Path;
 import java.util.Map;
 
+import javafx.application.HostServices;
 import ro.fortsoft.pf4j.PluginManager;
 
 /**
@@ -30,6 +31,8 @@ public interface Model {
     void saveProfiles(Path path);
 
     PluginManager getPluginManager();
+
+    HostServices getHostServices();
 
     void launch();
 

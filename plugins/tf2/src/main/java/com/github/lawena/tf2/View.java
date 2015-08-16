@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import javafx.beans.binding.Bindings;
@@ -26,6 +25,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -83,7 +83,7 @@ public class View {
     private TableView<Resource> resourcesTable;
 
     // extra properties
-    private StringProperty advLaunchProperty = new SimpleStringProperty(""); //$NON-NLS-1$
+    private StringProperty advLaunchProperty = new SimpleStringProperty(""); //NON-NLS
 
     // other data
     private Map<ExternalString, Pane> infoCards = new HashMap<>();
@@ -110,16 +110,16 @@ public class View {
     }
 
     private static void configureColumn(TableColumn<?, ?> column, TableView<?> table, double prop) {
-        column.prefWidthProperty().bind(table.widthProperty().multiply(prop).subtract(1));
+        column.prefWidthProperty().bind(table.widthProperty().multiply(prop).subtract(2));
         column.maxWidthProperty().bind(column.prefWidthProperty());
         column.setResizable(false);
     }
 
     private static void showAlert() {
         Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle(Messages.getString("View.ConfigureSrcDemoTitle")); //$NON-NLS-1$
+        alert.setTitle(Messages.getString("View.ConfigureSrcDemoTitle"));
         alert.setHeaderText(null);
-        alert.setContentText(Messages.getString("View.ConfigureSrcDemoContent")); //$NON-NLS-1$
+        alert.setContentText(Messages.getString("View.ConfigureSrcDemoContent"));
         alert.showAndWait();
     }
 
@@ -129,11 +129,11 @@ public class View {
 
     public HBox getResolutionBox() {
         if (_resolution == null) {
-            Label label = new Label(Messages.getString("View.Resolution")); //$NON-NLS-1$
+            Label label = new Label(Messages.getString("View.Resolution"));
             label.setPrefWidth(70);
             HBox.setHgrow(label, Priority.NEVER);
 
-            Label by = new Label(Messages.getString("View.ResolutionBy")); //$NON-NLS-1$
+            Label by = new Label(Messages.getString("View.ResolutionBy"));
             HBox.setHgrow(by, Priority.NEVER);
 
             width = new Spinner<>(640, Integer.MAX_VALUE, 1280, 1);
@@ -155,16 +155,16 @@ public class View {
             restrictInput(width, allowed);
             restrictInput(height, allowed);
 
-            Pattern widthPattern = Pattern.compile("^.*(-w|-width) [0-9]+.*$"); //$NON-NLS-1$
-            Pattern heightPattern = Pattern.compile("^.*(-h|-height) [0-9]+.*$"); //$NON-NLS-1$
+            Pattern widthPattern = Pattern.compile("^.*(-w|-width) [0-9]+.*$");
+            Pattern heightPattern = Pattern.compile("^.*(-h|-height) [0-9]+.*$");
             patternBinding(widthPattern, width.disableProperty(), advLaunchProperty);
             patternBinding(heightPattern, height.disableProperty(), advLaunchProperty);
 
             Validator<String> widthVal =
-                    Validator.createEmptyValidator(Messages.getString("View.WidthInvalidEmpty")); //$NON-NLS-1$
+                    Validator.createEmptyValidator(Messages.getString("View.WidthInvalidEmpty"));
             validation.registerValidator(width.getEditor(), false, widthVal);
             Validator<String> heightVal =
-                    Validator.createEmptyValidator(Messages.getString("View.HeightInvalidEmpty")); //$NON-NLS-1$
+                    Validator.createEmptyValidator(Messages.getString("View.HeightInvalidEmpty"));
             validation.registerValidator(height.getEditor(), false, heightVal);
         }
         return _resolution;
@@ -172,7 +172,7 @@ public class View {
 
     public HBox getDxlevelBox() {
         if (_dxlevel == null) {
-            Label label = new Label(Messages.getString("View.DxLevel")); //$NON-NLS-1$
+            Label label = new Label(Messages.getString("View.DxLevel"));
             label.setPrefWidth(70);
             dxlevel = new ComboBox<>(FXCollections.observableArrayList(TF2Plugin.DXLEVELS));
             _dxlevel = new HBox(5, label, dxlevel);
@@ -180,7 +180,7 @@ public class View {
             HBox.setHgrow(dxlevel, Priority.ALWAYS);
             _dxlevel.setAlignment(Pos.CENTER_LEFT);
 
-            Pattern dxlevelPattern = Pattern.compile("^.*-dxlevel (80|81|90|95|98).*$"); //$NON-NLS-1$
+            Pattern dxlevelPattern = Pattern.compile("^.*-dxlevel (80|81|90|95|98).*$");
             patternBinding(dxlevelPattern, dxlevel.disableProperty(), advLaunchProperty);
         }
         return _dxlevel;
@@ -188,7 +188,7 @@ public class View {
 
     public HBox getAdvancedBox() {
         if (_advanced == null) {
-            advanced = new Button(Messages.getString("View.AdvancedBtn")); //$NON-NLS-1$
+            advanced = new Button(Messages.getString("View.AdvancedBtn"));
             advanced.setOnAction(evt -> getLaunchOptionsDialog().showAndWait().ifPresent(
                     advLaunchProperty::set));
             _advanced = new HBox(5, advanced);
@@ -201,9 +201,9 @@ public class View {
     public TextInputDialog getLaunchOptionsDialog() {
         if (_dialog == null) {
             _dialog = new TextInputDialog(advLaunchProperty.get());
-            _dialog.setTitle(Messages.getString("View.AdvancedLaunchTitle")); //$NON-NLS-1$
-            _dialog.setHeaderText(Messages.getString("View.AdvancedLaunchHeader")); //$NON-NLS-1$
-            _dialog.setContentText(Messages.getString("View.AdvancedLaunchContent")); //$NON-NLS-1$
+            _dialog.setTitle(Messages.getString("View.AdvancedLaunchTitle"));
+            _dialog.setHeaderText(Messages.getString("View.AdvancedLaunchHeader"));
+            _dialog.setContentText(Messages.getString("View.AdvancedLaunchContent"));
         }
         return _dialog;
     }
@@ -212,44 +212,44 @@ public class View {
         if (_record == null) {
             captureMode = new ComboBox<>(FXCollections.observableArrayList(TF2Plugin.CAPTURES));
             captureMode.setMaxWidth(Double.MAX_VALUE);
-            Label at = new Label(Messages.getString("View.FramerateAt")); //$NON-NLS-1$
+            Label at = new Label(Messages.getString("View.FramerateAt"));
             fps = new Spinner<>(24, Integer.MAX_VALUE, 120);
             fps.setEditable(true);
             fps.setPrefWidth(70);
-            restrictInput(fps, "0123456789"); //$NON-NLS-1$
+            restrictInput(fps, "0123456789");
             fps.getValueFactory().setConverter(new ZeroIntegerStringConverter());
-            Label fpsLabel = new Label(Messages.getString("View.FPS")); //$NON-NLS-1$
+            Label fpsLabel = new Label(Messages.getString("View.FPS"));
             _record = new HBox(5, captureMode, at, fps, fpsLabel);
             _record.setAlignment(Pos.CENTER_LEFT);
 
-            Label tgaInfo = new Label(Messages.getString("View.CaptureTGA")); //$NON-NLS-1$
+            Label tgaInfo = new Label(Messages.getString("View.CaptureTGA"));
             tgaInfo.setWrapText(true);
             tgaInfo.setAlignment(Pos.TOP_LEFT);
             tgaInfo.setMaxHeight(Double.MAX_VALUE);
 
-            Label jpgInfo = new Label(Messages.getString("View.CaptureJPEG")); //$NON-NLS-1$
+            Label jpgInfo = new Label(Messages.getString("View.CaptureJPEG"));
             jpgInfo.setWrapText(true);
             jpgInfo.setAlignment(Pos.TOP_LEFT);
             jpgInfo.setMaxHeight(Double.MAX_VALUE);
-            Label qualityLabel = new Label(Messages.getString("View.JPEGQuality")); //$NON-NLS-1$
+            Label qualityLabel = new Label(Messages.getString("View.JPEGQuality"));
             quality = new Spinner<>(1, 100, 90);
             quality.setEditable(true);
             quality.setPrefWidth(70);
-            restrictInput(quality, "0123456789"); //$NON-NLS-1$
+            restrictInput(quality, "0123456789");
             quality.getValueFactory().setConverter(new ZeroIntegerStringConverter());
             HBox jpgHBox = new HBox(5, qualityLabel, quality);
             jpgHBox.setAlignment(Pos.CENTER_RIGHT);
 
-            Label manInfo = new Label(Messages.getString("View.CaptureSrcDemoManaged")); //$NON-NLS-1$
+            Label manInfo = new Label(Messages.getString("View.CaptureSrcDemoManaged"));
             manInfo.setWrapText(true);
             manInfo.setAlignment(Pos.TOP_LEFT);
             manInfo.setMaxHeight(Double.MAX_VALUE);
-            cfgSrcDemo = new Button(Messages.getString("View.ConfigureSrcDemo")); //$NON-NLS-1$
+            cfgSrcDemo = new Button(Messages.getString("View.ConfigureSrcDemo"));
             cfgSrcDemo.setOnAction((evt) -> showAlert());
             HBox srcHBox = new HBox(5, cfgSrcDemo);
             srcHBox.setAlignment(Pos.CENTER_RIGHT);
 
-            Label stdInfo = new Label(Messages.getString("View.CaptureSrcDemoStandalone")); //$NON-NLS-1$
+            Label stdInfo = new Label(Messages.getString("View.CaptureSrcDemoStandalone"));
             stdInfo.setWrapText(true);
             stdInfo.setAlignment(Pos.TOP_LEFT);
             stdInfo.setMaxHeight(Double.MAX_VALUE);
@@ -275,10 +275,10 @@ public class View {
             infoCards.put(TF2Plugin.CAPTURES.get(3), stdVBox);
 
             Validator<String> fpsVal =
-                    Validator.createEmptyValidator(Messages.getString("View.FpsInvalidEmpty")); //$NON-NLS-1$
+                    Validator.createEmptyValidator(Messages.getString("View.FpsInvalidEmpty"));
             validation.registerValidator(fps.getEditor(), false, fpsVal);
             Validator<String> qualityVal =
-                    Validator.createEmptyValidator(Messages.getString("View.QualityInvalidEmpty")); //$NON-NLS-1$
+                    Validator.createEmptyValidator(Messages.getString("View.QualityInvalidEmpty"));
             validation.registerValidator(quality.getEditor(), false, qualityVal);
         }
         return _record;
@@ -294,7 +294,7 @@ public class View {
 
     public HBox getHudBox() {
         if (_hud == null) {
-            Label hudLabel = new Label(Messages.getString("View.HUD")); //$NON-NLS-1$
+            Label hudLabel = new Label(Messages.getString("View.HUD"));
             hudLabel.setPrefWidth(70);
 
             hud = new ComboBox<>(FXCollections.observableArrayList(TF2Plugin.HUDS));
@@ -309,7 +309,7 @@ public class View {
 
     public HBox getSkyboxBox() {
         if (_skybox == null) {
-            Label skyLabel = new Label(Messages.getString("View.Skybox")); //$NON-NLS-1$
+            Label skyLabel = new Label(Messages.getString("View.Skybox"));
             skyLabel.setPrefWidth(70);
             HBox.setHgrow(skyLabel, Priority.NEVER);
             skybox = new ComboBox<>();
@@ -339,15 +339,15 @@ public class View {
 
     public HBox getViewmodelsBox() {
         if (_viewmodels == null) {
-            Label vmodels = new Label(Messages.getString("View.Viewmodels")); //$NON-NLS-1$
+            Label vmodels = new Label(Messages.getString("View.Viewmodels"));
             vmodels.setPrefWidth(70);
             HBox.setHgrow(vmodels, Priority.NEVER);
 
             vmSwitch = new ComboBox<>(FXCollections.observableArrayList(TF2Plugin.VIEWMODELS));
-            vmSwitch.setTooltip(new Tooltip(Messages.getString("View.ViewmodelsTooltip"))); //$NON-NLS-1$
+            vmSwitch.setTooltip(new Tooltip(Messages.getString("View.ViewmodelsTooltip")));
             vmSwitch.setMaxWidth(Double.MAX_VALUE);
 
-            Label with = new Label(Messages.getString("View.ViewmodelFovWith")); //$NON-NLS-1$
+            Label with = new Label(Messages.getString("View.ViewmodelFovWith"));
             HBox.setHgrow(with, Priority.NEVER);
 
             vmFov = new Spinner<>(0.1, 179.899994, 75, 1.0);
@@ -355,14 +355,14 @@ public class View {
             vmFov.setPrefWidth(70);
             vmFov.setMaxWidth(Double.MAX_VALUE);
             vmFov.getValueFactory().setConverter(new ZeroDoubleStringConverter());
-            vmFov.setTooltip(new Tooltip(Messages.getString("View.ViewmodelFovTooltip"))); //$NON-NLS-1$
-            restrictInput(vmFov, ".0123456789"); //$NON-NLS-1$
+            vmFov.setTooltip(new Tooltip(Messages.getString("View.ViewmodelFovTooltip")));
+            restrictInput(vmFov, ".0123456789");
             vmFov.disableProperty().bind(vmSwitch.valueProperty().isEqualTo(TF2Plugin.VIEWMODELS.get(1)));
             Validator<String> vmFovVal =
-                    Validator.createEmptyValidator(Messages.getString("View.VmFovInvalidEmpty")); //$NON-NLS-1$
+                    Validator.createEmptyValidator(Messages.getString("View.VmFovInvalidEmpty"));
             validation.registerValidator(vmFov.getEditor(), false, vmFovVal);
 
-            Label vmFovLabel = new Label(Messages.getString("View.ViewmodelFov")); //$NON-NLS-1$
+            Label vmFovLabel = new Label(Messages.getString("View.ViewmodelFov"));
             HBox.setHgrow(vmFovLabel, Priority.NEVER);
 
             _viewmodels = new HBox(5, vmodels, vmSwitch, with, vmFov, vmFovLabel);
@@ -377,13 +377,13 @@ public class View {
             groupTable.setEditable(true);
             HBox.setHgrow(groupTable, Priority.ALWAYS);
 
-            TableColumn<Group, Boolean> enabledCol = new TableColumn<>(""); //$NON-NLS-1$
-            enabledCol.setCellValueFactory(new PropertyValueFactory<>("enabled")); //$NON-NLS-1$
+            TableColumn<Group, Boolean> enabledCol = new TableColumn<>(""); //NON-NLS
+            enabledCol.setCellValueFactory(new PropertyValueFactory<>("enabled"));
             enabledCol.setCellFactory(CheckBoxTableCell.forTableColumn(enabledCol));
             enabledCol.setEditable(true);
 
             TableColumn<Group, String> nameCol =
-                    new TableColumn<>(Messages.getString("View.GroupNameColumn")); //$NON-NLS-1$
+                    new TableColumn<>(Messages.getString("View.GroupNameColumn"));
             nameCol.setCellValueFactory(g -> new ReadOnlyObjectWrapper<>(local(g.getValue().getName())));
             nameCol.setEditable(false);
 
@@ -398,7 +398,7 @@ public class View {
 
     public HBox getResInfoBox() {
         if (_resInfo == null) {
-            Label info = new Label(Messages.getString("View.ResourcesInfo")); //$NON-NLS-1$
+            Label info = new Label(Messages.getString("View.ResourcesInfo"));
             info.setWrapText(true);
             info.setAlignment(Pos.TOP_LEFT);
             _resInfo = new HBox(5, info);
@@ -418,23 +418,20 @@ public class View {
             HBox.setHgrow(resourcesTable, Priority.ALWAYS);
             VBox.setVgrow(resourcesTable, Priority.ALWAYS);
 
-            TableColumn<Resource, Boolean> enabledCol = new TableColumn<>(""); //$NON-NLS-1$
-            enabledCol.setCellValueFactory(new PropertyValueFactory<>("enabled")); //$NON-NLS-1$
+            TableColumn<Resource, Boolean> enabledCol = new TableColumn<>(""); //NON-NLS
+            enabledCol.setCellValueFactory(new PropertyValueFactory<>("enabled"));
             enabledCol.setCellFactory(CheckBoxTableCell.forTableColumn(enabledCol));
             enabledCol.setEditable(true);
 
             TableColumn<Resource, String> nameCol =
-                    new TableColumn<>(Messages.getString("View.ResourcesNameColumn")); //$NON-NLS-1$
+                    new TableColumn<>(Messages.getString("View.ResourcesNameColumn"));
             nameCol.setCellValueFactory(r -> new ReadOnlyObjectWrapper<>(local(r.getValue().getName())));
             nameCol.setEditable(false);
 
-            TableColumn<Resource, String> tagsCol =
-                    new TableColumn<>(Messages.getString("View.ResourcesTagsColumn")); //$NON-NLS-1$
-            tagsCol.setCellValueFactory(r -> {
-                Set<String> tags = r.getValue().getTags();
-                String value = tags.toString().replace("[", "").replace("]", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-                return new ReadOnlyObjectWrapper<>(value);
-            });
+            TableColumn<Resource, ObservableSet<String>> tagsCol =
+                    new TableColumn<>(Messages.getString("View.ResourcesTagsColumn"));
+            tagsCol.setCellValueFactory(new PropertyValueFactory<>("tags"));
+            tagsCol.setCellFactory(param -> new TagsCell());
             tagsCol.setEditable(false);
 
             resourcesTable.getColumns().add(enabledCol);
@@ -442,7 +439,7 @@ public class View {
             resourcesTable.getColumns().add(tagsCol);
             configureColumn(enabledCol, resourcesTable, (double) 1 / 11);
             configureColumn(nameCol, resourcesTable, (double) 7 / 11);
-            configureColumn(tagsCol, resourcesTable, (double) 3 / 11);
+            configureColumn(tagsCol, resourcesTable, ((double) 3 / 11));
 
             _resources = new HBox(5, resourcesTable);
         }
@@ -484,11 +481,6 @@ public class View {
     public ObjectProperty<Skybox> skyboxProperty() {
         return skybox.valueProperty();
     }
-
-//    public Pane getInfoCard(ExternalString key) {
-//        Objects.requireNonNull(key);
-//        return infoCards.get(key);
-//    }
 
     public Optional<Pane> getInfoCard(ExternalString key) {
         Objects.requireNonNull(key);

@@ -86,7 +86,7 @@ public class Start extends Application {
             protected Optional<Model> call() throws Exception {
                 updateMessage(Messages.getString("Start.Initializing"));
                 try {
-                    Model model = new AppModel(getParameters());
+                    Model model = new AppModel(Start.this);
                     updateMessage(Messages.getString("Start.Ready"));
                     return Optional.of(model);
                 } catch (Exception e) {
