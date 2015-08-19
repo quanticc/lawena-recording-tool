@@ -10,6 +10,11 @@ import com.github.lawena.util.ZeroIntegerStringConverter;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -38,6 +43,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -48,6 +54,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
 import javafx.util.Callback;
 
 public class View {
@@ -81,6 +88,9 @@ public class View {
     private Spinner<Double> vmFov;
     private TableView<Group> groupTable;
     private TableView<Resource> resourcesTable;
+    private HBox _recOutput;
+    private TextField framesPath;
+    private Button chooseFramesPath;
 
     // extra properties
     private StringProperty advLaunchProperty = new SimpleStringProperty(""); //NON-NLS
@@ -222,6 +232,71 @@ public class View {
             _record = new HBox(5, captureMode, at, fps, fpsLabel);
             _record.setAlignment(Pos.CENTER_LEFT);
 
+            Validator<String> fpsVal =
+                    Validator.createEmptyValidator(Messages.getString("View.FpsInvalidEmpty"));
+            validation.registerValidator(fps.getEditor(), false, fpsVal);
+        }
+        return _record;
+    }
+
+    public Pane getRecordOutputBox() {
+        if (_recOutput == null) {
+            Label outputLabel = new Label("To");
+            framesPath = new TextField();
+            framesPath.setPromptText("Enter folder to save captured frames");
+            framesPath.setEditable(true);
+            framesPath.setMaxWidth(Double.MAX_VALUE);
+            chooseFramesPath = new Button("...");
+            chooseFramesPath.setTooltip(new Tooltip("Select folder"));
+            DirectoryChooser chooser = new DirectoryChooser();
+            chooseFramesPath.setOnAction(evt -> {
+                tryGetPath(framesPath.getText()).ifPresent(current -> {
+                    if (Files.exists(current) && Files.isDirectory(current)) {
+                        chooser.setInitialDirectory(current.toFile());
+                    }
+                });
+                File selectedFile = chooser.showDialog(null);
+                if (selectedFile != null) {
+                    framesPath.setText(selectedFile.getAbsolutePath());
+                }
+            });
+            _recOutput = new HBox(5, outputLabel, framesPath, chooseFramesPath);
+            _recOutput.setAlignment(Pos.CENTER_LEFT);
+            HBox.setHgrow(framesPath, Priority.ALWAYS);
+
+            Validator<String> pathVal = Validator.combine(
+                    Validator.createEmptyValidator("Path must not be empty"),
+                    Validator.createPredicateValidator(this::isValidFolder,
+                            "Path must be a valid directory"));
+            validation.registerValidator(framesPath, false, pathVal);
+        }
+        return _recOutput;
+    }
+
+    private Optional<Path> tryGetPath(String str) {
+        if (str == null || str.isEmpty()) {
+            return Optional.empty();
+        } else {
+            try {
+                return Optional.of(Paths.get(str));
+            } catch (InvalidPathException e) {
+                return Optional.empty();
+            }
+        }
+    }
+
+    private boolean isValidFolder(String str) {
+        // for validation, if str is an invalid path, return false instead of the exception
+        try {
+            Path path = Paths.get(str);
+            return Files.exists(path) && Files.isDirectory(path);
+        } catch (InvalidPathException e) {
+            return false;
+        }
+    }
+
+    public Pane getRecordInfoBox() {
+        if (_recInfo == null) {
             Label tgaInfo = new Label(Messages.getString("View.CaptureTGA"));
             tgaInfo.setWrapText(true);
             tgaInfo.setAlignment(Pos.TOP_LEFT);
@@ -240,12 +315,17 @@ public class View {
             HBox jpgHBox = new HBox(5, qualityLabel, quality);
             jpgHBox.setAlignment(Pos.CENTER_RIGHT);
 
+            Validator<String> qualityVal =
+                    Validator.createEmptyValidator(Messages.getString("View.QualityInvalidEmpty"));
+            validation.registerValidator(quality.getEditor(), false, qualityVal);
+
+            // TODO: implement srcdemo2 integration
             Label manInfo = new Label(Messages.getString("View.CaptureSrcDemoManaged"));
             manInfo.setWrapText(true);
             manInfo.setAlignment(Pos.TOP_LEFT);
             manInfo.setMaxHeight(Double.MAX_VALUE);
             cfgSrcDemo = new Button(Messages.getString("View.ConfigureSrcDemo"));
-            cfgSrcDemo.setOnAction((evt) -> showAlert());
+            cfgSrcDemo.setOnAction(evt -> showAlert());
             HBox srcHBox = new HBox(5, cfgSrcDemo);
             srcHBox.setAlignment(Pos.CENTER_RIGHT);
 
@@ -274,18 +354,6 @@ public class View {
             infoCards.put(TF2Plugin.CAPTURES.get(2), manVBox);
             infoCards.put(TF2Plugin.CAPTURES.get(3), stdVBox);
 
-            Validator<String> fpsVal =
-                    Validator.createEmptyValidator(Messages.getString("View.FpsInvalidEmpty"));
-            validation.registerValidator(fps.getEditor(), false, fpsVal);
-            Validator<String> qualityVal =
-                    Validator.createEmptyValidator(Messages.getString("View.QualityInvalidEmpty"));
-            validation.registerValidator(quality.getEditor(), false, qualityVal);
-        }
-        return _record;
-    }
-
-    public Pane getRecordInfoBox() {
-        if (_recInfo == null) {
             _recInfo = new VBox();
             VBox.setVgrow(_recInfo, Priority.ALWAYS);
         }
@@ -505,6 +573,10 @@ public class View {
 
     public ObjectProperty<ObservableList<Resource>> resourceItemsProperty() {
         return resourcesTable.itemsProperty();
+    }
+
+    public StringProperty framesPathProperty() {
+        return framesPath.textProperty();
     }
 
 }

@@ -55,16 +55,16 @@ public class Fortress implements ViewProvider {
     private InvalidationListener reloader = o -> refreshResourceSelection(controller.getModel().getProfiles().getSelected());
 
     private static List<String> split(String str) {
-        return Arrays.asList(str.split(";")).stream().map(String::trim).collect(Collectors.toList()); //$NON-NLS-1$
+        return Arrays.asList(str.split(";")).stream().map(String::trim).collect(Collectors.toList()); //NON-NLS
     }
 
     private static String join(List<String> list) {
-        return list.toString().replace(",", ";").replaceAll("\\[|\\]", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        return list.toString().replace(",", ";").replaceAll("\\[|\\]", "");
     }
 
     @Override
     public String getName() {
-        return "tf2-view"; // NON-NLS
+        return "tf2-view"; //NON-NLS
     }
 
     @Override
@@ -74,18 +74,18 @@ public class Fortress implements ViewProvider {
         }
         log.debug("Installing {}", getName());
         this.controller = parent;
-        this.app = controller.getModel().getGames().get(440);
+        this.app = controller.getGameFromProfile();
         this.plugin = (TF2Plugin) controller.getModel().getPluginManager().getPlugin("TF2Plugin").getPlugin();
         this.view = new View();
 
         // configure node groups that will be displayed on various UI locations
-        controller.getNodeGroups().getNodes(this, "launch") // NON-NLS
+        controller.getNodeGroups().getNodes(this, "launch") //NON-NLS
                 .addAll(Arrays.asList(view.getResolutionBox(), view.getDxlevelBox(), view.getAdvancedBox()));
-        controller.getNodeGroups().getNodes(this, "recorder") // NON-NLS
-                .addAll(Arrays.asList(view.getRecordOptionsBox(), view.getRecordInfoBox()));
-        controller.getNodeGroups().getNodes(this, "config") // NON-NLS
+        controller.getNodeGroups().getNodes(this, "recorder") //NON-NLS
+                .addAll(Arrays.asList(view.getRecordOptionsBox(), view.getRecordOutputBox(), view.getRecordInfoBox()));
+        controller.getNodeGroups().getNodes(this, "config") //NON-NLS
                 .addAll(Arrays.asList(view.getHudBox(), view.getSkyboxBox(), view.getViewmodelsBox(), view.getGameConfigBox()));
-        controller.getNodeGroups().getNodes(this, "resources") // NON-NLS
+        controller.getNodeGroups().getNodes(this, "resources") //NON-NLS
                 .addAll(Arrays.asList(view.getResInfoBox(), view.getResourcesBox()));
 
         // setup context menu
@@ -141,10 +141,10 @@ public class Fortress implements ViewProvider {
             controller.getTasks().add(new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
-                    updateTitle(Messages.getString("TF2Plugin.PreviewTaskTitle")); //$NON-NLS-1$
-                    updateMessage(Messages.getString("TF2Plugin.PreviewTaskMessage")); //$NON-NLS-1$
+                    updateTitle(Messages.getString("TF2Plugin.PreviewTaskTitle"));
+                    updateMessage(Messages.getString("TF2Plugin.PreviewTaskMessage"));
                     try {
-                        log.debug("Waiting for generator to complete"); //$NON-NLS-1$
+                        log.debug("Waiting for generator to complete");
                         ObservableList<Skybox> list = task.get();
                         list.add(0, Skybox.DEFAULT);
                         Platform.runLater(() -> {
@@ -152,7 +152,7 @@ public class Fortress implements ViewProvider {
                             skyboxes.save(cache);
                         });
                     } catch (InterruptedException | ExecutionException e) {
-                        log.warn("Could not update skybox list", e); //$NON-NLS-1$
+                        log.warn("Could not update skybox list", e);
                     }
                     return null;
                 }
@@ -198,7 +198,7 @@ public class Fortress implements ViewProvider {
 
     @Override
     public void bind(Profile profile) {
-        log.debug("Loading profile: {}", profile.getName()); //$NON-NLS-1$
+        log.debug("Loading profile: {}", profile.getName());
         Properties config = plugin.getConfig();
         load(profile, config.widthProperty(), view.widthProperty(), Integer::parseInt);
         load(profile, config.heightProperty(), view.heightProperty(), Integer::parseInt);
@@ -211,6 +211,7 @@ public class Fortress implements ViewProvider {
         load(profile, config.skyboxProperty(), view.skyboxProperty(), plugin::getSkybox);
         load(profile, config.viewmodelSwitchProperty(), view.vmSwitchProperty(), plugin::vmodel);
         load(profile, config.viewmodelFovProperty(), view.vmFovProperty(), Double::parseDouble);
+        load(profile, config.framesPathProperty(), view.framesPathProperty(), Function.identity());
         loadGroup(profile, config.motionBlurProperty());
         loadGroup(profile, config.noDamageNumbersProperty());
         loadGroup(profile, config.noCrosshairSwitchProperty());
@@ -227,7 +228,7 @@ public class Fortress implements ViewProvider {
 
     @Override
     public void unbind(Profile profile) {
-        log.debug("Saving profile: {}", profile.getName()); //$NON-NLS-1$
+        log.debug("Saving profile: {}", profile.getName());
         Properties config = plugin.getConfig();
         save(profile, config.widthProperty(), view.widthProperty());
         save(profile, config.heightProperty(), view.heightProperty());
@@ -240,6 +241,7 @@ public class Fortress implements ViewProvider {
         save(profile, config.skyboxProperty(), view.skyboxProperty());
         save(profile, config.viewmodelSwitchProperty(), view.vmSwitchProperty(), Pair::getKey);
         save(profile, config.viewmodelFovProperty(), view.vmFovProperty());
+        save(profile, config.framesPathProperty(), view.framesPathProperty());
         saveGroup(profile, config.motionBlurProperty());
         saveGroup(profile, config.noDamageNumbersProperty());
         saveGroup(profile, config.noCrosshairSwitchProperty());
@@ -274,7 +276,7 @@ public class Fortress implements ViewProvider {
             Group group = app.getGroup(model).get();
             load(profile, model, group.enabledProperty(), Boolean::parseBoolean);
         } catch (NoSuchElementException e) {
-            log.warn("No group found with key '{}'", model.getName()); //$NON-NLS-1$
+            log.warn("No group found with key '{}'", model.getName());
         }
     }
 
@@ -283,7 +285,7 @@ public class Fortress implements ViewProvider {
             Group group = app.getGroup(model).get();
             save(profile, model, group.enabledProperty());
         } catch (NoSuchElementException e) {
-            log.warn("No group found with key '{}'", model.getName()); //$NON-NLS-1$
+            log.warn("No group found with key '{}'", model.getName());
         }
     }
 

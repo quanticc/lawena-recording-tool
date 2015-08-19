@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="mainContainer" prefHeight="620.0"
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="mainContainer" prefHeight="630.0"
       prefWidth="740.0" xmlns="http://javafx.com/javafx/8.0.40"
       fx:controller="com.github.lawena.AppController">
     <children>

@@ -215,10 +215,10 @@ public class AppController implements Controller {
         });
         tasksPane.getChildren().add(taskView);
 
-        launchPane.setContent(display("launch", Collections.emptyList())); // NON-NLS
-        recorderPane.setContent(display("recorder", Collections.emptyList())); // NON-NLS
-        configPane.setContent(display("config", Collections.emptyList())); // NON-NLS
-        resourcesPane.setContent(display("resources", Collections.emptyList())); // NON-NLS
+        launchPane.setContent(display("launch", Collections.emptyList())); //NON-NLS
+        recorderPane.setContent(display("recorder", Collections.emptyList())); //NON-NLS
+        configPane.setContent(display("config", Collections.emptyList())); //NON-NLS
+        resourcesPane.setContent(display("resources", Collections.emptyList())); //NON-NLS
 
         // configure additional controls
         statusBar = new StatusBar();
@@ -251,6 +251,11 @@ public class AppController implements Controller {
         executor.shutdownNow();
         model.getResources().foldersProperty().remove(resourceFolderListener);
         model.exit();
+    }
+
+    @Override
+    public GameDescription getGameFromProfile() {
+        return model.getGames().get(model.getProfiles().getSelected().getAppId());
     }
 
     private void bindProfileList() {
