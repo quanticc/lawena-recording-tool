@@ -20,9 +20,7 @@ public interface Model {
 
     Map<Integer, GameDescription> getGames();
 
-    void loadGameDescriptions(Path path);
-
-    void saveGameDescriptions(Path path);
+    void saveSettings(Path path);
 
     Profiles getProfiles();
 

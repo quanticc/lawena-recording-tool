@@ -2,7 +2,6 @@ package com.github.lawena;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 
 import com.github.lawena.exts.DescriptorProvider;
 import com.github.lawena.exts.TagProvider;
@@ -46,10 +45,10 @@ import ro.fortsoft.pf4j.PluginManager;
 
 public class AppModel implements Model {
     private static final Logger log = LoggerFactory.getLogger(AppModel.class);
-    private static final Charset DEFAULT = Charset.forName("UTF-8"); //$NON-NLS-1$
+    private static final Charset DEFAULT = Charset.forName("UTF-8");
     private static final OpenOption[] WRITE = {StandardOpenOption.WRITE, StandardOpenOption.CREATE,
             StandardOpenOption.TRUNCATE_EXISTING};
-    private static Version semVer = Version.valueOf("5.0.0"); // hardcode in case of fallback
+    private static Version version = Version.valueOf("5.0.0");
 
     private final LogAppender logAppender;
     private final PluginManager pluginManager;
@@ -59,8 +58,8 @@ public class AppModel implements Model {
     private final Resources resources;
     private final HostServices hostServices;
 
-    private Map<Integer, GameDescription> games = new HashMap<>();
     private Profiles profiles = new AppProfiles();
+    private AppSettings settings = new AppSettings();
 
     public AppModel(Application application) {
         Objects.requireNonNull(application);
@@ -69,8 +68,8 @@ public class AppModel implements Model {
         application.getParameters().getUnnamed().forEach(p -> parameters.put(p, null));
         parameters.putAll(application.getParameters().getNamed());
         parameters.putAll(loadVersionData());
-        parameters.put("games", "lwrt/games.json"); //$NON-NLS-1$ //$NON-NLS-2$
-        parameters.put("profiles", "lwrt/profiles.json"); //$NON-NLS-1$ //$NON-NLS-2$
+        parameters.put("settings", "lwrt/settings.json"); //NON-NLS
+        parameters.put("profiles", "lwrt/profiles.json"); //NON-NLS
         updater = new Updater();
         logVMInfo();
         pluginManager = new DefaultPluginManager();
@@ -78,7 +77,7 @@ public class AppModel implements Model {
         pluginManager.startPlugins();
         resources = new AppResources();
         resources.setProviders(pluginManager.getExtensions(TagProvider.class));
-        loadGameDescriptions();
+        loadSettings();
         loadProfiles();
     }
 
@@ -86,10 +85,8 @@ public class AppModel implements Model {
         try {
             return Files.readAllLines(Paths.get("describe.tmp"), Charset.forName("UTF-8"));
         } catch (IOException e) {
-            log.debug("Could not read describe version data: {}", e.toString());
-            // read manifest only as a fallback
-            return Arrays.asList(LwrtUtils.getManifestString("git-describe", semVer.getNormalVersion()),
-                    LwrtUtils.getManifestString("buildtime", LwrtUtils.now("yyyyMMddHHmmss")));
+            return Arrays.asList(LwrtUtils.getManifestString("git-describe", version.getNormalVersion()), //NON-NLS
+                    LwrtUtils.getManifestString("buildtime", LwrtUtils.now("yyyyMMddHHmmss"))); //NON-NLS
         }
     }
 
@@ -97,37 +94,37 @@ public class AppModel implements Model {
         Map<String, String> map = new LinkedHashMap<>();
         List<String> data = readVersionData();
         String describe = data.get(0);
-        map.put("build", data.get(1));
-        if (describe.startsWith("v")) { // remove prefix
+        map.put("build", data.get(1)); //NON-NLS
+        if (describe.startsWith("v")) { //NON-NLS
             describe = describe.substring(1);
         }
         map.put("version", describe);
         Pattern regex = Pattern.compile("^\\s?(\\d+.\\d+.\\d+(?:[A-Za-z\\d\\.\\-]+)?)-(\\d+)-(g[0-9a-f]+)\\s?$");
         Matcher m = regex.matcher(describe);
-        String version = null;
+        String ver = null;
         String ahead = null;
         String hash = null;
         if (m.matches() && m.groupCount() == 3) {
-            version = m.group(1);
+            ver = m.group(1);
             ahead = m.group(2);
             hash = m.group(3);
         } else if (describe.matches("[0-9a-f]+")) {
             // fallback if we only get hash (no tag describe)
-            version = semVer.getNormalVersion();
+            ver = version.getNormalVersion();
             ahead = "1";
-            hash = "g" + describe;
+            hash = "g" + describe; //NON-NLS
         }
-        if (version == null && ahead == null && hash != null) {
+        if (ver == null && ahead == null && hash != null) {
             log.warn("git-describe not compatible with semver: {}", describe);
             return map;
         }
-        semVer = new Version.Builder(version).setBuildMetadata(ahead + "." + hash).build();
+        version = new Version.Builder(ver).setBuildMetadata(ahead + "." + hash).build();
         return map;
     }
 
     private static LogAppender initLog() {
         ch.qos.logback.classic.Logger rootLog =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root"); //$NON-NLS-1$
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("root");
         FxLogAppender appender = new FxLogAppender(rootLog.getLoggerContext());
         rootLog.addAppender(appender);
         return appender;
@@ -135,54 +132,65 @@ public class AppModel implements Model {
 
     private void logVMInfo() {
         log.debug("---------------- Lawena Recording Tool ----------------");
-        log.debug("v{} @ {} [{}]", semVer, getBuildTime(), updater.getCurrentBranchName());
+        log.debug("v{} @ {} [{}]", version, getBuildTime(), updater.getCurrentBranchName()); //NON-NLS
         log.debug("----------------------- VM Info -----------------------");
         log.debug("OS name: {} {}", System.getProperty("os.name"), System.getProperty("os.arch"));
         log.debug("Java version: {}", System.getProperty("java.version"));
         log.debug("Java home: {}", System.getProperty("java.home"));
         log.debug("----------------------- Folders -----------------------");
         log.debug("Application: {}", Paths.get("").toAbsolutePath());
-        log.debug("Game definitions: {}", parameters.get("games"));
-        log.debug("Profiles: {}", parameters.get("profiles"));
+        log.debug("Settings: {}", parameters.get("settings")); //NON-NLS
+        log.debug("Profiles: {}", parameters.get("profiles")); //NON-NLS
         log.debug("-------------------------------------------------------");
     }
 
     public String getBuildTime() {
-        return parameters.get("build"); //$NON-NLS-1$
+        return parameters.get("build"); //NON-NLS
     }
 
     @Override
     public Map<Integer, GameDescription> getGames() {
-        return games;
+        return settings.getGames();
     }
 
-    private void loadGameDescriptions() {
-        loadGameDescriptions(Paths.get(parameters.get("games"))); //$NON-NLS-1$
+    private void loadSettings() {
+        loadSettings(Paths.get(parameters.get("settings"))); //NON-NLS
+    }
+
+    private void loadSettings(Path path) {
+        try (Reader reader = Files.newBufferedReader(path, DEFAULT)) {
+            settings = GameDescription.getGson().fromJson(reader, AppSettings.class);
+        } catch (JsonSyntaxException | JsonIOException | IOException e) {
+            log.debug("Could not properly load application settings file: {}", e.toString());
+        }
+        Map<Integer, GameDescription> games = settings.getGames();
+        // also load from extensions - if the appid is absent
+        pluginManager.getExtensions(DescriptorProvider.class).stream()
+                .map(DescriptorProvider::getDescriptor).forEach(a -> {
+            if (settings.isPrioritizedLocal()) {
+                games.putIfAbsent(a.getApplaunch(), a);
+            } else {
+                games.put(a.getApplaunch(), a);
+            }
+        });
+        // populate saved game path data if empty
+        games.values().forEach(g -> {
+            if ((g.getGamePath() == null || g.getGamePath().isEmpty()) && g.getApplaunch() != null) {
+                settings.get("gamePath." + g.getApplaunch().toString()).ifPresent(g::setGamePath); //NON-NLS
+            }
+        });
     }
 
     private void loadProfiles() {
-        loadProfiles(Paths.get(parameters.get("profiles"))); //$NON-NLS-1$
+        loadProfiles(Paths.get(parameters.get("profiles"))); //NON-NLS
     }
 
     @Override
-    public void loadGameDescriptions(Path path) {
-        try (Reader reader = Files.newBufferedReader(path, DEFAULT)) {
-            games = GameDescription.getGson().fromJson(reader, new TypeToken<Map<Integer, GameDescription>>() {
-            }.getType());
-        } catch (JsonSyntaxException | JsonIOException | IOException e) {
-            log.debug("Could not properly load game settings file: {}", e.toString()); //$NON-NLS-1$
-        }
-        // also load from extensions
-        pluginManager.getExtensions(DescriptorProvider.class).stream()
-                .map(DescriptorProvider::getDescriptor).forEach(a -> games.put(a.getApplaunch(), a));
-    }
-
-    @Override
-    public void saveGameDescriptions(Path path) {
+    public void saveSettings(Path path) {
         try {
-            Files.write(path, Collections.singletonList(GameDescription.getGson().toJson(games)), DEFAULT, WRITE);
+            Files.write(path, Collections.singletonList(GameDescription.getGson().toJson(settings)), DEFAULT, WRITE);
         } catch (IOException e) {
-            log.debug("Could not save game settings to file: {}", e.toString()); //$NON-NLS-1$
+            log.debug("Could not save application settings to file: {}", e.toString());
         }
     }
 
@@ -236,7 +244,8 @@ public class AppModel implements Model {
     public void exit() {
         log.debug("Exiting model");
         resources.stopWatch();
-        saveProfiles(Paths.get(parameters.get("profiles"))); //$NON-NLS-1$
+        saveProfiles(Paths.get(parameters.get("profiles"))); //NON-NLS
+        saveSettings(Paths.get(parameters.get("settings"))); //NON-NLS
         pluginManager.stopPlugins();
         Platform.exit();
     }

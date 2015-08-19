@@ -137,7 +137,7 @@ src/main/dist/lawena/code/*.exe
 *.ser*
 *sound.cache
 profiles.json
-games.json
+settings.json
 plugins/**
 !plugins/empty
 lwrt/**/skybox-launch
