@@ -19,9 +19,6 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
-/**
- * Created by Ivan on 30-07-2015.
- */
 public class NewDescriptionDialog extends Dialog<GameDescription> {
 
     private final List<String> modulesList;

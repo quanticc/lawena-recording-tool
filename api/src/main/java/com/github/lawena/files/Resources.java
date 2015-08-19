@@ -11,9 +11,8 @@ import javafx.beans.property.ListProperty;
 import javafx.collections.ObservableList;
 
 /**
- * A repository for {@link Resource} objects that provides actions over their contents, like
- * creating, updating and removing individual <code>Resource</code>s and scanning directories for
- * potential elements.
+ * A repository for {@link Resource} objects that allows creating, updating and removing individual
+ * <code>Resource</code> items and scanning directories for potential elements.
  *
  * @author Ivan
  */

@@ -30,6 +30,7 @@ public class Archive {
     private int treeLength;
     private int headerLength;
     private List<Directory> directories;
+
     /**
      * Creates a new VPK archive.
      *

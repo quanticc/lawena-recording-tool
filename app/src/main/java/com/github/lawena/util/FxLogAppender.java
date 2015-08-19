@@ -106,7 +106,6 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
             this._event = event;
         }
 
-        @SuppressWarnings("synthetic-access")
         @Override
         public final void run() {
             try {
@@ -117,7 +116,7 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
                 Level level = _event.getLevel();
                 String time = dateFormatter.format(_event.getTimeStamp());
                 String logger = last(_event.getLoggerName());
-                controller.append(String.format("%s %s [%s] %s\n", time, level, logger,
+                controller.append(String.format("%s %s [%s] %s\n", time, level, logger, //NON-NLS
                         formatMsg(_event, message)));
             } catch (Exception e) {
                 log.warn(MarkerFactory.getMarker("no-ui-log"), "Problem while appending to UI", e);
@@ -140,8 +139,7 @@ public class FxLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
             } else {
                 String exString = ex.toString();
                 if (exString != null) {
-                    builder.append("\n");
-                    builder.append("----- Caused by " + exString);
+                    builder.append("\n").append("----- Caused by ").append(exString); //NON-NLS
                 }
             }
             return builder.toString();
