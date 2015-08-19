@@ -9,6 +9,7 @@
     "os x": "hl2_osx"
   },
   "gameFolderName": "tf",
+  "gamePath": "",
   "localGamePath": "lwrt/tf2",
   "views": [
     "tf2-view"

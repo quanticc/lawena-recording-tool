@@ -37,6 +37,7 @@ public class GameDescription {
     private String shortName;
     private Map<String, String> processName;
     private String gameFolderName;
+    private String gamePath = "";
     private String localGamePath;
     // view views by name
     private List<String> views = new ArrayList<>();
@@ -197,4 +198,11 @@ public class GameDescription {
         return String.format("%s (AppId: %d)", name, applaunch); //$NON-NLS-1$
     }
 
+    public String getGamePath() {
+        return gamePath;
+    }
+
+    public void setGamePath(String gamePath) {
+        this.gamePath = gamePath;
+    }
 }
