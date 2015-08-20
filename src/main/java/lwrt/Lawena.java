@@ -1340,9 +1340,12 @@ public class Lawena {
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getMoviePath(), "*.wav")) {
       for (Path path : stream) {
         String segname = path.getFileName().toString();
-        String key = segname.substring(0, segname.indexOf("_"));
-        if (!existingSegments.contains(key))
-          existingSegments.add(key);
+        int index = segname.indexOf("_");
+        if (index > 0) {
+          String key = segname.substring(0, segname.indexOf("_"));
+          if (!existingSegments.contains(key))
+            existingSegments.add(key);
+        }
       }
     } catch (NoSuchFileException e) {
       // TODO: add a check for the reparse point (junction) to confirm it's SrcDemo2
