@@ -38,6 +38,7 @@ public class Properties {
             "tf2.cfg.viewmodels", ext("VmSwitchOn"));
     private ObjectProperty<Double> viewmodelFov = new SimpleObjectProperty<>(this,
             "tf2.cfg.viewmodelFov", 75D);
+    private BooleanProperty insecure = new SimpleBooleanProperty(this, "launch.insecure", false);
     private BooleanProperty motionBlur = new SimpleBooleanProperty(this, "tf2.cfg.motionBlur", false);
     private BooleanProperty pixelfog = new SimpleBooleanProperty(this, "tf2.cfg.pixelfog", false);
     private BooleanProperty noCrosshair = new SimpleBooleanProperty(this, "tf2.cfg.noCrosshair",
@@ -449,6 +450,18 @@ public class Properties {
 
     public final void setNoDamageNumbers(final boolean noDamageNumbers) {
         this.noDamageNumbersProperty().set(noDamageNumbers);
+    }
+
+    public final BooleanProperty insecureProperty() {
+        return this.insecure;
+    }
+
+    public final boolean isInsecure() {
+        return this.insecureProperty().get();
+    }
+
+    public final void setInsecure(final boolean insecure) {
+        this.insecureProperty().set(insecure);
     }
 
 }

@@ -80,7 +80,7 @@ public class Fortress implements ViewProvider {
 
         // configure node groups that will be displayed on various UI locations
         controller.getNodeGroups().getNodes(this, "launch") //NON-NLS
-                .addAll(Arrays.asList(view.getResolutionBox(), view.getDxlevelBox(), view.getAdvancedBox()));
+                .addAll(Arrays.asList(view.getResolutionBox(), view.getDxlevelBox(), view.getInsecureBox(), view.getAdvancedBox()));
         controller.getNodeGroups().getNodes(this, "recorder") //NON-NLS
                 .addAll(Arrays.asList(view.getRecordOptionsBox(), view.getRecordOutputBox(), view.getRecordInfoBox()));
         controller.getNodeGroups().getNodes(this, "config") //NON-NLS
@@ -203,6 +203,7 @@ public class Fortress implements ViewProvider {
         load(profile, config.widthProperty(), view.widthProperty(), Integer::parseInt);
         load(profile, config.heightProperty(), view.heightProperty(), Integer::parseInt);
         load(profile, config.dxlevelProperty(), view.dxlevelProperty(), plugin::dxlevel);
+        load(profile, config.insecureProperty(), view.insecureProperty(), Boolean::parseBoolean);
         load(profile, config.launchOptionsProperty(), view.advLaunchProperty(), Function.identity());
         load(profile, config.captureModeProperty(), view.captureModeProperty(), plugin::capture);
         load(profile, config.fpsProperty(), view.fpsProperty(), Integer::parseInt);
@@ -233,6 +234,7 @@ public class Fortress implements ViewProvider {
         save(profile, config.widthProperty(), view.widthProperty());
         save(profile, config.heightProperty(), view.heightProperty());
         save(profile, config.dxlevelProperty(), view.dxlevelProperty(), Pair::getKey);
+        save(profile, config.insecureProperty(), view.insecureProperty());
         save(profile, config.launchOptionsProperty(), view.advLaunchProperty());
         save(profile, config.captureModeProperty(), view.captureModeProperty(), Pair::getKey);
         save(profile, config.fpsProperty(), view.fpsProperty());

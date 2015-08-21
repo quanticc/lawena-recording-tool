@@ -36,6 +36,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -72,11 +73,13 @@ public class View {
     private HBox _config;
     private HBox _resInfo;
     private HBox _resources;
+    private HBox _insecure;
 
     // exposed controls
     private Spinner<Integer> width;
     private Spinner<Integer> height;
     private ComboBox<ExternalString> dxlevel;
+    private CheckBox insecure;
     private Button advanced;
     private ComboBox<ExternalString> captureMode;
     private Spinner<Integer> fps;
@@ -194,6 +197,22 @@ public class View {
             patternBinding(dxlevelPattern, dxlevel.disableProperty(), advLaunchProperty);
         }
         return _dxlevel;
+    }
+
+    public HBox getInsecureBox() {
+        if (_insecure == null) {
+            Label label = new Label();
+            label.setPrefWidth(70);
+            insecure = new CheckBox("-insecure");
+            _insecure = new HBox(5, label, insecure);
+            insecure.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(insecure, Priority.ALWAYS);
+            _insecure.setAlignment(Pos.CENTER_LEFT);
+
+            Pattern insecurePattern = Pattern.compile("^.*-insecure.*$");
+            patternBinding(insecurePattern, insecure.disableProperty(), advLaunchProperty);
+        }
+        return _insecure;
     }
 
     public HBox getAdvancedBox() {
@@ -577,6 +596,10 @@ public class View {
 
     public StringProperty framesPathProperty() {
         return framesPath.textProperty();
+    }
+
+    public BooleanProperty insecureProperty() {
+        return insecure.selectedProperty();
     }
 
 }
