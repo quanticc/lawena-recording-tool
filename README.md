@@ -12,6 +12,7 @@ If you want to use a stable version, check the [releases](https://github.com/iab
 
 # About this branch
 Development branch towards v5.0.0
+![Version 5](https://dl.dropboxusercontent.com/u/74380/lawena/lawena_v5.png)
 
 # Credits
 * Original project by Montz (currently inactive)
