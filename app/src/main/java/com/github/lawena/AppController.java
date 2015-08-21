@@ -238,6 +238,7 @@ public class AppController implements Controller {
         launchButton.setText("Launch Game");
 
         launchService = new LaunchService(this);
+        launchService.setExecutor(executor);
     }
 
     @FXML
@@ -433,6 +434,9 @@ public class AppController implements Controller {
         resourcesPane.setDisable(value);
         configPane.setDisable(value);
         recorderPane.setDisable(value);
+        profilesComboBox.setDisable(value);
+        profileSplitMenuButton.setDisable(value);
+
         launchButton.setDisable(value);
     }
 
