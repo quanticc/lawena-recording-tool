@@ -1,7 +1,7 @@
 package com.github.lawena;
 
 import com.github.lawena.files.Resources;
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 import com.github.lawena.profile.Profiles;
 import com.github.lawena.util.LogAppender;
 
@@ -18,7 +18,7 @@ import ro.fortsoft.pf4j.PluginManager;
  */
 public interface Model {
 
-    Map<Integer, GameDescription> getGames();
+    Map<Integer, SourceGame> getGames();
 
     void saveSettings(Path path);
 

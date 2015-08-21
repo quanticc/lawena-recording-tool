@@ -1,6 +1,6 @@
 package com.github.lawena;
 
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,15 +8,15 @@ import java.util.Optional;
 
 public class AppSettings {
 
-    private Map<Integer, GameDescription> games = new HashMap<>();
+    private Map<Integer, SourceGame> games = new HashMap<>();
     private Map<String, String> settings = new HashMap<>();
     private boolean prioritizedLocal = false;
 
-    public Map<Integer, GameDescription> getGames() {
+    public Map<Integer, SourceGame> getGames() {
         return games;
     }
 
-    public void setGames(Map<Integer, GameDescription> games) {
+    public void setGames(Map<Integer, SourceGame> games) {
         this.games = games;
     }
 

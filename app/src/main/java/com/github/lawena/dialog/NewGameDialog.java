@@ -1,6 +1,6 @@
 package com.github.lawena.dialog;
 
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 import com.github.lawena.util.ZeroIntegerStringConverter;
 
 import org.controlsfx.control.CheckListView;
@@ -19,11 +19,11 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
-public class NewDescriptionDialog extends Dialog<GameDescription> {
+public class NewGameDialog extends Dialog<SourceGame> {
 
     private final List<String> modulesList;
 
-    public NewDescriptionDialog(List<String> modulesList) {
+    public NewGameDialog(List<String> modulesList) {
         this.modulesList = modulesList;
         init();
     }

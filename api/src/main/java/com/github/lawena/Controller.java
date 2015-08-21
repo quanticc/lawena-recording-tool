@@ -5,7 +5,7 @@ import com.github.lawena.exts.ImageProvider;
 import com.github.lawena.exts.MenuProvider;
 import com.github.lawena.exts.TagProvider;
 import com.github.lawena.exts.ViewProvider;
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 
 import java.util.List;
 
@@ -62,5 +62,5 @@ public interface Controller {
 
     void saveProfiles();
 
-    GameDescription getGameFromProfile();
+    SourceGame getGameFromProfile();
 }

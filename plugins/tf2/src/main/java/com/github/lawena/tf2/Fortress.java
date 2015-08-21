@@ -3,7 +3,7 @@ package com.github.lawena.tf2;
 import com.github.lawena.Controller;
 import com.github.lawena.exts.ViewProvider;
 import com.github.lawena.files.Resource;
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 import com.github.lawena.game.Group;
 import com.github.lawena.profile.Profile;
 import com.github.lawena.tf2.skybox.PreviewTask;
@@ -49,7 +49,7 @@ public class Fortress implements ViewProvider {
 
     private Controller controller;
     private TF2Plugin plugin;
-    private GameDescription app;
+    private SourceGame app;
     private View view;
     private boolean installed = false;
     private InvalidationListener reloader = o -> refreshResourceSelection(controller.getModel().getProfiles().getSelected());
@@ -162,7 +162,7 @@ public class Fortress implements ViewProvider {
 
         // setup command groups
         Properties config = plugin.getConfig();
-        GameDescription tf = controller.getModel().getGames().get(440);
+        SourceGame tf = controller.getModel().getGames().get(440);
         Bindings.bindContentBidirectional(view.groupItemsProperty().get(), config.groupItemsProperty()
                 .get());
         config.getGroupItems().addAll(tf.getGroups());

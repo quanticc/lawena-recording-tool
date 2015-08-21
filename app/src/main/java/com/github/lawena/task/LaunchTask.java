@@ -5,7 +5,7 @@ import com.github.lawena.Controller;
 import com.github.lawena.exts.FileProvider;
 import com.github.lawena.exts.ViewProvider;
 import com.github.lawena.files.BackupMode;
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 import com.github.lawena.i18n.Messages;
 import com.github.lawena.profile.Profile;
 import com.github.lawena.util.LawenaException;
@@ -162,7 +162,7 @@ public class LaunchTask extends Task<Boolean> {
             controller.getLaunchButton().setText(Messages.getString("LaunchTask.LaunchButtonText"));
         });
         // execute launch validations, requires to call extensions
-        GameDescription game = Optional.ofNullable(controller.getModel().getGames().get(profile.getAppId())).get();
+        SourceGame game = Optional.ofNullable(controller.getModel().getGames().get(profile.getAppId())).get();
         // retrieve all view extensions
         List<ViewProvider> views =
                 controller.getViewProviders().stream().filter(x -> game.getViews().contains(x.getName()))

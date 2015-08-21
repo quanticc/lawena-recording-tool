@@ -3,7 +3,7 @@ package com.github.lawena.tf2;
 import com.github.lawena.Controller;
 import com.github.lawena.exts.FileProvider;
 import com.github.lawena.files.Resource;
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 import com.github.lawena.profile.Profile;
 import com.github.lawena.tf2.skybox.Skybox;
 import com.github.lawena.util.FileUtils;
@@ -29,7 +29,7 @@ public class Linker implements FileProvider {
     private static final Logger log = LoggerFactory.getLogger(Linker.class);
 
     private Controller controller;
-    private GameDescription game;
+    private SourceGame game;
     private TF2Plugin plugin;
 
     @Override

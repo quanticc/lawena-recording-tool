@@ -3,11 +3,11 @@ package com.github.lawena;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import com.github.lawena.exts.DescriptorProvider;
+import com.github.lawena.exts.GameProvider;
 import com.github.lawena.exts.TagProvider;
 import com.github.lawena.files.AppResources;
 import com.github.lawena.files.Resources;
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 import com.github.lawena.profile.AppProfiles;
 import com.github.lawena.profile.Profiles;
 import com.github.lawena.update.Updater;
@@ -149,7 +149,7 @@ public class AppModel implements Model {
     }
 
     @Override
-    public Map<Integer, GameDescription> getGames() {
+    public Map<Integer, SourceGame> getGames() {
         return settings.getGames();
     }
 
@@ -159,14 +159,14 @@ public class AppModel implements Model {
 
     private void loadSettings(Path path) {
         try (Reader reader = Files.newBufferedReader(path, DEFAULT)) {
-            settings = GameDescription.getGson().fromJson(reader, AppSettings.class);
+            settings = SourceGame.getGson().fromJson(reader, AppSettings.class);
         } catch (JsonSyntaxException | JsonIOException | IOException e) {
             log.debug("Could not properly load application settings file: {}", e.toString());
         }
-        Map<Integer, GameDescription> games = settings.getGames();
+        Map<Integer, SourceGame> games = settings.getGames();
         // also load from extensions - if the appid is absent
-        pluginManager.getExtensions(DescriptorProvider.class).stream()
-                .map(DescriptorProvider::getDescriptor).forEach(a -> {
+        pluginManager.getExtensions(GameProvider.class).stream()
+                .map(GameProvider::getGame).forEach(a -> {
             if (settings.isPrioritizedLocal()) {
                 games.putIfAbsent(a.getApplaunch(), a);
             } else {
@@ -188,7 +188,7 @@ public class AppModel implements Model {
     @Override
     public void saveSettings(Path path) {
         try {
-            Files.write(path, Collections.singletonList(GameDescription.getGson().toJson(settings)), DEFAULT, WRITE);
+            Files.write(path, Collections.singletonList(SourceGame.getGson().toJson(settings)), DEFAULT, WRITE);
         } catch (IOException e) {
             log.debug("Could not save application settings to file: {}", e.toString());
         }

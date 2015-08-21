@@ -8,7 +8,7 @@ import com.github.lawena.exts.TagProvider;
 import com.github.lawena.exts.ViewProvider;
 import com.github.lawena.files.Resource;
 import com.github.lawena.files.ScanTask;
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 import com.github.lawena.i18n.Messages;
 import com.github.lawena.profile.Profile;
 import com.github.lawena.profile.Profiles;
@@ -255,7 +255,7 @@ public class AppController implements Controller {
     }
 
     @Override
-    public GameDescription getGameFromProfile() {
+    public SourceGame getGameFromProfile() {
         return model.getGames().get(model.getProfiles().getSelected().getAppId());
     }
 
@@ -276,7 +276,7 @@ public class AppController implements Controller {
                     setGraphic(null);
                     setText(null);
                 } else {
-                    GameDescription app = Optional.ofNullable(model.getGames().get(item.getAppId())).get();
+                    SourceGame app = Optional.ofNullable(model.getGames().get(item.getAppId())).get();
                     ImageView icon = new ImageView(tryImageProviders(app.getIcon())
                             .orElse(LwrtUtils.image(app.getIcon())));
                     icon.setFitWidth(16);
@@ -312,7 +312,7 @@ public class AppController implements Controller {
 
     private void unbindProfile(Profile profile) {
         try {
-            GameDescription app = Optional.ofNullable(model.getGames().get(profile.getAppId())).get();
+            SourceGame app = Optional.ofNullable(model.getGames().get(profile.getAppId())).get();
             // get ui extensions related to this app
             List<ViewProvider> exts =
                     getViewProviders().stream().filter(x -> app.getViews().contains(x.getName()))
@@ -326,7 +326,7 @@ public class AppController implements Controller {
 
     private void bindProfile(Profile profile) {
         try {
-            GameDescription app = Optional.ofNullable(model.getGames().get(profile.getAppId())).get();
+            SourceGame app = Optional.ofNullable(model.getGames().get(profile.getAppId())).get();
             // get ui extensions related to this app
             List<ViewProvider> exts =
                     getViewProviders().stream().filter(x -> app.getViews().contains(x.getName()))
@@ -460,7 +460,7 @@ public class AppController implements Controller {
     void newProfile(ActionEvent event) {
         // show the new profile dialog
         NewProfileDialog dialog = new NewProfileDialog(model.getProfiles(), model.getGames().values());
-        Optional<Pair<GameDescription, String>> result = dialog.showAndWait();
+        Optional<Pair<SourceGame, String>> result = dialog.showAndWait();
         result.ifPresent(response -> Platform.runLater(() -> model.getProfiles().create(response.getKey().getApplaunch(),
                 response.getValue())));
     }

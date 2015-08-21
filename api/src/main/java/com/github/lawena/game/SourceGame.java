@@ -26,9 +26,9 @@ import javafx.beans.property.Property;
  *
  * @author Ivan
  */
-public class GameDescription {
+public class SourceGame {
 
-    private static final Logger log = LoggerFactory.getLogger(GameDescription.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceGame.class);
     private static Gson gson;
 
     private String name;
@@ -61,9 +61,9 @@ public class GameDescription {
         return gson;
     }
 
-    public static GameDescription load(InputStream jsonStream) {
+    public static SourceGame load(InputStream jsonStream) {
         try (Reader reader = new InputStreamReader(jsonStream, Charset.forName("UTF-8"))) {
-            return getGson().fromJson(reader, GameDescription.class);
+            return getGson().fromJson(reader, SourceGame.class);
         } catch (IOException e) {
             log.warn("Could not import game description from JSON", e);
             throw new IllegalArgumentException("Could not import game description", e);
@@ -184,7 +184,7 @@ public class GameDescription {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        GameDescription other = (GameDescription) obj;
+        SourceGame other = (SourceGame) obj;
         if (applaunch == null) {
             if (other.applaunch != null)
                 return false;

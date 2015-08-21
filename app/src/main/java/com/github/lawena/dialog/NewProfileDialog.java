@@ -1,6 +1,6 @@
 package com.github.lawena.dialog;
 
-import com.github.lawena.game.GameDescription;
+import com.github.lawena.game.SourceGame;
 import com.github.lawena.profile.Profiles;
 
 import org.controlsfx.validation.ValidationSupport;
@@ -21,12 +21,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
-public class NewProfileDialog extends Dialog<Pair<GameDescription, String>> {
+public class NewProfileDialog extends Dialog<Pair<SourceGame, String>> {
 
     private final Profiles profiles;
-    private final Collection<GameDescription> appCollection;
+    private final Collection<SourceGame> appCollection;
 
-    public NewProfileDialog(Profiles profiles, Collection<GameDescription> appCollection) {
+    public NewProfileDialog(Profiles profiles, Collection<SourceGame> appCollection) {
         this.profiles = profiles;
         this.appCollection = appCollection;
         init();
@@ -46,7 +46,7 @@ public class NewProfileDialog extends Dialog<Pair<GameDescription, String>> {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        ComboBox<GameDescription> apps = new ComboBox<>(FXCollections.observableArrayList(appCollection));
+        ComboBox<SourceGame> apps = new ComboBox<>(FXCollections.observableArrayList(appCollection));
         apps.getSelectionModel().selectFirst();
         TextField name = new TextField();
         name.setPromptText("Profile name");
