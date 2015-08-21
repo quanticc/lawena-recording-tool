@@ -40,12 +40,7 @@
     <logger name="sun.awt" level="INFO"/>
     <logger name="sun.net" level="INFO"/>
     <logger name="sun.rmi" level="INFO"/>
-    <logger name="focus" level="INFO"/>
-    <logger name="input" level="INFO"/>
-    <logger name="layout" level="INFO"/>
-    <logger name="css" level="INFO"/>
-    <logger name="controls" level="INFO"/>
-    <logger name="beans" level="INFO"/>
+    <logger name="javafx" level="INFO"/>
     <logger name="com.threerings.getdown" level="WARN"/>
     <logger name="ro.fortsoft.pf4j" level="INFO"/>
     <logger name="java.util.prefs" level="ERROR"/>
