@@ -211,6 +211,7 @@ public class SettingsManager {
     lines.add("voice_enable " + (getVoice() ? "1" : "0"));
     lines.add("alias voice_enable \"\"");
     lines.add("cl_autorezoom 0");
+    lines.add("cl_autoreload 0");
     lines.add("hud_saytext_time 0");
     lines.add("net_graph 0");
     lines.add("alias net_graph \"\"");
