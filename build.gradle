@@ -119,6 +119,21 @@ task buildLauncher {
     }
 }
 
+task buildLauncher2 {
+    inputs.file 'launcher/lawena-skip-updater.xml'
+    outputs.file 'launcher/lawena-skip-updater.exe'
+    doLast {
+        exec {
+            workingDir 'launcher'
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', launch4jPath, 'lawena-skip-updater.xml'
+            } else {
+                commandLine launch4jPath, 'lawena-skip-updater.xml'
+            }
+        }
+    }
+}
+
 task copyLauncher(type: Copy, dependsOn: 'buildLauncher') {
     from 'launcher/lawena.exe'
     into 'src/main/dist'

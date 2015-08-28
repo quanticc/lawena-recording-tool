@@ -2,11 +2,11 @@
 <launch4jConfig>
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>.\lawena\getdown-client.jar</jar>
-  <outfile>lawena.exe</outfile>
+  <jar>.\lawena\lawena.jar</jar>
+  <outfile>lawena-skip-updater.exe</outfile>
   <errTitle></errTitle>
   <cmdLine>lawena</cmdLine>
-  <chdir>.</chdir>
+  <chdir>.\lawena</chdir>
   <priority>normal</priority>
   <downloadUrl>https://java.com/download/</downloadUrl>
   <supportUrl>https://github.com/iabarca/lawena-recording-tool/issues</supportUrl>
@@ -30,13 +30,13 @@
   <versionInfo>
     <fileVersion>4.2.2.0</fileVersion>
     <txtFileVersion>4.2.2</txtFileVersion>
-    <fileDescription>Launcher and Updater for Lawena Recording Tool</fileDescription>
+    <fileDescription>Launcher for Lawena Recording Tool</fileDescription>
     <copyright>Lawena</copyright>
     <productVersion>4.1.9.0</productVersion>
     <txtProductVersion>4.1.9</txtProductVersion>
-    <productName>Lawena v4 Launcher and Updater</productName>
+    <productName>Lawena v4 Launcher</productName>
     <companyName>Lawena</companyName>
     <internalName>lawena</internalName>
-    <originalFilename>lawena.exe</originalFilename>
+    <originalFilename>lawena-skip-updater.exe</originalFilename>
   </versionInfo>
 </launch4jConfig>
