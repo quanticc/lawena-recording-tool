@@ -1,8 +1,11 @@
 package util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -23,11 +26,7 @@ public class UpdateHelper {
 
   public UpdateHelper() {}
 
-  /**
-   * Workaround to delete resources not used anymore by lawena, since Getdown does not support this
-   * out of the box.
-   */
-  public void cleanupUnusedFiles() {
+  private void cleanupUnusedFiles() {
     try {
       Map<String, Object> config = ConfigUtil.parseConfig(new File("getdown.txt"), false);
       String[] toDelete = (String[]) ConfigUtil.getMultiValue(config, "delete");
@@ -45,24 +44,65 @@ public class UpdateHelper {
     }
   }
 
-  /**
-   * Updates the lawena.exe file with the latest version downloaded by the updater, copying it
-   * safely to be used upon next run.
-   */
-  public void updateLauncher() {
-    try {
-      Logger logger = Logger.getLogger("com.threerings.getdown");
-      logger.setParent(Logger.getLogger("lawena"));
-      String[] executables = {"lawena", "lawena-no-updates"};
-      for (String exe : executables) {
-        File oldgd = new File("../" + exe + "-old.exe");
-        File curgd = new File("../" + exe + ".exe");
-        File newgd = new File("code/" + exe + "-new.exe");
-        LaunchUtil.upgradeGetdown(oldgd, curgd, newgd);
-      }
-    } catch (IllegalArgumentException e) {
-      log.info("Could not update launcher executable: " + e);
+  private static void upgrade(String desc, File oldgd, File curgd, File newgd) {
+    if (!newgd.exists() || newgd.length() == curgd.length()
+        || Util.compareCreationTime(newgd, curgd) == 0) {
+      log.fine("Resource " + desc + " is up to date");
+      return;
     }
+    log.info("Upgrade " + desc + " with " + newgd + "...");
+    try {
+      Files.deleteIfExists(oldgd.toPath());
+    } catch (IOException e) {
+      log.warning("Could not delete old path: " + e);
+    }
+    if (!curgd.exists() || curgd.renameTo(oldgd)) {
+      if (newgd.renameTo(curgd)) {
+        try {
+          Files.deleteIfExists(oldgd.toPath());
+        } catch (IOException e) {
+          log.warning("Could not delete old path: " + e);
+        }
+        try (InputStream in = new FileInputStream(curgd);
+            OutputStream out = new FileOutputStream(newgd)) {
+          Util.copy(in, out);
+        } catch (IOException e) {
+          log.warning("Problem copying " + desc + " back: " + e);
+        }
+        return;
+      }
+      log.warning("Unable to rename to " + oldgd);
+      if (!oldgd.renameTo(curgd)) {
+        log.warning("Could not rename " + oldgd + " to " + curgd);
+      }
+    }
+    log.info("Attempting to upgrade by copying over " + curgd + "...");
+    try (InputStream in = new FileInputStream(newgd);
+        OutputStream out = new FileOutputStream(curgd)) {
+      Util.copy(in, out);
+    } catch (IOException e) {
+      log.warning("Brute force copy method also failed: " + e);
+    }
+  }
+
+  private static void upgradeLauncher() {
+    File oldgd = new File("../lawena-old.exe");
+    File curgd = new File("../lawena.exe");
+    File newgd = new File("code/lawena-new.exe");
+    upgrade("Lawena launcher", oldgd, curgd, newgd);
+  }
+
+  private static void upgradeGetdown() {
+    File oldgd = new File("getdown-client-old.jar");
+    File curgd = new File("getdown-client.jar");
+    File newgd = new File("code/getdown-client-new.jar");
+    upgrade("Lawena updater", oldgd, curgd, newgd);
+  }
+
+  public void fileCleanup() {
+    cleanupUnusedFiles();
+    upgradeLauncher();
+    upgradeGetdown();
   }
 
   public void showSwitchUpdateChannelDialog() {

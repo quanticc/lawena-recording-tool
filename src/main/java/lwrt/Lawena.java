@@ -686,8 +686,7 @@ public class Lawena {
 
     // Perform after-update checks
     updater = new UpdateHelper();
-    updater.updateLauncher();
-    updater.cleanupUnusedFiles();
+    updater.fileCleanup();
     updater.loadChannels();
 
     settings = cfg;
