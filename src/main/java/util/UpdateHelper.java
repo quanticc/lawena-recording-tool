@@ -30,13 +30,18 @@ public class UpdateHelper {
     try {
       Map<String, Object> config = ConfigUtil.parseConfig(new File("getdown.txt"), false);
       String[] toDelete = (String[]) ConfigUtil.getMultiValue(config, "delete");
-      for (String path : toDelete) {
-        try {
-          if (Files.deleteIfExists(Paths.get(path))) {
-            log.info("Deleted deprecated file: " + path);
+      if (toDelete != null) {
+        for (String path : toDelete) {
+          if (path == null) {
+            continue;
           }
-        } catch (IOException e) {
-          log.log(Level.INFO, "Could not delete deprecated file: " + path, e);
+          try {
+            if (Files.deleteIfExists(Paths.get(path))) {
+              log.info("Deleted deprecated file: " + path);
+            }
+          } catch (IOException e) {
+            log.log(Level.INFO, "Could not delete deprecated file: " + path, e);
+          }
         }
       }
     } catch (IllegalArgumentException | IOException e) {
