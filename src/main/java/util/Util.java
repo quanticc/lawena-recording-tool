@@ -12,6 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -88,6 +89,17 @@ public class Util {
     int exp = (int) (Math.log(bytes) / Math.log(unit));
     String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
     return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+  }
+  
+  public static int startProcess(List<String> command) {
+    try {
+      ProcessBuilder builder = new ProcessBuilder(command);
+      Process p = builder.start();
+      return p.waitFor();
+    } catch (InterruptedException | IOException e) {
+      log.warning("Process could not be completed: " + e.toString()); //$NON-NLS-1$
+    }
+    return 1;
   }
 
   private Util() {}

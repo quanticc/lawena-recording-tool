@@ -10,6 +10,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -282,7 +283,13 @@ public class FileManager {
       }
       try {
         if (isEmpty(customPath)) {
-          copy(customBackupPath, customPath);
+          if (isSymbolicLink(customBackupPath)) {
+            Files.delete(customPath);
+            Files.move(customBackupPath, customPath, StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.COPY_ATTRIBUTES);
+          } else {
+            copy(customBackupPath, customPath);
+          }
         } else {
           restoreComplete = false;
         }
@@ -304,7 +311,12 @@ public class FileManager {
       }
       try {
         if (isEmpty(configPath)) {
-          copy(configBackupPath, configPath);
+          if (isSymbolicLink(configBackupPath)) {
+            Files.delete(configPath);
+            Files.move(configBackupPath, configPath);
+          } else {
+            copy(configBackupPath, configPath);
+          }
         } else {
           restoreComplete = false;
         }
@@ -394,6 +406,22 @@ public class FileManager {
       }
     }
     return restoreComplete;
+  }
+
+  private boolean isSymbolicLink(Path path) {
+    String osname = System.getProperty("os.name");
+    if (osname.contains("Windows")) {
+      if (Files.isSymbolicLink(path)) {
+        return true;
+      } else {
+        int ret =
+            Util.startProcess(Arrays.asList("cmd", "/c", "fsutil", "reparsepoint", "query", path
+                .toAbsolutePath().toString()));
+        return ret == 0;
+      }
+    } else {
+      return Files.isSymbolicLink(path);
+    }
   }
 
   public boolean copyToCustom(final Path path) {
