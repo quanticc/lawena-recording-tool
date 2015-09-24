@@ -363,7 +363,9 @@ public class FileManager {
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
         for (Path path : Arrays.asList(configBackupPath, customBackupPath)) {
-          zipFile.addFolder(path.toFile(), parameters);
+          if (Files.exists(path)) {
+            zipFile.addFolder(path.toFile(), parameters);
+          }
         }
       } catch (IllegalArgumentException | ZipException e) {
         // IllegalArgumentException can be caused by a bug in jdk versions 7u40 and older
