@@ -284,9 +284,8 @@ public class FileManager {
       try {
         if (isEmpty(customPath)) {
           if (isSymbolicLink(customBackupPath)) {
-            Files.delete(customPath);
-            Files.move(customBackupPath, customPath, StandardCopyOption.REPLACE_EXISTING,
-                StandardCopyOption.COPY_ATTRIBUTES);
+            Files.deleteIfExists(customPath);
+            Files.move(customBackupPath, customPath);
           } else {
             copy(customBackupPath, customPath);
           }
@@ -312,7 +311,7 @@ public class FileManager {
       try {
         if (isEmpty(configPath)) {
           if (isSymbolicLink(configBackupPath)) {
-            Files.delete(configPath);
+            Files.deleteIfExists(configPath);
             Files.move(configBackupPath, configPath);
           } else {
             copy(configBackupPath, configPath);
