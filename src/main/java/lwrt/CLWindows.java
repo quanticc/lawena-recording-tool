@@ -13,7 +13,19 @@ public class CLWindows extends CommandLine {
   private String hl2 = "hl2.exe";
 
   @Override
-  public ProcessBuilder getBuilderStartTF2(String steamPath) {
+  public ProcessBuilder getBuilderStartTF2(String gamePath) {
+    Path path = Paths.get(gamePath).resolve("../hl2.exe");
+    try {
+      path = path.toRealPath();
+    } catch (IOException e) {
+      log.warning("Could not obtain real path of game executable: " + e.toString());
+    }
+    return new ProcessBuilder(path.toString());
+
+  }
+
+  @Override
+  public ProcessBuilder getBuilderStartSteam(String steamPath) {
     return new ProcessBuilder(steamPath + "/steam.exe");
   }
 

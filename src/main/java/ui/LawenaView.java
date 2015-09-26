@@ -160,6 +160,7 @@ public class LawenaView extends JFrame {
   private JCheckBoxMenuItem chckbxmntmBackupMode;
   private JCheckBoxMenuItem installFonts;
   private JMenuItem customLaunchOptionsMenuItem;
+  private JCheckBoxMenuItem launchUsingSteam;
 
   /**
    * Create the frame.
@@ -220,6 +221,9 @@ public class LawenaView extends JFrame {
 
     JSeparator separator_3 = new JSeparator();
     mnAdvanced.add(separator_3);
+
+    JCheckBoxMenuItem launchUsingSteam = new JCheckBoxMenuItem("Launch using Steam");
+    mnAdvanced.add(launchUsingSteam);
 
     JCheckBoxMenuItem chckbxmntmInsecure = new JCheckBoxMenuItem("Use -insecure in Launch Options");
     mnAdvanced.add(chckbxmntmInsecure);
@@ -703,6 +707,7 @@ public class LawenaView extends JFrame {
     this.mntmOpenCustomFolder = mntmOpenCustomFolder;
     this.mntmChangeTfLaunch = mntmChangeTfLaunch;
     this.chckbxmntmInsecure = chckbxmntmInsecure;
+    this.launchUsingSteam = launchUsingSteam;
 
     JCheckBox usePlayerModel_1 = new JCheckBox("3D Player Model in HUD");
     usePlayerModel_1
@@ -904,6 +909,10 @@ public class LawenaView extends JFrame {
 
   public JMenuItem getCustomLaunchOptionsMenuItem() {
     return customLaunchOptionsMenuItem;
+  }
+
+  public JCheckBoxMenuItem getLaunchUsingSteam() {
+    return launchUsingSteam;
   }
 
 }

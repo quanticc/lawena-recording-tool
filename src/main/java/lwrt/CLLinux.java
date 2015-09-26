@@ -27,7 +27,13 @@ public class CLLinux extends CommandLine {
   }
 
   @Override
-  public ProcessBuilder getBuilderStartTF2(String steamPath) {
+  public ProcessBuilder getBuilderStartTF2(String gamePath) {
+    throw new UnsupportedOperationException(
+        "Please use 'Launch using Steam' from the advanced menu");
+  }
+
+  @Override
+  public ProcessBuilder getBuilderStartSteam(String steamPath) {
     Path steam = Paths.get(steamPath).resolve("steam.sh");
     try {
       Files.setPosixFilePermissions(steam, perms777);

@@ -59,6 +59,7 @@ public class SettingsManager {
     SourceRecorderJpegQuality(50, 1, 100),
     DeleteBackupsWhenRestoring(true),
     BigFolderMBThreshold(200, 0, Integer.MAX_VALUE),
+    LaunchUsingSteam(false),
     LaunchOptions("-novid -console");
 
     private Object value;

@@ -39,11 +39,13 @@ public abstract class CommandLine {
    * Returns the necessary {@link ProcessBuilder} to launch TF2. It will be used when
    * {@link #startTf(int, int, String)} is called.
    * 
-   * @param steamPath a <code>String</code> equivalent to the Steam installation path.
+   * @param gamePath a <code>String</code> equivalent to the game path.
    * @return The <code>ProcessBuilder</code> used to create a {@link Process} and launch TF2 with it
    *         or <code>null</code> if it couldn't be created.
    */
-  public abstract ProcessBuilder getBuilderStartTF2(String steamPath);
+  public abstract ProcessBuilder getBuilderStartTF2(String gamePath);
+
+  public abstract ProcessBuilder getBuilderStartSteam(String steamPath);
 
   /**
    * Returns the necessary {@link ProcessBuilder} to stop or kill the TF2 process, to abort its
@@ -72,7 +74,7 @@ public abstract class CommandLine {
    * @return The <code>Path</code> where Steam and TF2 main executable, can be located.
    */
   public abstract Path getSteamPath();
-  
+
   public abstract boolean isValidSteamPath(Path steamPath);
 
   /**
@@ -259,10 +261,18 @@ public abstract class CommandLine {
    */
   public void startTf(SettingsManager cfg) {
     try {
+      boolean useSteam = cfg.getBoolean(Key.LaunchUsingSteam);
       String opts = cfg.getString(Key.LaunchOptions);
       Map<String, String> options = new LinkedHashMap<>();
-      // these options will be overridden if the user wants
-      options.put("-applaunch", "440");
+      if (useSteam) {
+        // Launch using steam.exe
+        options.put("-applaunch", "440");
+      } else {
+        // Launch using hl2.exe
+        options.put("-steam", "");
+        options.put("-game", "tf");
+      }
+      // Additional options
       options.put("-dxlevel", cfg.getDxlevel());
       options.put("-w", cfg.getWidth() + "");
       options.put("-h", cfg.getHeight() + "");
@@ -300,13 +310,14 @@ public abstract class CommandLine {
         options.remove("-h");
       }
       // prepare list of options
-      log.info("Launching Steam AppID " + options.get("-applaunch") + " in " + options.get("-w")
-          + "x" + options.get("-h") + " " + (fs ? "Fullscreen" : "Windowed") + " with dxlevel "
-          + options.get("-dxlevel"));
-      log.finer("Parameters: " + options);
-      ProcessBuilder pb = getBuilderStartTF2(cfg.getString(Key.SteamDir));
-      pb.command().add("-applaunch");
-      pb.command().add(options.get("-applaunch"));
+      ProcessBuilder pb;
+      if (useSteam) {
+        pb = getBuilderStartSteam(cfg.getString(Key.SteamDir));
+        pb.command().add("-applaunch");
+        pb.command().add(options.get("-applaunch"));
+      } else {
+        pb = getBuilderStartTF2(cfg.getString(Key.TfDir));
+      }
       options.remove("-applaunch");
       for (Entry<String, String> e : options.entrySet()) {
         pb.command().add(e.getKey());
@@ -317,14 +328,18 @@ public abstract class CommandLine {
         log.fine("Using -insecure in launch options");
         pb.command().add("-insecure");
       }
+      log.info("Launching: "
+          + pb.command().toString().replaceAll("\\[|\\]|,", "").replaceAll("\\s\\s+", " "));
       Process pr = pb.start();
-      try (BufferedReader input = newProcessReader(pr)) {
-        String line;
-        while ((line = input.readLine()) != null) {
-          log.finer("[steam] " + line);
+      if (useSteam) {
+        try (BufferedReader input = newProcessReader(pr)) {
+          String line;
+          while ((line = input.readLine()) != null) {
+            log.finer("[steam] " + line);
+          }
         }
+        pr.waitFor();
       }
-      pr.waitFor();
     } catch (InterruptedException | IOException e) {
       log.warning("Process was interrupted: " + e);
     }
@@ -371,4 +386,5 @@ public abstract class CommandLine {
   public void registerFonts(Path path) {
     // no-op, used only in Windows
   }
+
 }

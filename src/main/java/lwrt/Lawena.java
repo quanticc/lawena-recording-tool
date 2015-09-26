@@ -1412,6 +1412,7 @@ public class Lawena {
     view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
     view.getChckbxmntmBackupMode().setSelected(settings.getBoolean(Key.DeleteBackupsWhenRestoring));
     view.getInstallFonts().setSelected(settings.getBoolean(Key.InstallFonts));
+    view.getLaunchUsingSteam().setSelected(settings.getBoolean(Key.LaunchUsingSteam));
     view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
     getCustomSettingsTextArea().setText(settings.getCustomSettings());
     view.getCmbSourceVideoFormat().setSelectedItem(
@@ -1461,6 +1462,7 @@ public class Lawena {
     settings
         .setBoolean(Key.DeleteBackupsWhenRestoring, view.getChckbxmntmBackupMode().isSelected());
     settings.setBoolean(Key.InstallFonts, view.getInstallFonts().isSelected());
+    settings.setBoolean(Key.LaunchUsingSteam, view.getLaunchUsingSteam().isSelected());
     settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
     settings.setCustomSettings(getCustomSettingsTextArea().getText());
     settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
