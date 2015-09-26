@@ -293,6 +293,11 @@ public abstract class CommandLine {
           log.warning("Discarding invalid launch parameter: " + key);
         }
       }
+      // Remove -dxlevel if the user provided +mat_dxlevel
+      // This won't have the desired effect if launch is done through Steam executable
+      if (options.containsKey("+mat_dxlevel")) {
+        options.remove("-dxlevel");
+      }
       boolean fs = options.containsKey("-full") || options.containsKey("-fullscreen");
       if (fs) {
         options.remove("-sw");
