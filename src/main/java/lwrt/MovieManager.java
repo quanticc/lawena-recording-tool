@@ -29,10 +29,10 @@ public class MovieManager {
       }
     }
     if (!lastmovie.equals("")) {
-      int idx = "abcdefghijklmno".indexOf(lastmovie.charAt(0));
+      int idx = "abcdefghijklmnopqrstuvwxy".indexOf(lastmovie.charAt(0));
       if (idx >= 0) {
         alias = "alias namescroll stmov" + (idx + 2);
-      } else if (lastmovie.charAt(0) == 'p') {
+      } else if (lastmovie.charAt(0) == 'z') {
         alias = "alias namescroll noslots";
       }
     }
@@ -42,7 +42,7 @@ public class MovieManager {
   public void createMovienameCfgs() throws IOException {
     String[] prefixes =
         {"a1", "b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9", "j10", "k11", "l12", "m13", "n14",
-            "o15", "p16"};
+            "o15", "p16", "q17", "r18", "s19", "t20", "u21", "v22", "w23", "x24", "y25", "z26"};
     String video = cfg.getString(Key.SourceRecorderVideoFormat);
     String audio = cfg.getString(Key.SourceRecorderAudioFormat);
     int quality = cfg.getInt(Key.SourceRecorderJpegQuality);
