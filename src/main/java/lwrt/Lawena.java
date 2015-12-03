@@ -1474,9 +1474,11 @@ public class Lawena {
     settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
         .getSelectedItem().toString().toLowerCase());
     settings.setInt(Key.SourceRecorderJpegQuality, (int) view.getSpinnerJpegQuality().getValue());
-    settings.setCustomSettings(customSettings.getTextArea().getText());
-    settings.setInt(Key.CustomSettingsDialogWidth, customSettings.getWidth());
-    settings.setInt(Key.CustomSettingsDialogHeight, customSettings.getHeight());
+    if (customSettings != null) {
+      settings.setCustomSettings(customSettings.getTextArea().getText());
+      settings.setInt(Key.CustomSettingsDialogWidth, customSettings.getWidth());
+      settings.setInt(Key.CustomSettingsDialogHeight, customSettings.getHeight());
+    }
     settings.save();
     log.fine("Settings saved");
   }
