@@ -54,6 +54,8 @@ public class SettingsManager {
     VdmSrcDemoFix(false),
     InstallFonts(true),
     CustomSettings("// Custom User Settings"),
+    CustomSettingsDialogWidth(300, 200, Integer.MAX_VALUE),
+    CustomSettingsDialogHeight(200, 100, Integer.MAX_VALUE),
     SourceRecorderVideoFormat("tga", "tga", "jpg"),
     SourceRecorderAudioFormat("wav", "wav", ""),
     SourceRecorderJpegQuality(50, 1, 100),

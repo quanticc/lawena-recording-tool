@@ -1,22 +1,9 @@
 package lwrt;
 
-import ui.AboutDialog;
-import ui.LaunchOptionsDialog;
-import ui.LawenaView;
-import ui.ParticlesDialog;
-import ui.SegmentsDialog;
-import ui.TooltipRenderer;
-import util.LawenaException;
-import util.StartLogger;
-import util.UpdateHelper;
-import util.Util;
-import util.WatchDir;
-import vdm.DemoEditor;
-
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
-import java.awt.Font;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
@@ -65,7 +52,6 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.RowFilter;
@@ -82,6 +68,19 @@ import javax.swing.text.JTextComponent;
 
 import lwrt.CustomPath.PathContents;
 import lwrt.SettingsManager.Key;
+import ui.AboutDialog;
+import ui.CustomSettingsDialog;
+import ui.LaunchOptionsDialog;
+import ui.LawenaView;
+import ui.ParticlesDialog;
+import ui.SegmentsDialog;
+import ui.TooltipRenderer;
+import util.LawenaException;
+import util.StartLogger;
+import util.UpdateHelper;
+import util.Util;
+import util.WatchDir;
+import vdm.DemoEditor;
 
 public class Lawena {
 
@@ -651,8 +650,7 @@ public class Lawena {
   private AboutDialog dialog;
   private ParticlesDialog particles;
   private SegmentsDialog segments;
-  private JTextArea customSettingsTextArea;
-  private JScrollPane customSettingsScrollPane;
+  private CustomSettingsDialog customSettings;
 
   private HashMap<String, ImageIcon> skyboxMap;
   private JFileChooser chooser;
@@ -890,18 +888,7 @@ public class Lawena {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        JTextArea custom = getCustomSettingsTextArea();
-        String previous = custom.getText();
-        int result =
-            JOptionPane.showConfirmDialog(view, getCustomSettingsScrollPane(),
-                "Configure Custom Settings", JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
-        if (result == JOptionPane.OK_OPTION) {
-          log.info("Saving custom settings change: " + custom.getText());
-          saveSettings();
-        } else {
-          custom.setText(previous);
-        }
+        startCustomSettingsDialog();
       }
     });
 
@@ -1165,20 +1152,41 @@ public class Lawena {
     view.getSpinnerJpegQuality().setEnabled(e);
   }
 
-  private JTextArea getCustomSettingsTextArea() {
-    if (customSettingsTextArea == null) {
-      customSettingsTextArea = new JTextArea(10, 40);
-      customSettingsTextArea.setEditable(true);
-      customSettingsTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
-    }
-    return customSettingsTextArea;
-  }
+  private void startCustomSettingsDialog() {
+    if (customSettings == null) {
+      customSettings = new CustomSettingsDialog();
+      customSettings.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      customSettings.setModalityType(ModalityType.APPLICATION_MODAL);
+      customSettings.setResizable(true);
+      final JTextArea textArea = customSettings.getTextArea();
+      customSettings.getOkButton().addActionListener(new ActionListener() {
 
-  private JScrollPane getCustomSettingsScrollPane() {
-    if (customSettingsScrollPane == null) {
-      customSettingsScrollPane = new JScrollPane(getCustomSettingsTextArea());
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          customSettings.setVisible(false);
+          log.info("Saving custom settings");
+          saveSettings();
+        }
+      });
+      customSettings.getCancelButton().addActionListener(new ActionListener() {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          customSettings.setVisible(false);
+          customSettings.getTextArea().setText(settings.getCustomSettings());
+        }
+      });
+      customSettings.addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowClosed(WindowEvent e) {
+          customSettings.getTextArea().setText(settings.getCustomSettings());
+        }
+      });
     }
-    return customSettingsScrollPane;
+    customSettings.setBounds(100, 100, settings.getInt(Key.CustomSettingsDialogWidth),
+        settings.getInt(Key.CustomSettingsDialogHeight));
+    customSettings.getTextArea().setText(settings.getCustomSettings());
+    customSettings.setVisible(true);
   }
 
   private void startParticlesDialog() {
@@ -1414,7 +1422,6 @@ public class Lawena {
     view.getInstallFonts().setSelected(settings.getBoolean(Key.InstallFonts));
     view.getLaunchUsingSteam().setSelected(settings.getBoolean(Key.LaunchUsingSteam));
     view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
-    getCustomSettingsTextArea().setText(settings.getCustomSettings());
     view.getCmbSourceVideoFormat().setSelectedItem(
         settings.getString(Key.SourceRecorderVideoFormat).toUpperCase());
     view.getSpinnerJpegQuality().setValue(settings.getInt(Key.SourceRecorderJpegQuality));
@@ -1464,10 +1471,12 @@ public class Lawena {
     settings.setBoolean(Key.InstallFonts, view.getInstallFonts().isSelected());
     settings.setBoolean(Key.LaunchUsingSteam, view.getLaunchUsingSteam().isSelected());
     settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
-    settings.setCustomSettings(getCustomSettingsTextArea().getText());
     settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
         .getSelectedItem().toString().toLowerCase());
     settings.setInt(Key.SourceRecorderJpegQuality, (int) view.getSpinnerJpegQuality().getValue());
+    settings.setCustomSettings(customSettings.getTextArea().getText());
+    settings.setInt(Key.CustomSettingsDialogWidth, customSettings.getWidth());
+    settings.setInt(Key.CustomSettingsDialogHeight, customSettings.getHeight());
     settings.save();
     log.fine("Settings saved");
   }
