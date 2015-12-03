@@ -9,6 +9,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -50,6 +51,10 @@ public class SegmentsDialog extends JDialog {
     setTitle("Select Segments to Delete");
     setModalityType(ModalityType.APPLICATION_MODAL);
     setBounds(100, 100, 450, 300);
+    try {
+      setIconImage(new ImageIcon(getClass().getClassLoader().getResource("ui/tf2.png")).getImage());
+    } catch (Exception e) {
+    }
     BorderLayout borderLayout = new BorderLayout();
     getContentPane().setLayout(borderLayout);
     contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
