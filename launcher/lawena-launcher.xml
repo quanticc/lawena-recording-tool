@@ -8,14 +8,20 @@
   <cmdLine>lawena</cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
-  <downloadUrl>https://java.com/download/</downloadUrl>
-  <supportUrl>https://github.com/iabarca/lawena-recording-tool/issues</supportUrl>
+  <downloadUrl>http://javadl.sun.com/webapps/download/AutoDL?BundleId=111689</downloadUrl>
+  <supportUrl>http://lawena.github.io</supportUrl>
   <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
   <manifest>elevated.manifest</manifest>
-  <icon>tf2_icon_256.ico</icon>
+  <icon>capture_point.ico</icon>
+  <singleInstance>
+    <mutexName>lawena-recording-tool-4</mutexName>
+    <windowTitle>Lawena Recording Tool</windowTitle>
+  </singleInstance>
   <jre>
     <path></path>
     <bundledJre64Bit>false</bundledJre64Bit>
+    <bundledJreAsFallback>false</bundledJreAsFallback>
     <minVersion>1.7.0_41</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
@@ -28,12 +34,12 @@
     <timeoutErr>true</timeoutErr>
   </splash>
   <versionInfo>
-    <fileVersion>4.2.2.0</fileVersion>
-    <txtFileVersion>4.2.2</txtFileVersion>
+    <fileVersion>4.3.0.0</fileVersion>
+    <txtFileVersion>4.3.0</txtFileVersion>
     <fileDescription>Launcher and Updater for Lawena Recording Tool</fileDescription>
     <copyright>Lawena</copyright>
-    <productVersion>4.1.9.0</productVersion>
-    <txtProductVersion>4.1.9</txtProductVersion>
+    <productVersion>4.1.10.0</productVersion>
+    <txtProductVersion>4.1.10</txtProductVersion>
     <productName>Lawena v4 Launcher and Updater</productName>
     <companyName>Lawena</companyName>
     <internalName>lawena</internalName>
