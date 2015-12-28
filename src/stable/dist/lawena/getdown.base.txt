@@ -27,7 +27,7 @@ delete = custom/skybox.vpk
 java_version = 1070042
 class = ui.LwrtGUI
 
-jvmarg = -Xmx256M
+jvmarg = -Xmx32m -Xss256k
 
 ui.name = Lawena Recording Tool [<channel>]
 ui.background_image = res/background.png
