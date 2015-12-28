@@ -59,7 +59,7 @@ public class SettingsManager {
     SourceRecorderVideoFormat("tga", "tga", "jpg"),
     SourceRecorderAudioFormat("wav", "wav", ""),
     SourceRecorderJpegQuality(50, 1, 100),
-    DeleteBackupsWhenRestoring(true),
+    DeleteBackupsWhenRestoring(false),
     BigFolderMBThreshold(200, 0, Integer.MAX_VALUE),
     LaunchUsingSteam(false),
     LaunchOptions("-novid -console");
