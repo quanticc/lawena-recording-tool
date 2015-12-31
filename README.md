@@ -1,13 +1,11 @@
-Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.1.x)](https://travis-ci.org/iabarca/lawena-recording-tool)
+Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.1.x)](https://travis-ci.org/iabarca/lawena-recording-tool) [![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 =====================
 
 ![Lawena Recording Tool](http://i.imgur.com/dlRdaeA.png)
 
-[![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Lawena is a simple Java program that greatly enhances your TF2 and other Source games image quality for recording purposes, with little performance loss compared to other alternatives. Records using in-game **Source Recorder**, with key bindings to ease the process.
 
-Lawena is a simple [Java](http://java.com/download) program that greatly enhances your TF2 and other Source games image quality for recording purposes, with little performance loss compared to other alternatives. Records using in-game **Source Recorder**, with key bindings to ease the process.
-
-Easy to install and use. Does not interfere with your regular configs, HUD or launch options. Check the sidebar for details.
+Easy to install and use. Does not interfere with your regular configs, HUD or launch options.
 
 ![Main Window](http://i.imgur.com/kXHsYDu.png)
 
