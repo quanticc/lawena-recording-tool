@@ -1,0 +1,27 @@
+.command {
+    -fx-fill: purple;
+    -fx-font-weight: bold;
+}
+
+.key {
+    -fx-fill: darkgreen;
+    -fx-font-weight: bold;
+}
+
+.special {
+    -fx-fill: teal;
+    -fx-font-weight: bold;
+}
+
+.string {
+    -fx-fill: blue;
+}
+
+.comment {
+    -fx-fill: cadetblue;
+}
+
+.template {
+    -fx-fill: firebrick;
+    -fx-font-weight: bold;
+}

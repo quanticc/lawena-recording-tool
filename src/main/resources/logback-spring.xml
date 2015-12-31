@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true">
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <logger name="com.github.lawena" level="@logback.loglevel@"/>
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+</configuration>

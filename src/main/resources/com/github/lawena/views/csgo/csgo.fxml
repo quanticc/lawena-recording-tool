@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+
+<AnchorPane xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.lawena.views.csgo.CSGOPresenter">
+   <children>
+      <Label fx:id="testLabel" text="Label" />
+   </children>
+</AnchorPane>

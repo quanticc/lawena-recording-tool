@@ -1,9 +1,21 @@
 language: java
 jdk:
-  - openjdk7
-  
+  - oraclejdk8
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+sudo: false
+cache:
+  directories:
+    - $HOME/.gradle
 before_install:
   - chmod +x gradlew
-  
 notifications:
-  slack: lawena:V1Ny6wkgPZEcXegxa479P8x5
+  email: false
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/d9b035ff1e40ae63598b
+    on_success: change
+    on_failure: always
+    on_start: false

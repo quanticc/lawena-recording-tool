@@ -1,39 +1,26 @@
-Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.x)](https://travis-ci.org/iabarca/lawena-recording-tool)
+Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=lwrt-5.x)](https://travis-ci.org/iabarca/lawena-recording-tool) [![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 =====================
 
-[![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Simple Java program that greatly enhances your TF2 and other Source games image quality for recording purposes, with little performance loss compared to other alternatives. Records using in-game **Source Recorder**, with key bindings to ease the process.
 
-A simple [Java 7+](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) tool which greatly enhances your TF2 and other Source games image quality for recording purposes, with surprisingly little performance loss compared to other such configurations. Records using ingame Source Recorder, with key bindings to ease the process.
+Easy to install and use. Does not interfere with your regular configs, HUD or launch options.
 
-Easy to install and use. This tool does not interfere with your regular TF2 configuration, HUD or launch options. Requires [Steam](https://steamcommunity.com/) in order to run.
+![Version 5](http://i.imgur.com/EF807TE.png)
 
-Check out the [Wiki](https://github.com/iabarca/lawena-recording-tool/wiki) for more information.
+## Installing Lawena
 
-# Installing Lawena
-If you want to use a stable version, check the [releases](https://github.com/iabarca/lawena-recording-tool/releases) page. Also there's some pre-releases that preview upcoming content. To download the latest, not particularly stable version:
+For a stable version, check the [releases](https://github.com/iabarca/lawena-recording-tool/releases) page and follow the instructions. If you don't have Java installed you will find a direct download link there.
 
-1. [Download this repository](https://github.com/iabarca/lawena-recording-tool/archive/v4.x.zip) and extract it to any folder.
-2. Run **gradlew.bat** (Windows) or **gradlew** script (Unix) to start the program. Administrative permissions are required due to the use of symbolic links.
+## About this branch
 
-# About this branch
-The v4.x branch contains the latest development towards a v4.2.0 release. You can switch branches from within the tool using the `Help -> Switch Updater Branch...` menu item.
+This branch is for development towards version 5.0.0. Currently unstable and not available through auto-updater.
 
-# Features
-* Insane max quality graphics configuration.
-* Recorded files are saved to the directory of your choosing for comfort and order.
-* Options to enable/disable various game elements which may be unnecessary in the context of a movie.
-* Includes built-in moviehuds with different levels of simplicity.
-* Supports custom HUDs/materials/models/etc to add a personal touch to your movies.
-* Includes a set of built-in skyboxes, and supports custom skyboxes via simple drag-and-drop.
-* [SrcDemo2](https://code.google.com/p/srcdemo2/) support to reduce drive usage and space.
-* [VDM](https://developer.valvesoftware.com/wiki/Demo_Recording_Tools) file support for automatizing your movie recording process.
-* Updates automatically, you can see the latest changes [here](https://github.com/iabarca/lawena-recording-tool/commits/v4.x).
+## Credits
 
-# Credits
-* Original project by Montz (currently inactive)
-* Current developer: Quantic ([Steam Profile](http://steamcommunity.com/id/thepropane))
-* Graphical .cfg files based on those made by Chris Down.
-* Built-in Killnotices and Medic HUD made by [mih](https://github.com/Kuw/recordinghuds).
-* Skyboxes made by komaokc from GameBanana.
-* Includes some content used in PLDX recording tool.
-* Valve - Team Fortress and Team Fortress logo.
+* Original project created by Montz (currently inactive)
+* Current developer: [Quantic](http://steamcommunity.com/profiles/76561198012092861/) since June 2013
+* Graphic `.cfg` files based on those made by [Chris Down's](https://chrisdown.name/tf2/) maxquality config.
+* Built-in **Killnotices only** and **Medic** HUD made by [mih](https://github.com/Kuw/recordinghuds)
+* Skyboxes included made by [komaokc](http://gamebanana.com/members/submissions/textures/289553) from GameBanana
+* Includes some content used in PLDX recording tool
+* Valve - Source engine, Team Fortress, Counter-Strike, the Team Fortress logo and the Counter-Strike logo.

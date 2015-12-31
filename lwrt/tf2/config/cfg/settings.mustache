@@ -1,0 +1,64 @@
+{{!
+    This is a Mustache template to generate the settings.cfg file,
+    If you wish to customize that file you must modify this one instead.
+    Alternatively, use "Customize..." settings in the application
+}}
+alias recframerate host_framerate {{recorder.fps}}
+alias currentfpsup {{fps_prev_step}}fps
+alias currentfpsdn {{fps_next_step}}fps
+mat_motion_blur_enabled {{tf2.cfg.motionBlur}}
+mat_motion_blur_forward_enabled {{tf2.cfg.motionBlur}}
+mat_motion_blur_strength {{tf2.cfg.motionBlur}}
+cl_cloud_settings 0
+viewmodel_fov_demo {{tf2.cfg.viewmodelFov}}
+{{#tf2.cfg.noCrosshairSwitch}}
+cl_crosshair_file ""
+cl_crosshair_red 200
+cl_crosshair_green 200
+cl_crosshair_blue 200
+cl_crosshair_scale 32
+cl_crosshairalpha 200
+{{/tf2.cfg.noCrosshairSwitch}}
+crosshair {{tf2.cfg.noCrosshair}}
+hud_combattext {{tf2.cfg.noDamageNumbers}}
+hud_combattext_healing {{tf2.cfg.noDamageNumbers}}
+tf_dingalingaling {{tf2.cfg.noHitsounds}}
+voice_enable {{tf2.cfg.noVoice}}
+alias voice_enable ""
+cl_hud_minmode {{tf2.cfg.hudMinmode}}
+cl_hud_playerclass_use_playermodel {{tf2.cfg.hudPlayerModel}}
+cl_hud_playerclass_playermodel_showed_confirm_dialog 1
+volume {{volume}}
+cl_autorezoom 0
+cl_autoreload 0
+hud_saytext_time 0
+engine_no_focus_sleep 0
+cl_spec_carrieditems 0
+tf_hud_target_id_disable_floating_health 1
+alias voice_enable ""
+alias voice_menu_1 ""
+alias voice_menu_2 ""
+alias voice_menu_3 ""
+net_graph 0
+alias net_graph ""
+cl_showfps 0
+alias cl_showfps ""
+alias +taunt ""
+alias +context_action ""
+hud_fastswitch 1
+
+{{#tf2.cfg.custom}}
+echo "[Lawena] Applying user custom settings"
+{{/tf2.cfg.custom}}
+{{tf2.cfg.custom}}
+
+{{#tf2.cfg.noCrosshairSwitch}}
+lockcrosshair
+alias toggle ""
+{{/tf2.cfg.noCrosshairSwitch}}
+{{#tf2.cfg.viewmodels.VmSwitchOff}}
+lockviewmodelson
+{{/tf2.cfg.viewmodels.VmSwitchOff}}
+{{#tf2.cfg.viewmodels.VmSwitchOn}}
+lockviewmodelsoff
+{{/tf2.cfg.viewmodels.VmSwitchOn}}

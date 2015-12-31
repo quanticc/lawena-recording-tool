@@ -1,0 +1,19 @@
+# ===================================================================
+# LAWENA APPLICATION CONFIGURATION
+# * DEVELOPMENT PROFILE
+#
+# Settings in main configuration file (application.yml) still apply
+# Only overrides take place when using --spring.profiles.active=dev
+# ===================================================================
+logging:
+  file: logs/lawena-dev.log.txt
+  level:
+    com.github.lawena:
+      domain.AppProfile: DEBUG
+      service.util:
+        CopyDirVisitor: DEBUG
+        DeleteDirVisitor: DEBUG
+spring:
+  jmx:
+    enabled: false
+debug: true

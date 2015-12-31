@@ -1,0 +1,75 @@
+# ===================================================================
+# LAWENA APPLICATION CONFIGURATION
+#
+# Can be overriden using Spring profiles, for instance:
+#   file "application-dev.yml" if using --spring.profiles.active=dev
+# Files should be placed in the Lawena root directory
+# ===================================================================
+
+# -------------------------------------------------------------------
+# The following configures default profile/launcher values,
+# Similar to the hard-coded values but with a functional Launcher
+# -------------------------------------------------------------------
+lawena:
+  selected: Default
+  profiles:
+    - name: Default
+      launcher: Team Fortress 2
+  launchers:
+    -
+      name: Team Fortress 2
+      icon: /com/github/lawena/views/tf2/tf2-red-48px.png
+      launchMode: HL2
+      modName: tf,
+      appId: 440,
+      processName:
+        windows: hl2.exe
+        linux: hl2_linux
+        osx: hl2_osx
+      gamePath: ''
+      basePath: tf2
+      viewName: tf2
+      flags:
+        - key: tf2.cfg.motionBlur
+          defaultValue: true
+          trueMappedValue: '1'
+          falseMappedValue: '0'
+        - key: tf2.cfg.noDamageNumbers
+          defaultValue: true
+          trueMappedValue: '0'
+          falseMappedValue: '1'
+        - key: tf2.cfg.noCrosshairSwitch
+          defaultValue: false
+          trueMappedValue: '//'
+          falseMappedValue: false
+        - key: tf2.cfg.noHitsounds
+          defaultValue: true
+          trueMappedValue: '0'
+          falseMappedValue: '1'
+        - key: tf2.cfg.noVoice
+          defaultValue: true
+          trueMappedValue: '0'
+          falseMappedValue: '1'
+        - key: tf2.cfg.hudMinmode
+          defaultValue: false
+          trueMappedValue: '1'
+          falseMappedValue: '0'
+        - key: tf2.cfg.hudPlayerModel
+          defaultValue: false
+          trueMappedValue: '1'
+          falseMappedValue: '0'
+        - key: tf2.cfg.noCrosshair
+          defaultValue: false
+          trueMappedValue: '0'
+          falseMappedValue: '1'
+logging:
+  file: logs/lawena.log.txt
+  level:
+    com.github.lawena:
+      domain.AppProfile: INFO
+      service.util:
+        CopyDirVisitor: INFO
+        DeleteDirVisitor: INFO
+spring:
+  jmx:
+    enabled: false

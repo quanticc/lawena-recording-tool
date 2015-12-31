@@ -1,72 +1,72 @@
 package com.github.lawena.vpk;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Represents a directory inside a VPK archive.
- * 
+ *
  * @author Connor Haigh
  * @see <a href="https://github.com/Contron/JavaVPK">GitHub Repository</a>
  */
 public class Directory {
-  /**
-   * Creates a new VPK directory.
-   * 
-   * @param path the path of the directory
-   */
-  public Directory(String path) {
-    this.path = path.trim();
-    this.entries = new ArrayList<>();
-  }
+    public static final String SEPARATOR = "/";
+    private String path;
+    private List<Entry> entries;
 
-  /**
-   * Returns the path of this directory.
-   * 
-   * @return the path
-   */
-  public String getPath() {
-    return this.path;
-  }
+    /**
+     * Creates a new VPK directory.
+     *
+     * @param path the path of the directory
+     */
+    protected Directory(String path) {
+        this.path = path.trim();
+        this.entries = new ArrayList<>();
+    }
 
-  /**
-   * Returns the full path for an entry in this directory.
-   * 
-   * @param entry the entry
-   * @return the full path
-   */
-  public String getPathFor(Entry entry) {
-    return (this.path + File.separator + entry.getFullName());
-  }
+    /**
+     * Returns the path of this directory.
+     *
+     * @return the path
+     */
+    public String getPath() {
+        return this.path;
+    }
 
-  /**
-   * Adds an entry to this directory.
-   * 
-   * @param entry the entry
-   */
-  public void addEntry(Entry entry) {
-    this.entries.add(entry);
-  }
+    /**
+     * Returns the full path for an entry in this directory.
+     *
+     * @param entry the entry
+     * @return the full path
+     */
+    public String getPathFor(Entry entry) {
+        return (this.path + Directory.SEPARATOR + entry.getFullName());
+    }
 
-  /**
-   * Removes an entry from this directory.
-   * 
-   * @param entry the entry
-   */
-  public void removeEntry(Entry entry) {
-    this.entries.remove(entry);
-  }
+    /**
+     * Adds an entry to this directory.
+     *
+     * @param entry the entry
+     */
+    public void addEntry(Entry entry) {
+        this.entries.add(entry);
+    }
 
-  /**
-   * Returns the list of entries in this directory.
-   * 
-   * @return the list of entries
-   */
-  public List<Entry> getEntries() {
-    return this.entries;
-  }
+    /**
+     * Removes an entry from this directory.
+     *
+     * @param entry the entry
+     */
+    public void removeEntry(Entry entry) {
+        this.entries.remove(entry);
+    }
 
-  private String path;
-  private ArrayList<Entry> entries;
+    /**
+     * Returns the list of entries in this directory.
+     *
+     * @return the list of entries
+     */
+    public List<Entry> getEntries() {
+        return this.entries;
+    }
 }

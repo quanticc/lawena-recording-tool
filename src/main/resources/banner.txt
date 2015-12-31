@@ -1,0 +1,6 @@
+
+   __              _
+  / /_      ___ __| |_    ${application.title}
+ / /\ \ /\ / / '__| __|   ${application.version}
+/ /__\ V  V /| |  | |_
+\____/\_/\_/ |_|   \__|   Spring Boot v${spring-boot.version}

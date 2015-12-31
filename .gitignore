@@ -1,6 +1,125 @@
-# Created by http://www.gitignore.io
+### Lawena-specific ###
+/logs
+*.lwf
+*.log
+lwrt/**/config/cfg/settings.cfg
+lwrt/**/config/cfg/namescroll.cfg
+lwrt/**/config/cfg/recbindings.cfg
+lwrt/**/config/cfg/help.cfg
+lwrt/**/config/cfg/mov/*.cfg
+lwrt/**/launch
+version.txt
+*.lck
+!launcher/*.jar
+launcher/*.exe
+src/main/dist/*.exe
+src/main/dist/lawena/code/*.exe
+*.ser*
+*sound.cache
+/application.yml
+settings.json
 
-### Windows ###
+### Java template
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.jar.*
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+### Gradle template
+.gradle
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+### Eclipse template
+*.pydevproject
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# Eclipse Core
+.project
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# Java annotation processor (APT)
+.factorypath
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin
+.target
+
+# TeXlipse plugin
+.texlipse
+
+### OSX template
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+### Linux template
+*~
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+### Windows template
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -17,136 +136,53 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+# Windows shortcuts
+*.lnk
 
-### Linux ###
-*~
+### JetBrains template
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio
 
-# KDE directory preferences
-.directory
+*.iml
 
+## Directory-based project format:
+.idea/
+# if you remove the above rule, at least ignore the following:
 
-### OSX ###
-.DS_Store
-.AppleDouble
-.LSOverride
+# User-specific stuff:
+# .idea/workspace.xml
+# .idea/tasks.xml
+# .idea/dictionaries
 
-# Icon must end with two \r
-Icon
+# Sensitive or high-churn files:
+# .idea/dataSources.ids
+# .idea/dataSources.xml
+# .idea/sqlDataSources.xml
+# .idea/dynamic.xml
+# .idea/uiDesigner.xml
 
+# Gradle:
+# .idea/gradle.xml
+# .idea/libraries
 
-# Thumbnails
-._*
+# Mongo Explorer plugin:
+# .idea/mongoSettings.xml
 
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
+## File-based project format:
+*.ipr
+*.iws
 
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
+## Plugin-specific files:
 
+# IntelliJ
+/out/
 
-### Eclipse ###
-*.pydevproject
-.metadata
-.gradle
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.settings/
-.loadpath
+# mpeltonen/sbt-idea plugin
+.idea_modules/
 
-# Additional eclipse files
-.classpath
-.project
+# JIRA plugin
+atlassian-ide-plugin.xml
 
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpath
-
-# sbteclipse plugin 
-.target
-
-# TeXlipse plugin
-.texlipse
-
-
-### NetBeans ###
-nbproject/private/
-build/
-nbbuild/
-#dist/
-nbdist/
-nbactions.xml
-nb-configuration.xml
-
-
-### Java ###
-*.class
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-
-
-### Gradle ###
-.gradle
-build/
-gradle.properties
-!gradle/wrapper/*.jar
-
-# Ignore Gradle GUI config
-gradle-app.setting
-
-
-### Maven ###
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-
-
-### Lawena-specific ###
-*.lwf
-*.log
-lwrt/tf/config/cfg/settings.cfg
-lwrt/tf/config/cfg/namescroll.cfg
-lwrt/tf/config/cfg/mov/*.cfg
-lwrt/csgo/config/cfg/settings.cfg
-lwrt/csgo/config/cfg/namescroll.cfg
-lwrt/csgo/config/cfg/mov/*.cfg
-lwrt/csgo/config/cfg/*.txt
-version.txt
-*.lck
-!launcher/*.jar
-launcher/*.exe
-src/main/dist/*.exe
-src/main/dist/lawena/code/*.exe
-*.ser.gz
-*sound.cache
-profiles.json
-games.json
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
