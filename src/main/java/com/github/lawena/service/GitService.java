@@ -1,6 +1,6 @@
 package com.github.lawena.service;
 
-import com.github.lawena.event.LaunchStatusUpdateEvent;
+import com.github.lawena.Messages;
 import com.github.lawena.util.LaunchException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.github.lawena.event.LaunchStatusUpdateEvent.updateEvent;
 import static org.eclipse.jgit.lib.Constants.*;
 
 @Service
@@ -76,7 +77,7 @@ public class GitService {
     }
 
     public void setup() throws LaunchException {
-        publisher.publishEvent(new LaunchStatusUpdateEvent(this).message("SETUP"));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.setup")));
         Path gamePath = validationService.getGamePath();
         Path gitPath = gamePath.resolve(DOT_GIT);
         log.debug("[Setup] Checking repository: {}", gitPath);
@@ -97,7 +98,7 @@ public class GitService {
     }
 
     public void replace() throws LaunchException {
-        publisher.publishEvent(new LaunchStatusUpdateEvent(this).message("REPLACE"));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.replacing")));
         Path gamePath = validationService.getGamePath();
         Path gitPath = gamePath.resolve(DOT_GIT);
         log.debug("[Replace] Checking repository: {}", gitPath);
@@ -122,7 +123,7 @@ public class GitService {
     }
 
     public void restore() throws LaunchException {
-        publisher.publishEvent(new LaunchStatusUpdateEvent(this).message("RESTORE"));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.restoring")));
         Path gamePath = validationService.getGamePath();
         Path gitPath = gamePath.resolve(DOT_GIT);
         log.debug("[Restore] Checking repository: {}", gitPath);

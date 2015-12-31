@@ -54,7 +54,7 @@ public class LaunchTask extends LawenaTask<Boolean> {
 
     @Override
     protected Boolean call() throws Exception {
-        updateTitle(Messages.getString("ui.base.tasks.launch.title"));
+        updateTitle(Messages.getString("ui.base.tasks.launch.title", validationService.getSelectedLauncher().getName()));
         updateMessage(Messages.getString("ui.base.tasks.launch.start"));
         // disable launch game button, rename it to "Launching..."
         // users looking to abort task can head to Tasks tab
@@ -158,7 +158,6 @@ public class LaunchTask extends LawenaTask<Boolean> {
 
     @EventListener
     void updateStatus(LaunchStatusUpdateEvent event) {
-        log.debug("Received: {}", event);
         String title = event.getTitle();
         String message = event.getMessage();
         double workDone = event.getWorkDone();

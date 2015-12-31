@@ -4,6 +4,14 @@ import org.springframework.context.ApplicationEvent;
 
 public class LaunchStatusUpdateEvent extends ApplicationEvent {
 
+    public static LaunchStatusUpdateEvent updateEvent(Object source, String message) {
+        return new LaunchStatusUpdateEvent(source).message(message);
+    }
+
+    public static LaunchStatusUpdateEvent updateEvent(Object source, String message, long workDone, long max) {
+        return new LaunchStatusUpdateEvent(source).message(message).withProgress(workDone, max);
+    }
+
     private String title;
     private String message;
     private double workDone = Double.NaN;

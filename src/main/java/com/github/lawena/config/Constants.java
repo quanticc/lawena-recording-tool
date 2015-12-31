@@ -7,7 +7,9 @@ import com.github.lawena.util.ExternalString;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Application constants.
@@ -30,6 +32,24 @@ public final class Constants {
             Arrays.asList("HudMinimal", "HudBasic", "HudCustom"));
     public static final List<ExternalString> VIEWMODELS = ExternalString.from(Messages::getString,
             Arrays.asList("VmSwitchOn", "VmSwitchOff", "VmSwitchDefault"));
+    public static final Map<String, Object> USER_FRIENDLY_KEYMAP = new HashMap<String, Object>() {
+        {
+            put("UPARROW", "Up arrow");
+            put("DOWNARROW", "Down arrow");
+            put("KP_DOWNARROW", "Numpad 2");
+            put("KP_END", "Numpad 1");
+            put("KP_LEFTARROW", "Numpad 4");
+            put("KP_HOME", "Numpad 7");
+            put("KP_UPARROW", "Numpad 8");
+            put("KP_PGUP", "Numpad 9");
+            put("KP_RIGHTARROW", "Numpad 6");
+            put("KP_PGDN", "Numpad 3");
+            put("KP_5", "Numpad 5");
+            put("KP_INS", "Numpad 0");
+            put("KP_MINUS", "Numpad -");
+            put("KP_PLUS", "Numpad +");
+        }
+    };
 
     public static final int MINIMUM_WIDTH = 640;
     public static final int INITIAL_WIDTH = 1280;

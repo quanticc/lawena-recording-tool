@@ -1,12 +1,13 @@
 package com.github.lawena.service;
 
+import com.github.lawena.Messages;
 import com.github.lawena.config.Constants;
 import com.github.lawena.domain.*;
-import com.github.lawena.event.LaunchStatusUpdateEvent;
 import com.github.lawena.service.util.CopyDirVisitor;
 import com.github.lawena.service.util.DeleteDirVisitor;
 import com.github.lawena.util.LaunchException;
 import com.github.lawena.util.LwrtUtils;
+import com.github.lawena.views.tf2.skybox.Skybox;
 import com.github.lawena.vpk.*;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -30,6 +31,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.github.lawena.event.LaunchStatusUpdateEvent.updateEvent;
 import static com.github.lawena.util.LwrtUtils.newProcessReader;
 
 @Service
@@ -53,7 +55,7 @@ public class FileService {
     public void replaceFiles() throws LaunchException {
         Profile profile = validationService.getSelectedProfile();
         // create configuration files
-        publisher.publishEvent(new LaunchStatusUpdateEvent(this).message("CONFIG_FILES"));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.configFiles")));
         try {
             generateSettingsFile();
             generateBindingsFiles();
@@ -83,7 +85,6 @@ public class FileService {
         String selectedSkybox = validationService.getString(profile, "tf2.skybox");
 
         // remove previous launch setup folder
-        publisher.publishEvent(new LaunchStatusUpdateEvent(this).message("LAUNCH_SETUP"));
         Path launchSetup = basePath.resolve("launch");
         if (Files.exists(launchSetup)) {
             try {
@@ -99,7 +100,9 @@ public class FileService {
         try {
             toCopy.add(newTempResource(basePath.resolve("config"), s -> !s.endsWith(".cfg")));
             toCopy.add(newTempResource(basePath.resolve("hud"), s -> !s.contains(selectedHud)));
-            toCopy.add(newTempResource(buildSelectedSkybox(basePath, selectedSkybox)));
+            if (!selectedSkybox.equals(Skybox.DEFAULT.getName())) {
+                toCopy.add(newTempResource(buildSelectedSkybox(basePath, selectedSkybox)));
+            }
             toCopy.add(newTempResource(basePath.resolve("default")));
         } catch (IOException e) {
             throw new LaunchException("Could not explore resource contents", e);
@@ -131,7 +134,7 @@ public class FileService {
         // SteamPipe/Replace
         int count = 1;
         for (Resource resource : toCopy) {
-            publisher.publishEvent(new LaunchStatusUpdateEvent(this).message("COPYING: " + resource.getPath()).withProgress(count, toCopy.size()));
+            publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.copyingFile", resource.getPath()), count, toCopy.size()));
             try {
                 Path srcPath = resource.getPath(); // where the root of the content to copy is located
                 if (srcPath.toString().toLowerCase().endsWith(".vpk")) {
@@ -267,9 +270,16 @@ public class FileService {
         scopes.put("key.togglepitch", "KP_INS");
         scopes.put("key.firstperson", "KP_MINUS");
         scopes.put("key.thirdperson", "KP_PLUS");
+        addTranslatedKeys(scopes);
         log.debug("Preparing bindings with scopes: {}", scopes);
         compileTemplateAndExecute(bindingsTemplatePath, bindingsCfgPath, "recbindings", scopes);
         compileTemplateAndExecute(helpTemplatePath, helpCfgPath, "help", scopes);
+    }
+
+    private void addTranslatedKeys(Map<String, Object> scopes) {
+        Map<String, Object> translationScope = new HashMap<>();
+        scopes.forEach((k, v) -> translationScope.put(k + ".user", Constants.USER_FRIENDLY_KEYMAP.getOrDefault(v, v)));
+        scopes.putAll(translationScope);
     }
 
     private void compileTemplateAndExecute(Path inputPath, Path outputPath, String name, Map<String, Object> scopes) throws LaunchException {
@@ -411,7 +421,11 @@ public class FileService {
         if (!LwrtUtils.isWindows()) {
             return;
         }
-        publisher.publishEvent(new LaunchStatusUpdateEvent(this).message("CLOSE_HANDLES: " + path.toAbsolutePath()));
+        if (!LwrtUtils.isAdmin()) {
+            log.warn("Handle closing only works when running the tool as administrator");
+            return;
+        }
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.closingHandles", path.toAbsolutePath())));
         try {
             Path handlePath = Constants.HANDLE_PATH;
             ProcessBuilder pb = new ProcessBuilder(handlePath.toString(), path.toString());
