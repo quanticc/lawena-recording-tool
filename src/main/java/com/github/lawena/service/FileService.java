@@ -154,7 +154,7 @@ public class FileService {
                 List<Path> excludedList = new ArrayList<>();
                 resource.getExcludedPaths().stream().map(srcPath::resolve).forEach(excludedList::add);
                 Path destPath = customDir.resolve("lawena-" + id + "-" + srcPath.getFileName());
-                log.info("Copying resource: {} -> {}{}", resource.getName(), srcPath, destPath, formatSize(excludedList));
+                log.info("Copying resource: {} -> {}{}", srcPath, destPath, formatSize(excludedList));
                 Files.walkFileTree(srcPath, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE,
                         new CopyDirVisitor(srcPath, destPath, excludedList));
             } catch (IOException e) {
