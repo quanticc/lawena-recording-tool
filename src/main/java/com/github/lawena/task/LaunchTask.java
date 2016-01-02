@@ -3,6 +3,7 @@ package com.github.lawena.task;
 import com.github.lawena.Messages;
 import com.github.lawena.config.Constants;
 import com.github.lawena.config.LawenaProperties;
+import com.github.lawena.domain.DataValidationMessage;
 import com.github.lawena.domain.Launcher;
 import com.github.lawena.event.LaunchStatusUpdateEvent;
 import com.github.lawena.service.FileService;
@@ -11,8 +12,6 @@ import com.github.lawena.util.LaunchException;
 import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.base.BasePresenter;
 import javafx.application.Platform;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
 import org.controlsfx.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ import java.util.function.Predicate;
 
 import static com.github.lawena.util.LwrtUtils.newProcessReader;
 
-public class LaunchTask extends LawenaTask<Boolean> {
+public class LaunchTask extends LawenaTask<ValidationResult> {
 
     private static final Logger log = LoggerFactory.getLogger(LaunchTask.class);
 
@@ -53,7 +52,7 @@ public class LaunchTask extends LawenaTask<Boolean> {
     }
 
     @Override
-    protected Boolean call() throws Exception {
+    protected ValidationResult call() throws Exception {
         updateTitle(Messages.getString("ui.base.tasks.launch.title", validationService.getSelectedLauncher().getName()));
         updateMessage(Messages.getString("ui.base.tasks.launch.start"));
         // disable launch game button, rename it to "Launching..."
@@ -61,14 +60,12 @@ public class LaunchTask extends LawenaTask<Boolean> {
         Platform.runLater(() -> {
             basePresenter.disable(true);
             launchButtonText = basePresenter.getLaunchButton().getText();
-            basePresenter.getLaunchButton().setText("");
-            ProgressIndicator graphic = new ProgressBar(-1);
-            graphic.setPrefWidth(basePresenter.getLaunchButton().getWidth());
-            basePresenter.getLaunchButton().setGraphic(graphic);
+            basePresenter.getLaunchButton().setText(Messages.getString("ui.base.tasks.launch.step"));
         });
 
         // Get current profile to validate first!
         ValidationResult result = validationService.validate(); // and save if successful
+        updateValue(result);
 
         // results
         result.getWarnings().forEach(w -> log.info("Validation {}: {} @ {}", w.getSeverity(), w.getText(), w.getTarget()));
@@ -87,7 +84,7 @@ public class LaunchTask extends LawenaTask<Boolean> {
         int maxSteps = maxTimeoutSeconds / (millis / 1000);
         updateMessage(Messages.getString("ui.base.tasks.launch.waitingStart"));
         updateProgress(0, maxSteps);
-        while (!isGameRunning() && (maxTimeoutSeconds == 0 || step < maxSteps)) {
+        while (!isCancelled() && !isGameRunning() && (maxTimeoutSeconds == 0 || step < maxSteps)) {
             ++step;
             if (maxTimeoutSeconds > 0) {
                 updateProgress(step, maxSteps);
@@ -97,19 +94,26 @@ public class LaunchTask extends LawenaTask<Boolean> {
         if (maxTimeoutSeconds > 0 && step >= maxSteps) {
             int s = step * (millis / 1000);
             log.info("Game launch timed out after {} seconds", s);
-            return false;
+            result.add(new DataValidationMessage(DataValidationMessage.Type.timedOutLaunch, s));
+            return result;
+        }
+        if (isCancelled()) {
+            return result;
         }
         log.debug("Game process has started");
         updateMessage(Messages.getString("ui.base.tasks.launch.waitingFinish"));
         updateProgress(-1, -1);
-        while (isGameRunning() || isCancelled()) {
+        while (!isCancelled() && isGameRunning()) {
             Thread.sleep(millis);
+        }
+        if (isCancelled()) {
+            return result;
         }
         Thread.sleep(millis);
         updateMessage("Returning your folders to their original state"); // TODO: NLS
         log.debug("Game process has stopped");
         fileService.restoreFiles();
-        return true;
+        return result;
     }
 
     @Override
@@ -128,9 +132,9 @@ public class LaunchTask extends LawenaTask<Boolean> {
     protected void failed() {
         Throwable t = getException();
         if (t != null) {
-            log.error("Launch task failed with an exception", t);
+            log.error("Launch task failed with exception", t);
         } else {
-            log.error("Launch task failed without an exception");
+            log.error("Launch task failed");
         }
     }
 
@@ -142,7 +146,7 @@ public class LaunchTask extends LawenaTask<Boolean> {
             if (isGameRunning()) {
                 // TODO: handle improper launch finish correctly
                 log.warn("Game is still running, files will not be replaced");
-            } else if (result == null) { // result is null after a FAILED or CANCELLED state
+            } else if (result == null || !result.getErrors().isEmpty()) { // result may be null after a FAILED or CANCELLED state
                 try {
                     fileService.restoreFiles();
                 } catch (LaunchException e) {
@@ -150,7 +154,6 @@ public class LaunchTask extends LawenaTask<Boolean> {
                 }
             }
         }).thenRunAsync(() -> {
-            basePresenter.getLaunchButton().setGraphic(null);
             basePresenter.getLaunchButton().setText(launchButtonText);
             basePresenter.disable(false);
         }, Platform::runLater);

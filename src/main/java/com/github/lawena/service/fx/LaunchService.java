@@ -3,12 +3,13 @@ package com.github.lawena.service.fx;
 import com.github.lawena.service.TaskService;
 import com.github.lawena.task.LaunchTask;
 import javafx.concurrent.Task;
+import org.controlsfx.validation.ValidationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LaunchService extends javafx.concurrent.Service<Boolean> {
+public class LaunchService extends javafx.concurrent.Service<ValidationResult> {
 
     private final ApplicationContext context;
     private final TaskService taskService;
@@ -20,8 +21,8 @@ public class LaunchService extends javafx.concurrent.Service<Boolean> {
     }
 
     @Override
-    protected Task<Boolean> createTask() {
-        Task<Boolean> task = context.getBean(LaunchTask.class);
+    protected Task<ValidationResult> createTask() {
+        Task<ValidationResult> task = context.getBean(LaunchTask.class);
         taskService.addToProgressView(task);
         return task;
     }

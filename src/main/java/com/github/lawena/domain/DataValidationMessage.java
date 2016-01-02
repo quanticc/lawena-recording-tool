@@ -49,7 +49,11 @@ public class DataValidationMessage implements ValidationMessage {
         genericWarning(Severity.WARNING),
         missingLaunchMode(Severity.ERROR),
         missingSteamPath(Severity.ERROR),
-        missingGamePath(Severity.ERROR);
+        missingGamePath(Severity.ERROR),
+        timedOutLaunch(Severity.ERROR),
+        exceptional(Severity.ERROR),
+        gameStillRunning(Severity.WARNING),
+        cancelled(Severity.WARNING);
 
         private final Severity severity;
 

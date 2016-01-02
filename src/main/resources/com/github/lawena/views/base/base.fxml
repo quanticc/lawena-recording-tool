@@ -28,7 +28,7 @@
           </Menu>
         </menus>
       </MenuBar>
-        <TabPane fx:id="tabs" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <TabPane fx:id="tabs" tabClosingPolicy="ALL_TABS" VBox.vgrow="ALWAYS">
             <tabs>
                 <Tab fx:id="setupTab" closable="false" text="%ui.base.tabs.setup">
                <content>
