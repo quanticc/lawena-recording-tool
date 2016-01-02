@@ -20,8 +20,8 @@ lawena:
       name: Team Fortress 2
       icon: /com/github/lawena/views/tf2/tf2-red-48px.png
       launchMode: HL2
-      modName: tf,
-      appId: 440,
+      modName: tf
+      appId: '440'
       processName:
         windows: hl2.exe
         linux: hl2_linux
