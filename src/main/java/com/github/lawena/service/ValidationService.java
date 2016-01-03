@@ -174,7 +174,16 @@ public class ValidationService {
     public Path getGameExecutable() throws LaunchException {
         Launcher launcher = profiles.getLauncher(getSelectedProfile()).get();
         try {
-            return getGamePath().toRealPath().getParent().resolve(launcher.getProcessName().get());
+            return getGamePath().toRealPath().getParent().resolve(launcher.getGameExecutable().get());
+        } catch (IOException e) {
+            throw new LaunchException("Could not get real game path", e);
+        }
+    }
+
+    public Path getGameProcess() throws LaunchException {
+        Launcher launcher = profiles.getLauncher(getSelectedProfile()).get();
+        try {
+            return getGamePath().toRealPath().getParent().resolve(launcher.getGameProcess().get());
         } catch (IOException e) {
             throw new LaunchException("Could not get real game path", e);
         }
@@ -205,7 +214,7 @@ public class ValidationService {
         return path != null
                 && Files.isDirectory(path)
                 && !path.startsWith(Paths.get("").toAbsolutePath().getParent())
-                && Files.exists(path.resolve(launcher.getProcessName().get()));
+                && Files.exists(path.resolve(launcher.getGameExecutable().get()));
     }
 
     public Path getBasePath() throws LaunchException {

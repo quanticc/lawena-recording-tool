@@ -179,7 +179,7 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
     }
 
     private boolean isGameRunning() {
-        String processName = validationService.getSelectedLauncher().getProcessName().get();
+        String processName = validationService.getSelectedLauncher().getGameProcess().get();
         if (LwrtUtils.isWindows()) {
             ProcessBuilder[] builders =
                     {

@@ -22,7 +22,11 @@ lawena:
       launchMode: HL2
       modName: tf
       appId: '440'
-      processName:
+      gameExecutable:
+        windows: hl2.exe
+        linux: hl2.sh
+        osx: hl2.sh
+      gameProcess:
         windows: hl2.exe
         linux: hl2_linux
         osx: hl2_osx

@@ -11,7 +11,8 @@ public class Launcher {
     private Mode launchMode = Mode.HL2;
     private String modName;
     private String appId;
-    private OperatingSystemMap processName;
+    private OperatingSystemMap gameExecutable;
+    private OperatingSystemMap gameProcess;
     private String steamPath = "";
     private String gamePath = "";
     private String basePath;
@@ -59,12 +60,20 @@ public class Launcher {
         this.appId = appId;
     }
 
-    public OperatingSystemMap getProcessName() {
-        return processName;
+    public OperatingSystemMap getGameExecutable() {
+        return gameExecutable;
     }
 
-    public void setProcessName(OperatingSystemMap processName) {
-        this.processName = processName;
+    public void setGameExecutable(OperatingSystemMap gameExecutable) {
+        this.gameExecutable = gameExecutable;
+    }
+
+    public OperatingSystemMap getGameProcess() {
+        return gameProcess;
+    }
+
+    public void setGameProcess(OperatingSystemMap gameProcess) {
+        this.gameProcess = gameProcess;
     }
 
     public String getSteamPath() {
@@ -148,7 +157,8 @@ public class Launcher {
                 ", launchMode=" + launchMode +
                 ", modName='" + modName + '\'' +
                 ", appId='" + appId + '\'' +
-                ", processName=" + processName +
+                ", gameExecutable=" + gameExecutable +
+                ", gameProcess=" + gameProcess +
                 ", steamPath='" + steamPath + '\'' +
                 ", gamePath='" + gamePath + '\'' +
                 ", basePath='" + basePath + '\'' +
