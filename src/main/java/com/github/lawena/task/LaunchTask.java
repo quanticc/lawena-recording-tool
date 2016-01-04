@@ -5,7 +5,9 @@ import com.github.lawena.config.Constants;
 import com.github.lawena.config.LawenaProperties;
 import com.github.lawena.domain.DataValidationMessage;
 import com.github.lawena.domain.Launcher;
-import com.github.lawena.event.LaunchStatusUpdateEvent;
+import com.github.lawena.event.LaunchFinishedEvent;
+import com.github.lawena.event.LaunchNextStateEvent;
+import com.github.lawena.event.LaunchStartedEvent;
 import com.github.lawena.service.FileService;
 import com.github.lawena.service.ValidationService;
 import com.github.lawena.util.LaunchException;
@@ -16,7 +18,7 @@ import org.controlsfx.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,15 +37,17 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
     private final FileService fileService;
     private final ValidationService validationService;
     private final BasePresenter basePresenter;
-
+    private final ApplicationEventPublisher publisher;
     private String launchButtonText;
 
     @Autowired
-    public LaunchTask(LawenaProperties properties, FileService fileService, ValidationService validationService, BasePresenter basePresenter) {
+    public LaunchTask(LawenaProperties properties, FileService fileService, ValidationService validationService,
+                      BasePresenter basePresenter, ApplicationEventPublisher publisher) {
         this.properties = properties;
         this.fileService = fileService;
         this.validationService = validationService;
         this.basePresenter = basePresenter;
+        this.publisher = publisher;
     }
 
     @Override
@@ -53,6 +57,7 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
 
     @Override
     protected ValidationResult call() throws Exception {
+        publisher.publishEvent(new LaunchStartedEvent(this));
         updateTitle(Messages.getString("ui.base.tasks.launch.title", validationService.getSelectedLauncher().getName()));
         updateMessage(Messages.getString("ui.base.tasks.launch.start"));
         // disable launch game button, rename it to "Launching..."
@@ -75,8 +80,12 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
             throw new LaunchException("Validation errors exist");
         }
 
+        updateMessage(Messages.getString("ui.base.tasks.launch.restoring"));
         fileService.restoreFiles();
+        updateMessage(Messages.getString("ui.base.tasks.launch.replacing"));
+        publisher.publishEvent(new LaunchNextStateEvent(this));
         fileService.replaceFiles();
+        updateMessage(Messages.getString("ui.base.tasks.launch.launching"));
         launchGame();
         int step = 0;
         int maxTimeoutSeconds = properties.getLaunchTimeout();
@@ -103,6 +112,7 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
         log.debug("Game process has started");
         updateMessage(Messages.getString("ui.base.tasks.launch.waitingFinish"));
         updateProgress(-1, -1);
+        publisher.publishEvent(new LaunchNextStateEvent(this));
         while (!isCancelled() && isGameRunning()) {
             Thread.sleep(millis);
         }
@@ -112,6 +122,7 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
         Thread.sleep(millis);
         updateMessage("Returning your folders to their original state"); // TODO: NLS
         log.debug("Game process has stopped");
+        publisher.publishEvent(new LaunchNextStateEvent(this));
         fileService.restoreFiles();
         return result;
     }
@@ -153,29 +164,11 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
                     log.warn("Could not restore files", e);
                 }
             }
+            publisher.publishEvent(new LaunchFinishedEvent(this, result));
         }).thenRunAsync(() -> {
             basePresenter.getLaunchButton().setText(launchButtonText);
             basePresenter.disable(false);
         }, Platform::runLater);
-    }
-
-    @EventListener
-    void updateStatus(LaunchStatusUpdateEvent event) {
-        String title = event.getTitle();
-        String message = event.getMessage();
-        double workDone = event.getWorkDone();
-        double max = event.getMax();
-        Platform.runLater(() -> {
-            if (title != null) {
-                updateTitle(title);
-            }
-            if (message != null) {
-                updateMessage(message);
-            }
-            if (!Double.isNaN(workDone)) {
-                updateProgress(workDone, max);
-            }
-        });
     }
 
     private boolean isGameRunning() {
@@ -289,7 +282,7 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
             processBuilder.command().add("-insecure");
         }
         log.info("Launching: {}", processBuilder.command().toString().replaceAll("\\[|\\]|,", "").replaceAll("\\s\\s+", " "));
-        startProcess(processBuilder, Launcher.Mode.STEAM.equals(mode));
+        startProcess(processBuilder, Launcher.Mode.STEAM.equals(mode) || !LwrtUtils.isWindows());
     }
 
     private void startProcess(ProcessBuilder processBuilder, boolean logProcessOutput) throws LaunchException {
@@ -300,10 +293,12 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
             throw new LaunchException("Could not start process", e);
         }
         if (logProcessOutput) {
+            String processName = processBuilder.command().get(0);
+            log.debug("Process started: {}", processName);
             try (BufferedReader input = newProcessReader(process)) {
                 String line;
                 while ((line = input.readLine()) != null) {
-                    log.trace("[steam] " + line);
+                    log.debug("{}", line);
                 }
             } catch (IOException e) {
                 throw new LaunchException("Could not launch process", e);
@@ -313,6 +308,7 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
             } catch (InterruptedException e) {
                 log.warn("Process was interrupted: {}", e.toString());
             }
+            log.debug("Process ended: {}", processName);
         }
     }
 }

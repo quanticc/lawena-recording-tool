@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.lawena.views.launch.LaunchPresenter">
+   <left>
+      <VBox spacing="5.0" styleClass="border" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="setupStateLabel" text="%ui.launch.state.setup" />
+            <Label fx:id="replaceStateLabel" text="%ui.launch.state.replace" />
+            <Label fx:id="gameStateLabel" text="%ui.launch.state.game" />
+            <Label fx:id="restoreStateLabel" text="%ui.launch.state.restore" />
+         </children>
+         <BorderPane.margin>
+            <Insets right="3.0" />
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </VBox>
+   </left>
+   <center>
+      <Accordion fx:id="accordion" BorderPane.alignment="CENTER">
+        <panes>
+          <TitledPane fx:id="validationPane" text="%ui.launch.validation.title">
+               <content>
+                  <VBox>
+                     <children>
+                        <TableView fx:id="validationTable">
+                          <columns>
+                            <TableColumn fx:id="timeColumn" maxWidth="1.7976931348623157E308" prefWidth="100.0" text="%ui.launch.validation.timeColumn" />
+                              <TableColumn fx:id="typeColumn" prefWidth="90.0" text="%ui.launch.validation.typeColumn" />
+                            <TableColumn fx:id="messageColumn" maxWidth="1.7976931348623157E308" prefWidth="251.0" text="%ui.launch.validation.messageColumn" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+          </TitledPane>
+          <TitledPane fx:id="processingPane" text="%ui.launch.processing">
+               <content>
+                  <VBox>
+                     <children>
+                        <TableView>
+                          <columns>
+                            <TableColumn prefWidth="75.0" text="C1" />
+                            <TableColumn prefWidth="75.0" text="C2" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+          </TitledPane>
+        </panes>
+      </Accordion>
+   </center>
+   <padding>
+      <Insets left="3.0" right="3.0" top="3.0" />
+   </padding>
+</BorderPane>

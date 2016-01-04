@@ -18,6 +18,7 @@ import com.github.lawena.views.dialog.NewProfileDialog;
 import javafx.concurrent.Task;
 import javafx.geometry.Dimension2D;
 import org.controlsfx.control.TaskProgressView;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -39,8 +40,10 @@ public class LawenaConfiguration {
 
     @Bean
     @Scope("prototype")
-    public LaunchTask launcherTask(LawenaProperties properties, FileService fileService, ValidationService validationService, BasePresenter basePresenter) {
-        return new LaunchTask(properties, fileService, validationService, basePresenter);
+    public LaunchTask launcherTask(LawenaProperties properties, FileService fileService,
+                                   ValidationService validationService, BasePresenter basePresenter,
+                                   ApplicationEventPublisher publisher) {
+        return new LaunchTask(properties, fileService, validationService, basePresenter, publisher);
     }
 
     @Bean

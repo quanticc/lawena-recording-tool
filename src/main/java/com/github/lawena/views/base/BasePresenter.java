@@ -12,6 +12,7 @@ import com.github.lawena.task.ScanTask;
 import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.LauncherView;
 import com.github.lawena.views.dialog.NewProfileDialog;
+import com.github.lawena.views.launch.LaunchView;
 import com.github.lawena.views.log.LogView;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -69,6 +70,8 @@ public class BasePresenter {
     private LaunchService launchService;
     @Autowired(required = false)
     private LogView logView;
+    @Autowired
+    private LaunchView launchView;
 
     @FXML
     private MenuButton menu;
@@ -147,6 +150,8 @@ public class BasePresenter {
             }
             bindProfileList();
             bindTaskStatus(true);
+
+            renderingTab.setContent(launchView.getView());
 
 //            String url = "https://github.com/iabarca/lawena-recording-tool";
 //            WebView webView = new WebView();
@@ -335,8 +340,8 @@ public class BasePresenter {
     private void launch(ActionEvent event) {
         log.debug("Launch game button pressed");
         Platform.runLater(() -> {
-            launchService.reset();
-            launchService.start();
+            launchService.restart();
+            tabs.getSelectionModel().select(renderingTab);
         });
     }
 
