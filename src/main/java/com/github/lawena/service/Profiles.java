@@ -2,8 +2,8 @@ package com.github.lawena.service;
 
 import com.github.lawena.domain.Launcher;
 import com.github.lawena.domain.Profile;
-import com.github.lawena.views.LauncherPresenter;
-import com.github.lawena.views.LauncherView;
+import com.github.lawena.views.GamePresenter;
+import com.github.lawena.views.GameView;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
@@ -109,8 +109,8 @@ public interface Profiles {
 
     Optional<Launcher> findLauncherByName(String launcherName);
 
-    LauncherView getView(Launcher launcher);
+    GameView getView(Launcher launcher);
 
-    LauncherPresenter getPresenter(Launcher launcher);
+    GamePresenter getPresenter(Launcher launcher);
 
 }

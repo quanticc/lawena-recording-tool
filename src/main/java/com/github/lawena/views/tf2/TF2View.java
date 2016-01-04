@@ -1,12 +1,12 @@
 package com.github.lawena.views.tf2;
 
 import com.github.lawena.views.AbstractFXMLView;
-import com.github.lawena.views.LauncherPresenter;
-import com.github.lawena.views.LauncherView;
+import com.github.lawena.views.GamePresenter;
+import com.github.lawena.views.GameView;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TF2View extends AbstractFXMLView implements LauncherView {
+public class TF2View extends AbstractFXMLView implements GameView {
 
     @Override
     public final String getName() {
@@ -14,8 +14,8 @@ public class TF2View extends AbstractFXMLView implements LauncherView {
     }
 
     @Override
-    public LauncherPresenter getPresenter() {
-        return (LauncherPresenter) super.getPresenter();
+    public GamePresenter getPresenter() {
+        return (GamePresenter) super.getPresenter();
     }
 
 }

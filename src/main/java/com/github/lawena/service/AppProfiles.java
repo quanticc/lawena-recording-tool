@@ -3,8 +3,8 @@ package com.github.lawena.service;
 import com.github.lawena.domain.AppProfile;
 import com.github.lawena.domain.Launcher;
 import com.github.lawena.domain.Profile;
-import com.github.lawena.views.LauncherPresenter;
-import com.github.lawena.views.LauncherView;
+import com.github.lawena.views.GamePresenter;
+import com.github.lawena.views.GameView;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -41,11 +41,11 @@ public class AppProfiles implements Profiles {
             FXCollections.checkedObservableList(FXCollections.observableArrayList(DEFAULT_PROFILE), Profile.class));
     private final ListProperty<Launcher> launchers = new SimpleListProperty<>(this, "launchers",
             FXCollections.checkedObservableList(FXCollections.observableArrayList(DEFAULT_LAUNCHER), Launcher.class));
-    private final List<LauncherView> launcherViews; // injected
+    private final List<GameView> gameViews; // injected
 
     @Autowired
-    public AppProfiles(List<LauncherView> launcherViews) {
-        this.launcherViews = launcherViews;
+    public AppProfiles(List<GameView> gameViews) {
+        this.gameViews = gameViews;
     }
 
     @PostConstruct
@@ -218,8 +218,8 @@ public class AppProfiles implements Profiles {
     }
 
     @Override
-    public LauncherView getView(Launcher launcher) {
-        LauncherView view = launcherViews.stream()
+    public GameView getView(Launcher launcher) {
+        GameView view = gameViews.stream()
                 .filter(v -> v.getName().equals(launcher.getViewName()))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("No view defined with name " + launcher.getViewName()));
@@ -228,7 +228,7 @@ public class AppProfiles implements Profiles {
     }
 
     @Override
-    public LauncherPresenter getPresenter(Launcher launcher) {
+    public GamePresenter getPresenter(Launcher launcher) {
         return getView(launcher).getPresenter();
     }
 

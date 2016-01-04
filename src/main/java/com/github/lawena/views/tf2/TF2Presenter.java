@@ -8,8 +8,8 @@ import com.github.lawena.service.Profiles;
 import com.github.lawena.service.Resources;
 import com.github.lawena.service.TaskService;
 import com.github.lawena.util.*;
-import com.github.lawena.views.LauncherPresenter;
-import com.github.lawena.views.TagsCell;
+import com.github.lawena.views.GamePresenter;
+import com.github.lawena.util.TagsCell;
 import com.github.lawena.views.dialog.CustomSettingsDialog;
 import com.github.lawena.views.dialog.ResourceFilterDialog;
 import com.github.lawena.views.dialog.SimpleCustomSettingsDialog;
@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
 import static com.github.lawena.util.BindUtils.*;
 
 @Component
-public class TF2Presenter implements LauncherPresenter {
+public class TF2Presenter implements GamePresenter {
 
     private static final Logger log = LoggerFactory.getLogger(TF2Presenter.class);
 

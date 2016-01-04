@@ -10,10 +10,9 @@ import com.github.lawena.service.TaskService;
 import com.github.lawena.service.fx.LaunchService;
 import com.github.lawena.task.ScanTask;
 import com.github.lawena.util.LwrtUtils;
-import com.github.lawena.views.LauncherView;
+import com.github.lawena.views.GameView;
 import com.github.lawena.views.dialog.NewProfileDialog;
 import com.github.lawena.views.launch.LaunchView;
-import com.github.lawena.views.log.LogView;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
@@ -68,8 +67,6 @@ public class BasePresenter {
     private TaskProgressView taskProgressView;
     @Autowired
     private LaunchService launchService;
-    @Autowired(required = false)
-    private LogView logView;
     @Autowired
     private LaunchView launchView;
 
@@ -88,25 +85,13 @@ public class BasePresenter {
     @FXML
     private Tab setupTab;
     @FXML
-    private Tab foldersTab;
-    @FXML
     private Tab renderingTab;
     @FXML
     private Tab demosTab;
     @FXML
     private Tab tasksTab;
     @FXML
-    private Tab logTab;
-    @FXML
     private Pane tasksPane;
-    @FXML
-    private Pane foldersPane;
-    @FXML
-    private Pane renderingPane;
-    @FXML
-    private Pane demosPane;
-    @FXML
-    private Pane logPane;
     @FXML
     private VBox mainContainer;
     @FXML
@@ -143,11 +128,6 @@ public class BasePresenter {
             Stage stage = (Stage) tabs.getScene().getWindow();
             stage.setOnCloseRequest(e -> exit());
             resources.foldersProperty().addListener(resourceFolderListener);
-            if (logView != null) {
-                logTab.setContent(logView.getView());
-            } else {
-                tabs.getTabs().remove(logTab);
-            }
             bindProfileList();
             bindTaskStatus(true);
 
@@ -245,7 +225,7 @@ public class BasePresenter {
         try {
             // get the launcher defined in the given profile
             Launcher app = profiles.getLauncher(profile).get();
-            LauncherView view = profiles.getView(app);
+            GameView view = profiles.getView(app);
 
             // unbind
             //FXUtils.runAndWait(() -> view.getPresenter().unbind(profile));
@@ -260,7 +240,7 @@ public class BasePresenter {
         try {
             // get the launcher defined in the given profile
             Launcher launcher = profiles.getLauncher(profile).get();
-            LauncherView view = profiles.getView(launcher);
+            GameView view = profiles.getView(launcher);
             syncResourceFolders(launcher);
 
             // perform binding and display view

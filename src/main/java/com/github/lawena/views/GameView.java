@@ -2,12 +2,12 @@ package com.github.lawena.views;
 
 import javafx.scene.Parent;
 
-public interface LauncherView {
+public interface GameView {
 
     String getName();
 
     Parent getView();
 
-    LauncherPresenter getPresenter();
+    GamePresenter getPresenter();
 
 }

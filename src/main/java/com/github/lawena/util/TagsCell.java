@@ -1,4 +1,4 @@
-package com.github.lawena.views;
+package com.github.lawena.util;
 
 import com.github.lawena.Messages;
 import com.github.lawena.domain.Resource;

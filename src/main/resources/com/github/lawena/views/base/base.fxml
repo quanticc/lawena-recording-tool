@@ -38,45 +38,11 @@
                      </center>
                   </BorderPane>
                </content></Tab>
-                <Tab fx:id="foldersTab" closable="false" text="%ui.base.tabs.folders">
-                    <content>
-                        <VBox fx:id="foldersPane">
-                            <padding>
-                                <Insets left="3.0" right="3.0" top="3.0" />
-                            </padding>
-                        </VBox>
-                    </content>
-                </Tab>
-                <Tab fx:id="renderingTab" closable="false" text="%ui.base.tabs.rendering">
-                    <content>
-                        <VBox fx:id="renderingPane">
-                            <padding>
-                                <Insets left="3.0" right="3.0" top="3.0" />
-                            </padding>
-                        </VBox>
-                    </content>
-                </Tab>
-                <Tab fx:id="demosTab" closable="false" text="%ui.base.tabs.demos">
-                    <content>
-                        <VBox fx:id="demosPane">
-                            <padding>
-                                <Insets left="3.0" right="3.0" top="3.0" />
-                            </padding>
-                        </VBox>
-                    </content>
-                </Tab>
+                <Tab fx:id="renderingTab" closable="false" text="%ui.base.tabs.rendering" />
+                <Tab fx:id="demosTab" closable="false" text="%ui.base.tabs.demos" />
                 <Tab fx:id="tasksTab" closable="false" text="%ui.base.tabs.tasks">
                     <content>
                         <VBox fx:id="tasksPane" spacing="5.0">
-                            <padding>
-                                <Insets left="3.0" right="3.0" top="3.0" />
-                            </padding>
-                        </VBox>
-                    </content>
-                </Tab>
-                <Tab fx:id="logTab" text="%ui.base.tabs.log">
-                    <content>
-                        <VBox fx:id="logPane" spacing="5.0">
                             <padding>
                                 <Insets left="3.0" right="3.0" top="3.0" />
                             </padding>

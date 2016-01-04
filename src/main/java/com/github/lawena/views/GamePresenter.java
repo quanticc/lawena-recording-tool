@@ -3,7 +3,7 @@ package com.github.lawena.views;
 import com.github.lawena.domain.Profile;
 import org.controlsfx.validation.ValidationResult;
 
-public interface LauncherPresenter {
+public interface GamePresenter {
 
     void bind(Profile profile);
 

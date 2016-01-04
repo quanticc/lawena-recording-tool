@@ -12,7 +12,7 @@ import com.github.lawena.service.Profiles;
 import com.github.lawena.service.ValidationService;
 import com.github.lawena.task.LaunchTask;
 import com.github.lawena.task.LawenaTask;
-import com.github.lawena.views.CustomTaskProgressViewSkin;
+import com.github.lawena.util.CustomTaskProgressViewSkin;
 import com.github.lawena.views.base.BasePresenter;
 import com.github.lawena.views.dialog.NewProfileDialog;
 import javafx.concurrent.Task;
