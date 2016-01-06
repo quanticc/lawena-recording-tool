@@ -12,7 +12,6 @@ import com.github.lawena.views.GamePresenter;
 import com.github.lawena.util.TagsCell;
 import com.github.lawena.views.dialog.CustomSettingsDialog;
 import com.github.lawena.views.dialog.ResourceFilterDialog;
-import com.github.lawena.views.dialog.SimpleCustomSettingsDialog;
 import com.github.lawena.views.dialog.data.CustomSettingsData;
 import com.github.lawena.views.tf2.skybox.PreviewTask;
 import com.github.lawena.views.tf2.skybox.Skybox;
@@ -370,7 +369,7 @@ public class TF2Presenter implements GamePresenter {
         TableColumn<Resource, ObservableSet<Tag>> tagsCol =
                 new TableColumn<>(Messages.getString("ui.tf2.resources.tagsColumn"));
         tagsCol.setCellValueFactory(new PropertyValueFactory<>("tags"));
-        tagsCol.setCellFactory(param -> new TagsCell());
+        tagsCol.setCellFactory(tableColumn -> new TagsCell());
         tagsCol.setEditable(false);
 
         resourcesTable.getColumns().add(enabledCol);
@@ -539,7 +538,7 @@ public class TF2Presenter implements GamePresenter {
     @FXML
     private void showCustomSettingsDialog(ActionEvent event) {
         if (customSettingsDialog == null) {
-            customSettingsDialog = new SimpleCustomSettingsDialog(windowFromEvent(event));
+            customSettingsDialog = new CustomSettingsDialog(windowFromEvent(event));
         }
         CustomSettingsData input = new CustomSettingsData();
         input.setContent(config.customSettingsProperty().get());
