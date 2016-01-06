@@ -4,7 +4,6 @@ import com.github.lawena.config.Constants;
 import com.github.lawena.config.LawenaProperties;
 import com.github.lawena.domain.DataValidationMessage;
 import com.github.lawena.domain.Launcher;
-import com.github.lawena.domain.OperatingSystemMap;
 import com.github.lawena.domain.Profile;
 import com.github.lawena.util.LaunchException;
 import com.github.lawena.util.LwrtUtils;
@@ -31,8 +30,6 @@ public class ValidationService {
 
     private final LawenaProperties properties;
     private final Profiles profiles;
-
-    private final OperatingSystemMap steamExecutable = OperatingSystemMap.create("steam.exe", "steam.app", "steam.sh");
 
     @Autowired
     public ValidationService(LawenaProperties properties, Profiles profiles) {
@@ -128,7 +125,7 @@ public class ValidationService {
 
     public Path getSteamExecutable() throws LaunchException {
         try {
-            return getSteamPath().toRealPath().resolve(steamExecutable.get());
+            return getSteamPath().toRealPath().resolve(Constants.STEAM_APP_NAME.get());
         } catch (IOException e) {
             throw new LaunchException("Could not get real steam path", e);
         }
@@ -159,7 +156,7 @@ public class ValidationService {
     }
 
     private boolean isSteamPath(Path path) {
-        return path != null && Files.isDirectory(path) && Files.exists(path.resolve(steamExecutable.get()));
+        return path != null && Files.isDirectory(path) && Files.exists(path.resolve(Constants.STEAM_APP_NAME.get()));
     }
 
     private Optional<ValidationMessage> validateSourceLauncher(Profile profile) {
@@ -180,13 +177,8 @@ public class ValidationService {
         }
     }
 
-    public Path getGameProcess() throws LaunchException {
-        Launcher launcher = profiles.getLauncher(getSelectedProfile()).get();
-        try {
-            return getGamePath().toRealPath().getParent().resolve(launcher.getGameProcess().get());
-        } catch (IOException e) {
-            throw new LaunchException("Could not get real game path", e);
-        }
+    public String getGameProcess() {
+        return profiles.getLauncher(getSelectedProfile()).get().getGameProcess().get();
     }
 
     public Path getGamePath() throws LaunchException {

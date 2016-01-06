@@ -1,7 +1,5 @@
 package com.github.lawena.domain;
 
-import javafx.beans.Observable;
-
 import java.util.Optional;
 
 /**
@@ -10,7 +8,7 @@ import java.util.Optional;
  *
  * @author Ivan
  */
-public interface Profile extends Observable {
+public interface Profile {
 
     /**
      * Get the identifying name of this profile. It must be unique within a profile container.

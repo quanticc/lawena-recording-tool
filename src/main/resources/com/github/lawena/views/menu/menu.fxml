@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.input.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<MenuBar fx:id="menuBar" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.lawena.views.menu.MenuPresenter">
+  <menus>
+    <Menu mnemonicParsing="false" text="%ui.menu.file.title">
+      <items>
+        <MenuItem mnemonicParsing="false" onAction="#exit" text="%ui.menu.file.exit">
+               <accelerator>
+                  <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP" />
+               </accelerator></MenuItem>
+      </items>
+    </Menu>
+      <Menu mnemonicParsing="false" text="%ui.menu.tools.title">
+        <items>
+          <MenuItem fx:id="configureLaunchers" mnemonicParsing="false" onAction="#configureLaunchers" text="%ui.menu.tools.configureLaunchers" />
+        </items>
+      </Menu>
+    <Menu mnemonicParsing="false" text="%ui.menu.help.title">
+      <items>
+            <MenuItem mnemonicParsing="false" text="%ui.menu.help.checkForUpdates" />
+        <MenuItem mnemonicParsing="false" text="%ui.menu.help.about" />
+      </items>
+    </Menu>
+  </menus>
+</MenuBar>

@@ -108,13 +108,22 @@ public class LawenaProperties {
                 "\nCurrent locale            : " + System.getProperty("user.language") + "_" + System.getProperty("user.country") +
                 "\n----------------------------- Settings -----------------------------" +
                 "\nProfile config location   : " + profilesPath +
-                "\nSteam directory           : " + formatNullOrEmpty(steamPath) +
+                "\nSteam directory (global)  : " + formatNullOrEmpty(steamPath) +
+                "\nSeconds to wait on launch : " + formatZeroAsUnlimited(launchTimeout) +
                 "\n----------------------------- Profiles -----------------------------" +
-                "\nSelected                  : " + selected + '\n' +
+                "\nSelected profile          : " + selected + '\n' +
                 profiles.stream().map(AppProfile::toFullString).collect(Collectors.joining("\n")) +
                 "\n----------------------------- Launchers ----------------------------\n" +
                 launchers.stream().map(Launcher::toFullString).collect(Collectors.joining("\n")) +
                 "\n--------------------------------------------------------------------";
+    }
+
+    private String formatZeroAsUnlimited(int value) {
+        if (value == 0) {
+            return "unlimited";
+        } else {
+            return value + "";
+        }
     }
 
     private String formatNullOrEmpty(Object o) {

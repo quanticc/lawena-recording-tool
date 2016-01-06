@@ -49,6 +49,12 @@ public final class LwrtUtils {
 
     @Cacheable
     public static Image image(String location) {
+        try {
+            return new Image(location);
+        } catch (Exception e) {
+            // fallback to load as resource
+            log.debug("Could not load image as URL: {}", e.toString());
+        }
         try (InputStream input = LwrtUtils.class.getResourceAsStream(location)) {
             if (input != null) {
                 return new Image(input);

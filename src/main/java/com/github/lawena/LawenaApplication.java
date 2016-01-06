@@ -2,6 +2,7 @@ package com.github.lawena;
 
 import com.github.lawena.config.LawenaProperties;
 import com.github.lawena.service.PersistenceService;
+import com.github.lawena.service.TaskService;
 import com.github.lawena.service.fx.WatchService;
 import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.base.BaseView;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Lazy;
 @EnableConfigurationProperties(LawenaProperties.class)
 @SpringBootApplication
 public class LawenaApplication extends AbstractJavaFxApplicationSupport {
+
     private static final Logger log = LoggerFactory.getLogger(LawenaApplication.class);
 
     @Autowired
@@ -31,6 +33,9 @@ public class LawenaApplication extends AbstractJavaFxApplicationSupport {
 
     @Autowired
     private WatchService watchService;
+
+    @Autowired
+    private TaskService taskService;
 
     @Autowired
     private LawenaProperties properties;
@@ -60,6 +65,7 @@ public class LawenaApplication extends AbstractJavaFxApplicationSupport {
     @Override
     public void stop() throws Exception {
         super.stop();
+        taskService.shutdownNow();
         watchService.cancel();
         persistenceService.saveLaunchSettings();
     }

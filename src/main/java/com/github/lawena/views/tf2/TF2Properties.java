@@ -1,6 +1,6 @@
 package com.github.lawena.views.tf2;
 
-import com.github.lawena.Messages;
+import com.github.lawena.config.Constants;
 import com.github.lawena.domain.ConfigFlag;
 import com.github.lawena.util.ExternalString;
 import com.github.lawena.views.tf2.skybox.Skybox;
@@ -22,14 +22,10 @@ public class TF2Properties {
     public static final List<String> DEFAULT_RESOURCES = Arrays.asList("no_announcer_voices.vpk",
             "no_applause_sounds.vpk", "no_domination_sounds.vpk");
 
-    private static ExternalString ext(String key) {
-        return new ExternalString(key, Messages::getString);
-    }
-
     // @formatter:off
     private ObjectProperty<Integer>        width                 = objectProperty("launch.width", 1280);
     private ObjectProperty<Integer>        height                = objectProperty("launch.height", 720);
-    private ObjectProperty<ExternalString> dxlevel               = objectProperty("launch.dxlevel", ext("DxLevel80"));
+    private ObjectProperty<ExternalString> dxlevel               = objectProperty("launch.dxlevel", Constants.DEFAULT_DIRECTX_LEVEL);
     private BooleanProperty                insecure              = booleanProperty("launch.insecure", false);
     private BooleanProperty                defaultLaunch         = booleanProperty("launch.default", false);
     private IntegerProperty                launchTimeout         = integerProperty("launch.timeout", 120);
@@ -37,16 +33,16 @@ public class TF2Properties {
     private BooleanProperty                noSkipToTickLines     = booleanProperty("vdm.noSkipToTickLines", false);
     private BooleanProperty                deleteUnneededBackups = booleanProperty("backups.deleteUnneeded", true);
     private IntegerProperty                folderSizeLimit       = integerProperty("backups.folderSizeLimit", 120);
-    private ObjectProperty<ExternalString> captureMode           = objectProperty("recorder.mode", ext("SourceRecorderTGA"));
+    private ObjectProperty<ExternalString> captureMode           = objectProperty("recorder.mode", Constants.DEFAULT_CAPTURE_MODE);
     private ObjectProperty<Integer>        quality               = objectProperty("recorder.quality", 90);
     private ObjectProperty<Integer>        fps                   = objectProperty("recorder.fps", 120);
     private StringProperty                 gamePath              = stringProperty("path.game", "");
     private StringProperty                 framesPath            = stringProperty("path.frames", "");
     private StringProperty                 steamPath             = stringProperty("path.steam", "");
     private ListProperty<ConfigFlag>       flagItems             = listProperty("flag.items");
-    private ObjectProperty<ExternalString> hud                   = objectProperty("tf2.hud", ext("HudMinimal"));
+    private ObjectProperty<ExternalString> hud                   = objectProperty("tf2.hud", Constants.DEFAULT_HUD);
     private ObjectProperty<Skybox>         skybox                = objectProperty("tf2.skybox", Skybox.DEFAULT);
-    private ObjectProperty<ExternalString> viewmodelSwitch       = objectProperty("tf2.cfg.viewmodels", ext("VmSwitchOn"));
+    private ObjectProperty<ExternalString> viewmodelSwitch       = objectProperty("tf2.cfg.viewmodels", Constants.DEFAULT_VIEWMODEL);
     private ObjectProperty<Double>         viewmodelFov          = objectProperty("tf2.cfg.viewmodelFov", 75D);
     private StringProperty                 customSettings        = stringProperty("tf2.cfg.custom", "");
     private ObjectProperty<Dimension2D>    customSettingsDialog  = objectProperty("tf2.customSettingsDialog", new Dimension2D(500.0, 400.0));

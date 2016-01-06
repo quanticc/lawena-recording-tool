@@ -1,6 +1,7 @@
 package com.github.lawena.config;
 
 import com.github.lawena.Messages;
+import com.github.lawena.domain.Launcher;
 import com.github.lawena.domain.OperatingSystemMap;
 import com.github.lawena.util.ExternalString;
 
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Application constants.
@@ -24,14 +26,22 @@ public final class Constants {
     public static final Path HANDLE_PATH = LWRT_PATH.resolve("tools/handle/handle.exe");
     public static final Path PROCESS_CHECKER_PATH = LWRT_PATH.resolve("tools/processcheck/procchk.vbs");
     public static final OperatingSystemMap STEAM_APP_NAME = OperatingSystemMap.create("steam.exe", "steam.app", "steam.sh");
-    public static final List<ExternalString> CAPTURE_MODES = ExternalString.from(Messages::getString,
+    public static final List<ExternalString> CAPTURE_MODES = ExternalString.from(s -> Messages.getString("capture." + s),
             Arrays.asList("SourceRecorderTGA", "SourceRecorderJPEG", "SrcDemo2Managed", "SrcDemo2Standalone"));
-    public static final List<ExternalString> DIRECTX_LEVELS = ExternalString.from(Messages::getString,
+    public static final List<ExternalString> DIRECTX_LEVELS = ExternalString.from(s -> Messages.getString("dxlevel." + s),
             Arrays.asList("DxLevel80", "DxLevel81", "DxLevel90", "DxLevel95", "DxLevel98"));
-    public static final List<ExternalString> HUDS = ExternalString.from(Messages::getString,
+    public static final List<ExternalString> HUDS = ExternalString.from(s -> Messages.getString("hud." + s),
             Arrays.asList("HudMinimal", "HudBasic", "HudCustom"));
-    public static final List<ExternalString> VIEWMODELS = ExternalString.from(Messages::getString,
+    public static final List<ExternalString> VIEWMODELS = ExternalString.from(s -> Messages.getString("viewmodel." + s),
             Arrays.asList("VmSwitchOn", "VmSwitchOff", "VmSwitchDefault"));
+    public static final List<ExternalString> LAUNCH_MODES = ExternalString.from(s -> Messages.getString("launchMode." + s),
+            Arrays.asList(Launcher.Mode.values()).stream().map(Enum::name).collect(Collectors.toList()));
+    public static final ExternalString DEFAULT_CAPTURE_MODE = CAPTURE_MODES.get(0);
+    public static final ExternalString DEFAULT_DIRECTX_LEVEL = DIRECTX_LEVELS.get(4);
+    public static final ExternalString DEFAULT_HUD = HUDS.get(0);
+    public static final ExternalString DEFAULT_VIEWMODEL = VIEWMODELS.get(2);
+    public static final ExternalString DEFAULT_LAUNCH_MODE = LAUNCH_MODES.get(1);
+    public static final String JPEG_CAPTURE_MODE_KEY = CAPTURE_MODES.get(1).getKey();
     public static final Map<String, Object> USER_FRIENDLY_KEYMAP = new HashMap<String, Object>() {
         {
             put("UPARROW", "Up arrow");

@@ -32,6 +32,18 @@ public class OperatingSystemMap {
         }
     }
 
+    public void set(String value) {
+        if (LwrtUtils.isWindows()) {
+            windows = value;
+        } else if (LwrtUtils.isMacOS()) {
+            osx = value;
+        } else if (LwrtUtils.isLinux()) {
+            linux = value;
+        } else {
+            throw new UnsupportedOperationException("Unsupported OS");
+        }
+    }
+
     public String getWindows() {
         return windows;
     }

@@ -1,12 +1,13 @@
 package com.github.lawena.domain;
 
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents the data container that will hold all user and game settings.
@@ -20,7 +21,6 @@ public class AppProfile implements Profile {
     private String name = "Default";
     private String launcher = "?";
     private Map<String, Object> settings = new HashMap<>();
-    private transient List<InvalidationListener> listeners = new ArrayList<>();
 
     public AppProfile() {
     }
@@ -46,8 +46,6 @@ public class AppProfile implements Profile {
     @Override
     public void setName(String name) {
         this.name = name;
-        // for now only publish renaming events
-        Platform.runLater(() -> listeners.forEach(c -> c.invalidated(this)));
     }
 
     public String getLauncher() {
@@ -93,15 +91,4 @@ public class AppProfile implements Profile {
     public int hashCode() {
         return Objects.hash(name);
     }
-
-    @Override
-    public void addListener(InvalidationListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(InvalidationListener listener) {
-        listeners.remove(listener);
-    }
-
 }

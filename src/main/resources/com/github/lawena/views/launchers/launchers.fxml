@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="480.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.lawena.views.launchers.LaunchersPresenter">
+   <center>
+      <SplitPane dividerPositions="0.25">
+         <items>
+            <ListView fx:id="launchersList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
+            <TabPane>
+               <tabs>
+                  <Tab closable="false" text="%ui.launchers.tabs.general">
+                     <content>
+                        <VBox spacing="5.0">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                           <children>
+                              <Label prefHeight="25.0" text="%ui.launchers.display">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <Label prefWidth="100.0" text="%ui.launchers.name" />
+                                    <TextField fx:id="name" disable="true" editable="false" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                    <Button mnemonicParsing="false" onAction="#rename" text="%ui.launchers.rename" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" layoutX="35.0" layoutY="40.0" spacing="5.0">
+                                 <children>
+                                    <Label prefWidth="100.0" text="%ui.launchers.icon" />
+                                    <TextField fx:id="icon" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <Label layoutX="15.0" layoutY="15.0" prefHeight="25.0" text="%ui.launchers.execution">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="description" layoutX="35.0" layoutY="135.0" wrapText="true">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <Label text="%ui.launchers.gameDirDescription" wrapText="true">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" layoutX="35.0" layoutY="40.0" spacing="5.0">
+                                 <children>
+                                    <Label prefWidth="100.0" text="%ui.launchers.gameDirectory" />
+                                    <TextField fx:id="gamePath" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                    <Button mnemonicParsing="false" onAction="#chooseGamePath" text="..." />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" layoutX="15.0" layoutY="164.0" spacing="5.0">
+                                 <children>
+                                    <Label prefWidth="100.0" text="%ui.launchers.launchMode" />
+                                    <ComboBox fx:id="launchMode" prefWidth="200.0" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <Pane fx:id="launchModePane" maxWidth="1.7976931348623157E308" prefHeight="55.0">
+                                 <VBox.margin>
+                                    <Insets left="40.0" right="40.0" />
+                                 </VBox.margin>
+                              </Pane>
+                              <Label layoutX="15.0" layoutY="105.0" prefHeight="25.0" text="%ui.launchers.advanced">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Button mnemonicParsing="false" onAction="#deleteSelectedLauncher" text="%ui.launchers.delete">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#newLauncher" text="%ui.launchers.new">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+                  <Tab closable="false" text="%ui.launchers.tabs.folders">
+                     <content>
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label prefHeight="25.0" text="%ui.launchers.baseDirTitle">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label text="%ui.launchers.baseDirDescription" wrapText="true">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <Label text="%ui.launchers.baseDir" />
+                                    <TextField fx:id="basePath" HBox.hgrow="ALWAYS" />
+                                    <Button mnemonicParsing="false" onAction="#chooseBasePath" text="..." />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <Label layoutX="15.0" layoutY="15.0" prefHeight="25.0" text="%ui.launchers.additionalSources">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <CheckBox fx:id="includeGamePath" mnemonicParsing="false" prefHeight="25.0" text="%ui.launchers.includeGameDir" wrapText="true">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </CheckBox>
+                              <HBox spacing="5.0">
+                                 <children>
+                                    <ListView fx:id="sourcesList" maxWidth="1.7976931348623157E308" prefHeight="150.0" HBox.hgrow="ALWAYS" />
+                                    <VBox spacing="5.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#addSource" prefWidth="25.0" text="+" />
+                                          <Button mnemonicParsing="false" onAction="#removeSelectedSource" prefWidth="25.0" text="-" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </VBox>
+                     </content>
+                  </Tab>
+                  <Tab closable="false" text="%ui.launchers.tabs.config">
+                     <content>
+                        <VBox spacing="5.0">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                           <children>
+                              <Label prefHeight="25.0" text="%ui.launchers.templates">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label text="%ui.launchers.templatesDescription" wrapText="true">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox spacing="5.0">
+                                 <children>
+                                    <TableView fx:id="flagsTable" editable="true" maxWidth="1.7976931348623157E308" prefHeight="250.0" HBox.hgrow="ALWAYS">
+                                       <columns>
+                                          <TableColumn fx:id="keyFlagColumn" prefWidth="145.0" text="%ui.launchers.flags.key" />
+                                          <TableColumn fx:id="defaultEnabledColumn" prefWidth="90.0" text="%ui.launchers.flags.defaultEnabled" />
+                                          <TableColumn prefWidth="75.0" text="%ui.launchers.flags.values">
+                                             <columns>
+                                                <TableColumn fx:id="enabledValueColumn" prefWidth="90.0" text="%ui.launchers.flags.enabled" />
+                                                <TableColumn fx:id="disabledValueColumn" prefWidth="90.0" text="%ui.launchers.flags.disabled" />
+                                             </columns>
+                                          </TableColumn>
+                                       </columns>
+                                    </TableView>
+                                    <VBox spacing="5.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#addFlag" prefWidth="25.0" text="+" />
+                                          <Button mnemonicParsing="false" onAction="#removeSelectedFlag" prefWidth="25.0" text="-" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+               </tabs>
+            </TabPane>
+         </items>
+      </SplitPane>
+   </center>
+</BorderPane>

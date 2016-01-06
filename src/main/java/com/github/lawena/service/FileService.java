@@ -322,7 +322,7 @@ public class FileService {
                         "o15", "p16", "q17", "r18", "s19", "t20", "u21", "v22", "w23", "x24", "y25", "z26"};
         Path basePath = validationService.getBasePath(profile);
         String mode = validationService.getString(profile, "recorder.mode");
-        String video = ("SourceRecorderJPEG".equals(mode) ? "jpg" : "tga");
+        String video = (Constants.JPEG_CAPTURE_MODE_KEY.equals(mode) ? "jpg" : "tga");
         String audio = "wav";
         int quality = validationService.getInteger(profile, "recorder.quality");
         String framesDir = validationService.getString(profile, "path.frames");

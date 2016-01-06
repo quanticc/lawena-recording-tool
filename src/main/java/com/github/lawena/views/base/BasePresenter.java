@@ -13,9 +13,8 @@ import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.GameView;
 import com.github.lawena.views.dialog.NewProfileDialog;
 import com.github.lawena.views.launch.LaunchView;
+import com.github.lawena.views.menu.MenuView;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.When;
@@ -24,12 +23,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Pair;
 import org.controlsfx.control.TaskProgressView;
@@ -69,6 +66,8 @@ public class BasePresenter {
     private LaunchService launchService;
     @Autowired
     private LaunchView launchView;
+    @Autowired
+    private MenuView menuView;
 
     @FXML
     private MenuButton menu;
@@ -123,10 +122,10 @@ public class BasePresenter {
     private void initialize() {
         log.debug("Initializing FX UI");
         VBox.setVgrow(taskProgressView, Priority.ALWAYS);
+        mainContainer.getChildren().add(0, menuView.getView());
         tasksPane.getChildren().add(taskProgressView);
         Platform.runLater(() -> {
-            Stage stage = (Stage) tabs.getScene().getWindow();
-            stage.setOnCloseRequest(e -> exit());
+            tabs.getScene().getWindow().setOnCloseRequest(e -> exit());
             resources.foldersProperty().addListener(resourceFolderListener);
             bindProfileList();
             bindTaskStatus(true);
@@ -140,7 +139,6 @@ public class BasePresenter {
 //            webView.getEngine().load(url);
 //            foldersPane.getChildren().add(webView);
         });
-        //taskService.scheduleLater(3000, this::bindTaskStatus);
     }
 
     private void bindTaskStatus(boolean wasNotInterrupted) {
@@ -180,37 +178,8 @@ public class BasePresenter {
         Bindings.bindContentBidirectional(profilesComboBox.itemsProperty().get(), profiles
                 .profilesProperty().get());
         profilesComboBox.setValue(profiles.getSelected());
-        Callback<ListView<Profile>, ListCell<Profile>> cellFactory = param -> new ListCell<Profile>() {
+        setProfileCellFactory();
 
-            InvalidationListener listener = p -> setText(((Profile) p).getName());
-
-            @Override
-            protected void updateItem(Profile item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setGraphic(null);
-                    setText(null);
-                } else {
-                    Optional<Launcher> o = profiles.getLauncher(item);
-                    if (o.isPresent()) {
-                        Launcher app = o.get();
-                        String iconLocation = app.getIcon();
-                        ImageView icon = null;
-                        if (!LwrtUtils.isNullOrEmpty(iconLocation)) {
-                            icon = new ImageView(LwrtUtils.image(iconLocation));
-                            icon.setFitWidth(16);
-                            icon.setFitHeight(16);
-                        }
-                        setGraphic(icon);
-                        setText(item.getName());
-                        // subscribe to this item changes
-                        item.addListener(new WeakInvalidationListener(listener));
-                    }
-                }
-            }
-        };
-        profilesComboBox.setButtonCell(cellFactory.call(null));
-        profilesComboBox.setCellFactory(cellFactory);
         Bindings.bindBidirectional(profilesComboBox.valueProperty(), profiles.selectedProperty());
         profiles.selectedProperty().addListener((obs, pre, cur) -> {
             log.debug("Selected profile change: {} -> {}", pre.getName(), cur.getName());
@@ -218,6 +187,12 @@ public class BasePresenter {
             bindProfile(cur);
         });
         bindProfile(profiles.getSelected());
+    }
+
+    private void setProfileCellFactory() {
+        Callback<ListView<Profile>, ListCell<Profile>> cellFactory = listView -> new ProfileCell(profiles);
+        profilesComboBox.setButtonCell(cellFactory.call(null));
+        profilesComboBox.setCellFactory(cellFactory);
     }
 
     private void unbindProfile(Profile profile) {
@@ -228,7 +203,6 @@ public class BasePresenter {
             GameView view = profiles.getView(app);
 
             // unbind
-            //FXUtils.runAndWait(() -> view.getPresenter().unbind(profile));
             Platform.runLater(() -> view.getPresenter().unbind(profile));
         } catch (NoSuchElementException e) {
             log.warn("Invalid profile definition of {}: {}", profile.getName(), e.toString());
@@ -242,9 +216,7 @@ public class BasePresenter {
             Launcher launcher = profiles.getLauncher(profile).get();
             GameView view = profiles.getView(launcher);
             syncResourceFolders(launcher);
-
             // perform binding and display view
-            //FXUtils.runAndWait(() -> {
             Platform.runLater(() -> {
                 view.getPresenter().bind(profile);
                 setupTab.setContent(view.getView());
@@ -341,12 +313,9 @@ public class BasePresenter {
         setupTab.getContent().setDisable(value);
     }
 
-    @FXML
     private void exit() {
         log.debug("Exiting controller");
         unbindProfile(profiles.getSelected());
-        taskService.shutdownNow();
-        resources.foldersProperty().removeListener(resourceFolderListener);
         Platform.exit();
     }
 
@@ -390,7 +359,10 @@ public class BasePresenter {
                 alert.setContentText(Messages.getString("ui.base.renameProfile.failedContent"));
                 alert.showAndWait();
             } else {
-                Platform.runLater(() -> profiles.rename(profile, name));
+                Platform.runLater(() -> {
+                    profiles.rename(profile, name);
+                    setProfileCellFactory();
+                });
             }
         });
     }
