@@ -1,10 +1,21 @@
 package com.github.lawena.views.launchers;
 
-import com.github.lawena.util.LwrtUtils;
+import com.github.lawena.repository.ImageRepository;
 import javafx.scene.control.ListCell;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static com.github.lawena.util.FXUtils.asyncToFxThread;
 
 public class FxLauncherCell extends ListCell<FxLauncher> {
+
+    private final ImageRepository images;
+
+    @Autowired
+    public FxLauncherCell(ImageRepository images) {
+        this.images = images;
+    }
 
     @Override
     protected void updateItem(FxLauncher item, boolean empty) {
@@ -13,18 +24,15 @@ public class FxLauncherCell extends ListCell<FxLauncher> {
             setGraphic(null);
             setText(null);
         } else {
-            setGraphic(getIcon(item.iconProperty().get()));
+            asyncToFxThread(() -> images.image(item.iconProperty().get()), image -> setGraphic(fitImageView(image)));
             setText(item.nameProperty().get());
         }
     }
 
-    private ImageView getIcon(String location) {
-        ImageView icon = null;
-        if (!LwrtUtils.isNullOrEmpty(location)) {
-            icon = new ImageView(LwrtUtils.image(location));
-            icon.setFitWidth(16);
-            icon.setFitHeight(16);
-        }
+    private ImageView fitImageView(Image image) {
+        ImageView icon = new ImageView(image);
+        icon.setFitWidth(16);
+        icon.setFitHeight(16);
         return icon;
     }
 }

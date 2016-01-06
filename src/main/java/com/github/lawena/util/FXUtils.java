@@ -12,10 +12,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyEvent;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -23,6 +23,23 @@ import java.util.regex.Pattern;
  * Collection of helpful JavaFX utility methods.
  */
 public class FXUtils {
+
+    private static final ExecutorService pool = Executors.newCachedThreadPool();
+
+    /**
+     * Performs an operation which computes a value in a background thread, then consume that value in the FX Application Thread.
+     *
+     * @param supplyInBackground a supplier processed in the background
+     * @param consumeInFxThread  a consumer processed in the FX Application Thread
+     * @param <T>                the type of the computed value
+     */
+    public static <T> void asyncToFxThread(Supplier<T> supplyInBackground, Consumer<T> consumeInFxThread) {
+        CompletableFuture.supplyAsync(supplyInBackground, pool).thenAcceptAsync(consumeInFxThread, Platform::runLater);
+    }
+
+    public static List<Runnable> shutdownPool() {
+        return pool.shutdownNow();
+    }
 
     /**
      * Restricts the possible user input to the given node.

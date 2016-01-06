@@ -1,11 +1,12 @@
 package com.github.lawena.util;
 
-import javafx.scene.image.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.InvalidPathException;
@@ -25,7 +26,6 @@ import java.util.prefs.Preferences;
  */
 public final class LwrtUtils {
     private static final Logger log = LoggerFactory.getLogger(LwrtUtils.class);
-    public static final String IMAGES_BASE = "/com/github/lawena"; // NON-NLS
 
     private static boolean windows;
     private static boolean macOS;
@@ -35,38 +35,16 @@ public final class LwrtUtils {
         try {
             String osname = System.getProperty("os.name");
             osname = (osname == null) ? "" : osname;
-            windows = (osname.contains("Windows")); //NON-NLS
-            macOS = (osname.contains("Mac OS") || //NON-NLS
-                    osname.contains("MacOS")); //NON-NLS
-            linux = (osname.contains("Linux")); //NON-NLS
+            windows = (osname.contains("Windows"));
+            macOS = (osname.contains("Mac OS") ||
+                    osname.contains("MacOS"));
+            linux = (osname.contains("Linux"));
         } catch (Exception e) {
             log.warn("Could not get OS name property");
         }
     }
 
     private LwrtUtils() {
-    }
-
-    @Cacheable
-    public static Image image(String location) {
-        try {
-            return new Image(location);
-        } catch (Exception e) {
-            // fallback to load as resource
-            log.debug("Could not load image as URL: {}", e.toString());
-        }
-        try (InputStream input = LwrtUtils.class.getResourceAsStream(location)) {
-            if (input != null) {
-                return new Image(input);
-            }
-        } catch (IOException e) {
-            log.debug("Could not load image from {}: {}", location, e.toString());
-        }
-        return null;
-    }
-
-    public static Image localImage(String location) {
-        return image(IMAGES_BASE + location);
     }
 
     /**

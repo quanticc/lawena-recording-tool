@@ -1,13 +1,14 @@
 package com.github.lawena.views.launch;
 
 import com.github.lawena.Messages;
+import com.github.lawena.config.Constants;
 import com.github.lawena.domain.ValidationItem;
 import com.github.lawena.event.LaunchFinishedEvent;
 import com.github.lawena.event.LaunchNextStateEvent;
 import com.github.lawena.event.LaunchStartedEvent;
 import com.github.lawena.event.LaunchStatusUpdateEvent;
+import com.github.lawena.repository.ImageRepository;
 import com.github.lawena.util.FXUtils;
-import com.github.lawena.util.LwrtUtils;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -22,6 +23,7 @@ import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,9 @@ import java.time.format.DateTimeFormatter;
 public class LaunchPresenter {
 
     private static final Logger log = LoggerFactory.getLogger(LaunchPresenter.class);
+
+    @Autowired
+    private ImageRepository images;
 
     @FXML
     private Label setupStateLabel;
@@ -84,8 +89,8 @@ public class LaunchPresenter {
         ProgressIndicator indicator = new ProgressIndicator(-1);
         indicator.setPrefSize(16, 16);
         workingGraphic = indicator;
-        errorGraphic = new ImageView(LwrtUtils.localImage("/fugue/cross-circle.png"));
-        warningGraphic = new ImageView(LwrtUtils.localImage("/fugue/exclamation.png"));
+        errorGraphic = new ImageView(images.image(Constants.IMAGES_BASE + "/fugue/cross-circle.png"));
+        warningGraphic = new ImageView(images.image(Constants.IMAGES_BASE + "/fugue/exclamation.png"));
         Platform.runLater(() -> {
             Label[] labels = {setupStateLabel, replaceStateLabel, gameStateLabel, restoreStateLabel};
             State[] states = {State.SETUP, State.REPLACE, State.GAME, State.RESTORE};
@@ -122,7 +127,7 @@ public class LaunchPresenter {
     }
 
     private Node tickGraphic() {
-        return new ImageView(LwrtUtils.localImage("/fugue/tick-circle.png"));
+        return new ImageView(images.image(Constants.IMAGES_BASE + "/fugue/tick-circle.png"));
     }
 
     private Node bulletGraphic() {

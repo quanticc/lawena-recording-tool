@@ -21,6 +21,7 @@ public final class Constants {
     public static final String SPRING_PROFILE_DEVELOPMENT = "dev";
 
     public static final String CUSTOM_FOLDER_NAME = "custom";
+    public static final String IMAGES_BASE = "/com/github/lawena";
     public static final Path LWRT_PATH = Paths.get("lwrt");
     public static final Path VTFCMD_PATH = LWRT_PATH.resolve("tools/vtfcmd/VTFCmd.exe");
     public static final Path HANDLE_PATH = LWRT_PATH.resolve("tools/handle/handle.exe");

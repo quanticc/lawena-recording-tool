@@ -3,11 +3,12 @@ package com.github.lawena.views.launchers;
 import com.github.lawena.Messages;
 import com.github.lawena.config.Constants;
 import com.github.lawena.config.LawenaProperties;
+import com.github.lawena.event.LaunchersUpdatedEvent;
 import com.github.lawena.util.ExternalString;
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,6 +25,8 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -37,6 +40,10 @@ public class LaunchersPresenter {
 
     private static final Logger log = LoggerFactory.getLogger(LaunchersPresenter.class);
 
+    @Autowired
+    private ApplicationContext context;
+    @Autowired
+    private ApplicationEventPublisher publisher;
     @Autowired
     private LawenaProperties lawenaProperties;
 
@@ -92,7 +99,11 @@ public class LaunchersPresenter {
     private TextField steamPath;
     private TextField appId;
     private Map<ExternalString, Node> launchModeCards = new HashMap<>();
-    private InvalidationListener refreshLauncherCells = o -> setLaunchersCellFactory();
+    private ChangeListener<String> refreshLauncherCells = (o, oldValue, newValue) -> {
+        if (newValue != null) {
+            setLaunchersCellFactory();
+        }
+    };
 
     @FXML
     private void initialize() {
@@ -187,7 +198,7 @@ public class LaunchersPresenter {
     }
 
     private void setLaunchersCellFactory() {
-        launchersList.setCellFactory(listView -> new FxLauncherCell());
+        launchersList.setCellFactory(listView -> context.getBean(FxLauncherCell.class));
     }
 
     private void bindLauncher(FxLauncher launcher) {
@@ -233,6 +244,7 @@ public class LaunchersPresenter {
         lawenaProperties.getLaunchers().stream()
                 .map(FxLauncher::launcherToFxLauncher)
                 .forEach(fxLaunchers::add);
+        launchersList.getSelectionModel().selectFirst();
     }
 
     public void save() {
@@ -247,6 +259,7 @@ public class LaunchersPresenter {
         lawenaProperties.setLaunchers(fxLaunchers.stream()
                 .map(FxLauncher::fxLauncherToLauncher)
                 .collect(Collectors.toList()));
+        publisher.publishEvent(new LaunchersUpdatedEvent(this));
     }
 
     public void clear() {

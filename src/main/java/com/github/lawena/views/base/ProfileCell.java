@@ -2,23 +2,26 @@ package com.github.lawena.views.base;
 
 import com.github.lawena.domain.Launcher;
 import com.github.lawena.domain.Profile;
+import com.github.lawena.repository.ImageRepository;
 import com.github.lawena.service.Profiles;
-import com.github.lawena.util.LwrtUtils;
 import javafx.scene.control.ListCell;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
+import static com.github.lawena.util.FXUtils.asyncToFxThread;
+
 public class ProfileCell extends ListCell<Profile> {
 
-    private static final Logger log = LoggerFactory.getLogger(ProfileCell.class);
-
     private final Profiles profiles;
+    private final ImageRepository images;
 
-    public ProfileCell(Profiles profiles) {
+    @Autowired
+    public ProfileCell(Profiles profiles, ImageRepository images) {
         this.profiles = profiles;
+        this.images = images;
     }
 
     @Override
@@ -30,19 +33,16 @@ public class ProfileCell extends ListCell<Profile> {
         } else {
             Optional<Launcher> o = profiles.getLauncher(item);
             if (o.isPresent()) {
-                setGraphic(getIcon(o.get().getIcon()));
+                asyncToFxThread(() -> images.image(o.get().getIcon()), image -> setGraphic(fitImageView(image)));
                 setText(item.getName());
             }
         }
     }
 
-    private ImageView getIcon(String location) {
-        ImageView icon = null;
-        if (!LwrtUtils.isNullOrEmpty(location)) {
-            icon = new ImageView(LwrtUtils.image(location));
-            icon.setFitWidth(16);
-            icon.setFitHeight(16);
-        }
+    private ImageView fitImageView(Image image) {
+        ImageView icon = new ImageView(image);
+        icon.setFitWidth(16);
+        icon.setFitHeight(16);
         return icon;
     }
 }

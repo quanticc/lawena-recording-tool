@@ -4,6 +4,7 @@ import com.github.lawena.Messages;
 import com.github.lawena.config.Constants;
 import com.github.lawena.domain.Launcher;
 import com.github.lawena.domain.Profile;
+import com.github.lawena.event.LaunchersUpdatedEvent;
 import com.github.lawena.service.Profiles;
 import com.github.lawena.service.Resources;
 import com.github.lawena.service.TaskService;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -190,9 +192,9 @@ public class BasePresenter {
     }
 
     private void setProfileCellFactory() {
-        Callback<ListView<Profile>, ListCell<Profile>> cellFactory = listView -> new ProfileCell(profiles);
+        Callback<ListView<Profile>, ListCell<Profile>> cellFactory = listView -> context.getBean(ProfileCell.class);
+        profilesComboBox.setCellFactory(listView -> context.getBean(ProfileCell.class));
         profilesComboBox.setButtonCell(cellFactory.call(null));
-        profilesComboBox.setCellFactory(cellFactory);
     }
 
     private void unbindProfile(Profile profile) {
@@ -365,6 +367,11 @@ public class BasePresenter {
                 });
             }
         });
+    }
+
+    @EventListener
+    private void launchersUpdated(LaunchersUpdatedEvent event) {
+        Platform.runLater(this::setProfileCellFactory);
     }
 
     @FXML

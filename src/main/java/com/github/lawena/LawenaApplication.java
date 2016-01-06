@@ -4,12 +4,13 @@ import com.github.lawena.config.LawenaProperties;
 import com.github.lawena.service.PersistenceService;
 import com.github.lawena.service.TaskService;
 import com.github.lawena.service.fx.WatchService;
-import com.github.lawena.util.LwrtUtils;
+import com.github.lawena.util.FXUtils;
 import com.github.lawena.views.base.BaseView;
 import com.github.lawena.views.dialog.ExceptionDialog;
 import javafx.application.HostServices;
 import javafx.application.Preloader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +53,7 @@ public class LawenaApplication extends AbstractJavaFxApplicationSupport {
         persistenceService.loadLaunchSettings();
         log.debug("Current application settings: {}", properties.toPrettyString());
         stage.setTitle("Lawena Recording Tool");
-        stage.getIcons().addAll(LwrtUtils.localImage("/cap-64px.png"), LwrtUtils.localImage("/cap-48px.png"),
-                LwrtUtils.localImage("/cap-32px.png"), LwrtUtils.localImage("/cap-16px.png"));
+        stage.getIcons().addAll(getApplicationIcons());
         stage.setScene(new Scene(baseView.getView()));
         stage.setResizable(true);
         stage.centerOnScreen();
@@ -62,10 +62,20 @@ public class LawenaApplication extends AbstractJavaFxApplicationSupport {
         watchService.start();
     }
 
+    private Image[] getApplicationIcons() {
+        return new Image[]{
+                new Image("/com/github/lawena/cap-64px.png"),
+                new Image("/com/github/lawena/cap-48px.png"),
+                new Image("/com/github/lawena/cap-32px.png"),
+                new Image("/com/github/lawena/cap-16px.png")
+        };
+    }
+
     @Override
     public void stop() throws Exception {
         super.stop();
         taskService.shutdownNow();
+        FXUtils.shutdownPool();
         watchService.cancel();
         persistenceService.saveLaunchSettings();
     }
