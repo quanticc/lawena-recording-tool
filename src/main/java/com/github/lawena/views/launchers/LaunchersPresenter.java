@@ -9,6 +9,7 @@ import com.github.lawena.util.ExternalString;
 import com.github.lawena.util.FXUtils;
 import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.GameView;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
@@ -27,6 +28,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import org.controlsfx.validation.ValidationResult;
 import org.controlsfx.validation.ValidationSupport;
@@ -43,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Component
@@ -60,6 +64,8 @@ public class LaunchersPresenter {
     private List<GameView> gameViews;
     @Autowired
     private Profiles profiles;
+    @Autowired
+    private HostServices hostServices;
 
     @FXML
     private ListView<FxLauncher> launchersList;
@@ -99,6 +105,8 @@ public class LaunchersPresenter {
     private Button removeFlag;
     @FXML
     private Button removeSource;
+    @FXML
+    private TextFlow templateInfoFlow;
 
     private final ListProperty<FxLauncher> fxLaunchers = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final Map<FxLauncher, String> renames = new LinkedHashMap<>();
@@ -171,6 +179,12 @@ public class LaunchersPresenter {
         expandedContainer = new VBox(5);
         validationReport = new ListView<>(FXCollections.observableArrayList());
         expandedContainer.getChildren().add(validationReport);
+
+        Hyperlink link = new Hyperlink("Mustache");
+        String url = "https://mustache.github.io/";
+        link.setOnAction(e -> CompletableFuture.runAsync(() -> hostServices.showDocument(url)));
+        link.setTooltip(new Tooltip(url));
+        templateInfoFlow.getChildren().addAll(new Text(Messages.getString("ui.launchers.templateLanguage")), link);
     }
 
     private boolean isValidViewName(String value) {
@@ -318,8 +332,9 @@ public class LaunchersPresenter {
         });
     }
 
-    public void save() {
-        if (validationSupport.isInvalid()) {
+    public boolean isValid() {
+        boolean valid = !validationSupport.isInvalid();
+        if (!valid) {
             ValidationResult result = validationSupport.getValidationResult();
             result.getWarnings().forEach(w -> log.info("Validation {}: {} @ {}", w.getSeverity(), w.getText(), w.getTarget()));
             result.getErrors().forEach(e -> log.info("Validation {}: {} @ {}", e.getSeverity(), e.getText(), e.getTarget()));
@@ -329,7 +344,12 @@ public class LaunchersPresenter {
                     Messages.getString("ui.launchers.save.invalidTitle"),
                     Messages.getString("ui.launchers.save.invalidHeader"),
                     Messages.getString("ui.launchers.save.invalidContent"), expandedContainer);
-        } else {
+        }
+        return valid;
+    }
+
+    public void save() {
+        if (!validationSupport.isInvalid()) {
             log.debug("Saving launchers from dialog data");
             lawenaProperties.getProfiles().forEach(p -> {
                 // find if this profile belongs to a renamed launcher

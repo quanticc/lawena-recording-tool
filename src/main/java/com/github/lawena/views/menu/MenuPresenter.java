@@ -6,6 +6,7 @@ import com.github.lawena.views.launchers.LaunchersPresenter;
 import com.github.lawena.views.launchers.LaunchersView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.MenuBar;
@@ -38,17 +39,23 @@ public class MenuPresenter {
 
     @FXML
     private void configureLaunchers(ActionEvent event) {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle(Messages.getString("ui.launchers.title"));
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
-        dialog.getDialogPane().setContent(launchersView.getView());
+        Parent view = launchersView.getView();
         LaunchersPresenter presenter = (LaunchersPresenter) launchersView.getPresenter();
         presenter.load();
-        Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            ButtonType buttonType = result.get();
-            if (buttonType == ButtonType.APPLY) {
-                presenter.save();
+        boolean done = false;
+        while (!done) {
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle(Messages.getString("ui.launchers.title"));
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
+            dialog.getDialogPane().setContent(view);
+            Optional<ButtonType> result = dialog.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.APPLY) {
+                done = presenter.isValid(); // invalid result will enter loop again
+                if (done) {
+                    presenter.save();
+                }
+            } else {
+                done = true;
             }
         }
         presenter.clear();

@@ -30,7 +30,7 @@
                                  <children>
                                     <Label prefWidth="100.0" text="%ui.launchers.name" />
                                     <TextField fx:id="name" disable="true" editable="false" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                                    <Button mnemonicParsing="false" onAction="#rename" text="%ui.launchers.rename" />
+                                    <Button mnemonicParsing="false" onAction="#rename" text="%ui.launchers.rename.button" />
                                  </children>
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
@@ -98,7 +98,7 @@
                                     <Font name="System Bold" size="14.0" />
                                  </font>
                               </Label>
-                              <Button fx:id="deleteLauncher" mnemonicParsing="false" onAction="#deleteSelectedLauncher" text="%ui.launchers.delete">
+                              <Button fx:id="deleteLauncher" mnemonicParsing="false" onAction="#deleteSelectedLauncher" text="%ui.launchers.delete.button">
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
@@ -148,7 +148,7 @@
                               </CheckBox>
                               <HBox spacing="5.0">
                                  <children>
-                                    <ListView fx:id="sourcesList" maxWidth="1.7976931348623157E308" prefHeight="150.0" HBox.hgrow="ALWAYS" />
+                                    <ListView fx:id="sourcesList" maxWidth="1.7976931348623157E308" prefHeight="250.0" HBox.hgrow="ALWAYS" />
                                     <VBox spacing="5.0">
                                        <children>
                                           <Button mnemonicParsing="false" onAction="#addSource" prefWidth="25.0" text="+" />
@@ -186,7 +186,7 @@
                               </Label>
                               <HBox spacing="5.0">
                                  <children>
-                                    <TableView fx:id="flagsTable" editable="true" maxWidth="1.7976931348623157E308" prefHeight="250.0" HBox.hgrow="ALWAYS">
+                                    <TableView fx:id="flagsTable" editable="true" maxWidth="1.7976931348623157E308" prefHeight="340.0" HBox.hgrow="ALWAYS">
                                        <columns>
                                           <TableColumn fx:id="keyFlagColumn" prefWidth="150.0" text="%ui.launchers.flags.key" />
                                           <TableColumn fx:id="defaultEnabledColumn" prefWidth="90.0" text="%ui.launchers.flags.defaultEnabled" />
@@ -209,6 +209,11 @@
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
                               </HBox>
+                              <TextFlow fx:id="templateInfoFlow">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </TextFlow>
                            </children>
                         </VBox>
                      </content>
