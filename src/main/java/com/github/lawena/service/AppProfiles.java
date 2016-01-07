@@ -3,6 +3,7 @@ package com.github.lawena.service;
 import com.github.lawena.domain.AppProfile;
 import com.github.lawena.domain.Launcher;
 import com.github.lawena.domain.Profile;
+import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.GamePresenter;
 import com.github.lawena.views.GameView;
 import javafx.beans.property.ListProperty;
@@ -135,7 +136,7 @@ public class AppProfiles implements Profiles {
     private Profile duplicateProfile(Profile baseProfile) {
         AppProfile newProfile = new AppProfile();
         AppProfile.copy((AppProfile) baseProfile, newProfile);
-        renameProfile(newProfile, findAvailableNameFrom(baseProfile.getName()));
+        renameProfile(newProfile, LwrtUtils.findAvailableNameFrom(baseProfile.getName(), this::findByName));
         return newProfile;
     }
 
@@ -163,22 +164,6 @@ public class AppProfiles implements Profiles {
         } else {
             profile.setName(newName);
         }
-    }
-
-    private String findAvailableNameFrom(String name) {
-        String src = name.trim();
-        if (!findByName(src).isPresent()) {
-            return name;
-        }
-        String append = " - Copy";
-        src = src.contains(append) ? src.substring(0, src.indexOf(append)) : src;
-        String dest = src + append;
-        int count = 2;
-        while (findByName(dest).orElse(null) != null) {
-            dest = src + " - Copy (" + count + ")";
-            count++;
-        }
-        return dest;
     }
 
     @Override

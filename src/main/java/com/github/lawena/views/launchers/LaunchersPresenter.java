@@ -470,25 +470,9 @@ public class LaunchersPresenter {
         FxLauncher launcher = launchersList.getSelectionModel().getSelectedItem();
         if (launcher != null) {
             FxLauncher dupe = FxLauncher.duplicate(launcher);
-            dupe.setName(findAvailableNameFrom(launcher.getName()));
+            dupe.setName(LwrtUtils.findAvailableNameFrom(launcher.getName(), this::findByName));
             launchersList.getItems().add(dupe);
         }
-    }
-
-    private String findAvailableNameFrom(String name) {
-        String src = name.trim();
-        if (!findByName(src).isPresent()) {
-            return name;
-        }
-        String append = " - Copy";
-        src = src.contains(append) ? src.substring(0, src.indexOf(append)) : src;
-        String dest = src + append;
-        int count = 2;
-        while (findByName(dest).orElse(null) != null) {
-            dest = src + " - Copy (" + count + ")";
-            count++;
-        }
-        return dest;
     }
 
     private Optional<FxLauncher> findByName(String name) {

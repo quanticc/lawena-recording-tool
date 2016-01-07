@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.jar.JarFile;
 import java.util.prefs.Preferences;
 
@@ -170,5 +171,28 @@ public final class LwrtUtils {
                 && Files.isDirectory(path)
                 && !path.startsWith(Paths.get("").toAbsolutePath().getParent())
                 && Files.exists(path.resolve(executableName));
+    }
+
+    /**
+     * Get a unique name base on a given one.
+     *
+     * @param name   the original name to begin
+     * @param finder a function to search by name, which must return an empty optional if the name does not exist
+     * @return a new name, based on the original one
+     */
+    public static String findAvailableNameFrom(String name, Function<String, Optional<?>> finder) {
+        String src = name.trim();
+        if (!finder.apply(src).isPresent()) {
+            return name;
+        }
+        String append = " - Copy";
+        src = src.contains(append) ? src.substring(0, src.indexOf(append)) : src;
+        String dest = src + append;
+        int count = 2;
+        while (finder.apply(dest).orElse(null) != null) {
+            dest = src + " - Copy (" + count + ")";
+            count++;
+        }
+        return dest;
     }
 }
