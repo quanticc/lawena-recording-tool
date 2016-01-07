@@ -5,7 +5,7 @@ Simple Java program that greatly enhances your TF2 and other Source games image 
 
 Easy to install and use. Does not interfere with your regular configs, HUD or launch options.
 
-![Version 5](http://i.imgur.com/EF807TE.png)
+![Version 5](http://i.imgur.com/4viFT1K.png)
 
 ## Installing Lawena
 
@@ -13,7 +13,7 @@ For a stable version, check the [releases](https://github.com/iabarca/lawena-rec
 
 ## About this branch
 
-This branch is for development towards version 5.0.0. Currently unstable and not available through auto-updater.
+This branch is for development towards version 5.0.0. Currently supporting TF2 launch only.
 
 ## Credits
 
