@@ -1,5 +1,6 @@
 package com.github.lawena.util;
 
+import com.github.lawena.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -143,5 +145,30 @@ public final class LwrtUtils {
         }
         sb.append(str);
         return sb.toString();
+    }
+
+    public static boolean isValidSteamPath(String steamPath) {
+        Optional<Path> path = tryGetPath(steamPath);
+        return path.isPresent() && isValidSteamPath(path.get());
+    }
+
+    public static boolean isValidSteamPath(Path path) {
+        return path != null && Files.isDirectory(path) && Files.exists(path.resolve(Constants.STEAM_APP_NAME.get()));
+    }
+
+    public static boolean isValidGamePath(String gamePath, String executableName) {
+        Optional<Path> path = tryGetPath(gamePath);
+        return path.isPresent() && isValidGamePath(path.get(), executableName);
+    }
+
+    public static boolean isValidGamePath(Path gamePath, String executableName) {
+        Path path = gamePath.toAbsolutePath().getParent();
+        return path != null
+                && Files.exists(gamePath)
+                && Files.isDirectory(gamePath)
+                && Files.exists(path)
+                && Files.isDirectory(path)
+                && !path.startsWith(Paths.get("").toAbsolutePath().getParent())
+                && Files.exists(path.resolve(executableName));
     }
 }

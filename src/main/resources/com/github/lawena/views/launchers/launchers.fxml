@@ -45,6 +45,15 @@
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
                               </HBox>
+                              <HBox alignment="CENTER_LEFT" layoutX="35.0" layoutY="75.0" spacing="5.0">
+                                 <children>
+                                    <Label prefWidth="100.0" text="%ui.launchers.viewName" />
+                                    <TextField fx:id="viewName" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
                               <Label layoutX="15.0" layoutY="15.0" prefHeight="25.0" text="%ui.launchers.execution">
                                  <font>
                                     <Font name="System Bold" size="14.0" />
@@ -79,17 +88,17 @@
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
                               </HBox>
-                              <Pane fx:id="launchModePane" maxWidth="1.7976931348623157E308" prefHeight="55.0">
+                              <VBox fx:id="launchModePane" maxWidth="1.7976931348623157E308" prefHeight="55.0">
                                  <VBox.margin>
                                     <Insets left="40.0" right="40.0" />
                                  </VBox.margin>
-                              </Pane>
+                              </VBox>
                               <Label layoutX="15.0" layoutY="105.0" prefHeight="25.0" text="%ui.launchers.advanced">
                                  <font>
                                     <Font name="System Bold" size="14.0" />
                                  </font>
                               </Label>
-                              <Button mnemonicParsing="false" onAction="#deleteSelectedLauncher" text="%ui.launchers.delete">
+                              <Button fx:id="deleteLauncher" mnemonicParsing="false" onAction="#deleteSelectedLauncher" text="%ui.launchers.delete">
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
@@ -143,7 +152,7 @@
                                     <VBox spacing="5.0">
                                        <children>
                                           <Button mnemonicParsing="false" onAction="#addSource" prefWidth="25.0" text="+" />
-                                          <Button mnemonicParsing="false" onAction="#removeSelectedSource" prefWidth="25.0" text="-" />
+                                          <Button fx:id="removeSource" mnemonicParsing="false" onAction="#removeSelectedSource" prefWidth="25.0" text="-" />
                                        </children>
                                     </VBox>
                                  </children>
@@ -179,7 +188,7 @@
                                  <children>
                                     <TableView fx:id="flagsTable" editable="true" maxWidth="1.7976931348623157E308" prefHeight="250.0" HBox.hgrow="ALWAYS">
                                        <columns>
-                                          <TableColumn fx:id="keyFlagColumn" prefWidth="145.0" text="%ui.launchers.flags.key" />
+                                          <TableColumn fx:id="keyFlagColumn" prefWidth="150.0" text="%ui.launchers.flags.key" />
                                           <TableColumn fx:id="defaultEnabledColumn" prefWidth="90.0" text="%ui.launchers.flags.defaultEnabled" />
                                           <TableColumn prefWidth="75.0" text="%ui.launchers.flags.values">
                                              <columns>
@@ -192,7 +201,7 @@
                                     <VBox spacing="5.0">
                                        <children>
                                           <Button mnemonicParsing="false" onAction="#addFlag" prefWidth="25.0" text="+" />
-                                          <Button mnemonicParsing="false" onAction="#removeSelectedFlag" prefWidth="25.0" text="-" />
+                                          <Button fx:id="removeFlag" mnemonicParsing="false" onAction="#removeSelectedFlag" prefWidth="25.0" text="-" />
                                        </children>
                                     </VBox>
                                  </children>

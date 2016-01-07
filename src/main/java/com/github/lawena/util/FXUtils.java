@@ -99,6 +99,31 @@ public class FXUtils {
         return alert.showAndWait();
     }
 
+    public static Optional<ButtonType> showWarning(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        return alert.showAndWait();
+    }
+
+    public static Optional<ButtonType> showWarning(String title, String header, String content, Node expanded) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.getDialogPane().setExpandableContent(expanded);
+        return alert.showAndWait();
+    }
+
+    public static Optional<ButtonType> showConfirmation(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        return alert.showAndWait();
+    }
+
     /**
      * Runs the specified {@link Runnable} on the
      * JavaFX application thread and waits for completion.

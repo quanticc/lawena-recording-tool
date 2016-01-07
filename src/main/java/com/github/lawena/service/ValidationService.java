@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -139,13 +137,13 @@ public class ValidationService {
         String key = "lawena.steamPath";
         Launcher launcher = profiles.getLauncher(profile).get();
         Path path = LwrtUtils.tryGetPath(profile.get(key).map(Object::toString).orElse(null))
-                .filter(this::isSteamPath)
+                .filter(LwrtUtils::isValidSteamPath)
                 .orElseGet(
                         () -> LwrtUtils.tryGetPath(launcher.getSteamPath())
-                                .filter(this::isSteamPath)
+                                .filter(LwrtUtils::isValidSteamPath)
                                 .orElseGet(
                                         () -> LwrtUtils.tryGetPath(properties.getSteamPath())
-                                                .filter(this::isSteamPath)
+                                                .filter(LwrtUtils::isValidSteamPath)
                                                 .orElse(null)
                                 )
                 );
@@ -153,10 +151,6 @@ public class ValidationService {
             throw new LaunchException("Invalid steam path");
         }
         return path;
-    }
-
-    private boolean isSteamPath(Path path) {
-        return path != null && Files.isDirectory(path) && Files.exists(path.resolve(Constants.STEAM_APP_NAME.get()));
     }
 
     private Optional<ValidationMessage> validateSourceLauncher(Profile profile) {
@@ -202,11 +196,7 @@ public class ValidationService {
     }
 
     private boolean hasGameExecutable(Path gamePath, Launcher launcher) {
-        Path path = gamePath.toAbsolutePath().getParent();
-        return path != null
-                && Files.isDirectory(path)
-                && !path.startsWith(Paths.get("").toAbsolutePath().getParent())
-                && Files.exists(path.resolve(launcher.getGameExecutable().get()));
+        return LwrtUtils.isValidGamePath(gamePath, launcher.getGameExecutable().get());
     }
 
     public Path getBasePath() throws LaunchException {

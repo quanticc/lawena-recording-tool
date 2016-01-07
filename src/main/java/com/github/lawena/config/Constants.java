@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
  */
 public final class Constants {
 
-    public static final String SPRING_PROFILE_DEVELOPMENT = "dev";
-
     public static final String CUSTOM_FOLDER_NAME = "custom";
     public static final String IMAGES_BASE = "/com/github/lawena";
     public static final Path LWRT_PATH = Paths.get("lwrt");
@@ -41,7 +39,8 @@ public final class Constants {
     public static final ExternalString DEFAULT_DIRECTX_LEVEL = DIRECTX_LEVELS.get(4);
     public static final ExternalString DEFAULT_HUD = HUDS.get(0);
     public static final ExternalString DEFAULT_VIEWMODEL = VIEWMODELS.get(2);
-    public static final ExternalString DEFAULT_LAUNCH_MODE = LAUNCH_MODES.get(1);
+    public static final ExternalString STEAM_LAUNCH_MODE = LAUNCH_MODES.get(0);
+    public static final ExternalString HL2_LAUNCH_MODE = LAUNCH_MODES.get(1);
     public static final String JPEG_CAPTURE_MODE_KEY = CAPTURE_MODES.get(1).getKey();
     public static final Map<String, Object> USER_FRIENDLY_KEYMAP = new HashMap<String, Object>() {
         {

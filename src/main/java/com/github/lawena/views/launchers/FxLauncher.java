@@ -5,6 +5,7 @@ import com.github.lawena.domain.Launcher;
 import com.github.lawena.util.ExternalString;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +21,30 @@ public class FxLauncher {
         return from.save();
     }
 
+    public static FxLauncher duplicate(FxLauncher launcher) {
+        FxLauncher fxLauncher = new FxLauncher();
+        fxLauncher.setName("L-" + System.currentTimeMillis());
+        fxLauncher.setIcon(launcher.getIcon());
+        fxLauncher.setGamePath(launcher.getGamePath());
+        fxLauncher.setLaunchMode(launcher.getLaunchMode());
+        fxLauncher.setModName(launcher.getModName());
+        fxLauncher.setAppId(launcher.getAppId());
+        fxLauncher.setSteamPath(launcher.getSteamPath());
+        fxLauncher.setGameExecutable(launcher.getGameExecutable());
+        fxLauncher.setGameProcess(launcher.getGameProcess());
+        fxLauncher.setBasePath(launcher.getBasePath());
+        fxLauncher.setViewName(launcher.getViewName());
+        fxLauncher.setIncludeGamePath(launcher.getIncludeGamePath());
+        launcher.getResourceFolders().stream().forEach(fxLauncher.resourceFolders::add);
+        launcher.getFlags().stream().map(FxConfigFlag::duplicate).forEach(fxLauncher.flags::add);
+        return fxLauncher;
+    }
+
     private final Launcher launcher;
     private final StringProperty name = emptyStringProperty();
     private final StringProperty icon = emptyStringProperty();
     private final StringProperty gamePath = emptyStringProperty();
-    private final ObjectProperty<ExternalString> launchMode = objectProperty(Constants.DEFAULT_LAUNCH_MODE);
+    private final ObjectProperty<ExternalString> launchMode = objectProperty(Constants.HL2_LAUNCH_MODE);
     private final StringProperty modName = emptyStringProperty();
     private final StringProperty appId = emptyStringProperty();
     private final StringProperty steamPath = emptyStringProperty();
@@ -84,7 +104,7 @@ public class FxLauncher {
         return launcher;
     }
 
-    private ExternalString findFromList(List<ExternalString> list, String name) {
+    private static ExternalString findFromList(List<ExternalString> list, String name) {
         return list.stream().filter(x -> x.getKey().equals(name)).findAny().get();
     }
 
@@ -104,55 +124,172 @@ public class FxLauncher {
         return name;
     }
 
+    public String getName() {
+        return name.get();
+    }
+
+    public void setName(String name) {
+        this.name.set(name);
+    }
+
     public StringProperty iconProperty() {
         return icon;
+    }
+
+    public String getIcon() {
+        return icon.get();
+    }
+
+    public void setIcon(String icon) {
+        this.icon.set(icon);
     }
 
     public StringProperty gamePathProperty() {
         return gamePath;
     }
 
+    public String getGamePath() {
+        return gamePath.get();
+    }
+
+    public void setGamePath(String gamePath) {
+        this.gamePath.set(gamePath);
+    }
+
     public ObjectProperty<ExternalString> launchModeProperty() {
         return launchMode;
+    }
+
+    public ExternalString getLaunchMode() {
+        return launchMode.get();
+    }
+
+    public void setLaunchMode(ExternalString launchMode) {
+        this.launchMode.set(launchMode);
     }
 
     public StringProperty modNameProperty() {
         return modName;
     }
 
+    public String getModName() {
+        return modName.get();
+    }
+
+    public void setModName(String modName) {
+        this.modName.set(modName);
+    }
+
     public StringProperty appIdProperty() {
         return appId;
+    }
+
+    public String getAppId() {
+        return appId.get();
+    }
+
+    public void setAppId(String appId) {
+        this.appId.set(appId);
     }
 
     public StringProperty steamPathProperty() {
         return steamPath;
     }
 
+    public String getSteamPath() {
+        return steamPath.get();
+    }
+
+    public void setSteamPath(String steamPath) {
+        this.steamPath.set(steamPath);
+    }
+
     public StringProperty gameExecutableProperty() {
         return gameExecutable;
+    }
+
+    public String getGameExecutable() {
+        return gameExecutable.get();
+    }
+
+    public void setGameExecutable(String gameExecutable) {
+        this.gameExecutable.set(gameExecutable);
     }
 
     public StringProperty gameProcessProperty() {
         return gameProcess;
     }
 
+    public String getGameProcess() {
+        return gameProcess.get();
+    }
+
+    public void setGameProcess(String gameProcess) {
+        this.gameProcess.set(gameProcess);
+    }
+
     public StringProperty basePathProperty() {
         return basePath;
+    }
+
+    public String getBasePath() {
+        return basePath.get();
+    }
+
+    public void setBasePath(String basePath) {
+        this.basePath.set(basePath);
     }
 
     public StringProperty viewNameProperty() {
         return viewName;
     }
 
+    public String getViewName() {
+        return viewName.get();
+    }
+
+    public void setViewName(String viewName) {
+        this.viewName.set(viewName);
+    }
+
     public BooleanProperty includeGamePathProperty() {
         return includeGamePath;
+    }
+
+    public boolean getIncludeGamePath() {
+        return includeGamePath.get();
+    }
+
+    public void setIncludeGamePath(boolean includeGamePath) {
+        this.includeGamePath.set(includeGamePath);
     }
 
     public ListProperty<String> resourceFoldersProperty() {
         return resourceFolders;
     }
 
+    public ObservableList<String> getResourceFolders() {
+        return resourceFolders.get();
+    }
+
+    public void setResourceFolders(ObservableList<String> resourceFolders) {
+        this.resourceFolders.set(resourceFolders);
+    }
+
     public ListProperty<FxConfigFlag> flagsProperty() {
         return flags;
+    }
+
+    public ObservableList<FxConfigFlag> getFlags() {
+        return flags.get();
+    }
+
+    public void setFlags(ObservableList<FxConfigFlag> flags) {
+        this.flags.set(flags);
+    }
+
+    @Override
+    public String toString() {
+        return name.get();
     }
 }

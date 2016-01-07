@@ -18,11 +18,20 @@ public class FxConfigFlag {
         return from.save();
     }
 
+    public static FxConfigFlag duplicate(FxConfigFlag base) {
+        FxConfigFlag fxConfigFlag = new FxConfigFlag();
+        fxConfigFlag.setKey(base.getKey());
+        fxConfigFlag.setDefaultValue(base.getDefaultValue());
+        fxConfigFlag.setEnabledValue(base.getEnabledValue());
+        fxConfigFlag.setDisabledValue(base.getDisabledValue());
+        return fxConfigFlag;
+    }
+
     private final ConfigFlag configFlag;
-    private StringProperty key = new SimpleStringProperty(this, "key", "");
+    private StringProperty key = new SimpleStringProperty(this, "key", "profile.key.name");
     private BooleanProperty defaultValue = new SimpleBooleanProperty(this, "defaultValue", false);
-    private StringProperty enabledValue = new SimpleStringProperty(this, "enabledValue", "");
-    private StringProperty disabledValue = new SimpleStringProperty(this, "disabledValue", "");
+    private StringProperty enabledValue = new SimpleStringProperty(this, "enabledValue", "1");
+    private StringProperty disabledValue = new SimpleStringProperty(this, "disabledValue", "0");
 
     public FxConfigFlag() {
         this(new ConfigFlag());
@@ -70,15 +79,47 @@ public class FxConfigFlag {
         return key;
     }
 
+    public String getKey() {
+        return key.get();
+    }
+
+    public void setKey(String key) {
+        this.key.set(key);
+    }
+
     public BooleanProperty defaultValueProperty() {
         return defaultValue;
+    }
+
+    public boolean getDefaultValue() {
+        return defaultValue.get();
+    }
+
+    public void setDefaultValue(boolean defaultValue) {
+        this.defaultValue.set(defaultValue);
     }
 
     public StringProperty enabledValueProperty() {
         return enabledValue;
     }
 
+    public String getEnabledValue() {
+        return enabledValue.get();
+    }
+
+    public void setEnabledValue(String enabledValue) {
+        this.enabledValue.set(enabledValue);
+    }
+
     public StringProperty disabledValueProperty() {
         return disabledValue;
+    }
+
+    public String getDisabledValue() {
+        return disabledValue.get();
+    }
+
+    public void setDisabledValue(String disabledValue) {
+        this.disabledValue.set(disabledValue);
     }
 }
