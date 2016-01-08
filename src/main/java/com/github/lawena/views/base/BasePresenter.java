@@ -131,15 +131,7 @@ public class BasePresenter {
             resources.foldersProperty().addListener(resourceFolderListener);
             bindProfileList();
             bindTaskStatus(true);
-
             renderingTab.setContent(launchView.getView());
-
-//            String url = "https://github.com/iabarca/lawena-recording-tool";
-//            WebView webView = new WebView();
-//            webView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) ->
-//                    System.out.println(url + " " + oldState + " -> " + newState));
-//            webView.getEngine().load(url);
-//            foldersPane.getChildren().add(webView);
         });
     }
 
@@ -372,6 +364,9 @@ public class BasePresenter {
     @EventListener
     private void launchersUpdated(LaunchersUpdatedEvent event) {
         Platform.runLater(this::setProfileCellFactory);
+        Profile current = profiles.getSelected();
+        unbindProfile(current);
+        bindProfile(current);
     }
 
     @FXML

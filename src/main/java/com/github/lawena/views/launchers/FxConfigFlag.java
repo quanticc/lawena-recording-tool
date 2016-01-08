@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class FxConfigFlag {
 
@@ -121,5 +122,18 @@ public class FxConfigFlag {
 
     public void setDisabledValue(String disabledValue) {
         this.disabledValue.set(disabledValue);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FxConfigFlag that = (FxConfigFlag) o;
+        return Objects.equals(key.get(), that.key.get());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key.get());
     }
 }

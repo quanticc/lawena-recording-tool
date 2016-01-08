@@ -1,3 +1,11 @@
 .dialog-pane > .content {
     -fx-padding: 0;
 }
+
+.scroll-bar .increment-button {
+    -fx-padding: 5px;
+}
+
+.scroll-bar .decrement-button {
+    -fx-padding: 5px;
+}

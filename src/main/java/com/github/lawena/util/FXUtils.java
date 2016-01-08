@@ -113,6 +113,7 @@ public class FXUtils {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.getDialogPane().setExpandableContent(expanded);
+        alert.getDialogPane().setPrefWidth(500);
         return alert.showAndWait();
     }
 

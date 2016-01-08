@@ -125,7 +125,6 @@ public class LaunchersPresenter {
 
     @FXML
     private void initialize() {
-        log.debug("Initializing launchers config UI");
         Bindings.bindContentBidirectional(launchersList.itemsProperty().get(), fxLaunchers.get());
         launchersList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> {
@@ -138,9 +137,12 @@ public class LaunchersPresenter {
         removeFlag.disableProperty().bind(flagsTable.getSelectionModel().selectedItemProperty().isNull());
         Platform.runLater(this::setLaunchersCellFactory);
 
+        sourcesList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        flagsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
         launchMode.setItems(FXCollections.observableArrayList(Constants.LAUNCH_MODES));
-        launchModeCards.put(Constants.LAUNCH_MODES.get(0), configureSteamPane());
-        launchModeCards.put(Constants.LAUNCH_MODES.get(1), configureHL2Pane());
+        launchModeCards.put(Constants.STEAM_LAUNCH_MODE, configureSteamPane());
+        launchModeCards.put(Constants.HL2_LAUNCH_MODE, configureHL2Pane());
         launchMode.valueProperty().addListener((observable, oldKey, newKey) -> {
             if (oldKey != null) {
                 Optional.ofNullable(launchModeCards.get(oldKey))
@@ -159,7 +161,7 @@ public class LaunchersPresenter {
         disabledValueColumn.setCellValueFactory(new PropertyValueFactory<>("disabledValue"));
         disabledValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        description.setText(Messages.getString("ui.launchers.description", "??", "??"));
+        description.setText(Messages.getString("ui.launchers.description", "", ""));
 
         // Validation
         Validator<String> gamePathValidator = Validator.createPredicateValidator(this::isValidGamePath, Messages.getString("ui.launchers.gamePath.invalid"));
@@ -168,6 +170,8 @@ public class LaunchersPresenter {
         Validator<String> modNameValidator = Validator.createPredicateValidator(this::isValidModNameOrUnneeded, Messages.getString("ui.launchers.modNameInvalid"));
         Validator<String> basePathValidator = Validator.createPredicateValidator(this::isValidBasePath, Messages.getString("ui.launchers.basePath.invalid"));
         Validator<String> viewNameValidator = Validator.createPredicateValidator(this::isValidViewName, Messages.getString("ui.launchers.viewNameinvalid"));
+        Validator<ObservableList<FxConfigFlag>> flagsTableValidator =
+                Validator.createPredicateValidator(this::isValidFlagItems, Messages.getString("ui.launchers.flags.invalid"));
 
         validationSupport.registerValidator(gamePath, false, gamePathValidator);
         validationSupport.registerValidator(steamPath, false, steamPathValidator);
@@ -185,6 +189,10 @@ public class LaunchersPresenter {
         link.setOnAction(e -> CompletableFuture.runAsync(() -> hostServices.showDocument(url)));
         link.setTooltip(new Tooltip(url));
         templateInfoFlow.getChildren().addAll(new Text(Messages.getString("ui.launchers.templateLanguage")), link);
+    }
+
+    private boolean isValidFlagItems(ObservableList<FxConfigFlag> items) {
+        return items.stream().distinct().count() == items.size() && items.stream().noneMatch(f -> f.getKey().isEmpty());
     }
 
     private boolean isValidViewName(String value) {
@@ -333,9 +341,11 @@ public class LaunchersPresenter {
     }
 
     public boolean isValid() {
-        boolean valid = !validationSupport.isInvalid();
+        ValidationResult result = validationSupport.getValidationResult().combine(
+                ValidationResult.fromErrorIf(flagsTable, Messages.getString("ui.launchers.flags.invalid"),
+                        !isValidFlagItems(flagsTable.itemsProperty().get())));
+        boolean valid = result.getMessages().isEmpty();
         if (!valid) {
-            ValidationResult result = validationSupport.getValidationResult();
             result.getWarnings().forEach(w -> log.info("Validation {}: {} @ {}", w.getSeverity(), w.getText(), w.getTarget()));
             result.getErrors().forEach(e -> log.info("Validation {}: {} @ {}", e.getSeverity(), e.getText(), e.getTarget()));
             validationReport.getItems().clear();
@@ -349,20 +359,18 @@ public class LaunchersPresenter {
     }
 
     public void save() {
-        if (!validationSupport.isInvalid()) {
-            log.debug("Saving launchers from dialog data");
-            lawenaProperties.getProfiles().forEach(p -> {
-                // find if this profile belongs to a renamed launcher
-                // and then rename the profile
-                renames.keySet().stream()
-                        .filter(k -> k.getLauncher().getName().equals(p.getLauncher()))
-                        .forEach(k -> p.setLauncher(renames.get(k)));
-            });
-            lawenaProperties.setLaunchers(fxLaunchers.stream()
-                    .map(FxLauncher::fxLauncherToLauncher)
-                    .collect(Collectors.toList()));
-            publisher.publishEvent(new LaunchersUpdatedEvent(this));
-        }
+        log.debug("Saving launchers from dialog data");
+        lawenaProperties.getProfiles().forEach(p -> {
+            // find if this profile belongs to a renamed launcher
+            // and then rename the profile
+            renames.keySet().stream()
+                    .filter(k -> k.getLauncher().getName().equals(p.getLauncher()))
+                    .forEach(k -> p.setLauncher(renames.get(k)));
+        });
+        lawenaProperties.setLaunchers(fxLaunchers.stream()
+                .map(FxLauncher::fxLauncherToLauncher)
+                .collect(Collectors.toList()));
+        publisher.publishEvent(new LaunchersUpdatedEvent(this));
     }
 
     public void clear() {
