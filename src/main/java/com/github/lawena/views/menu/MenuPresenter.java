@@ -2,15 +2,13 @@ package com.github.lawena.views.menu;
 
 import com.github.lawena.Messages;
 import com.github.lawena.service.fx.LaunchService;
+import com.github.lawena.views.about.AboutView;
 import com.github.lawena.views.launchers.LaunchersPresenter;
 import com.github.lawena.views.launchers.LaunchersView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +23,11 @@ public class MenuPresenter {
     private LaunchersView launchersView;
     @Autowired
     private LaunchService launchService;
+    @Autowired
+    private AboutView aboutView;
 
     @FXML
     private MenuBar menuBar;
-
     @FXML
     private MenuItem configureLaunchers;
 
@@ -59,6 +58,14 @@ public class MenuPresenter {
             }
         }
         presenter.clear();
+    }
+
+    @FXML
+    private void about(ActionEvent event) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(Messages.getString("ui.about.title"));
+        dialog.setDialogPane((DialogPane) aboutView.getView());
+        dialog.showAndWait();
     }
 
     @FXML

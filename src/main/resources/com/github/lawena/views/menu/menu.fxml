@@ -22,7 +22,7 @@
     <Menu mnemonicParsing="false" text="%ui.menu.help.title">
       <items>
             <MenuItem mnemonicParsing="false" text="%ui.menu.help.checkForUpdates" />
-        <MenuItem mnemonicParsing="false" text="%ui.menu.help.about" />
+        <MenuItem mnemonicParsing="false" onAction="#about" text="%ui.menu.help.about" />
       </items>
     </Menu>
   </menus>

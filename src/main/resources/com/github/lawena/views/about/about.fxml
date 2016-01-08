@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.web.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<DialogPane headerText="Lawena Recording Tool" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="480.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.lawena.views.about.AboutPresenter">
+   <buttonTypes>
+      <ButtonType fx:constant="CLOSE" />
+   </buttonTypes>
+   <graphic>
+      <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../lawena-logo.png" />
+         </image>
+         <viewport>
+            <Rectangle2D />
+         </viewport>
+      </ImageView>
+   </graphic>
+   <content>
+      <VBox spacing="5.0">
+         <children>
+            <Label text="Copyright 2011-2016 Montz, Quantic, contributors and others." />
+            <Label text="Version 5.0.0" />
+         </children>
+      </VBox>
+   </content>
+   <expandableContent>
+      <WebView fx:id="webView" prefHeight="200.0" prefWidth="200.0" />
+   </expandableContent>
+</DialogPane>
