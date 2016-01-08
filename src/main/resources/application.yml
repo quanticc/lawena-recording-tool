@@ -36,36 +36,62 @@ lawena:
       flags:
         - key: tf2.cfg.motionBlur
           defaultValue: true
-          trueMappedValue: '1'
-          falseMappedValue: '0'
+          trueMappedValue: 1
+          falseMappedValue: 0
         - key: tf2.cfg.noDamageNumbers
           defaultValue: true
-          trueMappedValue: '0'
-          falseMappedValue: '1'
+          trueMappedValue: 0
+          falseMappedValue: 1
         - key: tf2.cfg.noCrosshairSwitch
           defaultValue: false
           trueMappedValue: '//'
           falseMappedValue: false
         - key: tf2.cfg.noHitsounds
           defaultValue: true
-          trueMappedValue: '0'
-          falseMappedValue: '1'
+          trueMappedValue: 0
+          falseMappedValue: 1
         - key: tf2.cfg.noVoice
           defaultValue: true
-          trueMappedValue: '0'
-          falseMappedValue: '1'
+          trueMappedValue: 0
+          falseMappedValue: 1
         - key: tf2.cfg.hudMinmode
           defaultValue: false
-          trueMappedValue: '1'
-          falseMappedValue: '0'
+          trueMappedValue: 1
+          falseMappedValue: 0
         - key: tf2.cfg.hudPlayerModel
           defaultValue: false
-          trueMappedValue: '1'
-          falseMappedValue: '0'
+          trueMappedValue: 1
+          falseMappedValue: 0
         - key: tf2.cfg.noCrosshair
           defaultValue: false
-          trueMappedValue: '0'
-          falseMappedValue: '1'
+          trueMappedValue: 0
+          falseMappedValue: 1
+      settings:
+        host_timescale: 0.001
+        volume: 0.5
+        key.record: P
+        key.toggleragdolls: R
+        key.lockviewmodelsoff: F1
+        key.lockviewmodelson: F2
+        key.lockviewmodels: N
+        key.lockcrosshair: M
+        key.fpsup: UPARROW
+        key.fpsdown: DOWNARROW
+        key.showhelp: F3
+        key.togglehud: H
+        key.togglenotices: K
+        key.cam.back: KP_DOWNARROW
+        key.cam.backleft: KP_END
+        key.cam.left: KP_LEFTARROW
+        key.cam.frontleft: KP_HOME
+        key.cam.front: KP_UPARROW
+        key.cam.frontright: KP_PGUP
+        key.cam.right: KP_RIGHTARROW
+        key.cam.backright: KP_PGDN
+        key.toggledist: KP_5
+        key.togglepitch: KP_INS
+        key.firstperson: KP_MINUS
+        key.thirdperson: KP_PLUS
 logging:
   file: logs/lawena.log.txt
   level:

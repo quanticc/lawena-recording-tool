@@ -55,6 +55,7 @@ public class FxLauncher {
     private final BooleanProperty includeGamePath = new SimpleBooleanProperty(false);
     private final ListProperty<String> resourceFolders = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<FxConfigFlag> flags = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<FxScope> scopes = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public FxLauncher() {
         this(new Launcher());
@@ -79,6 +80,7 @@ public class FxLauncher {
         includeGamePath.set(launcher.getResourceFolders().contains(launcher.getGamePath()));
         launcher.getResourceFolders().stream().filter(s -> !s.equals(launcher.getGamePath())).forEach(resourceFolders::add);
         launcher.getFlags().stream().map(FxConfigFlag::configFlagToFxConfigFlag).forEach(flags::add);
+        launcher.getSettings().forEach((k, v) -> scopes.add(FxScope.create(k, v)));
         return this;
     }
 
@@ -101,6 +103,7 @@ public class FxLauncher {
         }
         launcher.setResourceFolders(list);
         launcher.setFlags(flags.stream().map(FxConfigFlag::fxConfigFlagToConfigFlag).collect(Collectors.toList()));
+        launcher.setSettings(scopes.stream().collect(Collectors.toMap(FxScope::getKey, FxScope::getConvertedValue)));
         return launcher;
     }
 
@@ -286,6 +289,18 @@ public class FxLauncher {
 
     public void setFlags(ObservableList<FxConfigFlag> flags) {
         this.flags.set(flags);
+    }
+
+    public ListProperty<FxScope> scopesProperty() {
+        return scopes;
+    }
+
+    public ObservableList<FxScope> getScopes() {
+        return scopes.get();
+    }
+
+    public void setScopes(ObservableList<FxScope> scopes) {
+        this.scopes.set(scopes);
     }
 
     @Override

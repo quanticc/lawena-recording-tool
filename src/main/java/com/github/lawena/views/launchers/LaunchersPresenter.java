@@ -107,6 +107,14 @@ public class LaunchersPresenter {
     private Button removeSource;
     @FXML
     private TextFlow templateInfoFlow;
+    @FXML
+    private TableView<FxScope> scopesTable;
+    @FXML
+    private TableColumn<FxScope, String> keyScopeColumn;
+    @FXML
+    private TableColumn<FxScope, String> valueScopeColumn;
+    @FXML
+    private Button removeScope;
 
     private final ListProperty<FxLauncher> fxLaunchers = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final Map<FxLauncher, String> renames = new LinkedHashMap<>();
@@ -132,13 +140,16 @@ public class LaunchersPresenter {
                 bindLauncher(newValue);
             });
         });
+        Platform.runLater(this::setLaunchersCellFactory);
+        // disable delete button if no items are selected to make button more intuitive
         deleteLauncher.disableProperty().bind(launchersList.getSelectionModel().selectedItemProperty().isNull());
         removeSource.disableProperty().bind(sourcesList.getSelectionModel().selectedItemProperty().isNull());
         removeFlag.disableProperty().bind(flagsTable.getSelectionModel().selectedItemProperty().isNull());
-        Platform.runLater(this::setLaunchersCellFactory);
+        removeScope.disableProperty().bind(scopesTable.getSelectionModel().selectedItemProperty().isNull());
 
         sourcesList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         flagsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        scopesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         launchMode.setItems(FXCollections.observableArrayList(Constants.LAUNCH_MODES));
         launchModeCards.put(Constants.STEAM_LAUNCH_MODE, configureSteamPane());
@@ -160,6 +171,10 @@ public class LaunchersPresenter {
         enabledValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         disabledValueColumn.setCellValueFactory(new PropertyValueFactory<>("disabledValue"));
         disabledValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        keyScopeColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
+        keyScopeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        valueScopeColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        valueScopeColumn.setCellFactory(param -> new FxScopeValueCell());
 
         description.setText(Messages.getString("ui.launchers.description", "", ""));
 
@@ -170,8 +185,6 @@ public class LaunchersPresenter {
         Validator<String> modNameValidator = Validator.createPredicateValidator(this::isValidModNameOrUnneeded, Messages.getString("ui.launchers.modNameInvalid"));
         Validator<String> basePathValidator = Validator.createPredicateValidator(this::isValidBasePath, Messages.getString("ui.launchers.basePath.invalid"));
         Validator<String> viewNameValidator = Validator.createPredicateValidator(this::isValidViewName, Messages.getString("ui.launchers.viewNameinvalid"));
-        Validator<ObservableList<FxConfigFlag>> flagsTableValidator =
-                Validator.createPredicateValidator(this::isValidFlagItems, Messages.getString("ui.launchers.flags.invalid"));
 
         validationSupport.registerValidator(gamePath, false, gamePathValidator);
         validationSupport.registerValidator(steamPath, false, steamPathValidator);
@@ -188,7 +201,11 @@ public class LaunchersPresenter {
         String url = "https://mustache.github.io/";
         link.setOnAction(e -> CompletableFuture.runAsync(() -> hostServices.showDocument(url)));
         link.setTooltip(new Tooltip(url));
-        templateInfoFlow.getChildren().addAll(new Text(Messages.getString("ui.launchers.templateLanguage")), link);
+        templateInfoFlow.getChildren().addAll(new Text(Messages.getString("ui.launchers.flags.templatesBy")), link);
+    }
+
+    private boolean isValidScopeItems(ObservableList<FxScope> items) {
+        return items.stream().distinct().count() == items.size() && items.stream().noneMatch(f -> f.getKey().isEmpty());
     }
 
     private boolean isValidFlagItems(ObservableList<FxConfigFlag> items) {
@@ -303,6 +320,7 @@ public class LaunchersPresenter {
         Bindings.bindBidirectional(includeGamePath.selectedProperty(), launcher.includeGamePathProperty());
         Bindings.bindContentBidirectional(sourcesList.itemsProperty().get(), launcher.resourceFoldersProperty());
         Bindings.bindContentBidirectional(flagsTable.itemsProperty().get(), launcher.flagsProperty());
+        Bindings.bindContentBidirectional(scopesTable.itemsProperty().get(), launcher.scopesProperty());
         icon.textProperty().addListener(refreshLauncherCells);
         description.setText(Messages.getString("ui.launchers.description",
                 launcher.gameExecutableProperty().get(), launcher.gameProcessProperty().get()));
@@ -324,6 +342,7 @@ public class LaunchersPresenter {
         Bindings.unbindBidirectional(includeGamePath.selectedProperty(), launcher.includeGamePathProperty());
         Bindings.unbindContentBidirectional(sourcesList.itemsProperty().get(), launcher.resourceFoldersProperty());
         Bindings.unbindContentBidirectional(flagsTable.itemsProperty().get(), launcher.flagsProperty());
+        Bindings.unbindContentBidirectional(scopesTable.itemsProperty().get(), launcher.scopesProperty());
         icon.textProperty().removeListener(refreshLauncherCells);
     }
 
@@ -343,7 +362,10 @@ public class LaunchersPresenter {
     public boolean isValid() {
         ValidationResult result = validationSupport.getValidationResult().combine(
                 ValidationResult.fromErrorIf(flagsTable, Messages.getString("ui.launchers.flags.invalid"),
-                        !isValidFlagItems(flagsTable.itemsProperty().get())));
+                        !isValidFlagItems(flagsTable.itemsProperty().get()))).combine(
+                ValidationResult.fromErrorIf(scopesTable, Messages.getString("ui.launchers.scopes.invalid"),
+                        !isValidScopeItems(scopesTable.itemsProperty().get()))
+        );
         boolean valid = result.getMessages().isEmpty();
         if (!valid) {
             result.getWarnings().forEach(w -> log.info("Validation {}: {} @ {}", w.getSeverity(), w.getText(), w.getTarget()));
@@ -517,6 +539,17 @@ public class LaunchersPresenter {
     private void removeSelectedFlag(ActionEvent event) {
         ObservableList<FxConfigFlag> selected = flagsTable.getSelectionModel().getSelectedItems();
         flagsTable.getItems().removeIf(selected::contains);
+    }
+
+    @FXML
+    private void addScope(ActionEvent event) {
+        scopesTable.getItems().add(FxScope.create());
+    }
+
+    @FXML
+    private void removeSelectedScope(ActionEvent event) {
+        ObservableList<FxScope> selected = scopesTable.getSelectionModel().getSelectedItems();
+        scopesTable.getItems().removeIf(selected::contains);
     }
 
     @FXML

@@ -93,7 +93,7 @@
                                     <Insets left="40.0" right="40.0" />
                                  </VBox.margin>
                               </VBox>
-                              <Label layoutX="15.0" layoutY="105.0" prefHeight="25.0" text="%ui.launchers.advanced">
+                              <Label layoutX="15.0" layoutY="105.0" prefHeight="25.0" text="%ui.launchers.operations">
                                  <font>
                                     <Font name="System Bold" size="14.0" />
                                  </font>
@@ -103,7 +103,7 @@
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
                               </Button>
-                              <Button mnemonicParsing="false" onAction="#newLauncher" text="%ui.launchers.new">
+                              <Button mnemonicParsing="false" onAction="#newLauncher" text="%ui.launchers.new.button">
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
@@ -151,8 +151,14 @@
                                     <ListView fx:id="sourcesList" maxWidth="1.7976931348623157E308" prefHeight="250.0" HBox.hgrow="ALWAYS" />
                                     <VBox spacing="5.0">
                                        <children>
-                                          <Button mnemonicParsing="false" onAction="#addSource" prefWidth="25.0" text="+" />
-                                          <Button fx:id="removeSource" mnemonicParsing="false" onAction="#removeSelectedSource" prefWidth="25.0" text="-" />
+                                          <Button mnemonicParsing="false" onAction="#addSource" prefWidth="25.0" text="+">
+                                             <tooltip>
+                                                <Tooltip text="%ui.launchers.addTooltip" />
+                                             </tooltip></Button>
+                                          <Button fx:id="removeSource" mnemonicParsing="false" onAction="#removeSelectedSource" prefWidth="25.0" text="-">
+                                             <tooltip>
+                                                <Tooltip text="%ui.launchers.removeTooltip" />
+                                             </tooltip></Button>
                                        </children>
                                     </VBox>
                                  </children>
@@ -167,19 +173,19 @@
                         </VBox>
                      </content>
                   </Tab>
-                  <Tab closable="false" text="%ui.launchers.tabs.config">
+                  <Tab closable="false" text="%ui.launchers.tabs.flags">
                      <content>
                         <VBox spacing="5.0">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
                            <children>
-                              <Label prefHeight="25.0" text="%ui.launchers.templates">
+                              <Label prefHeight="25.0" text="%ui.launchers.flags.paneTitle">
                                  <font>
                                     <Font name="System Bold" size="14.0" />
                                  </font>
                               </Label>
-                              <Label text="%ui.launchers.templatesDescription" wrapText="true">
+                              <Label text="%ui.launchers.flags.paneDescription" wrapText="true">
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
@@ -200,8 +206,14 @@
                                     </TableView>
                                     <VBox spacing="5.0">
                                        <children>
-                                          <Button mnemonicParsing="false" onAction="#addFlag" prefWidth="25.0" text="+" />
-                                          <Button fx:id="removeFlag" mnemonicParsing="false" onAction="#removeSelectedFlag" prefWidth="25.0" text="-" />
+                                          <Button mnemonicParsing="false" onAction="#addFlag" prefWidth="25.0" text="+">
+                                             <tooltip>
+                                                <Tooltip text="%ui.launchers.addTooltip" />
+                                             </tooltip></Button>
+                                          <Button fx:id="removeFlag" mnemonicParsing="false" onAction="#removeSelectedFlag" prefWidth="25.0" text="-">
+                                             <tooltip>
+                                                <Tooltip text="%ui.launchers.removeTooltip" />
+                                             </tooltip></Button>
                                        </children>
                                     </VBox>
                                  </children>
@@ -214,6 +226,54 @@
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
                               </TextFlow>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+                  <Tab closable="false" text="%ui.launchers.tabs.scopes">
+                     <content>
+                        <VBox spacing="5.0">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                           <children>
+                              <Label prefHeight="25.0" text="%ui.launchers.scopes.paneTitle">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label text="%ui.launchers.scopes.paneDescription" wrapText="true">
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox spacing="5.0">
+                                 <children>
+                                    <TableView fx:id="scopesTable" editable="true" maxWidth="1.7976931348623157E308" prefHeight="340.0" HBox.hgrow="ALWAYS">
+                                       <columns>
+                                          <TableColumn fx:id="keyScopeColumn" prefWidth="168.0" text="%ui.launchers.scopes.key" />
+                                          <TableColumn fx:id="valueScopeColumn" prefWidth="234.0" text="%ui.launchers.scopes.value" />
+                                       </columns>
+                                    </TableView>
+                                    <VBox spacing="5.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#addScope" prefWidth="25.0" text="+">
+                                             <tooltip>
+                                                <Tooltip text="%ui.launchers.addTooltip" />
+                                             </tooltip>
+                                          </Button>
+                                          <Button fx:id="removeScope" mnemonicParsing="false" onAction="#removeSelectedScope" prefWidth="25.0" text="-">
+                                             <tooltip>
+                                                <Tooltip text="%ui.launchers.removeTooltip" />
+                                             </tooltip>
+                                          </Button>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </VBox.margin>
+                              </HBox>
                            </children>
                         </VBox>
                      </content>

@@ -1,5 +1,7 @@
 package com.github.lawena.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.lawena.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -28,8 +32,9 @@ import java.util.prefs.Preferences;
  * @author Ivan
  */
 public final class LwrtUtils {
-    private static final Logger log = LoggerFactory.getLogger(LwrtUtils.class);
 
+    private static final Logger log = LoggerFactory.getLogger(LwrtUtils.class);
+    private static final ObjectMapper mapper = new ObjectMapper();
     private static boolean windows;
     private static boolean macOS;
     private static boolean linux;
@@ -194,5 +199,70 @@ public final class LwrtUtils {
             count++;
         }
         return dest;
+    }
+
+    /**
+     * Attempt to coerce a String value to another type that can give it additional meaning.
+     *
+     * @param value the value to be converted
+     * @return a boolean equivalent if the string is "true" or "false", additionally returning <code>false</code> if the
+     * string is empty, <code>null</code> if the string is <code>null</code> or the "null" string, a numeric value if it
+     * represents one (either a long or a double). Also will attempt JSON deserialization if the string starts with "["
+     * or "{" and finishes with "]" or "}" respectively. Otherwise returns the given string.
+     */
+    public static Object coerce(String value) {
+        // could be plain de-serialized as JSON, but we want to avoid doing expensive/unneeded conversion
+        if (value == null) {
+            return null;
+        }
+        String source = value.trim();
+        if (source.equalsIgnoreCase("null")) {
+            return null;
+        } else if (source.isEmpty() || source.equalsIgnoreCase("false")) {
+            return false;
+        } else if (source.equalsIgnoreCase("true")) {
+            return true;
+        } else if (source.startsWith("[") && source.endsWith("]")) {
+            try {
+                return mapper.readValue(source, List.class);
+            } catch (IOException e) {
+                log.warn("String is not valid JSON. Using raw value", e);
+                return source;
+            }
+        } else if (source.startsWith("{") && source.endsWith("}")) {
+            try {
+                return mapper.readValue(source, Map.class);
+            } catch (IOException e) {
+                log.warn("String is not valid JSON. Using raw value", e);
+                return source;
+            }
+        } else if (source.matches("^-?\\d+$")) {
+            return Long.parseLong(source);
+        } else if (source.matches("^-?\\d+(\\.\\d+)?$")) {
+            return Double.parseDouble(source);
+        } else {
+            return source;
+        }
+    }
+
+    /**
+     * Tries to convert a given Object to a String, returning a JSON compliant string if the object is a list or a map.
+     *
+     * @param value an Object to be converted
+     * @return a String, never <code>null</code>, representing this value
+     */
+    public static String tryConvertToJsonString(Object value) {
+        if (value == null) {
+            return "null";
+        } else if (value instanceof List || value instanceof Map) {
+            try {
+                return mapper.writeValueAsString(value);
+            } catch (JsonProcessingException e) {
+                log.warn("Object is not valid JSON. Using toString value", e);
+                return value.toString();
+            }
+        } else {
+            return value.toString();
+        }
     }
 }

@@ -1,8 +1,6 @@
 package com.github.lawena.domain;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Launcher {
 
@@ -19,6 +17,7 @@ public class Launcher {
     private String viewName;
     private List<ConfigFlag> flags = new ArrayList<>();
     private List<String> resourceFolders = new ArrayList<>();
+    private Map<String, Object> settings = new LinkedHashMap<>();
 
     public Launcher() {
 
@@ -132,6 +131,14 @@ public class Launcher {
         this.resourceFolders = resourceFolders;
     }
 
+    public Map<String, Object> getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Map<String, Object> settings) {
+        this.settings = settings;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -165,6 +172,7 @@ public class Launcher {
                 ", viewName='" + viewName + '\'' +
                 ", flags=" + flags +
                 ", resourceFolders=" + resourceFolders +
+                ", settings=" + settings +
                 ']';
     }
 

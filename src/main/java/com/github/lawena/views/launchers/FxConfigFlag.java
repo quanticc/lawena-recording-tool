@@ -1,12 +1,12 @@
 package com.github.lawena.views.launchers;
 
 import com.github.lawena.domain.ConfigFlag;
+import com.github.lawena.util.LwrtUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class FxConfigFlag {
@@ -53,27 +53,9 @@ public class FxConfigFlag {
     private ConfigFlag save() {
         configFlag.setKey(key.get());
         configFlag.setDefaultValue(defaultValue.get());
-        configFlag.setTrueMappedValue(coerce(enabledValue.get()));
-        configFlag.setFalseMappedValue(coerce(disabledValue.get()));
+        configFlag.setTrueMappedValue(LwrtUtils.coerce(enabledValue.get()));
+        configFlag.setFalseMappedValue(LwrtUtils.coerce(disabledValue.get()));
         return configFlag;
-    }
-
-    private Object coerce(String source) {
-        // "null" -> null
-        // "" | "false" -> false
-        // "true" -> true
-        // "[]" -> new ArrayList<Object>()
-        if (source == null || source.equalsIgnoreCase("null")) {
-            return null;
-        } else if (source.isEmpty() || source.equalsIgnoreCase("false")) {
-            return false;
-        } else if (source.equalsIgnoreCase("true")) {
-            return true;
-        } else if (source.equals("[]")) {
-            return new ArrayList<Object>();
-        } else {
-            return source;
-        }
     }
 
     public StringProperty keyProperty() {

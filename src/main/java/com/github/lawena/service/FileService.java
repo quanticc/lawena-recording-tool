@@ -56,9 +56,13 @@ public class FileService {
         Profile profile = validationService.getSelectedProfile();
         // create configuration files
         publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.configFiles")));
+        // construct scopes from launcher.settings, profiles can override if keys match
+        Map<String, Object> scopes = new LinkedHashMap<>();
+        Launcher launcher = validationService.getSelectedLauncher();
+        scopes.putAll(launcher.getSettings());
         try {
-            generateSettingsFile();
-            generateBindingsFiles();
+            generateSettingsFile(scopes);
+            generateBindingsFiles(scopes);
             generateMovieSegmentSlots(profile);
         } catch (IOException e) {
             throw new LaunchException("Could not generate config files", e);
@@ -198,11 +202,10 @@ public class FileService {
         }
     }
 
-    private void generateSettingsFile() throws LaunchException {
+    private void generateSettingsFile(Map<String, Object> scopes) throws LaunchException {
         Path cfgPath = validationService.getBasePath().resolve("config/cfg");
         Path settingsTemplatePath = cfgPath.resolve("settings.mustache");
         Path settingsCfgPath = cfgPath.resolve("settings.cfg");
-        Map<String, Object> scopes = new LinkedHashMap<>();
         int frameRate = validationService.getInteger("recorder.fps");
         int[] steps = {60, 120, 240, 480, 960, 1920, 3840};
         int nextStep = steps[0];
@@ -224,7 +227,7 @@ public class FileService {
         scopes.put("tf2.cfg.viewmodelFov", validationService.getString("tf2.cfg.viewmodelFov"));
         scopes.put("tf2.cfg.viewmodels." + validationService.getString("tf2.cfg.viewmodels"), true);
         scopes.put("tf2.cfg.custom", validationService.getString("tf2.cfg.custom"));
-        scopes.put("volume", "0.5");
+        scopes.putIfAbsent("volume", "0.5");
         Launcher launcher = validationService.getSelectedLauncher();
         for (ConfigFlag flag : launcher.getFlags()) {
             String key = flag.getKey();
@@ -238,38 +241,37 @@ public class FileService {
         compileTemplateAndExecute(settingsTemplatePath, settingsCfgPath, "settings", scopes);
     }
 
-    private void generateBindingsFiles() throws LaunchException {
+    private void generateBindingsFiles(Map<String, Object> scopes) throws LaunchException {
         Path cfgPath = validationService.getBasePath().resolve("config/cfg");
         Path bindingsTemplatePath = cfgPath.resolve("recbindings.mustache");
         Path bindingsCfgPath = cfgPath.resolve("recbindings.cfg");
         Path helpTemplatePath = cfgPath.resolve("help.mustache");
         Path helpCfgPath = cfgPath.resolve("help.cfg");
-        Map<String, Object> scopes = new LinkedHashMap<>();
-        // TODO: allow customization of these values via application settings
-        scopes.put("host_timescale", "0.001");
-        scopes.put("key.record", "P");
-        scopes.put("key.toggleragdolls", "R");
-        scopes.put("key.lockviewmodelsoff", "F1");
-        scopes.put("key.lockviewmodelson", "F2");
-        scopes.put("key.lockviewmodels", "N");
-        scopes.put("key.lockcrosshair", "M");
-        scopes.put("key.fpsup", "UPARROW");
-        scopes.put("key.fpsdown", "DOWNARROW");
-        scopes.put("key.showhelp", "F3");
-        scopes.put("key.togglehud", "H");
-        scopes.put("key.togglenotices", "K");
-        scopes.put("key.cam.back", "KP_DOWNARROW");
-        scopes.put("key.cam.backleft", "KP_END");
-        scopes.put("key.cam.left", "KP_LEFTARROW");
-        scopes.put("key.cam.frontleft", "KP_HOME");
-        scopes.put("key.cam.front", "KP_UPARROW");
-        scopes.put("key.cam.frontright", "KP_PGUP");
-        scopes.put("key.cam.right", "KP_RIGHTARROW");
-        scopes.put("key.cam.backright", "KP_PGDN");
-        scopes.put("key.toggledist", "KP_5");
-        scopes.put("key.togglepitch", "KP_INS");
-        scopes.put("key.firstperson", "KP_MINUS");
-        scopes.put("key.thirdperson", "KP_PLUS");
+        // fallback in case these are not already in the scope
+        scopes.putIfAbsent("host_timescale", "0.001");
+        scopes.putIfAbsent("key.record", "P");
+        scopes.putIfAbsent("key.toggleragdolls", "R");
+        scopes.putIfAbsent("key.lockviewmodelsoff", "F1");
+        scopes.putIfAbsent("key.lockviewmodelson", "F2");
+        scopes.putIfAbsent("key.lockviewmodels", "N");
+        scopes.putIfAbsent("key.lockcrosshair", "M");
+        scopes.putIfAbsent("key.fpsup", "UPARROW");
+        scopes.putIfAbsent("key.fpsdown", "DOWNARROW");
+        scopes.putIfAbsent("key.showhelp", "F3");
+        scopes.putIfAbsent("key.togglehud", "H");
+        scopes.putIfAbsent("key.togglenotices", "K");
+        scopes.putIfAbsent("key.cam.back", "KP_DOWNARROW");
+        scopes.putIfAbsent("key.cam.backleft", "KP_END");
+        scopes.putIfAbsent("key.cam.left", "KP_LEFTARROW");
+        scopes.putIfAbsent("key.cam.frontleft", "KP_HOME");
+        scopes.putIfAbsent("key.cam.front", "KP_UPARROW");
+        scopes.putIfAbsent("key.cam.frontright", "KP_PGUP");
+        scopes.putIfAbsent("key.cam.right", "KP_RIGHTARROW");
+        scopes.putIfAbsent("key.cam.backright", "KP_PGDN");
+        scopes.putIfAbsent("key.toggledist", "KP_5");
+        scopes.putIfAbsent("key.togglepitch", "KP_INS");
+        scopes.putIfAbsent("key.firstperson", "KP_MINUS");
+        scopes.putIfAbsent("key.thirdperson", "KP_PLUS");
         addTranslatedKeys(scopes);
         log.debug("Preparing bindings with scopes: {}", scopes);
         compileTemplateAndExecute(bindingsTemplatePath, bindingsCfgPath, "recbindings", scopes);
@@ -278,7 +280,12 @@ public class FileService {
 
     private void addTranslatedKeys(Map<String, Object> scopes) {
         Map<String, Object> translationScope = new HashMap<>();
-        scopes.forEach((k, v) -> translationScope.put(k + ".user", Constants.USER_FRIENDLY_KEYMAP.getOrDefault(v, v)));
+        // only process scopes with key starting with "key."
+        scopes.forEach((k, v) -> {
+            if (k.startsWith("key.")) {
+                translationScope.put(k + ".user", Constants.USER_FRIENDLY_KEYMAP.getOrDefault(v, v));
+            }
+        });
         scopes.putAll(translationScope);
     }
 
