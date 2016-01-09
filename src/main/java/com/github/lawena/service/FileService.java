@@ -67,6 +67,7 @@ public class FileService {
         } catch (IOException e) {
             throw new LaunchException("Could not generate config files", e);
         }
+        log.debug("Template scopes used: {}", scopes);
         try {
             generateMovieCurrentSlot(profile);
         } catch (IOException e) {
@@ -237,7 +238,7 @@ public class FileService {
                 scopes.put(key, value);
             }
         }
-        log.debug("Preparing settings with scopes: {}", scopes);
+        log.debug("Generating settings CFG files");
         compileTemplateAndExecute(settingsTemplatePath, settingsCfgPath, "settings", scopes);
     }
 
@@ -249,31 +250,31 @@ public class FileService {
         Path helpCfgPath = cfgPath.resolve("help.cfg");
         // fallback in case these are not already in the scope
         scopes.putIfAbsent("host_timescale", "0.001");
-        scopes.putIfAbsent("key.record", "P");
-        scopes.putIfAbsent("key.toggleragdolls", "R");
-        scopes.putIfAbsent("key.lockviewmodelsoff", "F1");
-        scopes.putIfAbsent("key.lockviewmodelson", "F2");
-        scopes.putIfAbsent("key.lockviewmodels", "N");
-        scopes.putIfAbsent("key.lockcrosshair", "M");
-        scopes.putIfAbsent("key.fpsup", "UPARROW");
-        scopes.putIfAbsent("key.fpsdown", "DOWNARROW");
-        scopes.putIfAbsent("key.showhelp", "F3");
-        scopes.putIfAbsent("key.togglehud", "H");
-        scopes.putIfAbsent("key.togglenotices", "K");
-        scopes.putIfAbsent("key.cam.back", "KP_DOWNARROW");
-        scopes.putIfAbsent("key.cam.backleft", "KP_END");
-        scopes.putIfAbsent("key.cam.left", "KP_LEFTARROW");
-        scopes.putIfAbsent("key.cam.frontleft", "KP_HOME");
-        scopes.putIfAbsent("key.cam.front", "KP_UPARROW");
-        scopes.putIfAbsent("key.cam.frontright", "KP_PGUP");
-        scopes.putIfAbsent("key.cam.right", "KP_RIGHTARROW");
-        scopes.putIfAbsent("key.cam.backright", "KP_PGDN");
-        scopes.putIfAbsent("key.toggledist", "KP_5");
-        scopes.putIfAbsent("key.togglepitch", "KP_INS");
-        scopes.putIfAbsent("key.firstperson", "KP_MINUS");
-        scopes.putIfAbsent("key.thirdperson", "KP_PLUS");
+        scopes.putIfAbsent("key_record", "P");
+        scopes.putIfAbsent("key_toggleragdolls", "R");
+        scopes.putIfAbsent("key_lockviewmodelsoff", "F1");
+        scopes.putIfAbsent("key_lockviewmodelson", "F2");
+        scopes.putIfAbsent("key_lockviewmodels", "N");
+        scopes.putIfAbsent("key_lockcrosshair", "M");
+        scopes.putIfAbsent("key_fpsup", "UPARROW");
+        scopes.putIfAbsent("key_fpsdown", "DOWNARROW");
+        scopes.putIfAbsent("key_showhelp", "F3");
+        scopes.putIfAbsent("key_togglehud", "H");
+        scopes.putIfAbsent("key_togglenotices", "K");
+        scopes.putIfAbsent("key_cam_back", "KP_DOWNARROW");
+        scopes.putIfAbsent("key_cam_backleft", "KP_END");
+        scopes.putIfAbsent("key_cam_left", "KP_LEFTARROW");
+        scopes.putIfAbsent("key_cam_frontleft", "KP_HOME");
+        scopes.putIfAbsent("key_cam_front", "KP_UPARROW");
+        scopes.putIfAbsent("key_cam_frontright", "KP_PGUP");
+        scopes.putIfAbsent("key_cam_right", "KP_RIGHTARROW");
+        scopes.putIfAbsent("key_cam_backright", "KP_PGDN");
+        scopes.putIfAbsent("key_toggledist", "KP_5");
+        scopes.putIfAbsent("key_togglepitch", "KP_INS");
+        scopes.putIfAbsent("key_firstperson", "KP_MINUS");
+        scopes.putIfAbsent("key_thirdperson", "KP_PLUS");
         addTranslatedKeys(scopes);
-        log.debug("Preparing bindings with scopes: {}", scopes);
+        log.debug("Generating key bindings CFG files");
         compileTemplateAndExecute(bindingsTemplatePath, bindingsCfgPath, "recbindings", scopes);
         compileTemplateAndExecute(helpTemplatePath, helpCfgPath, "help", scopes);
     }
@@ -282,8 +283,8 @@ public class FileService {
         Map<String, Object> translationScope = new HashMap<>();
         // only process scopes with key starting with "key."
         scopes.forEach((k, v) -> {
-            if (k.startsWith("key.")) {
-                translationScope.put(k + ".user", Constants.USER_FRIENDLY_KEYMAP.getOrDefault(v, v));
+            if (k.startsWith("key_")) {
+                translationScope.put(k + "_user", Constants.USER_FRIENDLY_KEYMAP.getOrDefault(v, v));
             }
         });
         scopes.putAll(translationScope);

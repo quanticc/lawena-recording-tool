@@ -69,29 +69,29 @@ lawena:
       settings:
         host_timescale: 0.001
         volume: 0.5
-        key.record: P
-        key.toggleragdolls: R
-        key.lockviewmodelsoff: F1
-        key.lockviewmodelson: F2
-        key.lockviewmodels: N
-        key.lockcrosshair: M
-        key.fpsup: UPARROW
-        key.fpsdown: DOWNARROW
-        key.showhelp: F3
-        key.togglehud: H
-        key.togglenotices: K
-        key.cam.back: KP_DOWNARROW
-        key.cam.backleft: KP_END
-        key.cam.left: KP_LEFTARROW
-        key.cam.frontleft: KP_HOME
-        key.cam.front: KP_UPARROW
-        key.cam.frontright: KP_PGUP
-        key.cam.right: KP_RIGHTARROW
-        key.cam.backright: KP_PGDN
-        key.toggledist: KP_5
-        key.togglepitch: KP_INS
-        key.firstperson: KP_MINUS
-        key.thirdperson: KP_PLUS
+        key_record: P
+        key_toggleragdolls: R
+        key_lockviewmodelsoff: F1
+        key_lockviewmodelson: F2
+        key_lockviewmodels: N
+        key_lockcrosshair: M
+        key_fpsup: UPARROW
+        key_fpsdown: DOWNARROW
+        key_showhelp: F3
+        key_togglehud: H
+        key_togglenotices: K
+        key_cam_back: KP_DOWNARROW
+        key_cam_backleft: KP_END
+        key_cam_left: KP_LEFTARROW
+        key_cam_frontleft: KP_HOME
+        key_cam_front: KP_UPARROW
+        key_cam_frontright: KP_PGUP
+        key_cam_right: KP_RIGHTARROW
+        key_cam_backright: KP_PGDN
+        key_toggledist: KP_5
+        key_togglepitch: KP_INS
+        key_firstperson: KP_MINUS
+        key_thirdperson: KP_PLUS
 logging:
   file: logs/lawena.log.txt
   level:

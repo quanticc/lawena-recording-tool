@@ -53,41 +53,41 @@ alias lockcrosshair6 "alias crosshair empty"
 alias lockcrosshair "lockcrosshair1; lockcrosshair2; lockcrosshair3; lockcrosshair4; lockcrosshair5; lockcrosshair6"
 
 //enable-disable ragdolls
-alias ragsoff "cl_ragdoll_fade_time 0; cl_ragdoll_forcefade 1; cl_ragdoll_physics_enable 0; g_ragdoll_fadespeed 0; g_ragdoll_lvfadespeed 0; ragdoll_sleepaftertime 0; bind {{key.toggleragdolls}} ragson"
-alias ragson "cl_ragdoll_fade_time 15; cl_ragdoll_forcefade 0; cl_ragdoll_physics_enable 1; g_ragdoll_fadespeed 600; g_ragdoll_lvfadespeed 100; ragdoll_sleepaftertime 5.0f; bind {{key.toggleragdolls}} ragsoff"
+alias ragsoff "cl_ragdoll_fade_time 0; cl_ragdoll_forcefade 1; cl_ragdoll_physics_enable 0; g_ragdoll_fadespeed 0; g_ragdoll_lvfadespeed 0; ragdoll_sleepaftertime 0; bind {{key_toggleragdolls}} ragson"
+alias ragson "cl_ragdoll_fade_time 15; cl_ragdoll_forcefade 0; cl_ragdoll_physics_enable 1; g_ragdoll_fadespeed 600; g_ragdoll_lvfadespeed 100; ragdoll_sleepaftertime 5.0f; bind {{key_toggleragdolls}} ragsoff"
 
 //disable quickswitch menu
 alias +quickswitch empty
 alias -quickswitch empty
 
 //start and stop recording with same key
-alias startrecording "host_timescale {{host_timescale}}; snd_soundmixer Default_Mix; recframerate; bind {{key.record}} stoprecording; namescroll"
-alias stoprecording "endmovie; host_timescale 1; host_framerate 0; bind {{key.record}} startrecording"
+alias startrecording "host_timescale {{host_timescale}}; snd_soundmixer Default_Mix; recframerate; bind {{key_record}} stoprecording; namescroll"
+alias stoprecording "endmovie; host_timescale 1; host_framerate 0; bind {{key_record}} startrecording"
 
 alias showhelp "exec help.cfg"
 
-bind {{key.lockviewmodelsoff}} lockviewmodelsoff
-bind {{key.lockviewmodelson}} lockviewmodelson
-bind {{key.toggleragdolls}} ragsoff
-bind {{key.lockcrosshair}} lockcrosshair
-bind {{key.record}} startrecording
-bind {{key.fpsup}} fpsscrollup
-bind {{key.fpsdown}} fpsscrolldn
-bind {{key.showhelp}} showhelp
-bind {{key.togglehud}} "incrementvar cl_drawhud 0 1 1"
-bind {{key.togglenotices}} "incrementvar hud_deathnotice_time 0 6 6"
+bind {{key_lockviewmodelsoff}} lockviewmodelsoff
+bind {{key_lockviewmodelson}} lockviewmodelson
+bind {{key_toggleragdolls}} ragsoff
+bind {{key_lockcrosshair}} lockcrosshair
+bind {{key_record}} startrecording
+bind {{key_fpsup}} fpsscrollup
+bind {{key_fpsdown}} fpsscrolldn
+bind {{key_showhelp}} showhelp
+bind {{key_togglehud}} "incrementvar cl_drawhud 0 1 1"
+bind {{key_togglenotices}} "incrementvar hud_deathnotice_time 0 6 6"
 
-bind {{key.cam.back}} "cam_idealyaw 0"
-bind {{key.cam.backleft}} "cam_idealyaw -45"
-bind {{key.cam.left}} "cam_idealyaw -90"
-bind {{key.cam.frontleft}} "cam_idealyaw -135"
-bind {{key.cam.front}} "cam_idealyaw 180"
-bind {{key.cam.frontright}} "cam_idealyaw 135"
-bind {{key.cam.right}} "cam_idealyaw 90"
-bind {{key.cam.backright}} "cam_idealyaw 45"
-bind {{key.toggledist}} "incrementvar cam_idealdist 0 200 25"
-bind {{key.togglepitch}} "incrementvar cam_idealpitch 0 360 30"
-bind {{key.firstperson}} "firstperson"
-bind {{key.thirdperson}} "thirdperson"
+bind {{key_cam_back}} "cam_idealyaw 0"
+bind {{key_cam_backleft}} "cam_idealyaw -45"
+bind {{key_cam_left}} "cam_idealyaw -90"
+bind {{key_cam_frontleft}} "cam_idealyaw -135"
+bind {{key_cam_front}} "cam_idealyaw 180"
+bind {{key_cam_frontright}} "cam_idealyaw 135"
+bind {{key_cam_right}} "cam_idealyaw 90"
+bind {{key_cam_backright}} "cam_idealyaw 45"
+bind {{key_toggledist}} "incrementvar cam_idealdist 0 200 25"
+bind {{key_togglepitch}} "incrementvar cam_idealpitch 0 360 30"
+bind {{key_firstperson}} "firstperson"
+bind {{key_thirdperson}} "thirdperson"
 
 showhelp

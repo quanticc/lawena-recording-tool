@@ -37,7 +37,7 @@ public class FxScopeValueCell extends TextFieldTableCell<FxScope, String> {
     private void refreshLabel(String value) {
         FxScope scope = (FxScope) getTableRow().getItem();
         label.setText(value);
-        if (scope != null && scope.getKey() != null && scope.getKey().startsWith("key.")) {
+        if (scope != null && scope.getKey() != null && scope.getKey().startsWith("key_")) {
             label.setStyle("-fx-padding: 0 3 0 3"
                     + "; -fx-font-size: 90%"
                     + "; -fx-text-fill: #ffffff"
