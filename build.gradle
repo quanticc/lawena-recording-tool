@@ -12,40 +12,17 @@ buildscript {
     }
 }
 
+plugins {
+    id 'net.researchgate.release' version '2.3.4'
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
 apply plugin: 'propdeps'
-apply plugin: 'propdeps-maven'
 apply plugin: 'propdeps-idea'
 apply plugin: 'propdeps-eclipse'
-
-try {
-    new ByteArrayOutputStream().withStream { execOS ->
-        exec {
-            executable = 'git'
-            args = [ 'describe', '--tags', '--always' ]
-            standardOutput = execOS
-        }
-        def describe = execOS.toString().trim()
-        version describe
-    }
-} catch (Exception ignored) {
-    println "Could not retrieve version number"
-}
-
-jar {
-    archiveName = 'lawena.jar'
-    destinationDir = null
-    def implVersion = (version == null ? "5.0.0-SNAPSHOT" : version)
-    manifest {
-        attributes (
-                'Implementation-Title': 'Lawena Recording Tool',
-                'Implementation-Version': implVersion
-        )
-    }
-}
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -75,6 +52,37 @@ eclipse {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.9'
+}
+
+release {
+    failOnPublishNeeded = false
+    preTagCommitMessage = 'Prepare for release: '
+    tagCommitMessage = 'Creating release tag: '
+    newVersionCommitMessage = 'Prepare for next development iteration: '
+    versionPropertyFile = 'gradle.properties'
+    buildTasks = ['bootRepackage']
+    scmAdapters = [
+            net.researchgate.release.GitAdapter
+    ]
+
+    git {
+        requireBranch = ''
+        pushToRemote = ''
+    }
+}
+
+def buildTime = new Date().format("yyyyMMddHHmmss")
+
+jar {
+    archiveName = 'lawena.jar'
+    destinationDir = null
+    manifest {
+        attributes (
+                'Implementation-Title': 'Lawena Recording Tool',
+                'Implementation-Version': version,
+                'Implementation-Build': buildTime
+        )
+    }
 }
 
 bootRun {
