@@ -15,7 +15,6 @@ uresource = lwrtresources.jar
 uresource = lwrtvpks.jar
 uresource = [windows] lwrtwinstuff.jar
 uresource = skybox.jar
-uresource = gradle-wrapper.jar
 
 java_version = 1080040
 class = org.springframework.boot.loader.JarLauncher
