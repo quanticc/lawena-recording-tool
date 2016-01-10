@@ -6,16 +6,15 @@ import com.github.lawena.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -56,7 +55,7 @@ public final class LwrtUtils {
     }
 
     /**
-     * Get the current date and time using the given format.
+     * Get the current date and time (local time zone) using the given format.
      *
      * @param format the pattern to use, not null
      * @return a formatted date and time
@@ -263,6 +262,58 @@ public final class LwrtUtils {
             }
         } else {
             return value.toString();
+        }
+    }
+
+    public static void copy(InputStream in, OutputStream out) throws IOException {
+        try {
+            byte[] buffer = new byte[4096];
+            for (int read; (read = in.read(buffer)) > 0; ) {
+                out.write(buffer, 0, read);
+            }
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ignored) {
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    public static int compareCreationTime(File newgd, File curgd) {
+        try {
+            Path newp = newgd.toPath();
+            BasicFileAttributes newAttributes = Files.readAttributes(newp, BasicFileAttributes.class);
+            FileTime newCreationTime = newAttributes.creationTime();
+            Path curp = curgd.toPath();
+            BasicFileAttributes curAttributes = Files.readAttributes(curp, BasicFileAttributes.class);
+            FileTime curCreationTime = curAttributes.creationTime();
+            log.debug("Comparing creationTime: new={} cur={}", newCreationTime, curCreationTime); //$NON-NLS-1$
+            return newCreationTime.compareTo(curCreationTime);
+        } catch (IOException e) {
+            log.warn("Could not retrieve file creation time: {}", e.toString()); //$NON-NLS-1$
+        }
+        return 1;
+    }
+
+    public static String streamToString(InputStream input) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+            StringBuilder sb = new StringBuilder();
+            String line = reader.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = reader.readLine();
+            }
+            return sb.toString();
         }
     }
 }

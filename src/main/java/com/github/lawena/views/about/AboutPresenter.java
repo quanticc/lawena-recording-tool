@@ -1,5 +1,6 @@
 package com.github.lawena.views.about;
 
+import com.github.lawena.util.LwrtUtils;
 import javafx.application.HostServices;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -17,10 +18,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.HTMLAnchorElement;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 
 @Component
@@ -47,7 +45,7 @@ public class AboutPresenter {
     private void loadContent() {
         String result;
         try {
-            result = streamToString(getClass().getResourceAsStream("credits.md"));
+            result = LwrtUtils.streamToString(getClass().getResourceAsStream("credits.md"));
         } catch (IOException e) {
             log.warn("Could not load stream", e);
             result = "";
@@ -62,7 +60,7 @@ public class AboutPresenter {
                 "<!DOCTYPE html>\n"
                         + "<html>\n"
                         + "<head>\n"
-                        + "<link rel=\"stylesheet\" href=\"" + getClass().getResource("markdownpad-github.css") + "\">\n"
+                        + "<link rel=\"stylesheet\" href=\"" + getClass().getResource("../markdownpad-github.css") + "\">\n"
                         + "</head>\n"
                         + "<body>\n"
                         + html
@@ -83,20 +81,6 @@ public class AboutPresenter {
                 hostServices.showDocument(href);
                 evt.preventDefault();
             }, false);
-        }
-    }
-
-    private String streamToString(InputStream input) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-            StringBuilder sb = new StringBuilder();
-            String line = reader.readLine();
-
-            while (line != null) {
-                sb.append(line);
-                sb.append("\n");
-                line = reader.readLine();
-            }
-            return sb.toString();
         }
     }
 }

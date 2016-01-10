@@ -11,14 +11,16 @@
     <children>
         <TabPane fx:id="tabs" tabClosingPolicy="ALL_TABS" VBox.vgrow="ALWAYS">
             <tabs>
-                <Tab fx:id="setupTab" closable="false" text="%ui.base.tabs.setup">
+            <Tab fx:id="welcomeTab" closable="false" text="Lawena">
                <content>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <center>
                         <ProgressIndicator fx:id="placeholder" maxHeight="50.0" maxWidth="50.0" style="-fx-accent: #5319e7;" BorderPane.alignment="CENTER" />
                      </center>
                   </BorderPane>
-               </content></Tab>
+               </content>
+            </Tab>
+                <Tab fx:id="setupTab" closable="false" text="%ui.base.tabs.setup" />
                 <Tab fx:id="renderingTab" closable="false" text="%ui.base.tabs.rendering" />
                 <Tab fx:id="demosTab" closable="false" text="%ui.base.tabs.demos" />
                 <Tab fx:id="tasksTab" closable="false" text="%ui.base.tabs.tasks">

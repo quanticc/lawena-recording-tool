@@ -15,6 +15,7 @@ import com.github.lawena.views.GameView;
 import com.github.lawena.views.dialog.NewProfileDialog;
 import com.github.lawena.views.launch.LaunchView;
 import com.github.lawena.views.menu.MenuView;
+import com.github.lawena.views.updates.UpdatesView;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
@@ -70,6 +71,8 @@ public class BasePresenter {
     private LaunchView launchView;
     @Autowired
     private MenuView menuView;
+    @Autowired
+    private UpdatesView updatesView;
 
     @FXML
     private MenuButton menu;
@@ -83,6 +86,8 @@ public class BasePresenter {
     private Button launchButton;
     @FXML
     private TabPane tabs;
+    @FXML
+    private Tab welcomeTab;
     @FXML
     private Tab setupTab;
     @FXML
@@ -127,6 +132,7 @@ public class BasePresenter {
         mainContainer.getChildren().add(0, menuView.getView());
         tasksPane.getChildren().add(taskProgressView);
         Platform.runLater(() -> {
+            welcomeTab.setContent(updatesView.getView());
             tabs.getScene().getWindow().setOnCloseRequest(e -> exit());
             resources.foldersProperty().addListener(resourceFolderListener);
             bindProfileList();

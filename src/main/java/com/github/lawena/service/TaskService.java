@@ -43,6 +43,21 @@ public class TaskService {
         return submitTask(task);
     }
 
+    public Future<?> submitTask(Runnable runnable) {
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+                    runnable.run();
+                } catch (Exception e) {
+                    log.warn("Could not complete task", e);
+                }
+                return null;
+            }
+        };
+        return submitTask(task);
+    }
+
     public List<Runnable> shutdownNow() {
         return executor.shutdownNow();
     }
