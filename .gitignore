@@ -1,7 +1,5 @@
 ### Lawena-specific ###
 /logs
-*.lwf
-*.log
 lwrt/**/config/cfg/settings.cfg
 lwrt/**/config/cfg/namescroll.cfg
 lwrt/**/config/cfg/recbindings.cfg
@@ -9,20 +7,16 @@ lwrt/**/config/cfg/help.cfg
 lwrt/**/config/cfg/mov/*.cfg
 lwrt/**/launch
 version.txt
-*.lck
 !launcher/*.jar
-launcher/*.exe
-src/main/dist/*.exe
-src/main/dist/lawena/code/*.exe
+*.exe
 *sound.cache
 /application.yml
-settings.json
+/settings.json
+getdown.full.txt
+getdown.txt
 
 ### Java template
 *.class
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
 
 # Package Files #
 *.jar
