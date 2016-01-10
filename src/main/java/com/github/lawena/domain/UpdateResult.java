@@ -6,8 +6,8 @@ public class UpdateResult {
         UPDATE_AVAILABLE, NO_UPDATES_FOUND, ALREADY_LATEST_VERSION;
     }
 
-    public static UpdateResult found(Build details) {
-        return new UpdateResult(Status.UPDATE_AVAILABLE, details);
+    public static UpdateResult found(Build details, String message) {
+        return new UpdateResult(Status.UPDATE_AVAILABLE, details, message);
     }
 
     public static UpdateResult notFound(String message) {

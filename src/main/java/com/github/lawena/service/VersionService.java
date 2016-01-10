@@ -2,6 +2,7 @@ package com.github.lawena.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.lawena.Messages;
 import com.github.lawena.domain.Branch;
 import com.github.lawena.domain.Build;
 import com.github.lawena.domain.UpdateResult;
@@ -37,6 +38,13 @@ public class VersionService {
 
     private static final Logger log = LoggerFactory.getLogger(VersionService.class);
     private static final String DEFAULT_BRANCHES = "https://dl.dropboxusercontent.com/u/74380/lwrt/5/channels.json";
+    private static final String IMPLEMENTATION_VERSION = "Implementation-Version";
+    private static final String IMPLEMENTATION_BUILD = "Implementation-Build";
+    private static final String GIT_DESCRIBE = "Git-Describe";
+    private static final String GIT_COMMIT = "Git-Commit";
+    private static final String CURRENT_VERSION = "Current-Version";
+    private static final String CURRENT_BRANCH = "Current-Branch";
+    private static final Path GETDOWN_PATH = Paths.get("getdown.txt");
 
     private final ObjectMapper mapper;
     private final Map<String, String> version = new LinkedHashMap<>();
@@ -57,14 +65,14 @@ public class VersionService {
             gradle.load(new FileInputStream("gradle.properties"));
         } catch (IOException ignored) {
         }
-        version.put("Implementation-Version", getManifestString("Implementation-Version", gradle.getProperty("version", "custom-v5")));
-        version.put("Implementation-Build", getManifestString("Implementation-Build", LwrtUtils.now("yyyyMMddHHmmss")));
-        version.put("Git-Describe", getManifestString("Git-Describe", version.get("Version")));
-        version.put("Git-Commit", getManifestString("Git-Commit", "0000000"));
+        version.put(IMPLEMENTATION_VERSION, getManifestString(IMPLEMENTATION_VERSION, gradle.getProperty("version", "custom-v5")));
+        version.put(IMPLEMENTATION_BUILD, getManifestString(IMPLEMENTATION_BUILD, LwrtUtils.now("yyyyMMddHHmmss")));
+        version.put(GIT_DESCRIBE, getManifestString(GIT_DESCRIBE, version.get(IMPLEMENTATION_VERSION)));
+        version.put(GIT_COMMIT, getManifestString(GIT_COMMIT, "0000000"));
         version.putAll(loadGitData());
-        getdown.putAll(loadGetdown(new File("getdown.txt")));
-        version.put("Current-Version", getCurrentVersion());
-        version.put("Current-Branch", getCurrentBranchName());
+        getdown.putAll(loadGetdown(GETDOWN_PATH));
+        version.put(CURRENT_VERSION, getCurrentVersion());
+        version.put(CURRENT_BRANCH, getCurrentBranchName());
         log.info("{}", version);
     }
 
@@ -92,10 +100,10 @@ public class VersionService {
                 Git git = new Git(repositoryBuilder.build());
                 String describe = git.describe().call();
                 if (describe != null) {
-                    result.put("Git-Describe", describe);
+                    result.put(GIT_DESCRIBE, describe);
                 }
                 String commit = git.getRepository().resolve("HEAD").getName();
-                result.put("Git-Commit", commit.substring(0, 7));
+                result.put(GIT_COMMIT, commit.substring(0, 7));
             }
         } catch (IOException | GitAPIException e) {
             log.debug("Could not retrieve Git repository info: {}", e.toString());
@@ -103,9 +111,9 @@ public class VersionService {
         return result;
     }
 
-    private Map<String, Object> loadGetdown(File file) {
+    private Map<String, Object> loadGetdown(Path path) {
         try {
-            return ConfigUtil.parseConfig(file, false);
+            return ConfigUtil.parseConfig(path.toFile(), false);
         } catch (IOException e) {
             standalone = true;
             return Collections.emptyMap();
@@ -113,27 +121,27 @@ public class VersionService {
     }
 
     public String getVersion() {
-        return version.get("Current-Version");
+        return version.get(CURRENT_VERSION);
     }
 
     public String getBranch() {
-        return version.get("Current-Branch");
+        return version.get(CURRENT_BRANCH);
     }
 
     public String getImplementationVersion() {
-        return version.get("Implementation-Version");
+        return version.get(IMPLEMENTATION_VERSION);
     }
 
     public String getImplementationBuild() {
-        return version.get("Implementation-Build");
+        return version.get(IMPLEMENTATION_BUILD);
     }
 
     public String getGitDescribe() {
-        return version.get("Git-Describe");
+        return version.get(GIT_DESCRIBE);
     }
 
     public String getGitCommit() {
-        return version.get("Git-Commit");
+        return version.get(GIT_COMMIT);
     }
 
     public void clear() {
@@ -367,19 +375,19 @@ public class VersionService {
     public UpdateResult checkForUpdates() {
         SortedSet<Build> buildList = getBuildList(getCurrentBranch());
         if (buildList.isEmpty()) {
-            return UpdateResult.notFound("No builds were found for the current branch");
+            return UpdateResult.notFound(Messages.getString("ui.updates.noUpdatesFound"));
         }
         Build latest = buildList.first();
         try {
             long current = Long.parseLong(getCurrentVersion());
             if (current < latest.getTimestamp()) {
-                return UpdateResult.found(latest);
+                return UpdateResult.found(latest, Messages.getString("ui.updates.newVersionAvailable", latest.getVersion()));
             } else {
-                return UpdateResult.latest("You already have the latest version");
+                return UpdateResult.latest(Messages.getString("ui.updates.hasLatestVersion"));
             }
         } catch (NumberFormatException e) {
             log.warn("Bad version format: {}", getCurrentVersion());
-            return UpdateResult.found(latest);
+            return UpdateResult.found(latest, Messages.getString("ui.updates.newVersionAvailable", latest.getVersion()));
         }
     }
 
@@ -421,16 +429,15 @@ public class VersionService {
 
     public void switchBranch(Branch newBranch) throws IOException {
         String appbase = newBranch.getUrl() + "latest/";
-        Path getdownPath = Paths.get("getdown.txt");
         try {
-            Files.copy(getdownPath, Paths.get("getdown.bak.txt"));
+            Files.copy(GETDOWN_PATH, Paths.get("getdown.bak.txt"));
         } catch (IOException e) {
             log.warn("Could not backup updater metadata file", e);
         }
         List<String> lines = new ArrayList<>();
         lines.add("appbase = " + appbase);
         try {
-            for (String line : Files.readAllLines(getdownPath, Charset.forName("UTF-8"))) {
+            for (String line : Files.readAllLines(GETDOWN_PATH, Charset.forName("UTF-8"))) {
                 if (line.startsWith("ui.")) {
                     lines.add(line);
                 }
@@ -438,36 +445,7 @@ public class VersionService {
         } catch (IOException e) {
             log.warn("Could not read current updater metadata file", e);
         }
-        Files.write(getdownPath, lines, Charset.defaultCharset());
+        Files.write(GETDOWN_PATH, lines, Charset.defaultCharset());
         log.info("New updater metadata file created");
-    }
-
-    public List<String> getChangeLog(Branch branch) {
-        List<String> list = branch.getChangeLog();
-        if (list != null) {
-            return list;
-        }
-        list = Collections.emptyList();
-        String url = branch.getUrl();
-        if (url == null) {
-            return list;
-        }
-        url = url + "changelog.txt";
-        File file = new File("changelog.txt").getAbsoluteFile();
-        try {
-            Resource res = new Resource(file.getName(), new URL(url), file, false);
-            if (download(res)) {
-                try {
-                    list = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
-                    branch.setChangeLog(list);
-                } catch (IOException e) {
-                    log.warn("Could not read lines from file: " + e);
-                }
-                res.erase();
-            }
-        } catch (MalformedURLException e) {
-            log.warn("Invalid URL: " + e);
-        }
-        return list;
     }
 }

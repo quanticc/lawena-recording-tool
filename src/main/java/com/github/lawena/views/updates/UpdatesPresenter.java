@@ -1,9 +1,11 @@
 package com.github.lawena.views.updates;
 
+import com.github.lawena.Messages;
 import com.github.lawena.domain.UpdateResult;
 import com.github.lawena.repository.ImageRepository;
 import com.github.lawena.service.TaskService;
 import com.github.lawena.service.VersionService;
+import com.github.lawena.util.FXUtils;
 import com.github.lawena.util.LwrtUtils;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -86,10 +88,14 @@ public class UpdatesPresenter {
                 Platform.runLater(() -> {
                     resultPane.setText(result.getMessage());
                     resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
-                    resultPane.getActions().add(new Action("Update Now", event -> {
+                    resultPane.getActions().add(new Action(Messages.getString("ui.updates.updateNow"), event -> {
                         if (versionService.upgradeApplication(result.getDetails())) {
                             Stage stage = (Stage) tabPane.getScene().getWindow();
                             stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+                        } else {
+                            FXUtils.showWarning(Messages.getString("ui.updates.failedTitle"),
+                                    Messages.getString("ui.updates.failedHeader"),
+                                    Messages.getString("ui.updates.failedContent"));
                         }
                     }));
                     resultPane.show();
