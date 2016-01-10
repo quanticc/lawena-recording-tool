@@ -300,7 +300,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             def output = file("${deployDir}/${distName}/buildlist.txt")
             output.append "${buildTime};${version};${describe}\n"
             // post to webhook about new build
-            //"curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}*\" ${notifyUrl}".execute()
+            "curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}* (${commit})\" ${notifyUrl}".execute()
         }
     }
 
@@ -325,6 +325,3 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
         }
     }
 }
-
-//installStableDist.dependsOn(cleanInstallStableDist, deployStable)
-//installPreviewDist.dependsOn(cleanInstallPreviewDist, deployPreview)
