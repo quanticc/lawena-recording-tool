@@ -7,6 +7,7 @@ import com.github.lawena.domain.Branch;
 import com.github.lawena.domain.Build;
 import com.github.lawena.domain.UpdateResult;
 import com.github.lawena.util.LwrtUtils;
+import com.jcabi.manifests.Manifests;
 import com.threerings.getdown.data.Resource;
 import com.threerings.getdown.net.Downloader;
 import com.threerings.getdown.net.HTTPDownloader;
@@ -30,7 +31,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.jar.JarFile;
 
 @Service
 public class VersionService {
@@ -44,6 +44,7 @@ public class VersionService {
     private static final String CURRENT_VERSION = "Current-Version";
     private static final String CURRENT_BRANCH = "Current-Branch";
     private static final Path GETDOWN_PATH = Paths.get("getdown.txt");
+    private static final Path PROPERTIES_PATH = Paths.get("gradle.properties");
 
     private final ObjectMapper mapper;
     private final Map<String, String> version = new LinkedHashMap<>();
@@ -59,15 +60,19 @@ public class VersionService {
 
     @PostConstruct
     private void configure() {
-        Properties gradle = new Properties();
-        try {
-            gradle.load(new FileInputStream("gradle.properties"));
-        } catch (IOException ignored) {
+        String versionFallback = "custom-built";
+        if (Files.exists(PROPERTIES_PATH)) {
+            Properties gradle = new Properties();
+            try {
+                gradle.load(new FileInputStream(PROPERTIES_PATH.toFile()));
+                versionFallback = gradle.getProperty("version");
+            } catch (IOException ignored) {
+            }
         }
-        version.put(IMPLEMENTATION_VERSION, getManifestString(IMPLEMENTATION_VERSION, gradle.getProperty("version", "custom-v5")));
-        version.put(IMPLEMENTATION_BUILD, getManifestString(IMPLEMENTATION_BUILD, LwrtUtils.now("yyyyMMddHHmmss")));
+        version.put(IMPLEMENTATION_VERSION, getManifestString(IMPLEMENTATION_VERSION, versionFallback));
+        version.put(IMPLEMENTATION_BUILD, getManifestString(IMPLEMENTATION_BUILD, "?"));
         version.put(GIT_DESCRIBE, getManifestString(GIT_DESCRIBE, version.get(IMPLEMENTATION_VERSION)));
-        version.put(GIT_COMMIT, getManifestString(GIT_COMMIT, "0000000"));
+        version.put(GIT_COMMIT, getManifestString(GIT_COMMIT, "?"));
         version.putAll(loadGitData());
         getdown.putAll(loadGetdown(GETDOWN_PATH));
         version.put(CURRENT_VERSION, getCurrentVersion());
@@ -76,19 +81,7 @@ public class VersionService {
     }
 
     private String getManifestString(String key, String defaultValue) {
-        try (JarFile jar =
-                     new JarFile(
-                             new File(VersionService.class.getProtectionDomain().getCodeSource().getLocation().getPath()))) {
-            String value = jar.getManifest().getMainAttributes().getValue(key);
-            // if value is null, the jar was not packaged through gradle
-            return (value == null ? defaultValue : value);
-        } catch (IOException ignored) {
-            // the application is not packed into a JAR
-        } catch (Exception e) {
-            // should not reach this normally
-            log.warn("Could not get JAR manifest string", e);
-        }
-        return defaultValue;
+        return Manifests.exists(key) ? Manifests.read(key) : defaultValue;
     }
 
     private Map<String, String> loadGitData() {

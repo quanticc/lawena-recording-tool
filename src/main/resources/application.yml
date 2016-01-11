@@ -101,6 +101,7 @@ logging:
         CopyDirVisitor: INFO
         DeleteDirVisitor: INFO
     java.util.prefs: ERROR
+    com.jcabi.manifests: WARN
 spring:
   jmx:
     enabled: false
