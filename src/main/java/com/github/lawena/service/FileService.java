@@ -345,11 +345,13 @@ public class FileService {
     }
 
     public void restoreFiles() throws LaunchException {
-        Path basePath = validationService.getBasePath();
-        // TODO: use folders given by the replacing-strategy
-        closeHandles(basePath.resolve("cfg"));
-        closeHandles(basePath.resolve("custom"));
-        // TODO: handle case when cfg or custom were symlinks originally
+        Path gamePath = validationService.getGamePath();
+        if (gamePath != null) {
+            // TODO: use folders given by the replacing-strategy
+            closeHandles(gamePath.resolve("cfg"));
+            closeHandles(gamePath.resolve("custom"));
+            // TODO: handle case when cfg or custom were symlinks originally
+        }
         gitService.restore();
     }
 
