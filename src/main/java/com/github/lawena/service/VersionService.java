@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -79,14 +78,17 @@ public class VersionService {
     private String getManifestString(String key, String defaultValue) {
         try (JarFile jar =
                      new JarFile(
-                             new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))) {
+                             new File(VersionService.class.getProtectionDomain().getCodeSource().getLocation().getPath()))) {
             String value = jar.getManifest().getMainAttributes().getValue(key);
             // if value is null, the jar was not packaged through gradle
             return (value == null ? defaultValue : value);
-        } catch (IOException | URISyntaxException ignored) {
+        } catch (IOException ignored) {
             // the application is not packed into a JAR
-            return defaultValue;
+        } catch (Exception e) {
+            // should not reach this normally
+            log.warn("Could not get JAR manifest string", e);
         }
+        return defaultValue;
     }
 
     private Map<String, String> loadGitData() {

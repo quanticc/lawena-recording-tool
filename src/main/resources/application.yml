@@ -18,7 +18,7 @@ lawena:
   launchers:
     -
       name: Team Fortress 2
-      icon: /com/github/lawena/views/tf2/tf2-red-48px.png
+      icon: /com/github/lawena/views/tf2/tf2-48px.png
       launchMode: HL2
       modName: tf
       appId: '440'
