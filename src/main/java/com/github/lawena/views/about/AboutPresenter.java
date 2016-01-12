@@ -1,9 +1,11 @@
 package com.github.lawena.views.about;
 
+import com.github.lawena.service.VersionService;
 import com.github.lawena.util.LwrtUtils;
 import javafx.application.HostServices;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.web.WebView;
 import org.pegdown.*;
 import org.pegdown.ast.RootNode;
@@ -28,12 +30,18 @@ public class AboutPresenter {
 
     @Autowired
     private HostServices hostServices;
+    @Autowired
+    private VersionService versionService;
 
     @FXML
     private WebView webView;
+    @FXML
+    private Label versionLabel;
 
     @FXML
     private void initialize() {
+        versionLabel.setText(String.format("Version: %s (build %s)",
+                versionService.getImplementationVersion(), versionService.getVersion()));
         webView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == Worker.State.SUCCEEDED) {
                 interceptAnchors(webView.getEngine().getDocument());

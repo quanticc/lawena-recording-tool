@@ -157,7 +157,7 @@ public class BasePresenter {
         rightStatus.textProperty().bind(
                 Bindings.concat(isEmpty.then("").otherwise(sizeBinding.asString()), isEmpty.then("")
                         .otherwise(Bindings.when(
-                                Bindings.greaterThan(1, sizeBinding)).then(plural)
+                                Bindings.notEqual(1, sizeBinding)).then(plural)
                                 .otherwise(singular))));
     }
 

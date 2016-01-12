@@ -25,7 +25,7 @@
       <VBox spacing="5.0">
          <children>
             <Label text="Copyright 2011-2016 Montz, Quantic, contributors and others." />
-            <Label text="Version 5.0.0" />
+            <Label fx:id="versionLabel" text="Version 5.0.0" />
          </children>
       </VBox>
    </content>

@@ -1,4 +1,8 @@
+import net.researchgate.release.GitAdapter
+import org.ajoberstar.grgit.Grgit
 import org.apache.tools.ant.taskdefs.condition.Os
+
+import java.text.Collator
 
 buildscript {
     ext {
@@ -12,6 +16,7 @@ buildscript {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.11.3'
+        classpath 'org.ajoberstar:grgit:1.4.1'
     }
 }
 
@@ -68,10 +73,7 @@ release {
     newVersionCommitMessage = 'Prepare for next development iteration:'
     versionPropertyFile = 'gradle.properties'
     buildTasks = ['bootRepackage']
-    scmAdapters = [
-            net.researchgate.release.GitAdapter
-    ]
-
+    scmAdapters = [GitAdapter]
     git {
         requireBranch = ''
         pushToRemote = ''
@@ -86,33 +88,15 @@ sourceSets {
     }
 }
 
+def git = Grgit.open()
 def buildTime = new Date().format("yyyyMMddHHmmss")
-def describe = version
-def commit = '0000000'
-try {
-    new ByteArrayOutputStream().withStream { execOS ->
-        exec {
-            executable = 'git'
-            args = ['describe', '--tags', '--always']
-            standardOutput = execOS
-        }
-        describe = execOS.toString().trim()
-    }
-    new ByteArrayOutputStream().withStream { execOS ->
-        exec {
-            executable = 'git'
-            args = ['rev-parse', '--short', 'HEAD']
-            standardOutput = execOS
-        }
-        commit = execOS.toString().trim()
-    }
-} catch (Exception e) {
-    println "Could not retrieve version number"
-}
+def describe = git?.describe()
+def commit = git?.head()?.getAbbreviatedId(7)
 
 jar {
     archiveName = 'lawena.jar'
     destinationDir = null
+    entryCompression = ZipEntryCompression.STORED
     manifest {
         attributes(
                 'Implementation-Title': 'Lawena Recording Tool',
@@ -125,7 +109,7 @@ jar {
 }
 
 bootRun {
-    jvmArgs = ["-Xmx32m", "-Djavafx.preloader=com.github.lawena.LawenaPreloader"]
+    jvmArgs = ["-Djavafx.preloader=com.github.lawena.LawenaPreloader"]
 }
 
 compileJava.dependsOn(processResources)
@@ -190,16 +174,7 @@ task copyMainJar(type: Copy, dependsOn: 'bootRepackage') {
     into 'src/dist/lawena'
 }
 
-task copyGradleLauncher(type: Copy) {
-    from(projectDir) {
-        include 'gradle/**'
-        include 'gradlew'
-        include 'gradlew.bat'
-    }
-    into 'build/gradlew/lawena'
-}
-
-task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar', 'copyGradleLauncher']) {}
+task copyLibs(dependsOn: ['copyGetdownClientNew', 'copyMainJar']) {}
 
 task packResources(type: Zip) {
     archiveName = 'lwrtresources.jar'
@@ -302,7 +277,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             def output = file("${deployDir}/${distName}/buildlist.txt")
             output.append "${buildTime};${version};${describe}\n"
             // post to webhook about new build
-            "curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}* (${commit})\" ${notifyUrl}".execute()
+            //"curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}* (${commit})\" ${notifyUrl}".execute()
         }
     }
 
@@ -313,7 +288,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             file("${deployDir}/${distName}").eachDirMatch(~/^[0-9]+$/) { dir ->
                 buildlist.add dir.name
             }
-            buildlist.sort(java.text.Collator.instance)
+            buildlist.sort(Collator.instance)
             def latest = buildlist[buildlist.size() - 1]
             buildlist = buildlist - latest
             buildlist.each { s ->
@@ -321,7 +296,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
                 javaexec {
                     main 'com.threerings.getdown.tools.Differ'
                     classpath 'launcher/getdown-client.jar'
-                    args = ['-verbose', file("${deployDir}/${distName}/${latestFolder}"), file("${deployDir}/${distName}/${s}")]
+                    args = ['-verbose', file("${deployDir}/${distName}/${latest}"), file("${deployDir}/${distName}/${s}")]
                 }
             }
         }

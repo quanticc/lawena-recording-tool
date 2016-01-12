@@ -96,7 +96,17 @@ public class Branch {
 
     @Override
     public String toString() {
-        return name + " (" + type.toString().toLowerCase() + ")";
+        return "Branch [" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                //", description='" + description + '\'' +
+                //", github='" + github + '\'' +
+                //", compare='" + compare + '\'' +
+                //", url='" + url + '\'' +
+                ", builds=" + builds +
+                ", changeLog=" + changeLog +
+                ']';
     }
 
     @Override

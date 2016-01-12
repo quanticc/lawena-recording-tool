@@ -202,7 +202,7 @@ public class VersionService {
     public Branch getCurrentBranch() {
         String branchName = getCurrentBranchName();
         for (Branch branch : getBranches()) {
-            if (branch.getId().equals(branchName)) {
+            if (branch.getName().equals(branchName)) {
                 return branch;
             }
         }
@@ -324,6 +324,7 @@ public class VersionService {
                             getBuildList(branch);
                         }
                     }
+                    log.debug("Found: {}", list);
                 } catch (FileNotFoundException e) {
                     log.info("No latest version file found");
                 } catch (IOException e) {
@@ -368,7 +369,9 @@ public class VersionService {
     }
 
     public UpdateResult checkForUpdates() {
-        SortedSet<Build> buildList = getBuildList(getCurrentBranch());
+        Branch branch = getCurrentBranch();
+        log.debug("Current build: {}/{}", branch.getName(), getVersion());
+        SortedSet<Build> buildList = getBuildList(branch);
         if (buildList.isEmpty()) {
             return UpdateResult.notFound(Messages.getString("ui.updates.noUpdatesFound"));
         }
