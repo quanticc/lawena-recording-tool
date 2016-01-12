@@ -102,8 +102,8 @@ jar {
                 'Implementation-Title': 'Lawena Recording Tool',
                 'Implementation-Version': version,
                 'Implementation-Build': buildTime,
-                'Git-Describe': describe,
-                'Git-Commit': commit
+                'Git-Describe': describe ?: version,
+                'Git-Commit': commit ?: '0000000'
         )
     }
 }
