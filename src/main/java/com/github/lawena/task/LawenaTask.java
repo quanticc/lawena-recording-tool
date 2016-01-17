@@ -1,32 +1,34 @@
 package com.github.lawena.task;
 
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.concurrent.Task;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.Node;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.util.Duration;
 
 public abstract class LawenaTask<T> extends Task<T> {
 
-    private static final Image gearIcon = new Image("/com/github/lawena/fugue/gear.png");
-
-    public static ImageView getGenericImageView() {
-        ImageView icon = new ImageView(gearIcon);
-        RotateTransition rt = new RotateTransition(Duration.millis(1000), icon);
+    public static Node getGenericImageView() {
+        Label label = GlyphsDude.createIconLabel(FontAwesomeIcon.COG, "", "1.5em", null, ContentDisplay.LEFT);
+        Node node = label.getGraphic();
+        RotateTransition rt = new RotateTransition(Duration.millis(2000), node);
         rt.setByAngle(360);
         rt.setCycleCount(Animation.INDEFINITE);
         rt.setInterpolator(Interpolator.LINEAR);
         rt.play();
-        return icon;
+        return node;
     }
 
     public Group getGroup() {
         return Group.GENERIC;
     }
 
-    public ImageView getImageView() {
+    public Node getGraphic() {
         return getGenericImageView();
     }
 

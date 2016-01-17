@@ -53,7 +53,7 @@ public class LawenaConfiguration {
             // allow customized graphic via LawenaTask
             if (t instanceof LawenaTask) {
                 LawenaTask<?> lawenaTask = (LawenaTask<?>) t;
-                return lawenaTask.getImageView();
+                return lawenaTask.getGraphic();
             }
             return LawenaTask.getGenericImageView();
         });

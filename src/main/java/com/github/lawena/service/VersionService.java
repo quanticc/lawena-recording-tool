@@ -6,13 +6,16 @@ import com.github.lawena.Messages;
 import com.github.lawena.domain.Branch;
 import com.github.lawena.domain.Build;
 import com.github.lawena.domain.UpdateResult;
+import com.github.lawena.task.CollectorTask;
+import com.github.lawena.task.DownloadTask;
+import com.github.lawena.task.VerifierTask;
 import com.github.lawena.util.LwrtUtils;
 import com.jcabi.manifests.Manifests;
 import com.threerings.getdown.data.Resource;
-import com.threerings.getdown.net.Downloader;
-import com.threerings.getdown.net.HTTPDownloader;
 import com.threerings.getdown.util.ConfigUtil;
 import com.threerings.getdown.util.LaunchUtil;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -31,14 +34,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static com.github.lawena.util.LwrtUtils.now;
 
 @Service
 public class VersionService {
 
     private static final Logger log = LoggerFactory.getLogger(VersionService.class);
     private static final String DEFAULT_BRANCHES = "https://dl.dropboxusercontent.com/u/74380/lwrt/5/channels.json";
-    private static final String IMPLEMENTATION_VERSION = "Implementation-Version";
-    private static final String IMPLEMENTATION_BUILD = "Implementation-Build";
+    private static final String IMPLEMENTATION_VERSION = "Application-Version";
+    private static final String IMPLEMENTATION_BUILD = "Application-Build";
     private static final String GIT_DESCRIBE = "Git-Describe";
     private static final String GIT_COMMIT = "Git-Commit";
     private static final String CURRENT_VERSION = "Current-Version";
@@ -46,7 +54,10 @@ public class VersionService {
     private static final Path GETDOWN_PATH = Paths.get("getdown.txt");
     private static final Path PROPERTIES_PATH = Paths.get("gradle.properties");
 
+    private final TaskService taskService;
     private final ObjectMapper mapper;
+
+    private final File appDir = new File("").getAbsoluteFile();
     private final Map<String, String> version = new LinkedHashMap<>();
     private final Map<String, Object> getdown = new LinkedHashMap<>();
     private final List<Branch> branches = new ArrayList<>();
@@ -54,7 +65,8 @@ public class VersionService {
     private boolean standalone = false;
 
     @Autowired
-    public VersionService(ObjectMapper mapper) {
+    public VersionService(TaskService taskService, ObjectMapper mapper) {
+        this.taskService = taskService;
         this.mapper = mapper;
     }
 
@@ -70,7 +82,7 @@ public class VersionService {
             }
         }
         version.put(IMPLEMENTATION_VERSION, getManifestString(IMPLEMENTATION_VERSION, versionFallback));
-        version.put(IMPLEMENTATION_BUILD, getManifestString(IMPLEMENTATION_BUILD, "?"));
+        version.put(IMPLEMENTATION_BUILD, getManifestString(IMPLEMENTATION_BUILD, now("yyyyMMddHHmmss")));
         version.put(GIT_DESCRIBE, getManifestString(GIT_DESCRIBE, version.get(IMPLEMENTATION_VERSION)));
         version.put(GIT_COMMIT, getManifestString(GIT_COMMIT, "?"));
         version.putAll(loadGitData());
@@ -78,6 +90,9 @@ public class VersionService {
         version.put(CURRENT_VERSION, getCurrentVersion());
         version.put(CURRENT_BRANCH, getCurrentBranchName());
         log.info("{}", version);
+        deleteOutdatedResources();
+        upgradeLauncher();
+        upgradeGetdown();
     }
 
     private String getManifestString(String key, String defaultValue) {
@@ -143,55 +158,147 @@ public class VersionService {
         branches.clear();
     }
 
-    private static SortedSet<Build> getBuildList(Branch branch) {
+    private SortedSet<Build> buildSingleBranchMap(Branch branch) {
+        SortedSet<Build> value = Optional.ofNullable(branch.getBuilds()).orElse(new TreeSet<>());
+        if (needsDownload(branch)) {
+            Resource resource = branchResource(branch);
+            if (download(resource)) {
+                value = readBuilds(resource);
+            }
+        }
+        branch.setBuilds(value);
+        return value;
+    }
+
+    private Map<Branch, SortedSet<Build>> buildBranchMap(List<Branch> branches) {
+        // init our map with existing values if present
+        Map<Branch, SortedSet<Build>> map = branches.stream()
+                .collect(Collectors.toMap(Function.identity(),
+                        b -> Optional.ofNullable(b.getBuilds()).orElse(new TreeSet<>())));
+        // now collect all resources to download
+        List<Resource> resources = map.keySet().stream()
+                .filter(this::needsDownload)
+                .map(this::branchResource)
+                .collect(Collectors.toList());
+        // do the deed
+        DownloadTask task = new DownloadTask(resources);
+        taskService.submitTask(task);
+        ObservableList<Resource> result;
+        try {
+            result = task.get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.info("Download was interrupted due to {}, retrieving partial results", e.toString());
+            result = task.getPartialResults();
+        }
+        // successful downloads are inspected, get build data from them and map it
+        result.forEach(resource ->
+                map.entrySet().stream()
+                        .filter(e -> e.getKey().getName().equalsIgnoreCase(resource.getPath()))
+                        .findAny()
+                        .ifPresent(entry -> entry.setValue(readBuilds(resource))
+                        )
+        );
+        // save the builds to their respective Branch mapping
+        map.entrySet().stream().forEach(e -> e.getKey().setBuilds(e.getValue()));
+        return map;
+    }
+
+    private boolean needsDownload(Branch branch) {
         if (branch == null)
             throw new IllegalArgumentException("Must set a branch");
-        SortedSet<Build> builds = branch.getBuilds();
-        if (builds != null) {
-            return builds;
-        }
-        builds = new TreeSet<>();
-        if (branch.equals(Branch.STANDALONE)) {
-            return builds;
-        }
-        if (branch.getUrl() == null || branch.getUrl().isEmpty()) {
-            log.warn("Invalid url for branch {}", branch);
-            return builds;
-        }
-        String name = "buildlist.txt";
-        builds = new TreeSet<>();
+        // download if not already cached, must not be standalone, must have a non-empty url
+        return branch.getBuilds() == null
+                && !branch.equals(Branch.STANDALONE)
+                && branch.getUrl() != null && !branch.getUrl().isEmpty();
+    }
+
+    private Resource branchResource(Branch branch) {
         try {
+            String name = branch.getName();
             File local = new File(name).getAbsoluteFile();
             URL url = new URL(branch.getUrl() + name);
-            Resource res = new Resource(local.getName(), url, local, false);
-            if (download(res)) {
-                try {
-                    for (String line : Files.readAllLines(local.toPath(), Charset.forName("UTF-8"))) {
-                        String[] data = line.split(";");
-                        if (data.length == 2) {
-                            builds.add(new Build(data[0], data[1], data[1], Long.parseLong(data[0])));
-                        } else if (data.length == 3) {
-                            builds.add(new Build(data[0], data[1], data[2], Long.parseLong(data[0])));
-                        } else {
-                            log.warn("Invalid build format: {}", Arrays.asList(data));
-                        }
-                    }
-                } catch (IOException e) {
-                    log.warn("Could not read lines from file: " + e);
-                }
-                res.erase();
-                try {
-                    Files.deleteIfExists(local.toPath());
-                } catch (IOException e) {
-                    log.warn("Could not delete file", e);
+            return new Resource(local.getName(), url, local, false);
+        } catch (MalformedURLException e) {
+            log.warn("Invalid URL: {}", e.toString());
+            return null;
+        }
+    }
+
+    private SortedSet<Build> readBuilds(Resource res) {
+        SortedSet<Build> builds = new TreeSet<>();
+        File local = res.getLocal();
+        try {
+            for (String line : Files.readAllLines(local.toPath(), Charset.forName("UTF-8"))) {
+                String[] data = line.split(";");
+                if (data.length == 2) {
+                    builds.add(new Build(data[0], data[1], data[1], Long.parseLong(data[0])));
+                } else if (data.length == 3) {
+                    builds.add(new Build(data[0], data[1], data[2], Long.parseLong(data[0])));
+                } else {
+                    log.warn("Invalid build format: {}", Arrays.asList(data));
                 }
             }
-        } catch (MalformedURLException e) {
-            log.warn("Invalid URL: " + e);
+        } catch (IOException e) {
+            log.warn("Could not read lines from file: " + e);
         }
-        branch.setBuilds(builds);
+        res.erase();
+        try {
+            Files.deleteIfExists(local.toPath());
+        } catch (IOException e) {
+            log.warn("Could not delete file", e);
+        }
         return builds;
     }
+
+//    private SortedSet<Build> getBuildList(Branch branch) {
+//        if (branch == null)
+//            throw new IllegalArgumentException("Must set a branch");
+//        SortedSet<Build> builds = branch.getBuilds();
+//        if (builds != null) {
+//            return builds;
+//        }
+//        builds = new TreeSet<>();
+//        if (branch.equals(Branch.STANDALONE)) {
+//            return builds;
+//        }
+//        if (branch.getUrl() == null || branch.getUrl().isEmpty()) {
+//            log.warn("Invalid url for branch {}", branch);
+//            return builds;
+//        }
+//        String name = "buildlist.txt";
+//        builds = new TreeSet<>();
+//        try {
+//            File local = new File(name).getAbsoluteFile();
+//            URL url = new URL(branch.getUrl() + name);
+//            Resource res = new Resource(local.getName(), url, local, false);
+//            if (download(res)) {
+//                try {
+//                    for (String line : Files.readAllLines(local.toPath(), Charset.forName("UTF-8"))) {
+//                        String[] data = line.split(";");
+//                        if (data.length == 2) {
+//                            builds.add(new Build(data[0], data[1], data[1], Long.parseLong(data[0])));
+//                        } else if (data.length == 3) {
+//                            builds.add(new Build(data[0], data[1], data[2], Long.parseLong(data[0])));
+//                        } else {
+//                            log.warn("Invalid build format: {}", Arrays.asList(data));
+//                        }
+//                    }
+//                } catch (IOException e) {
+//                    log.warn("Could not read lines from file: " + e);
+//                }
+//                res.erase();
+//                try {
+//                    Files.deleteIfExists(local.toPath());
+//                } catch (IOException e) {
+//                    log.warn("Could not delete file", e);
+//                }
+//            }
+//        } catch (MalformedURLException e) {
+//            log.warn("Invalid URL: " + e);
+//        }
+//        branch.setBuilds(builds);
+//        return builds;
+//    }
 
     /**
      * Retrieves the current development branch the installation is in. This method might trigger
@@ -319,11 +426,10 @@ public class VersionService {
                     TypeReference token = new TypeReference<List<Branch>>() {
                     };
                     list = mapper.readValue(reader, token);
-                    for (Branch branch : list) {
-                        if (branch.getType() == Branch.Type.SNAPSHOT) {
-                            getBuildList(branch);
-                        }
-                    }
+                    buildBranchMap(list.stream()
+                            .filter(b -> b.getType() == Branch.Type.SNAPSHOT)
+                            .collect(Collectors.toList())
+                    );
                     log.debug("Found: {}", list);
                 } catch (FileNotFoundException e) {
                     log.info("No latest version file found");
@@ -343,35 +449,21 @@ public class VersionService {
         return list;
     }
 
-    private static boolean download(Resource... res) {
-        return new HTTPDownloader(Arrays.asList(res), new Downloader.Observer() {
-
-            @Override
-            public void resolvingDownloads() {
-            }
-
-            @Override
-            public boolean downloadProgress(int percent, long remaining) {
-                return !Thread.currentThread().isInterrupted();
-            }
-
-            @Override
-            public void downloadFailed(Resource rsrc, Exception e) {
-                log.warn("Download failed: {}", e.toString());
-            }
-        }).download();
-    }
-
-    public void fileCleanup() {
-        deleteOutdatedResources();
-        upgradeLauncher();
-        upgradeGetdown();
+    private boolean download(Resource res) {
+        DownloadTask task = new DownloadTask(res);
+        taskService.submitTask(task);
+        try {
+            return task.get().size() == 1;
+        } catch (InterruptedException | ExecutionException e) {
+            log.warn("Download task failed: {}", e.toString());
+            return false;
+        }
     }
 
     public UpdateResult checkForUpdates() {
         Branch branch = getCurrentBranch();
         log.debug("Current build: {}/{}", branch.getName(), getVersion());
-        SortedSet<Build> buildList = getBuildList(branch);
+        SortedSet<Build> buildList = buildSingleBranchMap(branch);
         if (buildList.isEmpty()) {
             return UpdateResult.notFound(Messages.getString("ui.updates.noUpdatesFound"));
         }
@@ -389,10 +481,50 @@ public class VersionService {
         }
     }
 
+    public boolean upgradeInBackground(Build build) {
+        log.info("Preparing files for update: {}", build);
+        String appbase = (String) getdown.get("appbase");
+        // make sure there's a trailing slash
+        if (!appbase.endsWith("/")) {
+            appbase = appbase + "/";
+        }
+        URL url = null;
+        try {
+            url = new URL(appbase.replace("%VERSION%", "" + version));
+        } catch (MalformedURLException e) {
+            log.warn("Bad url format: {}", e.toString());
+            return false;
+        }
+        long version = build.getTimestamp();
+        DownloadTask downloadTask = null;
+        try {
+            Task<List<Resource>> collectionTask = new CollectorTask(getdown, url);
+            taskService.submitTask(collectionTask);
+            Task<List<Resource>> verificationTask = new VerifierTask(collectionTask.get(), version, url);
+            taskService.submitTask(verificationTask);
+            downloadTask = new DownloadTask(verificationTask.get());
+            taskService.submitTask(downloadTask);
+        } catch (InterruptedException | ExecutionException e) {
+            log.warn("Update operation was interrupted: {}", e.toString());
+        }
+        if (downloadTask != null) {
+            ObservableList<Resource> successful;
+            try {
+                successful = downloadTask.get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.info("Some files not downloaded due to {}. " +
+                        "They will be downloaded upon application restart", e.toString());
+                successful = downloadTask.getPartialResults();
+            }
+            log.info("Successfully downloaded: {}", successful);
+        }
+        return upgradeApplication(build);
+    }
+
+
     public boolean upgradeApplication(Build build) {
         try {
-            return LaunchUtil.updateVersionAndRelaunch(new File("").getAbsoluteFile(),
-                    "getdown-client.jar", build.getName());
+            return LaunchUtil.updateVersionAndRelaunch(appDir, "getdown-client.jar", build.getName());
         } catch (IOException e) {
             log.warn("Could not complete the upgrade", e);
         }

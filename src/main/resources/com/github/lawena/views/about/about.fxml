@@ -14,7 +14,7 @@
    <graphic>
       <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../lawena-logo.png" />
+            <Image url="@../../shortcut-32@2x.png" />
          </image>
          <viewport>
             <Rectangle2D />

@@ -64,10 +64,10 @@ public class LawenaApplication extends AbstractJavaFxApplicationSupport {
 
     private Image[] getApplicationIcons() {
         return new Image[]{
-                new Image("/com/github/lawena/cap-64px.png"),
-                new Image("/com/github/lawena/cap-48px.png"),
-                new Image("/com/github/lawena/cap-32px.png"),
-                new Image("/com/github/lawena/cap-16px.png")
+                new Image("/com/github/lawena/shortcut-32@2x.png"),
+                new Image("/com/github/lawena/shortcut-32.png"),
+                new Image("/com/github/lawena/shortcut-16@2x.png"),
+                new Image("/com/github/lawena/shortcut-16.png")
         };
     }
 

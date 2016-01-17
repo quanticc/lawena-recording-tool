@@ -5,8 +5,9 @@ import com.github.lawena.domain.UpdateResult;
 import com.github.lawena.repository.ImageRepository;
 import com.github.lawena.service.TaskService;
 import com.github.lawena.service.VersionService;
+import com.github.lawena.task.UpdatesChecker;
+import com.github.lawena.task.WebViewLoader;
 import com.github.lawena.util.FXUtils;
-import com.github.lawena.util.LwrtUtils;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
@@ -19,9 +20,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.controlsfx.control.NotificationPane;
 import org.controlsfx.control.action.Action;
-import org.pegdown.*;
-import org.pegdown.ast.RootNode;
-import org.pegdown.plugins.PegDownPlugins;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +30,10 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.HTMLAnchorElement;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Component
 public class UpdatesPresenter {
@@ -77,58 +76,39 @@ public class UpdatesPresenter {
                 interceptAnchors(changesWebView.getEngine().getDocument());
             }
         });
-        taskService.submitTask(() -> {
-            loadContent(HOME_URL, infoWebView);
-            loadContent(LOG_URL, changesWebView);
-        });
-        taskService.submitTask(() -> {
-            UpdateResult result = versionService.checkForUpdates();
+        UpdatesChecker checker = new UpdatesChecker(versionService);
+        WebViewLoader.LoadSpec loadSpec = new WebViewLoader.LoadSpec();
+        Map<WebView, String> map = new LinkedHashMap<>();
+        map.put(infoWebView, HOME_URL);
+        map.put(changesWebView, LOG_URL);
+        loadSpec.getViewUrlMap().putAll(map);
+        loadSpec.getStylesheets().add(getClass().getResource("../markdownpad-github.css"));
+        taskService.submitTask(new WebViewLoader(loadSpec));
+        taskService.submitTask(checker);
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                return checker.get();
+            } catch (InterruptedException | ExecutionException e) {
+                return UpdateResult.notFound(e.toString());
+            }
+        }).thenAcceptAsync(result -> {
             log.info("{}", result.toString());
             if (result.getStatus() == UpdateResult.Status.UPDATE_AVAILABLE) {
-                Platform.runLater(() -> {
-                    resultPane.setText(result.getMessage());
-                    resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
-                    resultPane.getActions().add(new Action(Messages.getString("ui.updates.updateNow"), event -> {
-                        if (versionService.upgradeApplication(result.getDetails())) {
-                            Stage stage = (Stage) tabPane.getScene().getWindow();
-                            stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-                        } else {
-                            FXUtils.showWarning(Messages.getString("ui.updates.failedTitle"),
-                                    Messages.getString("ui.updates.failedHeader"),
-                                    Messages.getString("ui.updates.failedContent"));
-                        }
-                    }));
-                    resultPane.show();
-                });
+                resultPane.setText(result.getMessage());
+                resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
+                resultPane.getActions().add(new Action(Messages.getString("ui.updates.updateNow"), event -> {
+                    if (versionService.upgradeInBackground(result.getDetails())) {
+                        Stage stage = (Stage) tabPane.getScene().getWindow();
+                        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+                    } else {
+                        FXUtils.showWarning(Messages.getString("ui.updates.failedTitle"),
+                                Messages.getString("ui.updates.failedHeader"),
+                                Messages.getString("ui.updates.failedContent"));
+                    }
+                }));
+                resultPane.show();
             }
-        });
-    }
-
-    private void loadContent(String from, WebView to) {
-        String result;
-        try {
-            URL url = new URL(from);
-            result = LwrtUtils.streamToString(url.openStream());
-        } catch (IOException e) {
-            log.warn("Could not load stream", e);
-            result = "";
-        }
-        PegDownProcessor processor = new PegDownProcessor(Extensions.ALL);
-        RootNode rootNode = processor.parseMarkdown(result.toCharArray());
-        String html = new ToHtmlSerializer(new LinkRenderer(),
-                Collections.<String, VerbatimSerializer>emptyMap(),
-                PegDownPlugins.NONE.getHtmlSerializerPlugins())
-                .toHtml(rootNode);
-        Platform.runLater(() -> to.getEngine().loadContent(
-                "<!DOCTYPE html>\n"
-                        + "<html>\n"
-                        + "<head>\n"
-                        + "<link rel=\"stylesheet\" href=\"" + getClass().getResource("../markdownpad-github.css") + "\">\n"
-                        + "</head>\n"
-                        + "<body>\n"
-                        + html
-                        + "</body>\n"
-                        + "</html>"));
+        }, Platform::runLater);
     }
 
     private void interceptAnchors(Document document) {

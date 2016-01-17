@@ -46,6 +46,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter'
     optional 'org.springframework.boot:spring-boot-configuration-processor'
     compile 'org.controlsfx:controlsfx:8.40.10'
+    compile 'de.jensd:fontawesomefx:8.8'
     compile 'org.pegdown:pegdown:1.6.0'
     compile 'com.threerings:getdown:1.5'
     compile 'com.jcabi:jcabi-manifests:1.1'
@@ -99,9 +100,9 @@ jar {
     entryCompression = ZipEntryCompression.STORED
     manifest {
         attributes(
-                'Implementation-Title': 'Lawena Recording Tool',
-                'Implementation-Version': version,
-                'Implementation-Build': buildTime,
+                'Application-Title': 'Lawena Recording Tool',
+                'Application-Version': version,
+                'Application-Build': buildTime,
                 'Git-Describe': describe ?: version,
                 'Git-Commit': commit ?: '0000000'
         )
@@ -274,7 +275,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
                 classpath 'launcher/getdown-client.jar'
                 args = [latestDestFile]
             }
-            def output = file("${deployDir}/${distName}/buildlist.txt")
+            def output = file("${deployDir}/${distName}/${distName}")
             output.append "${buildTime};${version};${describe}\n"
             // post to webhook about new build
             //"curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}* (${commit})\" ${notifyUrl}".execute()

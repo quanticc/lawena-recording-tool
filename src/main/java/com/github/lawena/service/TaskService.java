@@ -19,7 +19,6 @@ public class TaskService {
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-
     @Autowired
     private TaskProgressView<Task<?>> taskProgressView;
 

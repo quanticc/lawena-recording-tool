@@ -13,7 +13,7 @@
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest>elevated.manifest</manifest>
-  <icon>capture_point.ico</icon>
+  <icon>lawena.ico</icon>
   <singleInstance>
     <mutexName>lawena-recording-tool-5</mutexName>
     <windowTitle>Lawena Recording Tool</windowTitle>
