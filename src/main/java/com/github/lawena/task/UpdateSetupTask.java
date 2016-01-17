@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,36 +19,46 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-/**
- * Task to validate existing resources against a target version checksum.
- * Resources that fail this test must be downloaded to reach the target version.
- */
-public class VerifierTask extends LawenaTask<List<Resource>> {
+public class UpdateSetupTask extends LawenaTask<List<Resource>> {
 
-    private static final Logger log = LoggerFactory.getLogger(VerifierTask.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateSetupTask.class);
     private static final String DIGEST_FILE = "digest.txt";
     private static final File APP_DIR = new File("").getAbsoluteFile();
     private static final File TEMP_DIR = new File(APP_DIR, "tmp");
 
-    private final List<Resource> activeResources;
-    private final long version;
+    private final Map<String, Object> properties;
     private final URL appbase;
+    private final long version;
 
     private Map<String, String> digests = new HashMap<>();
     private String metaDigest = "";
 
-    public VerifierTask(List<Resource> activeResources, long version, URL appbase) {
-        this.activeResources = activeResources;
-        this.version = version;
+    public UpdateSetupTask(Map<String, Object> properties, URL appbase, long version) {
+        this.properties = properties;
         this.appbase = appbase;
+        this.version = version;
     }
 
     @Override
     protected List<Resource> call() throws Exception {
         updateTitle("Updating Lawena");
-        updateMessage("Verifying resources");
-        updateProgress(-1L, -1L); // indeterminate
+        updateMessage("Preparing files");
 
+        List<Resource> resources = new ArrayList<>();
+        parseResources("code", false, resources);
+        parseResources("ucode", true, resources);
+        parseResources("resource", false, resources);
+        parseResources("uresource", true, resources);
+        for (String auxgroup : parseList("auxgroups")) {
+            if (isAuxGroupActive(auxgroup)) {
+                parseResources(auxgroup + ".code", false, resources);
+                parseResources(auxgroup + ".ucode", true, resources);
+                parseResources(auxgroup + ".resource", false, resources);
+                parseResources(auxgroup + ".uresource", true, resources);
+            }
+        }
+
+        updateMessage("Verifying existing resources");
         // get the target digest.txt file - we will be checking CURRENT resources against this
         File tempVersionDir = new File(TEMP_DIR, "" + version);
         Resource digest = new Resource(DIGEST_FILE, new URL(appbase, DIGEST_FILE), new File(tempVersionDir, DIGEST_FILE), false);
@@ -80,15 +91,43 @@ public class VerifierTask extends LawenaTask<List<Resource>> {
             digest.erase();
         }
 
-        // determine what resources do not match the given version
-        List<Resource> failures = verifyResources();
+        // determine what resources do not match the given version, then
         // transform failures into resources with new destination (tmp/versionNumber/resourcePath)
-        return failures.stream()
+        return verifyResources(resources).stream()
                 .map(r -> new Resource(r.getPath(), r.getRemote(), new File(tempVersionDir, r.getPath()), r.shouldUnpack()))
                 .collect(Collectors.toList());
     }
 
-    private List<Resource> verifyResources() throws InterruptedException {
+    private void parseResources(String name, boolean unpack, List<Resource> list) {
+        String[] resources = ConfigUtil.getMultiValue(properties, name);
+        if (resources == null) {
+            return;
+        }
+        for (String resource : resources) {
+            try {
+                list.add(createResource(resource, unpack));
+            } catch (Exception e) {
+                log.warn("Invalid resource '{}'. {}", resource, e.toString());
+            }
+        }
+    }
+
+    private Resource createResource(String path, boolean unpack)
+            throws MalformedURLException {
+        URL remoteUrl = new URL(appbase, path.replace(" ", "%20"));
+        return new Resource(path, remoteUrl, new File(APP_DIR, path), unpack);
+    }
+
+    private String[] parseList(String name) {
+        String value = (String) properties.get(name);
+        return (value == null) ? new String[0] : StringUtils.parseStringArray(value);
+    }
+
+    public boolean isAuxGroupActive(String auxgroup) {
+        return new File(APP_DIR, auxgroup + ".dat").exists();
+    }
+
+    private List<Resource> verifyResources(List<Resource> activeResources) throws InterruptedException {
         List<Resource> failures = new ArrayList<>();
         // total up the file size of the resources to validate
         long totalSize = activeResources.stream().map(Resource::getLocal).map(File::length).reduce(0L, Long::sum);

@@ -18,7 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @EnableConfigurationProperties(LawenaProperties.class)
 @SpringBootApplication
@@ -78,9 +81,14 @@ public class LawenaApplication extends AbstractJavaFxApplicationSupport {
         FXUtils.shutdownPool();
         watchService.cancel();
         persistenceService.saveLaunchSettings();
+        List<Runnable> tasks = taskService.getShutdownTasks();
+        if (!tasks.isEmpty()) {
+            // perform shutdown tasks - uses the commonPool which has not shutdown yet
+            List<CompletableFuture<?>> futures = tasks.stream().map(CompletableFuture::runAsync).collect(Collectors.toList());
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).join();
+        }
     }
 
-    @Lazy
     @Bean
     public HostServices hostServices() {
         return getHostServices();

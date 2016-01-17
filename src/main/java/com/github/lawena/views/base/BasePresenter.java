@@ -10,6 +10,7 @@ import com.github.lawena.service.Resources;
 import com.github.lawena.service.TaskService;
 import com.github.lawena.service.fx.LaunchService;
 import com.github.lawena.task.ScanTask;
+import com.github.lawena.util.FXUtils;
 import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.GameView;
 import com.github.lawena.views.dialog.NewProfileDialog;
@@ -314,9 +315,19 @@ public class BasePresenter {
     }
 
     private void exit() {
-        log.debug("Exiting controller");
-        unbindProfile(profiles.getSelected());
-        Platform.exit();
+        Optional<ButtonType> answer = Optional.of(ButtonType.OK);
+        if (!taskProgressView.getTasks().isEmpty()) {
+            answer = FXUtils.showConfirmation("Exit Lawena",
+                    "Unfinished tasks present. It is recommended that you wait until they are finished",
+                    "Do you still wish to exit the program?");
+        }
+        if (answer.isPresent()) {
+            if (answer.get() == ButtonType.OK) {
+                log.debug("Exiting controller");
+                unbindProfile(profiles.getSelected());
+                Platform.exit();
+            }
+        }
     }
 
     // ***********************************************************************

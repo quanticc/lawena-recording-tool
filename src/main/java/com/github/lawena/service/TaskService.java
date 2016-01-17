@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -17,10 +18,14 @@ public class TaskService {
 
     private static final Logger log = LoggerFactory.getLogger(TaskService.class);
 
+    private final TaskProgressView<Task<?>> taskProgressView;
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final List<Runnable> shutdownTasks = new ArrayList<>();
 
     @Autowired
-    private TaskProgressView<Task<?>> taskProgressView;
+    public TaskService(TaskProgressView<Task<?>> taskProgressView) {
+        this.taskProgressView = taskProgressView;
+    }
 
     public Future<?> submitTask(Task<?> task) {
         taskProgressView.getTasks().add(task);
@@ -84,5 +89,13 @@ public class TaskService {
         } catch (InterruptedException e) {
             return false;
         }
+    }
+
+    public void scheduleOnShutdown(Runnable runnable) {
+        shutdownTasks.add(runnable);
+    }
+
+    public List<Runnable> getShutdownTasks() {
+        return shutdownTasks;
     }
 }

@@ -79,7 +79,7 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
             discoverSize(resource);
         }
 
-        long totalSize = sizes.values().stream().reduce(0L, Long::sum);
+        //long totalSize = sizes.values().stream().reduce(0L, Long::sum);
         //log.info("Downloading {}...", LwrtUtils.humanizeBytes(totalSize, false));
 
         // make a note of the time at which we started the download

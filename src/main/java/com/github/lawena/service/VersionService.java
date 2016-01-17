@@ -6,16 +6,14 @@ import com.github.lawena.Messages;
 import com.github.lawena.domain.Branch;
 import com.github.lawena.domain.Build;
 import com.github.lawena.domain.UpdateResult;
-import com.github.lawena.task.CollectorTask;
 import com.github.lawena.task.DownloadTask;
-import com.github.lawena.task.VerifierTask;
+import com.github.lawena.task.UpdateSetupTask;
 import com.github.lawena.util.LwrtUtils;
 import com.jcabi.manifests.Manifests;
 import com.threerings.getdown.data.Resource;
 import com.threerings.getdown.util.ConfigUtil;
 import com.threerings.getdown.util.LaunchUtil;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -481,9 +479,23 @@ public class VersionService {
         }
     }
 
+    public Map<String, Object> getGetdown() {
+        return getdown;
+    }
+
+    public String getAppbase() {
+        String appbase = (String) getdown.get("appbase");
+        // make sure there's a trailing slash
+        if (!appbase.endsWith("/")) {
+            appbase = appbase + "/";
+        }
+        return appbase;
+    }
+
     public boolean upgradeInBackground(Build build) {
         log.info("Preparing files for update: {}", build);
         String appbase = (String) getdown.get("appbase");
+        long version = build.getTimestamp();
         // make sure there's a trailing slash
         if (!appbase.endsWith("/")) {
             appbase = appbase + "/";
@@ -495,14 +507,11 @@ public class VersionService {
             log.warn("Bad url format: {}", e.toString());
             return false;
         }
-        long version = build.getTimestamp();
         DownloadTask downloadTask = null;
         try {
-            Task<List<Resource>> collectionTask = new CollectorTask(getdown, url);
-            taskService.submitTask(collectionTask);
-            Task<List<Resource>> verificationTask = new VerifierTask(collectionTask.get(), version, url);
-            taskService.submitTask(verificationTask);
-            downloadTask = new DownloadTask(verificationTask.get());
+            UpdateSetupTask setupTask = new UpdateSetupTask(getdown, url, version);
+            taskService.submitTask(setupTask);
+            downloadTask = new DownloadTask(setupTask.get());
             taskService.submitTask(downloadTask);
         } catch (InterruptedException | ExecutionException e) {
             log.warn("Update operation was interrupted: {}", e.toString());
