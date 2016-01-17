@@ -76,7 +76,6 @@ public class LawenaApplication extends AbstractJavaFxApplicationSupport {
 
     @Override
     public void stop() throws Exception {
-        super.stop();
         taskService.shutdownNow();
         FXUtils.shutdownPool();
         watchService.cancel();
@@ -87,6 +86,7 @@ public class LawenaApplication extends AbstractJavaFxApplicationSupport {
             List<CompletableFuture<?>> futures = tasks.stream().map(CompletableFuture::runAsync).collect(Collectors.toList());
             CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).join();
         }
+        super.stop();
     }
 
     @Bean

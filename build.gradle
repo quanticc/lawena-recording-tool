@@ -100,9 +100,9 @@ jar {
     entryCompression = ZipEntryCompression.STORED
     manifest {
         attributes(
-                'Application-Title': 'Lawena Recording Tool',
-                'Application-Version': version,
-                'Application-Build': buildTime,
+                'Implementation-Title': 'Lawena Recording Tool',
+                'Implementation-Version': version,
+                'Implementation-Build': buildTime,
                 'Git-Describe': describe ?: version,
                 'Git-Commit': commit ?: '0000000'
         )
@@ -227,7 +227,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
 
     tasks.create(name: "build${DistName}Dist", dependsOn: ["setup${DistName}Dist", "${distName}DistZip"]) {}
 
-    tasks.create(name: "setup${DistName}Deploy", dependsOn: ["build${DistName}Dist"/*, "cleanInstall${DistName}Dist"*/, "install${DistName}Dist"]) {
+    tasks.create(name: "setup${DistName}Deploy", dependsOn: ["build${DistName}Dist", "install${DistName}Dist"]) {
         description "Prepares deployment descriptor for deploying ${distName} distribution"
         def base = file("getdown/${distName}/lawena/getdown.base.txt")
         def getdown = file("getdown/${distName}/lawena/getdown.full.txt")
@@ -241,19 +241,19 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
         }
     }
 
-    tasks.create(name: "deploy${DistName}", dependsOn: ["setup${DistName}Deploy"/*, "cleanInstall${DistName}Dist", "install${DistName}Dist"*/]) {
-        description "Deploys ${distName} distribution to a local directory"
+    tasks.create(name: "deploy${DistName}", dependsOn: ["setup${DistName}Deploy"]) {
+        description "Deploy ${distName} distribution to a local directory"
         doLast {
             def sourceTree = fileTree("build/install/lawena-${distName}/lawena")
-            def stampDestFile = file("${deployDir}/${distName}/${buildTime}")
-            def latestDestFile = file("${deployDir}/${distName}/${latestFolder}")
+            def stampDestFile = file("${localDeployDir}/${distName}/${buildTime}")
+            def latestDestFile = file("${localDeployDir}/${distName}/${latestFolder}")
             copy {
                 from sourceTree
                 into stampDestFile
             }
             copy {
                 from file("getdown/${distName}/lawena/getdown.full.txt")
-                into file("${deployDir}/${distName}/${buildTime}")
+                into file("${localDeployDir}/${distName}/${buildTime}")
                 rename "getdown.full.txt", "getdown.txt"
             }
             javaexec {
@@ -267,7 +267,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             }
             copy {
                 from file("getdown/${distName}/lawena/getdown.full.txt")
-                into file("${deployDir}/${distName}/${latestFolder}")
+                into file("${localDeployDir}/${distName}/${latestFolder}")
                 rename "getdown.full.txt", "getdown.txt"
             }
             javaexec {
@@ -275,18 +275,42 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
                 classpath 'launcher/getdown-client.jar'
                 args = [latestDestFile]
             }
-            def output = file("${deployDir}/${distName}/${distName}")
+        }
+    }
+
+    tasks.create(name: "publish${DistName}", dependsOn: "deploy${DistName}") {
+        description "Publishes a deployment to a remote location using Dropbox"
+        doLast {
+            exec {
+                workingDir localDeployDir
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    commandLine 'cmd', '/c', dropboxUploaderPath, '-p', 'download', "${remoteDeployDir}/${distName}", "${distName}/${distName}"
+                } else {
+                    commandLine dropboxUploaderPath, '-p', 'download', "${remoteDeployDir}/${distName}", "${distName}/${distName}"
+                }
+            }
+            // create buildlist descriptor
+            def output = file("${localDeployDir}/${distName}/${distName}")
             output.append "${buildTime};${version};${describe}\n"
+            exec {
+                workingDir localDeployDir
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    commandLine 'cmd', '/c', dropboxUploaderPath, '-p', 'upload', distName, "${remoteDeployDir}/${distName}"
+                } else {
+                    commandLine dropboxUploaderPath, '-p', 'upload', distName, "${remoteDeployDir}/${distName}"
+                }
+            }
             // post to webhook about new build
             //"curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}* (${commit})\" ${notifyUrl}".execute()
         }
     }
 
+    // FIXME: differ does not work
     tasks.create(name: "diffDeploy${DistName}", dependsOn: "deploy${DistName}") {
         description "Deploys and creates diff patch files for ${distName} distribution"
         doLast {
             def buildlist = []
-            file("${deployDir}/${distName}").eachDirMatch(~/^[0-9]+$/) { dir ->
+            file("${localDeployDir}/${distName}").eachDirMatch(~/^[0-9]+$/) { dir ->
                 buildlist.add dir.name
             }
             buildlist.sort(Collator.instance)
@@ -297,7 +321,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
                 javaexec {
                     main 'com.threerings.getdown.tools.Differ'
                     classpath 'launcher/getdown-client.jar'
-                    args = ['-verbose', file("${deployDir}/${distName}/${latest}"), file("${deployDir}/${distName}/${s}")]
+                    args = ['-verbose', file("${localDeployDir}/${distName}/${latest}"), file("${localDeployDir}/${distName}/${s}")]
                 }
             }
         }

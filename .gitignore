@@ -14,6 +14,7 @@ version.txt
 /settings.json
 getdown.full.txt
 getdown.txt
+/extra.txt
 
 ### Java template
 *.class

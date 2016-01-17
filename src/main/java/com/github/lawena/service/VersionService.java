@@ -30,6 +30,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -43,8 +44,8 @@ public class VersionService {
 
     private static final Logger log = LoggerFactory.getLogger(VersionService.class);
     private static final String DEFAULT_BRANCHES = "https://dl.dropboxusercontent.com/u/74380/lwrt/5/channels.json";
-    private static final String IMPLEMENTATION_VERSION = "Application-Version";
-    private static final String IMPLEMENTATION_BUILD = "Application-Build";
+    private static final String IMPLEMENTATION_VERSION = "Implementation-Version";
+    private static final String IMPLEMENTATION_BUILD = "Implementation-Build";
     private static final String GIT_DESCRIBE = "Git-Describe";
     private static final String GIT_COMMIT = "Git-Commit";
     private static final String CURRENT_VERSION = "Current-Version";
@@ -70,18 +71,20 @@ public class VersionService {
 
     @PostConstruct
     private void configure() {
-        String versionFallback = "custom-built";
+        String implVersion = getManifestString(IMPLEMENTATION_VERSION, "custom-built");
         if (Files.exists(PROPERTIES_PATH)) {
             Properties gradle = new Properties();
             try {
                 gradle.load(new FileInputStream(PROPERTIES_PATH.toFile()));
-                versionFallback = gradle.getProperty("version");
+                implVersion = gradle.getProperty("version");
             } catch (IOException ignored) {
             }
         }
-        version.put(IMPLEMENTATION_VERSION, getManifestString(IMPLEMENTATION_VERSION, versionFallback));
-        version.put(IMPLEMENTATION_BUILD, getManifestString(IMPLEMENTATION_BUILD, now("yyyyMMddHHmmss")));
-        version.put(GIT_DESCRIBE, getManifestString(GIT_DESCRIBE, version.get(IMPLEMENTATION_VERSION)));
+        version.put(IMPLEMENTATION_VERSION, implVersion);
+        String implBuild = now("yyyyMMddHHmmss");
+        String manifestImplBuild = getManifestString(IMPLEMENTATION_BUILD, implBuild);
+        version.put(IMPLEMENTATION_BUILD, manifestImplBuild.matches("^[0-9]+$") ? manifestImplBuild : implBuild);
+        version.put(GIT_DESCRIBE, getManifestString(GIT_DESCRIBE, implVersion));
         version.put(GIT_COMMIT, getManifestString(GIT_COMMIT, "?"));
         version.putAll(loadGitData());
         getdown.putAll(loadGetdown(GETDOWN_PATH));
@@ -91,6 +94,7 @@ public class VersionService {
         deleteOutdatedResources();
         upgradeLauncher();
         upgradeGetdown();
+        createExtraJvmArgsFile();
     }
 
     private String getManifestString(String key, String defaultValue) {
@@ -402,6 +406,18 @@ public class VersionService {
         File curgd = new File("getdown-client.jar");
         File newgd = new File("code/getdown-client-new.exe");
         upgrade("Lawena updater", oldgd, curgd, newgd);
+    }
+
+    private void createExtraJvmArgsFile() {
+        Path path = Paths.get("extra.txt");
+        if (!Files.exists(path)) {
+            try {
+                Files.write(path, Arrays.asList("#Custom Lawena and JVM arguments", "#-Xmx64m"), Charset.forName("UTF-8"),
+                        StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+            } catch (IOException e) {
+                log.warn("Could not create example extra.txt file", e);
+            }
+        }
     }
 
     public List<Branch> getBranches() {
