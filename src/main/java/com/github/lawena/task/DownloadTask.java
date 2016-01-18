@@ -1,8 +1,10 @@
 package com.github.lawena.task;
 
+import com.github.lawena.util.FXUtils;
 import com.github.lawena.util.LwrtUtils;
 import com.threerings.getdown.data.Resource;
 import com.threerings.getdown.util.ConnectionUtil;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -17,6 +19,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Task to download a collection of resources from a HTTP server, providing progress report through properties.
@@ -53,21 +56,41 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
     }
 
     private void initMetaProperties() {
-        bytesPerSecond.bind(
-                Bindings.when(seconds.isEqualTo(0L))
-                        .then(0L)
-                        .otherwise(downloadedSize.divide(seconds.doubleValue()))
-        );
-        percentCompleted.bind(
-                Bindings.when(totalSize.isEqualTo(0L))
-                        .then(0)
-                        .otherwise(downloadedSize.multiply(100f).divide(totalSize.doubleValue()))
-        );
-        remainingSeconds.bind(
-                Bindings.when(bytesPerSecond.lessThanOrEqualTo(0L).or(totalSize.isEqualTo(0L)))
-                        .then(-1L)
-                        .otherwise(totalSize.subtract(downloadedSize).divide(bytesPerSecond.doubleValue()))
-        );
+        try {
+            bytesPerSecond.bind(
+                    Bindings.when(seconds.isEqualTo(0L)).then(0L)
+                            .otherwise(downloadedSize.divide(seconds.doubleValue()))
+            );
+            percentCompleted.bind(Bindings.min(100,
+                    Bindings.when(totalSize.isEqualTo(0L)).then(0)
+                            .otherwise(downloadedSize.divide(totalSize.doubleValue()).multiply(100f))
+                    )
+            );
+            remainingSeconds.bind(
+                    Bindings.when(bytesPerSecond.lessThanOrEqualTo(0L).or(totalSize.isEqualTo(0L))).then(-1L)
+                            .otherwise(totalSize.subtract(downloadedSize).divide(bytesPerSecond.doubleValue()))
+            );
+            downloadedSize.addListener((observable, oldValue, newValue) -> {
+                log.debug("dld: {} -> {}", oldValue, newValue);
+            });
+            totalSize.addListener((observable, oldValue, newValue) -> {
+                log.debug("tot: {} -> {}", oldValue, newValue);
+            });
+            seconds.addListener((observable, oldValue, newValue) -> {
+                log.debug("sec: {} -> {}", oldValue, newValue);
+            });
+            bytesPerSecond.addListener((observable, oldValue, newValue) -> {
+                log.debug("bps: {} -> {}", oldValue, newValue);
+            });
+            percentCompleted.addListener((observable, oldValue, newValue) -> {
+                log.debug("pct: {} -> {}", oldValue, newValue);
+            });
+            remainingSeconds.addListener((observable, oldValue, newValue) -> {
+                log.debug("eta: {} -> {}", oldValue, newValue);
+            });
+        } catch (Exception e) {
+            log.warn("???", e);
+        }
     }
 
     @Override
@@ -89,10 +112,20 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
         for (Resource resource : resources) {
             download(resource);
         }
-        return partialResults.get();
+
+        ObservableList<Resource> result = partialResults.get();
+        log.debug("Downloaded resources: {} {}", result.size(), result);
+        return result;
     }
 
-    protected void download(Resource rsrc) throws IOException, InterruptedException {
+    @Override
+    protected void done() {
+        CompletableFuture.runAsync(
+                () -> log.debug("Download task finished with status: {}", getState()),
+                Platform::runLater);
+    }
+
+    protected void download(Resource rsrc) throws InterruptedException {
         // make sure the resource's target directory exists
         File parent = new File(rsrc.getLocal().getParent());
         if (!parent.exists()) {
@@ -100,7 +133,11 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
                 log.warn("Failed to create target directory for resource '{}'. Download will certainly fail.", rsrc);
             }
         }
-        doDownload(rsrc);
+        try {
+            doDownload(rsrc);
+        } catch (IOException e) {
+            log.warn("Unable to download {}: {}", rsrc, e.toString());
+        }
     }
 
     protected void doDownload(Resource rsrc) throws IOException, InterruptedException {
@@ -131,13 +168,14 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
                 // note that we've downloaded some data
                 currentSize += read;
 
-                long bps = bytesPerSecond.get();
-                updateMessage(String.format("%s (%d%s / %d%s @ %d%s/s)", rsrc.getPath(),
-                        currentSize, humanize(currentSize),
-                        actualSize, humanize(actualSize),
-                        bps, humanize(bps)));
                 updateObserver(rsrc, currentSize, actualSize);
+                long bps = bytesPerSecond.get();
+                String status = String.format("%s (%s / %s @ %s/s)",
+                        rsrc.getPath(), humanize(currentSize), humanize(actualSize), humanize(bps));
+                updateMessage(status);
+                log.debug("[{}%] {}", percentCompleted.get(), status);
             }
+            FXUtils.runAndWait(() -> partialResults.get().add(rsrc));
         }
     }
 
@@ -199,14 +237,11 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
         long now = System.currentTimeMillis();
         if ((now - lastUpdate) >= UPDATE_DELAY) {
             lastUpdate = now;
-            downloadedSize.set(downloaded.values().stream().reduce(0L, Long::sum));
-            totalSize.set(sizes.values().stream().reduce(0L, Long::sum));
             seconds.set((now - start) / 1000L);
+            totalSize.set(sizes.values().stream().reduce(0L, Long::sum));
+            downloadedSize.set(downloaded.values().stream().reduce(0L, Long::sum));
             if (isCancelled()) {
                 throw new InterruptedException();
-            }
-            if (percentCompleted.get() == 100) {
-                partialResults.get().add(rsrc);
             }
             updateProgress(percentCompleted.get(), 100);
         }

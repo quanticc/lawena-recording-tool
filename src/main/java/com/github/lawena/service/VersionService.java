@@ -182,6 +182,7 @@ public class VersionService {
                 .filter(this::needsDownload)
                 .map(this::branchResource)
                 .collect(Collectors.toList());
+        log.debug("Preparing to download: {}", resources);
         // do the deed
         DownloadTask task = new DownloadTask(resources);
         taskService.submitTask(task);
@@ -195,7 +196,7 @@ public class VersionService {
         // successful downloads are inspected, get build data from them and map it
         result.forEach(resource ->
                 map.entrySet().stream()
-                        .filter(e -> e.getKey().getName().equalsIgnoreCase(resource.getPath() + "-builds.txt"))
+                        .filter(e -> resource.getPath().equalsIgnoreCase(e.getKey().getName() + "-builds.txt"))
                         .findAny()
                         .ifPresent(entry -> entry.setValue(readBuilds(resource))
                         )
@@ -249,58 +250,9 @@ public class VersionService {
         } catch (IOException e) {
             log.warn("Could not delete file", e);
         }
+        log.debug("Read these builds from {}: {}", res, builds);
         return builds;
     }
-
-//    private SortedSet<Build> getBuildList(Branch branch) {
-//        if (branch == null)
-//            throw new IllegalArgumentException("Must set a branch");
-//        SortedSet<Build> builds = branch.getBuilds();
-//        if (builds != null) {
-//            return builds;
-//        }
-//        builds = new TreeSet<>();
-//        if (branch.equals(Branch.STANDALONE)) {
-//            return builds;
-//        }
-//        if (branch.getUrl() == null || branch.getUrl().isEmpty()) {
-//            log.warn("Invalid url for branch {}", branch);
-//            return builds;
-//        }
-//        String name = "buildlist.txt";
-//        builds = new TreeSet<>();
-//        try {
-//            File local = new File(name).getAbsoluteFile();
-//            URL url = new URL(branch.getUrl() + name);
-//            Resource res = new Resource(local.getName(), url, local, false);
-//            if (download(res)) {
-//                try {
-//                    for (String line : Files.readAllLines(local.toPath(), Charset.forName("UTF-8"))) {
-//                        String[] data = line.split(";");
-//                        if (data.length == 2) {
-//                            builds.add(new Build(data[0], data[1], data[1], Long.parseLong(data[0])));
-//                        } else if (data.length == 3) {
-//                            builds.add(new Build(data[0], data[1], data[2], Long.parseLong(data[0])));
-//                        } else {
-//                            log.warn("Invalid build format: {}", Arrays.asList(data));
-//                        }
-//                    }
-//                } catch (IOException e) {
-//                    log.warn("Could not read lines from file: " + e);
-//                }
-//                res.erase();
-//                try {
-//                    Files.deleteIfExists(local.toPath());
-//                } catch (IOException e) {
-//                    log.warn("Could not delete file", e);
-//                }
-//            }
-//        } catch (MalformedURLException e) {
-//            log.warn("Invalid URL: " + e);
-//        }
-//        branch.setBuilds(builds);
-//        return builds;
-//    }
 
     /**
      * Retrieves the current development branch the installation is in. This method might trigger
@@ -444,7 +396,7 @@ public class VersionService {
                             .filter(b -> b.getType() == Branch.Type.SNAPSHOT)
                             .collect(Collectors.toList())
                     );
-                    log.debug("Found: {}", list);
+                    log.debug("Updater branches: {}", list);
                 } catch (FileNotFoundException e) {
                     log.info("No latest version file found");
                 } catch (IOException e) {

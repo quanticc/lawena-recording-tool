@@ -1,5 +1,6 @@
 package com.github.lawena.service;
 
+import com.github.lawena.util.FXUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.controlsfx.control.TaskProgressView;
@@ -28,7 +29,7 @@ public class TaskService {
     }
 
     public Future<?> submitTask(Task<?> task) {
-        taskProgressView.getTasks().add(task);
+        FXUtils.ensureRunLater(() -> taskProgressView.getTasks().add(task));
         return executor.submit(task);
     }
 
