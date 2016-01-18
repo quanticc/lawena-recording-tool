@@ -195,7 +195,7 @@ public class VersionService {
         // successful downloads are inspected, get build data from them and map it
         result.forEach(resource ->
                 map.entrySet().stream()
-                        .filter(e -> e.getKey().getName().equalsIgnoreCase(resource.getPath()))
+                        .filter(e -> e.getKey().getName().equalsIgnoreCase(resource.getPath() + "-builds.txt"))
                         .findAny()
                         .ifPresent(entry -> entry.setValue(readBuilds(resource))
                         )
@@ -216,7 +216,7 @@ public class VersionService {
 
     private Resource branchResource(Branch branch) {
         try {
-            String name = branch.getName();
+            String name = branch.getName() + "-builds.txt";
             File local = new File(name).getAbsoluteFile();
             URL url = new URL(branch.getUrl() + name);
             return new Resource(local.getName(), url, local, false);

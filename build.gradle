@@ -284,24 +284,24 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             exec {
                 workingDir localDeployDir
                 if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'cmd', '/c', dropboxUploaderPath, '-p', 'download', "${remoteDeployDir}/${distName}", "${distName}/${distName}"
+                    commandLine 'cmd', '/c', dropboxUploaderPath, 'download', "${remoteDeployDir}/${distName}/${distName}-builds.txt", "${distName}/${distName}-builds.txt"
                 } else {
-                    commandLine dropboxUploaderPath, '-p', 'download', "${remoteDeployDir}/${distName}", "${distName}/${distName}"
+                    commandLine dropboxUploaderPath, 'download', "${remoteDeployDir}/${distName}/${distName}-builds.txt", "${distName}/${distName}-builds.txt"
                 }
             }
             // create buildlist descriptor
-            def output = file("${localDeployDir}/${distName}/${distName}")
+            def output = file("${localDeployDir}/${distName}/${distName}-builds.txt")
             output.append "${buildTime};${version};${describe}\n"
             exec {
                 workingDir localDeployDir
                 if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'cmd', '/c', dropboxUploaderPath, '-p', 'upload', distName, "${remoteDeployDir}/${distName}"
+                    commandLine 'cmd', '/c', dropboxUploaderPath, 'upload', distName, "${remoteDeployDir}/"
                 } else {
-                    commandLine dropboxUploaderPath, '-p', 'upload', distName, "${remoteDeployDir}/${distName}"
+                    commandLine dropboxUploaderPath, 'upload', distName, "${remoteDeployDir}/"
                 }
             }
             // post to webhook about new build
-            //"curl --data-urlencode \"message=New version pushed to **${distName}** updater branch: *${version}* (${commit})\" ${notifyUrl}".execute()
+            "curl --data-urlencode \"message=New version pushed from `${commit}` to **${distName}** updater branch: *${version}*\" ${notifyUrl}".execute()
         }
     }
 
