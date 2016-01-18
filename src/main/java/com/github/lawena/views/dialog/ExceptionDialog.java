@@ -1,5 +1,6 @@
 package com.github.lawena.views.dialog;
 
+import com.github.lawena.util.FXUtils;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
@@ -22,12 +23,14 @@ public final class ExceptionDialog {
     }
 
     public static Optional<ButtonType> show(String title, String header, String content, Throwable t) {
-        ExceptionDialog d = new ExceptionDialog();
-        d.title = title;
-        d.header = header;
-        d.content = content;
-        d.throwable = t;
-        return d.show();
+        return FXUtils.ensureRunAndGet(() -> {
+            ExceptionDialog d = new ExceptionDialog();
+            d.title = title;
+            d.header = header;
+            d.content = content;
+            d.throwable = t;
+            return d.show();
+        }, null);
     }
 
     private Optional<ButtonType> show() {

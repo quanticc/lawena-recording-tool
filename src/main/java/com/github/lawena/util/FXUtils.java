@@ -177,7 +177,7 @@ public class FXUtils {
      * or a given exceptional value.
      *
      * @param action        the action to perform
-     * @param exceptionally the value retrieve if the result could not be retrieved
+     * @param exceptionally the value retrieved if the result could not be retrieved
      * @param <T>           the type of the supplier
      * @return either the result of the given action (if it could be completed) or the exceptional value
      * (in case an exception was thrown while waiting for the result)
