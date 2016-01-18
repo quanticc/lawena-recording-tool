@@ -145,6 +145,8 @@ public class UpdatesPresenter {
         resultPane.getActions().clear();
         UpdateSetupTask setupTask = new UpdateSetupTask(versionService.getGetdown(), url, targetVersion);
         ProgressIndicator indicator = new ProgressIndicator(-1);
+        indicator.setPrefSize(24, 24);
+        indicator.setMaxSize(24, 24);
         taskService.submitTask(setupTask);
         resultPane.textProperty().bind(setupTask.messageProperty());
         resultPane.setGraphic(indicator);

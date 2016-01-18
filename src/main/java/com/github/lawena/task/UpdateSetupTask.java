@@ -1,6 +1,7 @@
 package com.github.lawena.task;
 
 import com.github.lawena.Messages;
+import com.github.lawena.util.FXUtils;
 import com.github.lawena.util.StringUtils;
 import com.threerings.getdown.data.Resource;
 import com.threerings.getdown.util.ConfigUtil;
@@ -146,11 +147,15 @@ public class UpdateSetupTask extends LawenaTask<List<Resource>> {
             } catch (Exception e) {
                 log.info("Failure validating resource {}. {}", rsrc, e.toString());
             } finally {
-                updateProgress((long) getProgress() + partialProgress, totalSize);
+                incrementProgress(partialProgress, totalSize);
             }
             failures.add(rsrc);
         }
         return failures;
+    }
+
+    private void incrementProgress(long by, long total) {
+        updateProgress(FXUtils.ensureRunAndGet(() -> (long) getProgress() + by, by), total);
     }
 
     /**
