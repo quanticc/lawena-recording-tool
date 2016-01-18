@@ -5,3 +5,12 @@
 .scroll-bar .decrement-button {
     -fx-padding: 5px;
 }
+
+.progress-indicator .percentage {
+    visibility: hidden;
+}
+
+.progress-indicator {
+    -fx-accent: #5319e7;
+    -fx-background-color: transparent;
+}
