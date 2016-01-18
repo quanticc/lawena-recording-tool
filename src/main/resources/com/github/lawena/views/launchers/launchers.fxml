@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
@@ -73,7 +74,10 @@
                                  <children>
                                     <Label prefWidth="100.0" text="%ui.launchers.gameDirectory" />
                                     <TextField fx:id="gamePath" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                                    <Button mnemonicParsing="false" onAction="#chooseGamePath" text="..." />
+                                    <Button mnemonicParsing="false" onAction="#chooseGamePath">
+                                       <graphic>
+                                          <FontAwesomeIconView glyphName="FOLDER" size="16" />
+                                       </graphic></Button>
                                  </children>
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
@@ -102,11 +106,17 @@
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="TRASH_ALT" size="16" />
+                                 </graphic>
                               </Button>
                               <Button mnemonicParsing="false" onAction="#newLauncher" text="%ui.launchers.new.button">
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="COPY" />
+                                 </graphic>
                               </Button>
                            </children>
                         </VBox>
@@ -130,7 +140,10 @@
                                  <children>
                                     <Label text="%ui.launchers.baseDir" />
                                     <TextField fx:id="basePath" HBox.hgrow="ALWAYS" />
-                                    <Button mnemonicParsing="false" onAction="#chooseBasePath" text="..." />
+                                    <Button mnemonicParsing="false" onAction="#chooseBasePath">
+                                       <graphic>
+                                          <FontAwesomeIconView glyphName="FOLDER" size="16" />
+                                       </graphic></Button>
                                  </children>
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
@@ -151,14 +164,20 @@
                                     <ListView fx:id="sourcesList" maxWidth="1.7976931348623157E308" prefHeight="250.0" HBox.hgrow="ALWAYS" />
                                     <VBox spacing="5.0">
                                        <children>
-                                          <Button mnemonicParsing="false" onAction="#addSource" prefWidth="25.0" text="+">
+                                          <Button mnemonicParsing="false" onAction="#addSource" prefWidth="25.0">
                                              <tooltip>
                                                 <Tooltip text="%ui.launchers.addTooltip" />
-                                             </tooltip></Button>
-                                          <Button fx:id="removeSource" mnemonicParsing="false" onAction="#removeSelectedSource" prefWidth="25.0" text="-">
+                                             </tooltip>
+                                             <graphic>
+                                                <FontAwesomeIconView fill="GREEN" glyphName="PLUS" size="16" />
+                                             </graphic></Button>
+                                          <Button fx:id="removeSource" mnemonicParsing="false" onAction="#removeSelectedSource" prefWidth="25.0">
                                              <tooltip>
                                                 <Tooltip text="%ui.launchers.removeTooltip" />
-                                             </tooltip></Button>
+                                             </tooltip>
+                                             <graphic>
+                                                <FontAwesomeIconView fill="RED" glyphName="MINUS" size="16" />
+                                             </graphic></Button>
                                        </children>
                                     </VBox>
                                  </children>
@@ -206,14 +225,20 @@
                                     </TableView>
                                     <VBox spacing="5.0">
                                        <children>
-                                          <Button mnemonicParsing="false" onAction="#addFlag" prefWidth="25.0" text="+">
+                                          <Button mnemonicParsing="false" onAction="#addFlag" prefWidth="25.0">
                                              <tooltip>
                                                 <Tooltip text="%ui.launchers.addTooltip" />
-                                             </tooltip></Button>
-                                          <Button fx:id="removeFlag" mnemonicParsing="false" onAction="#removeSelectedFlag" prefWidth="25.0" text="-">
+                                             </tooltip>
+                                             <graphic>
+                                                <FontAwesomeIconView fill="GREEN" glyphName="PLUS" size="16" />
+                                             </graphic></Button>
+                                          <Button fx:id="removeFlag" mnemonicParsing="false" onAction="#removeSelectedFlag" prefWidth="25.0">
                                              <tooltip>
                                                 <Tooltip text="%ui.launchers.removeTooltip" />
-                                             </tooltip></Button>
+                                             </tooltip>
+                                             <graphic>
+                                                <FontAwesomeIconView fill="RED" glyphName="MINUS" size="16" />
+                                             </graphic></Button>
                                        </children>
                                     </VBox>
                                  </children>
@@ -257,15 +282,21 @@
                                     </TableView>
                                     <VBox spacing="5.0">
                                        <children>
-                                          <Button mnemonicParsing="false" onAction="#addScope" prefWidth="25.0" text="+">
+                                          <Button mnemonicParsing="false" onAction="#addScope" prefWidth="25.0">
                                              <tooltip>
                                                 <Tooltip text="%ui.launchers.addTooltip" />
                                              </tooltip>
+                                             <graphic>
+                                                <FontAwesomeIconView fill="GREEN" glyphName="PLUS" size="16" />
+                                             </graphic>
                                           </Button>
-                                          <Button fx:id="removeScope" mnemonicParsing="false" onAction="#removeSelectedScope" prefWidth="25.0" text="-">
+                                          <Button fx:id="removeScope" mnemonicParsing="false" onAction="#removeSelectedScope" prefWidth="25.0">
                                              <tooltip>
                                                 <Tooltip text="%ui.launchers.removeTooltip" />
                                              </tooltip>
+                                             <graphic>
+                                                <FontAwesomeIconView fill="RED" glyphName="MINUS" size="16" />
+                                             </graphic>
                                           </Button>
                                        </children>
                                     </VBox>

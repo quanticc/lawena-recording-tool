@@ -9,6 +9,8 @@ import com.github.lawena.util.ExternalString;
 import com.github.lawena.util.FXUtils;
 import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.GameView;
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -251,7 +253,7 @@ public class LaunchersPresenter {
         steamPath.setPromptText(Messages.getString("ui.launchers.steamDirPrompt"));
         steamPath.setMaxWidth(Double.MAX_VALUE);
 
-        Button steamPathButton = new Button("...");
+        Button steamPathButton = GlyphsDude.createIconButton(FontAwesomeIcon.FOLDER, "", "16px", null, ContentDisplay.LEFT);
         steamPathButton.setOnAction(this::chooseSteamPath);
 
         Label appIdLabel = new Label(Messages.getString("ui.launchers.appId"));

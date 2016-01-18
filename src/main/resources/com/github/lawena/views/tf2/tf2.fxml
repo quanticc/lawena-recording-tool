@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -73,10 +74,13 @@
                            <children>
                               <Label text="%ui.tf2.recorder.to" />
                               <TextField fx:id="framesPath" maxWidth="1.7976931348623157E308" promptText="%ui.tf2.recorder.framesPathPrompt" HBox.hgrow="ALWAYS" />
-                              <Button mnemonicParsing="false" onAction="#showFramesPathChooser" text="...">
+                              <Button mnemonicParsing="false" onAction="#showFramesPathChooser">
                                  <tooltip>
                                     <Tooltip text="%ui.tf2.recorder.selectFolderTooltip" />
                                  </tooltip>
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="FOLDER" size="16" />
+                                 </graphic>
                               </Button>
                            </children>
                         </HBox>
