@@ -3,6 +3,9 @@ import org.ajoberstar.grgit.Grgit
 import org.apache.tools.ant.taskdefs.condition.Os
 
 import java.text.Collator
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 buildscript {
     ext {
@@ -90,9 +93,10 @@ sourceSets {
 }
 
 def git = Grgit.open()
-def buildTime = new Date().format("yyyyMMddHHmmss")
+def buildTime = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
 def describe = git?.describe()
 def commit = git?.head()?.getAbbreviatedId(7)
+def isWindows = Os.isFamily(Os.FAMILY_WINDOWS)
 
 jar {
     archiveName = 'lawena.jar'
@@ -139,10 +143,11 @@ task buildLauncher {
     doLast {
         exec {
             workingDir 'launcher'
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', launch4jPath, 'lawena-launcher.xml'
+            def args = [launch4jPath, 'lawena-launcher.xml']
+            if (isWindows) {
+                commandLine ['cmd', '/c'] + args
             } else {
-                commandLine launch4jPath, 'lawena-launcher.xml'
+                commandLine args
             }
         }
     }
@@ -278,15 +283,25 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
         }
     }
 
+    tasks.create(name: "with${DistName}Descriptor", dependsOn: "deploy${DistName}") {
+        description "Creates a build list descriptor"
+        doLast {
+            // create buildlist descriptor
+            def output = file("${localDeployDir}/${distName}/${distName}-builds.txt")
+            output.append "${buildTime};${version};${describe}\n"
+        }
+    }
+
     tasks.create(name: "publish${DistName}", dependsOn: "deploy${DistName}") {
         description "Publishes a deployment to a remote location using Dropbox"
         doLast {
             exec {
                 workingDir localDeployDir
-                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'cmd', '/c', dropboxUploaderPath, 'download', "${remoteDeployDir}/${distName}/${distName}-builds.txt", "${distName}/${distName}-builds.txt"
+                def args = [dropboxUploaderPath, 'download', "${remoteDeployDir}/${distName}/${distName}-builds.txt", "${distName}/${distName}-builds.txt"]
+                if (isWindows) {
+                    commandLine ['cmd', '/c'] + args
                 } else {
-                    commandLine dropboxUploaderPath, 'download', "${remoteDeployDir}/${distName}/${distName}-builds.txt", "${distName}/${distName}-builds.txt"
+                    commandLine args
                 }
             }
             // create buildlist descriptor
@@ -294,15 +309,25 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
             output.append "${buildTime};${version};${describe}\n"
             exec {
                 workingDir localDeployDir
-                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'cmd', '/c', dropboxUploaderPath, 'upload', distName, "${remoteDeployDir}/"
+                def args = [dropboxUploaderPath, 'upload', distName, "${remoteDeployDir}/"]
+                if (isWindows) {
+                    commandLine ['cmd', '/c'] + args
                 } else {
-                    commandLine dropboxUploaderPath, 'upload', distName, "${remoteDeployDir}/"
+                    commandLine args
                 }
+            }
+            def dir = new File(localDeployDir, "${distName}/${buildTime}")
+            if (dir.exists() && dir.isDirectory()) {
+                dir.deleteDir()
             }
             // post to webhook about new build
             exec {
-                commandLine 'curl', '--data-urlencode', "\"message=New version pushed from ${commit} to: ${distName}/${version}\" ${notifyUrl}"
+                def args = ['curl', '--data-urlencode', "\"message=New version pushed from ${commit} to: ${distName}/${version}\"", "${notifyUrl}"]
+                if (isWindows) {
+                    commandLine ['cmd', '/c'] + args
+                } else {
+                    commandLine args
+                }
             }
         }
     }
