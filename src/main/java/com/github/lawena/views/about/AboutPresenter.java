@@ -63,7 +63,7 @@ public class AboutPresenter {
         if (branch.equals(Branch.STANDALONE)) {
             return Messages.getString("ui.about.standalone");
         } else {
-            return Messages.getString("ui.about.branch");
+            return Messages.getString("ui.about.branch", branch.getName());
         }
     }
 

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,11 +39,14 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
     protected long start;
     protected long lastUpdate;
 
+    private final SmoothValue smoothTime = new SmoothValue();
+    private final SmoothValue smoothRate = new SmoothValue();
+
     protected final ReadOnlyObjectWrapper<ObservableList<Resource>> partialResults =
             new ReadOnlyObjectWrapper<>(FXCollections.observableArrayList(new ArrayList<>()));
-    protected final ReadOnlyLongWrapper downloadedSize = new ReadOnlyLongWrapper(0L);
-    protected final ReadOnlyLongWrapper totalSize = new ReadOnlyLongWrapper(0L);
-    protected final ReadOnlyLongWrapper seconds = new ReadOnlyLongWrapper(0L);
+    protected final ReadOnlyLongWrapper downloadedSize = new ReadOnlyLongWrapper(1L);
+    protected final ReadOnlyLongWrapper totalSize = new ReadOnlyLongWrapper(1L);
+    protected final ReadOnlyLongWrapper seconds = new ReadOnlyLongWrapper(1L);
     protected final ReadOnlyLongWrapper bytesPerSecond = new ReadOnlyLongWrapper(0L);
     protected final ReadOnlyIntegerWrapper percentCompleted = new ReadOnlyIntegerWrapper(0);
     protected final ReadOnlyLongWrapper remainingSeconds = new ReadOnlyLongWrapper(0L);
@@ -57,41 +61,19 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
     }
 
     private void initMetaProperties() {
-        try {
-            bytesPerSecond.bind(
-                    Bindings.when(seconds.isEqualTo(0L)).then(0L)
-                            .otherwise(downloadedSize.divide(seconds.doubleValue()))
-            );
-            percentCompleted.bind(Bindings.min(100,
-                    Bindings.when(totalSize.isEqualTo(0L)).then(0)
-                            .otherwise(downloadedSize.divide(totalSize.doubleValue()).multiply(100f))
-                    )
-            );
-            remainingSeconds.bind(
-                    Bindings.when(bytesPerSecond.lessThanOrEqualTo(0L).or(totalSize.isEqualTo(0L))).then(-1L)
-                            .otherwise(totalSize.subtract(downloadedSize).divide(bytesPerSecond.doubleValue()))
-            );
-            downloadedSize.addListener((observable, oldValue, newValue) -> {
-                log.debug("dld: {} -> {}", oldValue, newValue);
-            });
-            totalSize.addListener((observable, oldValue, newValue) -> {
-                log.debug("tot: {} -> {}", oldValue, newValue);
-            });
-            seconds.addListener((observable, oldValue, newValue) -> {
-                log.debug("sec: {} -> {}", oldValue, newValue);
-            });
-            bytesPerSecond.addListener((observable, oldValue, newValue) -> {
-                log.debug("bps: {} -> {}", oldValue, newValue);
-            });
-            percentCompleted.addListener((observable, oldValue, newValue) -> {
-                log.debug("pct: {} -> {}", oldValue, newValue);
-            });
-            remainingSeconds.addListener((observable, oldValue, newValue) -> {
-                log.debug("eta: {} -> {}", oldValue, newValue);
-            });
-        } catch (Exception e) {
-            log.warn("???", e);
-        }
+        bytesPerSecond.bind(
+                Bindings.when(seconds.isEqualTo(0L)).then(0L)
+                        .otherwise(downloadedSize.divide(seconds))
+        );
+        percentCompleted.bind(Bindings.min(100,
+                Bindings.when(totalSize.isEqualTo(0L)).then(0)
+                        .otherwise(downloadedSize.multiply(100f).divide(totalSize))
+                )
+        );
+        remainingSeconds.bind(
+                Bindings.when(bytesPerSecond.lessThanOrEqualTo(0L).or(totalSize.isEqualTo(0L))).then(-1L)
+                        .otherwise(totalSize.subtract(downloadedSize).divide(bytesPerSecond))
+        );
     }
 
     @Override
@@ -102,9 +84,6 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
         for (Resource resource : resources) {
             discoverSize(resource);
         }
-
-        //long totalSize = sizes.values().stream().reduce(0L, Long::sum);
-        //log.info("Downloading {}...", LwrtUtils.humanizeBytes(totalSize, false));
 
         // make a note of the time at which we started the download
         start = System.currentTimeMillis();
@@ -156,7 +135,7 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
         }
 
         long actualSize = conn.getContentLength();
-        log.info("Downloading: {} ({})", rsrc.getRemote(), humanize(actualSize));
+        log.info("Downloading: {} ({})", rsrc.getRemote(), humanizeBytes(actualSize));
         long currentSize = 0L;
         try (InputStream in = conn.getInputStream();
              FileOutputStream out = new FileOutputStream(rsrc.getLocal())) {
@@ -170,18 +149,29 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
                 currentSize += read;
 
                 updateObserver(rsrc, currentSize, actualSize);
+                long eta = remainingSeconds.get();
                 long bps = bytesPerSecond.get();
-                String status = String.format("%s (%s / %s @ %s/s)",
-                        rsrc.getPath(), humanize(currentSize), humanize(actualSize), humanize(bps));
+                String status = String.format("%s (%s %s %s%s) %s", rsrc.getPath(), humanizeBytes(currentSize),
+                        Messages.getString("ui.tasks.download.of"), humanizeBytes(actualSize),
+                        bps <= 0 ? "" : String.format(" @ %s/s", humanizeRate(bps)),
+                        eta <= 0 ? "" : humanizeTime(eta));
                 updateMessage(status);
-                log.debug("[{}%] {}", percentCompleted.get(), status);
             }
             FXUtils.runAndWait(() -> partialResults.get().add(rsrc));
         }
     }
 
-    private String humanize(long bytes) {
-        return LwrtUtils.humanizeBytes(bytes, false);
+    private String humanizeTime(long totalSeconds) {
+        Duration duration = Duration.ofSeconds(smoothTime.smooth(totalSeconds));
+        return Messages.getString("ui.tasks.download.remaining", LwrtUtils.shortFormatDuration(duration));
+    }
+
+    private String humanizeRate(long bps) {
+        return LwrtUtils.humanizeBytes(smoothRate.smooth(bps));
+    }
+
+    private String humanizeBytes(long bytes) {
+        return LwrtUtils.humanizeBytes(bytes);
     }
 
     /**
@@ -226,12 +216,7 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
      *                    #checkSize} phase.
      */
     protected void updateObserver(Resource rsrc, long currentSize, long actualSize) throws IOException, InterruptedException {
-        // update the actual size for this resource (but don't let it shrink)
         sizes.put(rsrc, actualSize = Math.max(actualSize, sizes.get(rsrc)));
-
-        // update the current downloaded size for said resource; don't allow the downloaded bytes
-        // to exceed the original claimed size of the resource, otherwise our progress will get
-        // booched and we'll end up back on the Daily WTF: http://tinyurl.com/29wt4oq
         downloaded.put(rsrc, Math.min(actualSize, currentSize));
 
         // notify the observer if it's been sufficiently long since our last notification
@@ -274,5 +259,27 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
 
     public ReadOnlyIntegerProperty percentCompletedProperty() {
         return percentCompleted.getReadOnlyProperty();
+    }
+
+    static class SmoothValue {
+        private int attempt = 0;
+        private long[] remains = new long[4];
+        private long lastMessageUpdate = 0;
+        private long lastMessageUpdateAttempt = 0;
+
+        public long smooth(long input) {
+            lastMessageUpdateAttempt = System.currentTimeMillis();
+            if (lastMessageUpdateAttempt - lastMessageUpdate >= 500L) {
+                remains[attempt++ % remains.length] = input;
+                lastMessageUpdate = lastMessageUpdateAttempt;
+            }
+            long smooth = 0;
+            int values = Math.min(attempt, remains.length);
+            for (int ii = 0; ii < values; ii++) {
+                smooth += remains[ii];
+            }
+            smooth /= values;
+            return smooth;
+        }
     }
 }

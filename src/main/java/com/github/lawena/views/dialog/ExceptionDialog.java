@@ -1,5 +1,6 @@
 package com.github.lawena.views.dialog;
 
+import com.github.lawena.Messages;
 import com.github.lawena.util.FXUtils;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -46,7 +47,7 @@ public final class ExceptionDialog {
             throwable.printStackTrace(pw);
             String exceptionText = sw.toString();
 
-            Label label = new Label("The exception stacktrace was:");
+            Label label = new Label(Messages.getString("ui.dialog.uncaught.stackTraceLabel"));
 
             TextArea textArea = new TextArea(exceptionText);
             textArea.setEditable(false);

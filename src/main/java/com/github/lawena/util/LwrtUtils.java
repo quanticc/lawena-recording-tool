@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -322,6 +323,10 @@ public final class LwrtUtils {
         }
     }
 
+    public static String humanizeBytes(long bytes) {
+        return humanizeBytes(bytes, true);
+    }
+
     public static String humanizeBytes(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
         if (bytes < unit)
@@ -329,6 +334,23 @@ public final class LwrtUtils {
         int exp = (int) (Math.log(bytes) / Math.log(unit));
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
         return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    public static String formatDuration(Duration duration) {
+        long totalSeconds = duration.getSeconds();
+        long absSeconds = Math.abs(totalSeconds);
+        return String.format(
+                "%d:%02d:%02d",
+                absSeconds / 3600,
+                (absSeconds % 3600) / 60,
+                absSeconds % 60);
+    }
+
+    public static String shortFormatDuration(Duration duration) {
+        long totalSeconds = duration.getSeconds();
+        long absSeconds = Math.abs(totalSeconds);
+        int minutes = (int) (absSeconds / 60), seconds = (int) (absSeconds % 60);
+        return minutes + ":" + ((seconds < 10) ? "0" : "") + seconds;
     }
 
     /**

@@ -2,6 +2,7 @@ package com.github.lawena.views.updates;
 
 import com.github.lawena.Messages;
 import com.github.lawena.config.LawenaProperties;
+import com.github.lawena.domain.Branch;
 import com.github.lawena.domain.Build;
 import com.github.lawena.domain.UpdateResult;
 import com.github.lawena.event.NewVersionAvailable;
@@ -13,11 +14,13 @@ import com.github.lawena.task.DownloadTask;
 import com.github.lawena.task.UpdateSetupTask;
 import com.github.lawena.task.UpdatesChecker;
 import com.github.lawena.task.WebViewLoader;
+import com.github.lawena.util.FXUtils;
 import com.threerings.getdown.data.Resource;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -25,6 +28,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Pair;
 import org.controlsfx.control.NotificationPane;
 import org.controlsfx.control.action.Action;
 import org.slf4j.Logger;
@@ -33,13 +37,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static com.github.lawena.util.LwrtUtils.interceptAnchors;
 
@@ -75,6 +82,7 @@ public class UpdatesPresenter {
     private NotificationPane resultPane;
     private Action check;
     private Action restart;
+    private Action rollback;
 
     @FXML
     private void initialize() {
@@ -102,12 +110,12 @@ public class UpdatesPresenter {
         taskService.submitTask(new WebViewLoader(loadSpec));
 
         if (lawenaProperties.getLastSkippedVersion() >= 0) {
-            checkForUpdates();
+            checkForUpdates(false);
         }
         resultPane.setOnHiding(e -> publisher.publishEvent(new NewVersionDismissed(UpdatesPresenter.this)));
     }
 
-    public void checkForUpdates() {
+    public void checkForUpdates(boolean alwaysShow) {
         UpdatesChecker checker = new UpdatesChecker(versionService);
         taskService.submitTask(checker);
         CompletableFuture.supplyAsync(() -> {
@@ -118,15 +126,15 @@ public class UpdatesPresenter {
                 result = UpdateResult.notFound(e.toString());
             }
             return result;
-        }).thenAcceptAsync(this::processUpdateResult, Platform::runLater);
+        }).thenAcceptAsync(r -> processUpdateResult(r, alwaysShow), Platform::runLater);
     }
 
     public void clearCache() {
         versionService.clear();
     }
 
-    private void processUpdateResult(UpdateResult result) {
-        log.info("{}", result.toString());
+    private void processUpdateResult(UpdateResult result, boolean alwaysShow) {
+        log.debug("{}", result.toString());
         if (result.getStatus() == UpdateResult.Status.UPDATE_AVAILABLE) {
             Build target = result.getDetails();
             String appbase = versionService.getAppbase();
@@ -154,18 +162,85 @@ public class UpdatesPresenter {
             Action updateNow = new Action(Messages.getString("ui.updates.updateNow"),
                     event -> performUpdate(url, targetVersion)
             );
-            Action skip = new Action("Skip Version", event -> {
+            Action skip = new Action(Messages.getString("ui.updates.skip"), event -> {
                 lawenaProperties.setLastSkippedVersion(targetVersion);
                 resultPane.hide();
             });
 
-            // First
             resultPane.setText(result.getMessage());
             resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
             resultPane.getActions().addAll(updateNow, skip);
             resultPane.show();
             publisher.publishEvent(new NewVersionAvailable(this));
+        } else if (result.getStatus() == UpdateResult.Status.ALREADY_LATEST_VERSION) {
+            if (alwaysShow) {
+                rollback = new Action(Messages.getString("ui.updates.rollback"), event -> {
+                    ChoiceDialog<Pair<Branch, Build>> dialog = createBuildChooserDialog();
+                    dialog.showAndWait().ifPresent(pair -> {
+                        Branch chosenBranch = pair.getKey();
+                        Build chosenBuild = pair.getValue();
+                        log.debug("Rollback choice: {}", pair);
+                        if (!chosenBranch.equals(versionService.getCurrentBranch())) {
+                            try {
+                                String appbase = versionService.switchBranch(chosenBranch, chosenBuild);
+                                long targetVersion = chosenBuild.getTimestamp();
+                                URL url = new URL(appbase.replace("%VERSION%", "" + targetVersion));
+                                performUpdate(url, targetVersion);
+                            } catch (IOException e) {
+                                log.error("Switch operation failed", e);
+                                FXUtils.showWarning(Messages.getString("ui.updates.failedSwitch.title"),
+                                        Messages.getString("ui.updates.failedSwitch.header"),
+                                        Messages.getString("ui.updates.failedSwitch.content"));
+                            }
+                        } else if (chosenBuild.getTimestamp() != versionService.getLongCurrentVersion()) {
+                            try {
+                                String appbase = versionService.getAppbase();
+                                long targetVersion = chosenBuild.getTimestamp();
+                                URL url = new URL(appbase.replace("%VERSION%", "" + targetVersion));
+                                performUpdate(url, targetVersion);
+                            } catch (MalformedURLException e) {
+                                log.error("Bad appbase URL: {}", e.toString());
+                                FXUtils.showWarning(Messages.getString("ui.updates.badAppbase.title"),
+                                        Messages.getString("ui.updates.badAppbase.header"),
+                                        Messages.getString("ui.updates.badAppbase.content"));
+                            }
+                        } else {
+                            FXUtils.showAlert(Messages.getString("ui.updates.sameVersion.title"),
+                                    Messages.getString("ui.updates.sameVersion.header"),
+                                    Messages.getString("ui.updates.sameVersion.content"));
+                        }
+                    });
+                });
+                resultPane.setText(result.getMessage());
+                resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/tick-24.png")));
+                resultPane.getActions().add(rollback);
+                resultPane.show();
+                publisher.publishEvent(new NewVersionAvailable(this));
+            }
+        } else if (result.getStatus() == UpdateResult.Status.NO_UPDATES_FOUND) {
+            if (alwaysShow) {
+                resultPane.setText(result.getMessage());
+                resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
+                resultPane.show();
+                publisher.publishEvent(new NewVersionAvailable(this));
+            }
         }
+    }
+
+    private ChoiceDialog<Pair<Branch, Build>> createBuildChooserDialog() {
+        List<Branch> branches = versionService.getBranches();
+        ChoiceDialog<Pair<Branch, Build>> dialog = new ChoiceDialog<>();
+        branches.stream().map(this::buildPairsFromBranch).flatMap(Collection::stream).forEach(pair -> dialog.getItems().add(pair));
+        dialog.setSelectedItem(versionService.getCurrentBuild());
+        dialog.setTitle(Messages.getString("ui.updates.buildChooser.title"));
+        dialog.setHeaderText(Messages.getString("ui.updates.buildChooser.header"));
+        dialog.setContentText(Messages.getString("ui.updates.buildChooser.content"));
+        dialog.initOwner(tabPane.getScene().getWindow());
+        return dialog;
+    }
+
+    private List<BranchBuildPair> buildPairsFromBranch(Branch branch) {
+        return branch.getBuilds().stream().sorted().map(build -> new BranchBuildPair(branch, build)).collect(Collectors.toList());
     }
 
     private void performUpdate(URL url, long targetVersion) {
@@ -228,5 +303,25 @@ public class UpdatesPresenter {
             resultPane.getActions().add(check);
             return null;
         });
+    }
+
+    static class BranchBuildPair extends Pair<Branch, Build> {
+
+        /**
+         * Creates a new pair
+         *
+         * @param key   The key for this pair
+         * @param value The value to use for this pair
+         */
+        public BranchBuildPair(Branch key, Build value) {
+            super(key, value);
+        }
+
+        @Override
+        public String toString() {
+            Branch branch = getKey();
+            Build build = getValue();
+            return branch.getName() + "/" + build.getTimestamp() + " (" + build.getVersion() + ")";
+        }
     }
 }

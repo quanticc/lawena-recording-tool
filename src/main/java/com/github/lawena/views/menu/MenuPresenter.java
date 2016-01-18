@@ -70,7 +70,7 @@ public class MenuPresenter {
     private void checkForUpdates(ActionEvent event) {
         properties.setLastSkippedVersion(0);
         updatesPresenter.clearCache();
-        updatesPresenter.checkForUpdates();
+        updatesPresenter.checkForUpdates(true);
     }
 
     @FXML

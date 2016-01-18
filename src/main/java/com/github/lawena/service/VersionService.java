@@ -14,6 +14,7 @@ import com.threerings.getdown.data.Resource;
 import com.threerings.getdown.util.ConfigUtil;
 import com.threerings.getdown.util.LaunchUtil;
 import javafx.collections.ObservableList;
+import javafx.util.Pair;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -27,10 +28,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -278,6 +276,25 @@ public class VersionService {
         if (value.length == 0)
             return "standalone";
         return value[0];
+    }
+
+    public Pair<Branch, Build> getCurrentBuild() {
+        Branch current = getCurrentBranch();
+        if (current == Branch.STANDALONE) {
+            return new Pair<>(current, Build.LATEST);
+        } else {
+            return new Pair<>(current, current.getBuilds().stream()
+                    .filter(b -> b.getTimestamp() == getLongCurrentVersion()).findAny().orElse(Build.LATEST));
+        }
+    }
+
+    public long getLongCurrentVersion() {
+        try {
+            return Long.parseLong(getCurrentVersion());
+        } catch (NumberFormatException e) {
+            log.warn("Bad current version format: ", e.toString());
+            return 0;
+        }
     }
 
     private String getCurrentVersion() {
@@ -537,25 +554,21 @@ public class VersionService {
         return lastCheck;
     }
 
-    public void switchBranch(Branch newBranch) throws IOException {
-        String appbase = newBranch.getUrl() + "latest/";
-        try {
-            Files.copy(GETDOWN_PATH, Paths.get("getdown.bak.txt"));
-        } catch (IOException e) {
-            log.warn("Could not backup updater metadata file", e);
-        }
+    public String switchBranch(Branch newBranch) throws IOException {
+        return switchBranch(newBranch, null);
+    }
+
+    public String switchBranch(Branch newBranch, Build newBuild) throws IOException {
+        String timestamp = (newBuild != null ? "%VERSION%/" : "latest/");
+        String appbase = newBranch.getUrl() + timestamp;
+        Files.copy(GETDOWN_PATH, Paths.get("getdown.bak.txt"),
+                StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         List<String> lines = new ArrayList<>();
         lines.add("appbase = " + appbase);
-        try {
-            for (String line : Files.readAllLines(GETDOWN_PATH, Charset.forName("UTF-8"))) {
-                if (line.startsWith("ui.")) {
-                    lines.add(line);
-                }
-            }
-        } catch (IOException e) {
-            log.warn("Could not read current updater metadata file", e);
-        }
+        lines.addAll(Files.readAllLines(GETDOWN_PATH, Charset.forName("UTF-8")).stream()
+                .filter(line -> line.startsWith("ui.")).collect(Collectors.toList()));
         Files.write(GETDOWN_PATH, lines, Charset.defaultCharset());
         log.info("New updater metadata file created");
+        return appbase;
     }
 }
