@@ -156,6 +156,9 @@ public class VersionService {
         return version.get(GIT_COMMIT);
     }
 
+    /**
+     * Clears downloaded updater branch data.
+     */
     public void clear() {
         branches.clear();
     }

@@ -1,5 +1,7 @@
 package com.github.lawena.views.about;
 
+import com.github.lawena.Messages;
+import com.github.lawena.domain.Branch;
 import com.github.lawena.service.VersionService;
 import com.github.lawena.util.LwrtUtils;
 import javafx.application.HostServices;
@@ -14,14 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.events.EventTarget;
-import org.w3c.dom.html.HTMLAnchorElement;
 
 import java.io.IOException;
 import java.util.Collections;
+
+import static com.github.lawena.util.LwrtUtils.interceptAnchors;
 
 @Component
 public class AboutPresenter {
@@ -40,14 +39,32 @@ public class AboutPresenter {
 
     @FXML
     private void initialize() {
-        versionLabel.setText(String.format("Version: %s (build %s)",
-                versionService.getImplementationVersion(), versionService.getVersion()));
+        String implVersion = versionService.getImplementationVersion();
+        String buildNumber = versionService.getVersion();
+        Branch branch = versionService.getCurrentBranch();
+        versionLabel.setText(Messages.getString("ui.about.version", implVersion, formatBuild(buildNumber), formatBranch(branch)));
         webView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == Worker.State.SUCCEEDED) {
-                interceptAnchors(webView.getEngine().getDocument());
+                interceptAnchors(webView.getEngine().getDocument(), href -> hostServices.showDocument(href));
             }
         });
         loadContent();
+    }
+
+    private String formatBuild(String buildNumber) {
+        if (buildNumber.equals("0")) {
+            return Messages.getString("ui.about.localBuild");
+        } else {
+            return Messages.getString("ui.about.build", buildNumber);
+        }
+    }
+
+    private String formatBranch(Branch branch) {
+        if (branch.equals(Branch.STANDALONE)) {
+            return Messages.getString("ui.about.standalone");
+        } else {
+            return Messages.getString("ui.about.branch");
+        }
     }
 
     private void loadContent() {
@@ -74,21 +91,5 @@ public class AboutPresenter {
                         + html
                         + "</body>\n"
                         + "</html>");
-    }
-
-    private void interceptAnchors(Document document) {
-        NodeList nodeList = document.getElementsByTagName("a");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Node node = nodeList.item(i);
-            EventTarget eventTarget = (EventTarget) node;
-            eventTarget.addEventListener("click", evt -> {
-                EventTarget target = evt.getCurrentTarget();
-                HTMLAnchorElement anchorElement = (HTMLAnchorElement) target;
-                String href = anchorElement.getHref();
-                log.debug("Opening browser at: {}", href);
-                hostServices.showDocument(href);
-                evt.preventDefault();
-            }, false);
-        }
     }
 }

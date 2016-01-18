@@ -5,6 +5,8 @@ import com.github.lawena.config.Constants;
 import com.github.lawena.domain.Launcher;
 import com.github.lawena.domain.Profile;
 import com.github.lawena.event.LaunchersUpdatedEvent;
+import com.github.lawena.event.NewVersionAvailable;
+import com.github.lawena.event.NewVersionDismissed;
 import com.github.lawena.service.Profiles;
 import com.github.lawena.service.Resources;
 import com.github.lawena.service.TaskService;
@@ -17,6 +19,8 @@ import com.github.lawena.views.dialog.NewProfileDialog;
 import com.github.lawena.views.launch.LaunchView;
 import com.github.lawena.views.menu.MenuView;
 import com.github.lawena.views.updates.UpdatesView;
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
@@ -128,7 +132,6 @@ public class BasePresenter {
 
     @FXML
     private void initialize() {
-        log.debug("Initializing FX UI");
         VBox.setVgrow(taskProgressView, Priority.ALWAYS);
         mainContainer.getChildren().add(0, menuView.getView());
         tasksPane.getChildren().add(taskProgressView);
@@ -137,12 +140,12 @@ public class BasePresenter {
             tabs.getScene().getWindow().setOnCloseRequest(e -> exit());
             resources.foldersProperty().addListener(resourceFolderListener);
             bindProfileList();
-            bindTaskStatus(true);
+            bindTaskStatus();
             renderingTab.setContent(launchView.getView());
         });
     }
 
-    private void bindTaskStatus(boolean wasNotInterrupted) {
+    private void bindTaskStatus() {
         // Task running status indicator
         IntegerBinding sizeBinding = Bindings.size(taskProgressView.getTasks());
         ProgressIndicator taskIndicator = new ProgressIndicator(-1);
@@ -401,5 +404,19 @@ public class BasePresenter {
         alert.setContentText(Messages.getString("ui.base.deleteProfile.content"));
         alert.showAndWait().filter(t -> t == ButtonType.OK)
                 .ifPresent(x -> Platform.runLater(() -> profiles.remove(profile)));
+    }
+
+    // ***********************************************************************
+    //  ADDITIONAL EVENT HANDLING
+    // ***********************************************************************
+
+    @EventListener
+    private void newVersionAvailable(NewVersionAvailable event) {
+        welcomeTab.setGraphic(GlyphsDude.createIconLabel(FontAwesomeIcon.EXCLAMATION_CIRCLE, "", "16px", null, ContentDisplay.LEFT).getGraphic());
+    }
+
+    @EventListener
+    private void newVersionDismissed(NewVersionDismissed event) {
+        welcomeTab.setGraphic(null);
     }
 }

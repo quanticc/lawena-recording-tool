@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.lawena.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.events.EventTarget;
+import org.w3c.dom.html.HTMLAnchorElement;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -21,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.jar.JarFile;
 import java.util.prefs.Preferences;
@@ -324,5 +329,30 @@ public final class LwrtUtils {
         int exp = (int) (Math.log(bytes) / Math.log(unit));
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
         return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    /**
+     * Intercepts all click events on external A tags (anchor) in a given document to make them perform the given action
+     * on the href of said anchor.
+     *
+     * @param document a representation of a HTML/XML document
+     * @param action   a consumer that will take the href attribute of the anchor on each click event
+     */
+    public static void interceptAnchors(Document document, Consumer<String> action) {
+        NodeList nodeList = document.getElementsByTagName("a");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            org.w3c.dom.Node node = nodeList.item(i);
+            EventTarget eventTarget = (EventTarget) node;
+            eventTarget.addEventListener("click", evt -> {
+                EventTarget target = evt.getCurrentTarget();
+                HTMLAnchorElement anchorElement = (HTMLAnchorElement) target;
+                String href = anchorElement.getHref();
+                if (!href.startsWith("#")) {
+                    log.debug("Opening browser at: {}", href);
+                    action.accept(href);
+                    evt.preventDefault();
+                }
+            }, false);
+        }
     }
 }

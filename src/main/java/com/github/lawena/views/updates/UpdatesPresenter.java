@@ -1,8 +1,11 @@
 package com.github.lawena.views.updates;
 
 import com.github.lawena.Messages;
+import com.github.lawena.config.LawenaProperties;
 import com.github.lawena.domain.Build;
 import com.github.lawena.domain.UpdateResult;
+import com.github.lawena.event.NewVersionAvailable;
+import com.github.lawena.event.NewVersionDismissed;
 import com.github.lawena.repository.ImageRepository;
 import com.github.lawena.service.TaskService;
 import com.github.lawena.service.VersionService;
@@ -27,12 +30,8 @@ import org.controlsfx.control.action.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.events.EventTarget;
-import org.w3c.dom.html.HTMLAnchorElement;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
+import static com.github.lawena.util.LwrtUtils.interceptAnchors;
 
 @Component
 public class UpdatesPresenter {
@@ -57,6 +58,10 @@ public class UpdatesPresenter {
     private HostServices hostServices;
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private LawenaProperties lawenaProperties;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     @FXML
     private TabPane tabPane;
@@ -73,19 +78,21 @@ public class UpdatesPresenter {
 
     @FXML
     private void initialize() {
+        // setup updates sliding notification pane
         resultPane = new NotificationPane(infoWebView);
         infoTab.setContent(resultPane);
+
+        // intercept <a> tags to open links externally
         infoWebView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == Worker.State.SUCCEEDED) {
-                interceptAnchors(infoWebView.getEngine().getDocument());
+                interceptAnchors(infoWebView.getEngine().getDocument(), href -> hostServices.showDocument(href));
             }
         });
         changesWebView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == Worker.State.SUCCEEDED) {
-                interceptAnchors(changesWebView.getEngine().getDocument());
+                interceptAnchors(changesWebView.getEngine().getDocument(), href -> hostServices.showDocument(href));
             }
         });
-        UpdatesChecker checker = new UpdatesChecker(versionService);
         WebViewLoader.LoadSpec loadSpec = new WebViewLoader.LoadSpec();
         Map<WebView, String> map = new LinkedHashMap<>();
         map.put(infoWebView, HOME_URL);
@@ -93,8 +100,16 @@ public class UpdatesPresenter {
         loadSpec.getViewUrlMap().putAll(map);
         loadSpec.getStylesheets().add(getClass().getResource("../markdownpad-github.css"));
         taskService.submitTask(new WebViewLoader(loadSpec));
-        taskService.submitTask(checker);
 
+        if (lawenaProperties.getLastSkippedVersion() >= 0) {
+            checkForUpdates();
+        }
+        resultPane.setOnHiding(e -> publisher.publishEvent(new NewVersionDismissed(UpdatesPresenter.this)));
+    }
+
+    public void checkForUpdates() {
+        UpdatesChecker checker = new UpdatesChecker(versionService);
+        taskService.submitTask(checker);
         CompletableFuture.supplyAsync(() -> {
             UpdateResult result;
             try {
@@ -106,12 +121,20 @@ public class UpdatesPresenter {
         }).thenAcceptAsync(this::processUpdateResult, Platform::runLater);
     }
 
+    public void clearCache() {
+        versionService.clear();
+    }
+
     private void processUpdateResult(UpdateResult result) {
         log.info("{}", result.toString());
         if (result.getStatus() == UpdateResult.Status.UPDATE_AVAILABLE) {
             Build target = result.getDetails();
             String appbase = versionService.getAppbase();
             long targetVersion = target.getTimestamp();
+            if (lawenaProperties.getLastSkippedVersion() == targetVersion) {
+                log.info("Skipping this version: {}", targetVersion);
+                return;
+            }
             URL url;
             try {
                 url = new URL(appbase.replace("%VERSION%", "" + targetVersion));
@@ -131,12 +154,17 @@ public class UpdatesPresenter {
             Action updateNow = new Action(Messages.getString("ui.updates.updateNow"),
                     event -> performUpdate(url, targetVersion)
             );
+            Action skip = new Action("Skip Version", event -> {
+                lawenaProperties.setLastSkippedVersion(targetVersion);
+                resultPane.hide();
+            });
 
             // First
             resultPane.setText(result.getMessage());
             resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
-            resultPane.getActions().add(updateNow);
+            resultPane.getActions().addAll(updateNow, skip);
             resultPane.show();
+            publisher.publishEvent(new NewVersionAvailable(this));
         }
     }
 
@@ -200,21 +228,5 @@ public class UpdatesPresenter {
             resultPane.getActions().add(check);
             return null;
         });
-    }
-
-    private void interceptAnchors(Document document) {
-        NodeList nodeList = document.getElementsByTagName("a");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Node node = nodeList.item(i);
-            EventTarget eventTarget = (EventTarget) node;
-            eventTarget.addEventListener("click", evt -> {
-                EventTarget target = evt.getCurrentTarget();
-                HTMLAnchorElement anchorElement = (HTMLAnchorElement) target;
-                String href = anchorElement.getHref();
-                log.debug("Opening browser at: {}", href);
-                hostServices.showDocument(href);
-                evt.preventDefault();
-            }, false);
-        }
     }
 }

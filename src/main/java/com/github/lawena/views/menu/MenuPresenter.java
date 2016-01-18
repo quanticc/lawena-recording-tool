@@ -1,10 +1,12 @@
 package com.github.lawena.views.menu;
 
 import com.github.lawena.Messages;
+import com.github.lawena.config.LawenaProperties;
 import com.github.lawena.service.fx.LaunchService;
 import com.github.lawena.views.about.AboutView;
 import com.github.lawena.views.launchers.LaunchersPresenter;
 import com.github.lawena.views.launchers.LaunchersView;
+import com.github.lawena.views.updates.UpdatesPresenter;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -20,11 +22,15 @@ import java.util.Optional;
 public class MenuPresenter {
 
     @Autowired
+    private LawenaProperties properties;
+    @Autowired
     private LaunchersView launchersView;
     @Autowired
     private LaunchService launchService;
     @Autowired
     private AboutView aboutView;
+    @Autowired
+    private UpdatesPresenter updatesPresenter;
 
     @FXML
     private MenuBar menuBar;
@@ -58,6 +64,13 @@ public class MenuPresenter {
             }
         }
         presenter.clear();
+    }
+
+    @FXML
+    private void checkForUpdates(ActionEvent event) {
+        properties.setLastSkippedVersion(0);
+        updatesPresenter.clearCache();
+        updatesPresenter.checkForUpdates();
     }
 
     @FXML

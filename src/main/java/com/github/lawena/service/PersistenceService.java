@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,11 +55,12 @@ public class PersistenceService {
             // attempt to deserialize json with profile and launcher data
             // if the data is invalid or could not be loaded, fallback to YAML configuration files
             try {
-                JsonProfiles data = mapper.readValue(path.toFile(), JsonProfiles.class);
-                validate(data.selected, data.profiles, data.launchers);
-                selected = data.selected;
-                launcherList = data.launchers;
-                profileList = data.profiles;
+                LawenaProperties data = mapper.readValue(path.toFile(), LawenaProperties.class);
+                validate(data.getSelected(), data.getProfiles(), data.getLaunchers());
+                selected = data.getSelected();
+                launcherList = data.getLaunchers();
+                profileList = data.getProfiles();
+                copyProperties(data, properties);
                 log.info("Loaded launch configuration from: {}", path);
             } catch (IllegalArgumentException e) {
                 log.warn("Invalid configuration file at {} due to {}", path, e.toString());
@@ -80,6 +81,12 @@ public class PersistenceService {
             log.warn("Launch configuration is not valid: {}", e.toString());
         }
         return refreshedProperties();
+    }
+
+    private static void copyProperties(LawenaProperties src, LawenaProperties dest) {
+        Optional.ofNullable(src.getSteamPath()).ifPresent(dest::setSteamPath);
+        dest.setLaunchTimeout(src.getLaunchTimeout());
+        dest.setLastSkippedVersion(src.getLastSkippedVersion());
     }
 
     public LawenaProperties refreshedProperties() {
@@ -112,21 +119,15 @@ public class PersistenceService {
     public void saveLaunchSettings() {
         Path path = Paths.get(properties.getProfilesPath());
         try {
-            JsonProfiles data = new JsonProfiles();
-            data.selected = profiles.getSelected().getName();
-            profiles.profilesProperty().stream().map(p -> (AppProfile) p).forEach(p -> data.profiles.add(p));
-            profiles.launchersProperty().stream().forEach(p -> data.launchers.add(p));
+            LawenaProperties data = new LawenaProperties();
+            data.setSelected(profiles.getSelected().getName());
+            profiles.profilesProperty().stream().map(p -> (AppProfile) p).forEach(p -> data.getProfiles().add(p));
+            profiles.launchersProperty().stream().forEach(p -> data.getLaunchers().add(p));
+            copyProperties(properties, data);
             mapper.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), data);
             log.info("Saving launch configuration to file: {}", path);
         } catch (IOException e) {
             log.debug("Could not save launch configuration: {}", e.toString());
         }
     }
-
-    static class JsonProfiles {
-        private String selected = "";
-        private List<AppProfile> profiles = new ArrayList<>();
-        private List<Launcher> launchers = new ArrayList<>();
-    }
-
 }

@@ -5,3 +5,9 @@
 .scroll-bar .decrement-button {
     -fx-padding: 5px;
 }
+
+.dialog-pane .header-panel .label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}

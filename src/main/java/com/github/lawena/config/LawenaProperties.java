@@ -24,6 +24,10 @@ public class LawenaProperties {
      */
     private int launchTimeout = 120;
     /**
+     * The last build version that was marked as skipped
+     */
+    private long lastSkippedVersion = 0;
+    /**
      * The selected profile name
      */
     private String selected = null;
@@ -84,6 +88,14 @@ public class LawenaProperties {
         this.launchTimeout = launchTimeout;
     }
 
+    public long getLastSkippedVersion() {
+        return lastSkippedVersion;
+    }
+
+    public void setLastSkippedVersion(long lastSkippedVersion) {
+        this.lastSkippedVersion = lastSkippedVersion;
+    }
+
     @Override
     public String toString() {
         return toFullString();
@@ -94,6 +106,7 @@ public class LawenaProperties {
                 "profilesPath='" + profilesPath + '\'' +
                 ", steamPath='" + steamPath + '\'' +
                 ", launchTimeout='" + launchTimeout + '\'' +
+                ", lastSkippedVersion=" + lastSkippedVersion +
                 ", selected='" + selected + '\'' +
                 ", profiles=[" + profiles.stream().map(AppProfile::toFullString).collect(Collectors.joining(", ")) +
                 "], launchers=[" + launchers.stream().map(Launcher::toFullString).collect(Collectors.joining(", ")) +
@@ -108,14 +121,25 @@ public class LawenaProperties {
                 "\nCurrent locale            : " + System.getProperty("user.language") + "_" + System.getProperty("user.country") +
                 "\n----------------------------- Settings -----------------------------" +
                 "\nProfile config location   : " + profilesPath +
-                "\nSteam directory (global)  : " + formatNullOrEmpty(steamPath) +
+                "\nSteam directory           : " + formatNullOrEmpty(steamPath) +
                 "\nSeconds to wait on launch : " + formatZeroAsUnlimited(launchTimeout) +
+                "\nAnnounce updates on start : " + formatSkippedVersion(lastSkippedVersion) +
                 "\n----------------------------- Profiles -----------------------------" +
                 "\nSelected profile          : " + selected + '\n' +
                 profiles.stream().map(AppProfile::toFullString).collect(Collectors.joining("\n")) +
-                "\n----------------------------- Launchers ----------------------------\n" +
+                "\n------------------------------ Games -------------------------------\n" +
                 launchers.stream().map(Launcher::toFullString).collect(Collectors.joining("\n")) +
                 "\n--------------------------------------------------------------------";
+    }
+
+    private String formatSkippedVersion(long value) {
+        if (value == 0) {
+            return "Yes";
+        } else if (value < 0) {
+            return "Never";
+        } else {
+            return "Only newer than v." + value;
+        }
     }
 
     private String formatZeroAsUnlimited(int value) {
@@ -128,7 +152,7 @@ public class LawenaProperties {
 
     private String formatNullOrEmpty(Object o) {
         if (o == null || o.toString().isEmpty()) {
-            return "<no value set>";
+            return "<no global value set>";
         }
         return o.toString();
     }
