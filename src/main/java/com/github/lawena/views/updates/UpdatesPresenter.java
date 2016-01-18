@@ -169,7 +169,7 @@ public class UpdatesPresenter {
 
             resultPane.setText(result.getMessage());
             resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
-            resultPane.getActions().addAll(updateNow, skip);
+            resultPane.getActions().setAll(updateNow, skip);
             resultPane.show();
             publisher.publishEvent(new NewVersionAvailable(this));
         } else if (result.getStatus() == UpdateResult.Status.ALREADY_LATEST_VERSION) {
@@ -213,7 +213,7 @@ public class UpdatesPresenter {
                 });
                 resultPane.setText(result.getMessage());
                 resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/tick-24.png")));
-                resultPane.getActions().add(rollback);
+                resultPane.getActions().setAll(rollback);
                 resultPane.show();
                 publisher.publishEvent(new NewVersionAvailable(this));
             }
@@ -282,13 +282,13 @@ public class UpdatesPresenter {
                     resultPane.textProperty().unbind();
                     resultPane.setText(Messages.getString("ui.updates.updateReady"));
                     resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
-                    resultPane.getActions().add(restart);
+                    resultPane.getActions().setAll(restart);
                 } else {
                     log.warn("Task failed with exception", task.getException());
                     resultPane.textProperty().unbind();
                     resultPane.setText(Messages.getString("ui.updates.updateFailed"));
                     resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
-                    resultPane.getActions().add(check);
+                    resultPane.getActions().setAll(check);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 // we should not get here normally
@@ -300,7 +300,7 @@ public class UpdatesPresenter {
             resultPane.textProperty().unbind();
             resultPane.setText(Messages.getString("ui.updates.updateAborted", t.getMessage()));
             resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
-            resultPane.getActions().add(check);
+            resultPane.getActions().setAll(check);
             return null;
         });
     }
