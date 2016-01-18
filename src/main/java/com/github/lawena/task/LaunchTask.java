@@ -58,14 +58,14 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
     @Override
     protected ValidationResult call() throws Exception {
         publisher.publishEvent(new LaunchStartedEvent(this));
-        updateTitle(Messages.getString("ui.base.tasks.launch.title", validationService.getSelectedLauncher().getName()));
-        updateMessage(Messages.getString("ui.base.tasks.launch.start"));
+        updateTitle(Messages.getString("ui.tasks.launch.title", validationService.getSelectedLauncher().getName()));
+        updateMessage(Messages.getString("ui.tasks.launch.start"));
         // disable launch game button, rename it to "Launching..."
         // users looking to abort task can head to Tasks tab
         Platform.runLater(() -> {
             basePresenter.disable(true);
             launchButtonText = basePresenter.getLaunchButton().getText();
-            basePresenter.getLaunchButton().setText(Messages.getString("ui.base.tasks.launch.step"));
+            basePresenter.getLaunchButton().setText(Messages.getString("ui.tasks.launch.step"));
         });
 
         // Get current profile to validate first!
@@ -77,21 +77,21 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
         result.getErrors().forEach(e -> log.info("Validation {}: {} @ {}", e.getSeverity(), e.getText(), e.getTarget()));
         if (!result.getErrors().isEmpty()) {
             log.warn("Aborting due to validation errors");
-            throw new LaunchException("Validation errors exist");
+            throw new LaunchException(Messages.getString("ui.tasks.launch.validationErrorsExist"));
         }
 
-        updateMessage(Messages.getString("ui.base.tasks.launch.restoring"));
+        updateMessage(Messages.getString("ui.tasks.launch.restoring"));
         fileService.restoreFiles();
-        updateMessage(Messages.getString("ui.base.tasks.launch.replacing"));
+        updateMessage(Messages.getString("ui.tasks.launch.replacing"));
         publisher.publishEvent(new LaunchNextStateEvent(this));
         fileService.replaceFiles();
-        updateMessage(Messages.getString("ui.base.tasks.launch.launching"));
+        updateMessage(Messages.getString("ui.tasks.launch.launching"));
         launchGame();
         int step = 0;
         int maxTimeoutSeconds = properties.getLaunchTimeout();
         int millis = 5000;
         int maxSteps = maxTimeoutSeconds / (millis / 1000);
-        updateMessage(Messages.getString("ui.base.tasks.launch.waitingStart"));
+        updateMessage(Messages.getString("ui.tasks.launch.waitingStart"));
         updateProgress(0, maxSteps);
         while (!isCancelled() && !isGameRunning() && (maxTimeoutSeconds == 0 || step < maxSteps)) {
             ++step;
@@ -110,7 +110,7 @@ public class LaunchTask extends LawenaTask<ValidationResult> {
             return result;
         }
         log.debug("Game process has started");
-        updateMessage(Messages.getString("ui.base.tasks.launch.waitingFinish"));
+        updateMessage(Messages.getString("ui.tasks.launch.waitingFinish"));
         updateProgress(-1, -1);
         publisher.publishEvent(new LaunchNextStateEvent(this));
         while (!isCancelled() && isGameRunning()) {

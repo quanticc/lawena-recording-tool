@@ -55,7 +55,7 @@ public class FileService {
     public void replaceFiles() throws LaunchException {
         Profile profile = validationService.getSelectedProfile();
         // create configuration files
-        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.configFiles")));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.tasks.launch.configFiles")));
         // construct scopes from launcher.settings, profiles can override if keys match
         Map<String, Object> scopes = new LinkedHashMap<>();
         Launcher launcher = validationService.getSelectedLauncher();
@@ -139,7 +139,7 @@ public class FileService {
         // SteamPipe/Replace
         int count = 1;
         for (Resource resource : toCopy) {
-            publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.copyingFile", resource.getPath()), count, toCopy.size()));
+            publisher.publishEvent(updateEvent(this, Messages.getString("ui.tasks.launch.copyingFile", resource.getPath()), count, toCopy.size()));
             try {
                 Path srcPath = resource.getPath(); // where the root of the content to copy is located
                 if (srcPath.toString().toLowerCase().endsWith(".vpk")) {
@@ -435,7 +435,7 @@ public class FileService {
             log.warn("Handle closing only works when running the tool as administrator");
             return;
         }
-        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.closingHandles", path.toAbsolutePath())));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.tasks.launch.closingHandles", path.toAbsolutePath())));
         try {
             Path handlePath = Constants.HANDLE_PATH;
             ProcessBuilder pb = new ProcessBuilder(handlePath.toString(), path.toString());

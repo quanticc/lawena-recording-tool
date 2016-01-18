@@ -1,5 +1,6 @@
 package com.github.lawena.task;
 
+import com.github.lawena.Messages;
 import com.github.lawena.util.FXUtils;
 import com.github.lawena.util.LwrtUtils;
 import com.threerings.getdown.data.Resource;
@@ -95,8 +96,8 @@ public class DownloadTask extends LawenaTask<ObservableList<Resource>> {
 
     @Override
     protected ObservableList<Resource> call() throws Exception {
-        updateTitle("Downloading update");
-        updateMessage("Resolving downloads");
+        updateTitle(Messages.getString("ui.tasks.download.title"));
+        updateMessage(Messages.getString("ui.tasks.download.resolvingMessage"));
         // first compute the total size of our download
         for (Resource resource : resources) {
             discoverSize(resource);

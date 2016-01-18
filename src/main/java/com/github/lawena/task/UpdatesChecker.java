@@ -1,5 +1,6 @@
 package com.github.lawena.task;
 
+import com.github.lawena.Messages;
 import com.github.lawena.domain.UpdateResult;
 import com.github.lawena.service.VersionService;
 
@@ -13,8 +14,8 @@ public class UpdatesChecker extends LawenaTask<UpdateResult> {
 
     @Override
     protected UpdateResult call() throws Exception {
-        updateTitle("Lawena Recording Tool");
-        updateMessage("Checking for updates...");
+        updateTitle(Messages.getString("ui.tasks.checker.title"));
+        updateMessage(Messages.getString("ui.tasks.checker.message"));
         return versionService.checkForUpdates();
     }
 }

@@ -77,7 +77,7 @@ public class GitService {
     }
 
     public void setup() throws LaunchException {
-        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.setup")));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.tasks.launch.setup")));
         Path gamePath = validationService.getGamePath();
         Path gitPath = gamePath.resolve(DOT_GIT);
         log.debug("[Setup] Checking repository: {}", gitPath);
@@ -98,7 +98,7 @@ public class GitService {
     }
 
     public void replace() throws LaunchException {
-        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.replacing")));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.tasks.launch.replacing")));
         Path gamePath = validationService.getGamePath();
         Path gitPath = gamePath.resolve(DOT_GIT);
         log.debug("[Replace] Checking repository: {}", gitPath);
@@ -123,7 +123,7 @@ public class GitService {
     }
 
     public void restore() throws LaunchException {
-        publisher.publishEvent(updateEvent(this, Messages.getString("ui.base.tasks.launch.restoring")));
+        publisher.publishEvent(updateEvent(this, Messages.getString("ui.tasks.launch.restoring")));
         Path gamePath = validationService.getGamePath();
         Path gitPath = gamePath.resolve(DOT_GIT);
         log.debug("[Restore] Checking repository: {}", gitPath);

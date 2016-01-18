@@ -1,5 +1,6 @@
 package com.github.lawena.task;
 
+import com.github.lawena.Messages;
 import com.github.lawena.util.StringUtils;
 import com.threerings.getdown.data.Resource;
 import com.threerings.getdown.util.ConfigUtil;
@@ -41,8 +42,8 @@ public class UpdateSetupTask extends LawenaTask<List<Resource>> {
 
     @Override
     protected List<Resource> call() throws Exception {
-        updateTitle("Updating Lawena");
-        updateMessage("Preparing files");
+        updateTitle(Messages.getString("ui.tasks.update.title"));
+        updateMessage(Messages.getString("ui.tasks.update.setupMessage"));
 
         List<Resource> resources = new ArrayList<>();
         parseResources("code", false, resources);
@@ -58,7 +59,7 @@ public class UpdateSetupTask extends LawenaTask<List<Resource>> {
             }
         }
 
-        updateMessage("Verifying existing resources");
+        updateMessage(Messages.getString("ui.tasks.update.verifyMessage"));
         // get the target digest.txt file - we will be checking CURRENT resources against this
         File tempVersionDir = new File(TEMP_DIR, "" + version);
         Resource digest = new Resource(DIGEST_FILE, new URL(appbase, DIGEST_FILE), new File(tempVersionDir, DIGEST_FILE), false);
@@ -136,7 +137,7 @@ public class UpdateSetupTask extends LawenaTask<List<Resource>> {
             if (isCancelled()) {
                 throw new InterruptedException("Task cancelled");
             }
-            updateMessage("Validating " + rsrc.getPath());
+            updateMessage(Messages.getString("ui.tasks.update.validatingMessage", rsrc.getPath()));
             long partialProgress = rsrc.getLocal().length();
             try {
                 if (validateResource(rsrc)) {

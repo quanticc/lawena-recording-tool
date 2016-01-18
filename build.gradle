@@ -301,7 +301,7 @@ task pack(dependsOn: ['packResources', 'packVpks', 'packWinBatches', 'packSkybox
                 }
             }
             // post to webhook about new build
-            "curl --data-urlencode \"message=New version pushed from `${commit}` to **${distName}** updater branch: *${version}*\" ${notifyUrl}".execute()
+            "curl --data-urlencode \"message=New version pushed from ${commit} to: ${distName}/${version}\" ${notifyUrl}".execute()
         }
     }
 

@@ -1,5 +1,6 @@
 package com.github.lawena.task;
 
+import com.github.lawena.Messages;
 import com.github.lawena.util.LwrtUtils;
 import javafx.application.Platform;
 import javafx.scene.web.WebView;
@@ -26,11 +27,11 @@ public class WebViewLoader extends LawenaTask<Void> {
 
     @Override
     protected Void call() throws Exception {
-        updateTitle("Loading Web Content");
+        updateTitle(Messages.getString("ui.tasks.web.title"));
         int progress = 0;
         Map<WebView, String> map = loadSpec.getViewUrlMap();
         for (Map.Entry<WebView, String> entry : map.entrySet()) {
-            updateMessage("Waiting for " + entry.getValue());
+            updateMessage(Messages.getString("ui.tasks.web.message", entry.getValue()));
             updateProgress(++progress, map.size());
             loadContent(entry.getValue(), entry.getKey());
         }
