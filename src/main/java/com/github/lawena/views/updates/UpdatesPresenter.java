@@ -16,14 +16,13 @@ import com.github.lawena.task.UpdatesChecker;
 import com.github.lawena.task.WebViewLoader;
 import com.github.lawena.util.FXUtils;
 import com.threerings.getdown.data.Resource;
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -168,7 +167,7 @@ public class UpdatesPresenter {
             });
 
             resultPane.setText(result.getMessage());
-            resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
+            resultPane.setGraphic(GlyphsDude.createIconLabel(FontAwesomeIcon.INFO_CIRCLE, "", "24px", null, ContentDisplay.LEFT).getGraphic());
             resultPane.getActions().setAll(updateNow, skip);
             resultPane.show();
             publisher.publishEvent(new NewVersionAvailable(this));
@@ -212,7 +211,7 @@ public class UpdatesPresenter {
                     });
                 });
                 resultPane.setText(result.getMessage());
-                resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/tick-24.png")));
+                resultPane.setGraphic(GlyphsDude.createIconLabel(FontAwesomeIcon.CHECK_SQUARE_ALT, "", "24px", null, ContentDisplay.LEFT).getGraphic());
                 resultPane.getActions().setAll(rollback);
                 resultPane.show();
                 publisher.publishEvent(new NewVersionAvailable(this));
@@ -220,7 +219,7 @@ public class UpdatesPresenter {
         } else if (result.getStatus() == UpdateResult.Status.NO_UPDATES_FOUND) {
             if (alwaysShow) {
                 resultPane.setText(result.getMessage());
-                resultPane.setGraphic(new ImageView(imageRepository.image("/com/github/lawena/fugue/exclamation-24.png")));
+                resultPane.setGraphic(GlyphsDude.createIconLabel(FontAwesomeIcon.INFO_CIRCLE, "", "24px", null, ContentDisplay.LEFT).getGraphic());
                 resultPane.show();
                 publisher.publishEvent(new NewVersionAvailable(this));
             }

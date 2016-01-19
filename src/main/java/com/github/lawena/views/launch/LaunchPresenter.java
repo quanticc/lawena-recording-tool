@@ -1,14 +1,14 @@
 package com.github.lawena.views.launch;
 
 import com.github.lawena.Messages;
-import com.github.lawena.config.Constants;
 import com.github.lawena.domain.ValidationItem;
 import com.github.lawena.event.LaunchFinishedEvent;
 import com.github.lawena.event.LaunchNextStateEvent;
 import com.github.lawena.event.LaunchStartedEvent;
 import com.github.lawena.event.LaunchStatusUpdateEvent;
-import com.github.lawena.repository.ImageRepository;
 import com.github.lawena.util.FXUtils;
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -18,12 +18,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +31,6 @@ import java.time.format.DateTimeFormatter;
 public class LaunchPresenter {
 
     private static final Logger log = LoggerFactory.getLogger(LaunchPresenter.class);
-
-    @Autowired
-    private ImageRepository images;
 
     @FXML
     private Label setupStateLabel;
@@ -87,10 +82,10 @@ public class LaunchPresenter {
 
         // unique indicators => can be reused
         ProgressIndicator indicator = new ProgressIndicator(-1);
-        indicator.setPrefSize(16, 16);
+        indicator.setPrefSize(14, 14);
         workingGraphic = indicator;
-        errorGraphic = new ImageView(images.image(Constants.IMAGES_BASE + "/fugue/cross-circle.png"));
-        warningGraphic = new ImageView(images.image(Constants.IMAGES_BASE + "/fugue/exclamation.png"));
+        errorGraphic = GlyphsDude.createIconLabel(FontAwesomeIcon.TIMES_CIRCLE, "", "16px", null, ContentDisplay.LEFT).getGraphic();
+        warningGraphic = GlyphsDude.createIconLabel(FontAwesomeIcon.EXCLAMATION_CIRCLE, "", "16px", null, ContentDisplay.LEFT).getGraphic();
         Platform.runLater(() -> {
             Label[] labels = {setupStateLabel, replaceStateLabel, gameStateLabel, restoreStateLabel};
             State[] states = {State.SETUP, State.REPLACE, State.GAME, State.RESTORE};
@@ -127,14 +122,11 @@ public class LaunchPresenter {
     }
 
     private Node tickGraphic() {
-        return new ImageView(images.image(Constants.IMAGES_BASE + "/fugue/tick-circle.png"));
+        return GlyphsDude.createIconLabel(FontAwesomeIcon.CHECK_CIRCLE, "", "16px", null, ContentDisplay.LEFT).getGraphic();
     }
 
     private Node bulletGraphic() {
-        ImageView view = new ImageView();
-        view.setFitHeight(16);
-        view.setFitWidth(16);
-        return view;
+        return GlyphsDude.createIconLabel(FontAwesomeIcon.CIRCLE_ALT, "", "16px", null, ContentDisplay.LEFT).getGraphic();
     }
 
     @EventListener
