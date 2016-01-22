@@ -692,8 +692,9 @@ public class Lawena {
     oDxlevel = getOriginalDxlevel();
 
     // get SteamPath from registry, this value might be invalid or there might not be a value at all
+    
     Path steampath = cl.getSteamPath();
-    if (!cl.isValidSteamPath(steampath)) {
+    /*if (!cl.isValidSteamPath(steampath)) {
       steampath = Paths.get(settings.getString(Key.AltSteamDir));
     }
     log.fine("Checking for Steam path at " + steampath);
@@ -704,13 +705,20 @@ public class Lawena {
       steampath = getChosenSteamPath();
       if (steampath == null) {
         log.info("No Steam directory specified, exiting.");
-        JOptionPane.showMessageDialog(null, "No Steam directory specified, program will exit.",
-            "Invalid SteamPath", JOptionPane.WARNING_MESSAGE);
-        throw new IllegalArgumentException("Steam directory must be specified");
+        //JOptionPane.showMessageDialog(null, "No Steam directory specified, program will exit.",
+        //    "Invalid SteamPath", JOptionPane.WARNING_MESSAGE);
+        //throw new IllegalArgumentException("Steam directory must be specified");
+        settings.setString(Key.AltSteamDir,  "");
+        settings.setBoolean(Key.LaunchUsingSteam, false);
+      } else {
+        settings.setString(Key.AltSteamDir, steampath.toString());
       }
-      settings.setString(Key.AltSteamDir, steampath.toString());
     }
-    settings.setString(Key.SteamDir, steampath.toString());
+    if (steampath != null) {
+      settings.setString(Key.SteamDir, steampath.toString());
+    }*/
+
+    settings.setBoolean(Key.LaunchUsingSteam, false);
 
     // retrieve GamePath, attempt resolving via SteamPath, otherwise ask user for it
     Path tfpath = settings.getTfPath();
