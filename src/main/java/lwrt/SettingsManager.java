@@ -211,6 +211,7 @@ public class SettingsManager {
     lines.add("hud_combattext " + (getCombattext() ? "1" : "0"));
     lines.add("hud_combattext_healing " + (getCombattext() ? "1" : "0"));
     lines.add("tf_dingalingaling " + (getHitsounds() ? "1" : "0"));
+    lines.add("tf_dingalingaling_lasthit " + (getHitsounds() ? "1" : "0"));
     lines.add("voice_enable " + (getVoice() ? "1" : "0"));
     lines.add("alias voice_enable \"\"");
     lines.add("cl_autorezoom 0");
