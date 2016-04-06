@@ -53,6 +53,7 @@ public class SettingsManager {
     Insecure(false),
     VdmSrcDemoFix(false),
     InstallFonts(true),
+    CopyUserConfig(false),
     CustomSettings("// Custom User Settings"),
     CustomSettingsDialogWidth(300, 200, Integer.MAX_VALUE),
     CustomSettingsDialogHeight(200, 100, Integer.MAX_VALUE),

@@ -161,6 +161,7 @@ public class LawenaView extends JFrame {
   private JCheckBoxMenuItem installFonts;
   private JMenuItem customLaunchOptionsMenuItem;
   private JCheckBoxMenuItem launchUsingSteam;
+  private JCheckBoxMenuItem copyUserConfig;
 
   /**
    * Create the frame.
@@ -235,6 +236,10 @@ public class LawenaView extends JFrame {
     JCheckBoxMenuItem installFonts =
         new JCheckBoxMenuItem("Install Custom HUD Fonts before Launch");
     mnAdvanced.add(installFonts);
+
+    JCheckBoxMenuItem copyUserConfig =
+        new JCheckBoxMenuItem("Copy config.cfg to Lawena");
+    mnAdvanced.add(copyUserConfig);
 
     JSeparator separator_5 = new JSeparator();
     mnAdvanced.add(separator_5);
@@ -725,6 +730,7 @@ public class LawenaView extends JFrame {
     this.chckbxmntmBackupMode = chckbxmntmBackupMode;
     this.customLaunchOptionsMenuItem = customLaunchOptionsMenuItem;
     this.installFonts = installFonts;
+    this.copyUserConfig = copyUserConfig;
 
     pack();
     setMinimumSize(new Dimension(750, 420));
@@ -913,6 +919,10 @@ public class LawenaView extends JFrame {
 
   public JCheckBoxMenuItem getLaunchUsingSteam() {
     return launchUsingSteam;
+  }
+  
+  public JCheckBoxMenuItem getCopyUserConfig() {
+    return copyUserConfig;
   }
 
 }

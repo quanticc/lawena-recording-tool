@@ -116,6 +116,14 @@ public class FileManager {
       Files.move(configPath, configBackupPath);
       mkdirs(configPath);
       copyReadOnly(Paths.get("cfg"), configPath);
+      if (cfg.getBoolean(Key.CopyUserConfig)) {
+        Path configCfg = configBackupPath.resolve("config.cfg");
+        if (Files.exists(configCfg)) {
+          log.fine("Copying user config.cfg to be used in Lawena");
+          Files.copy(configCfg, configPath.resolve("config.cfg"), 
+              StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+        }
+      }
     } catch (IOException e) {
       log.log(Level.INFO, "Could not replace cfg files", e);
       throw new LawenaException("Failed to replace cfg files", e);
