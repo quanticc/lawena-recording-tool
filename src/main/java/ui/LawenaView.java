@@ -238,7 +238,7 @@ public class LawenaView extends JFrame {
     mnAdvanced.add(installFonts);
 
     JCheckBoxMenuItem copyUserConfig =
-        new JCheckBoxMenuItem("Copy config.cfg to Lawena");
+        new JCheckBoxMenuItem("Crash Fix: Use config.cfg");
     mnAdvanced.add(copyUserConfig);
 
     JSeparator separator_5 = new JSeparator();
