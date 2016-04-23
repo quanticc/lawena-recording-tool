@@ -61,6 +61,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -236,36 +237,9 @@ public class Lawena {
           return false;
         }
 
-        setProgress(10);
-
         // Check for big custom folders, mitigate OOM errors with custom folder > 2 GB
         Path tfpath = settings.getTfPath();
         Path customPath = tfpath.resolve("custom");
-        Path configPath = tfpath.resolve("cfg");
-        try {
-          long bytes = Util.sizeOfPath(configPath) + Util.sizeOfPath(customPath);
-          String size = Util.humanReadableByteCount(bytes, true);
-          log.info("Config and Custom folders size: " + size);
-          if (bytes / 1024 / 1024 > settings.getInt(Key.BigFolderMBThreshold)) {
-            int answer =
-                JOptionPane
-                    .showConfirmDialog(
-                        null,
-                        "Your cfg and custom folders are "
-                            + size
-                            + " in size."
-                            + "\nPlease consider moving unnecesary custom files like maps to tf/download folder."
-                            + "\nDo you still want to proceed?", "Copying Folders before Launch",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-            if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
-              log.info("Launch aborted by the user");
-              status.info("Launch aborted by the user");
-              return false;
-            }
-          }
-        } catch (IOException e) {
-          log.info("Could not determine folder size: " + e);
-        }
 
         setProgress(20);
         closeTf2Handles();
@@ -315,7 +289,7 @@ public class Lawena {
         if (settings.getBoolean(Key.InstallFonts)) {
           try {
             status.info("Registering all custom fonts found...");
-            for (Path folder : files.scanFonts(customPath)) {
+            for (Path folder : FileManager.scanFonts(customPath)) {
               cl.registerFonts(folder);
             }
           } catch (IOException e) {
@@ -581,6 +555,25 @@ public class Lawena {
     }
 
   }
+  
+  public class HlaePathChange implements ActionListener {
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      if (startTfTask == null) {
+        Path newpath = getChosenHlaePath();
+        if (newpath != null) {
+          settings.setString(Key.HlaePath, newpath.toAbsolutePath().toString());
+          JOptionPane.showMessageDialog(view, String.format("HLAE executable: %s", newpath, //$NON-NLS-1$
+              "Change HLAE Executable Location", //$NON-NLS-1$
+              JOptionPane.INFORMATION_MESSAGE));
+        }
+      } else {
+        JOptionPane.showMessageDialog(view, "Please wait until TF2 has stopped running");
+      }
+    }
+
+  }
 
   private static final Logger log = Logger.getLogger("lawena");
   private static final Logger status = Logger.getLogger("status");
@@ -691,34 +684,8 @@ public class Lawena {
     log.fine("Retrieving system dxlevel and Steam path");
     oDxlevel = getOriginalDxlevel();
 
-    // get SteamPath from registry, this value might be invalid or there might not be a value at all
-    
+    // get SteamPath from registry, this value might be invalid or there might not be a value at all    
     Path steampath = cl.getSteamPath();
-    /*if (!cl.isValidSteamPath(steampath)) {
-      steampath = Paths.get(settings.getString(Key.AltSteamDir));
-    }
-    log.fine("Checking for Steam path at " + steampath);
-    if (!cl.isValidSteamPath(steampath)) {
-      log.warning("IMPORTANT: SteamPath from registry is invalid. Check your Steam installation");
-      log.warning("Value should be at HKEY_CURRENT_USER\\Software\\Valve\\Steam on key SteamPath");
-      log.info("Asking for manual SteamPath");
-      steampath = getChosenSteamPath();
-      if (steampath == null) {
-        log.info("No Steam directory specified, exiting.");
-        //JOptionPane.showMessageDialog(null, "No Steam directory specified, program will exit.",
-        //    "Invalid SteamPath", JOptionPane.WARNING_MESSAGE);
-        //throw new IllegalArgumentException("Steam directory must be specified");
-        settings.setString(Key.AltSteamDir,  "");
-        settings.setBoolean(Key.LaunchUsingSteam, false);
-      } else {
-        settings.setString(Key.AltSteamDir, steampath.toString());
-      }
-    }
-    if (steampath != null) {
-      settings.setString(Key.SteamDir, steampath.toString());
-    }*/
-
-    settings.setBoolean(Key.LaunchUsingSteam, false);
 
     // retrieve GamePath, attempt resolving via SteamPath, otherwise ask user for it
     Path tfpath = settings.getTfPath();
@@ -1000,6 +967,7 @@ public class Lawena {
 
     view.getMntmChangeTfDirectory().addActionListener(new Tf2FolderChange());
     view.getMntmChangeMovieDirectory().addActionListener(new MovieFolderChange());
+    view.getSelectHlaeLocation().addActionListener(new HlaePathChange());
     view.getMntmRevertToDefault().addActionListener(new ActionListener() {
 
       @Override
@@ -1071,13 +1039,6 @@ public class Lawena {
             return null;
           }
         }.execute();
-      }
-    });
-    view.getChckbxmntmInsecure().addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
       }
     });
     view.getMntmLaunchTimeout().addActionListener(new ActionListener() {
@@ -1425,10 +1386,12 @@ public class Lawena {
     view.getDisableHitSounds().setSelected(!settings.getHitsounds());
     view.getDisableVoiceChat().setSelected(!settings.getVoice());
     view.getUseHudMinmode().setSelected(settings.getHudMinmode());
-    view.getChckbxmntmInsecure().setSelected(settings.getInsecure());
     view.getChckbxmntmBackupMode().setSelected(settings.getBoolean(Key.DeleteBackupsWhenRestoring));
     view.getInstallFonts().setSelected(settings.getBoolean(Key.InstallFonts));
-    view.getLaunchUsingSteam().setSelected(settings.getBoolean(Key.LaunchUsingSteam));
+    view.getSourceLaunch().setSelected(true);
+    view.getSourceLaunch().setSelected(settings.getString(Key.LaunchMode).equals("hl2"));
+    view.getSteamLaunch().setSelected(settings.getString(Key.LaunchMode).equals("steam"));
+    view.getHlaeLaunch().setSelected(settings.getString(Key.LaunchMode).equals("hlae"));
     view.getCopyUserConfig().setSelected(settings.getBoolean(Key.CopyUserConfig));
     view.getUsePlayerModel().setSelected(settings.getHudPlayerModel());
     view.getCmbSourceVideoFormat().setSelectedItem(
@@ -1474,12 +1437,17 @@ public class Lawena {
     }
     settings.setCustomResources(selected);
     settings.setHudMinmode(view.getUseHudMinmode().isSelected());
-    settings.setInsecure(view.getChckbxmntmInsecure().isSelected());
     settings
         .setBoolean(Key.DeleteBackupsWhenRestoring, view.getChckbxmntmBackupMode().isSelected());
     settings.setBoolean(Key.InstallFonts, view.getInstallFonts().isSelected());
     settings.setBoolean(Key.CopyUserConfig, view.getCopyUserConfig().isSelected());
-    settings.setBoolean(Key.LaunchUsingSteam, view.getLaunchUsingSteam().isSelected());
+    if (view.getSourceLaunch().isSelected()) {
+      settings.setString(Key.LaunchMode, "hl2");
+    } else if (view.getSteamLaunch().isSelected()) {
+      settings.setString(Key.LaunchMode, "steam");      
+    } else if (view.getHlaeLaunch().isSelected()) {
+      settings.setString(Key.LaunchMode, "hlae");            
+    }
     settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
     settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
         .getSelectedItem().toString().toLowerCase());
@@ -1597,6 +1565,38 @@ public class Lawena {
         selected = null;
       }
       log.finer("Selected SteamPath: " + selected);
+    }
+    return selected;
+  }
+  
+  private Path getChosenHlaePath() {
+    Path selected = null;
+    int ret = 0;
+    while ((selected == null && ret == 0)
+        || (selected != null && (!Files.exists(selected)))) {
+      chooser = new JFileChooser();
+      chooser.setDialogTitle("Choose the HLAE executable");
+      chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      chooser.setFileHidingEnabled(false);
+      chooser.setFileFilter(new FileFilter() {
+        
+        @Override
+        public String getDescription() {
+          return "HLAE Executable";
+        }
+        
+        @Override
+        public boolean accept(File f) {
+          return f.isDirectory() || f.getName().equalsIgnoreCase("HLAE.exe");
+        }
+      });
+      ret = chooser.showOpenDialog(null);
+      if (ret == JFileChooser.APPROVE_OPTION) {
+        selected = chooser.getSelectedFile().toPath();
+      } else {
+        selected = null;
+      }
+      log.finer("Selected HLAE path: " + selected);
     }
     return selected;
   }

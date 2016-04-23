@@ -12,6 +12,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -23,6 +24,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
@@ -155,12 +157,16 @@ public class LawenaView extends JFrame {
   private JMenuItem mntmOpenMovieFolder;
   private JMenuItem mntmOpenCustomFolder;
   private JMenuItem mntmChangeTfLaunch;
-  private JCheckBoxMenuItem chckbxmntmInsecure;
   private JMenuItem mntmRevertToDefault;
   private JCheckBoxMenuItem chckbxmntmBackupMode;
   private JCheckBoxMenuItem installFonts;
   private JMenuItem customLaunchOptionsMenuItem;
-  private JCheckBoxMenuItem launchUsingSteam;
+  private JMenu launchMode;
+  private ButtonGroup launchModeGroup;
+  private JRadioButtonMenuItem sourceLaunch;
+  private JRadioButtonMenuItem steamLaunch;
+  private JRadioButtonMenuItem hlaeLaunch;
+  private JMenuItem selectHlaeLocation;
   private JCheckBoxMenuItem copyUserConfig;
 
   /**
@@ -223,14 +229,29 @@ public class LawenaView extends JFrame {
     JSeparator separator_3 = new JSeparator();
     mnAdvanced.add(separator_3);
 
-    JCheckBoxMenuItem launchUsingSteam = new JCheckBoxMenuItem("Launch using Steam");
-    mnAdvanced.add(launchUsingSteam);
+    JMenu mnLaunchMode = new JMenu("Launch Mode");
+    mnAdvanced.add(mnLaunchMode);
 
-    JCheckBoxMenuItem chckbxmntmInsecure = new JCheckBoxMenuItem("Use -insecure in Launch Options");
-    mnAdvanced.add(chckbxmntmInsecure);
+    JRadioButtonMenuItem mnSourceLaunch = new JRadioButtonMenuItem("Launch using HL2 (default)");
+    JRadioButtonMenuItem mnSteamLaunch = new JRadioButtonMenuItem("Launch using Steam");
+    JRadioButtonMenuItem mnHlaeLaunch =
+        new JRadioButtonMenuItem("Launch using HLAE with -insecure");
+    JSeparator separatorLaunchMode = new JSeparator();
+    JMenuItem mnHlaePath = new JMenuItem("Select HLAE executable...");
+
+    mnLaunchMode.add(mnSourceLaunch);
+    mnLaunchMode.add(mnSteamLaunch);
+    mnLaunchMode.add(mnHlaeLaunch);
+    mnLaunchMode.add(separatorLaunchMode);
+    mnLaunchMode.add(mnHlaePath);
+
+    ButtonGroup group = new ButtonGroup();
+    group.add(mnSourceLaunch);
+    group.add(mnSteamLaunch);
+    group.add(mnHlaeLaunch);
 
     JCheckBoxMenuItem chckbxmntmBackupMode =
-        new JCheckBoxMenuItem("Delete Backup if Files were Restored");
+        new JCheckBoxMenuItem("Delete Backups after a Successful Restore");
     mnAdvanced.add(chckbxmntmBackupMode);
 
     JCheckBoxMenuItem installFonts =
@@ -238,7 +259,7 @@ public class LawenaView extends JFrame {
     mnAdvanced.add(installFonts);
 
     JCheckBoxMenuItem copyUserConfig =
-        new JCheckBoxMenuItem("Crash Fix: Use config.cfg");
+        new JCheckBoxMenuItem("Copy my Configs to Lawena (fixes crashes)");
     mnAdvanced.add(copyUserConfig);
 
     JSeparator separator_5 = new JSeparator();
@@ -711,8 +732,12 @@ public class LawenaView extends JFrame {
     this.mntmOpenMovieFolder = mntmOpenMovieFolder;
     this.mntmOpenCustomFolder = mntmOpenCustomFolder;
     this.mntmChangeTfLaunch = mntmChangeTfLaunch;
-    this.chckbxmntmInsecure = chckbxmntmInsecure;
-    this.launchUsingSteam = launchUsingSteam;
+    this.launchMode = mnLaunchMode;
+    this.sourceLaunch = mnSourceLaunch;
+    this.steamLaunch = mnSteamLaunch;
+    this.hlaeLaunch = mnHlaeLaunch;
+    this.selectHlaeLocation = mnHlaePath;
+    this.launchModeGroup = group;
 
     JCheckBox usePlayerModel_1 = new JCheckBox("3D Player Model in HUD");
     usePlayerModel_1
@@ -881,10 +906,6 @@ public class LawenaView extends JFrame {
     return mntmChangeTfLaunch;
   }
 
-  public JCheckBoxMenuItem getChckbxmntmInsecure() {
-    return chckbxmntmInsecure;
-  }
-
   public JCheckBox getUsePlayerModel() {
     return usePlayerModel;
   }
@@ -917,12 +938,24 @@ public class LawenaView extends JFrame {
     return customLaunchOptionsMenuItem;
   }
 
-  public JCheckBoxMenuItem getLaunchUsingSteam() {
-    return launchUsingSteam;
-  }
-  
   public JCheckBoxMenuItem getCopyUserConfig() {
     return copyUserConfig;
+  }
+
+  public JRadioButtonMenuItem getSourceLaunch() {
+    return sourceLaunch;
+  }
+
+  public JRadioButtonMenuItem getSteamLaunch() {
+    return steamLaunch;
+  }
+
+  public JRadioButtonMenuItem getHlaeLaunch() {
+    return hlaeLaunch;
+  }
+
+  public JMenuItem getSelectHlaeLocation() {
+    return selectHlaeLocation;
   }
 
 }

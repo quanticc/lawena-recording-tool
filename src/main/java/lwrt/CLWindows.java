@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.logging.Level;
 
 public class CLWindows extends CommandLine {
@@ -27,6 +28,24 @@ public class CLWindows extends CommandLine {
   @Override
   public ProcessBuilder getBuilderStartSteam(String steamPath) {
     return new ProcessBuilder(steamPath + "/steam.exe");
+  }
+
+  @Override
+  public ProcessBuilder getBuilderStartHLAE(String hlaePath, String gamePath) {
+    Path hl2Path = Paths.get(gamePath).resolve("../hl2.exe");
+    try {
+      hl2Path = hl2Path.toRealPath();
+    } catch (IOException e) {
+      log.warning("Could not obtain real path of game executable: " + e.toString());
+    }
+    Path hookPath = Paths.get(hlaePath).resolveSibling("AfxHookSource.dll");
+    try {
+      hookPath = hookPath.toRealPath();
+    } catch (IOException e) {
+      log.warning("Could not obtain real path of HLAE Source hook DLL: " + e.toString());
+    }
+    return new ProcessBuilder(hlaePath.toString(), "-customLoader", "-autoStart",
+        "-hookDllPath", hookPath.toString(), "-programPath", hl2Path.toString(), "-cmdLine");
   }
 
   @Override

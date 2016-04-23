@@ -47,6 +47,8 @@ public abstract class CommandLine {
 
   public abstract ProcessBuilder getBuilderStartSteam(String steamPath);
 
+  public abstract ProcessBuilder getBuilderStartHLAE(String hlaePath, String gamePath);
+
   /**
    * Returns the necessary {@link ProcessBuilder} to stop or kill the TF2 process, to abort its
    * execution. It will be used when {@link #killTf2Process()} is called.
@@ -261,13 +263,16 @@ public abstract class CommandLine {
    */
   public void startTf(SettingsManager cfg) {
     try {
-      boolean useSteam = cfg.getBoolean(Key.LaunchUsingSteam);
+      String mode = cfg.getString(Key.LaunchMode);
       String opts = cfg.getString(Key.LaunchOptions);
       Map<String, String> options = new LinkedHashMap<>();
-      if (useSteam) {
+      if (mode.equals("steam")) {
         // Launch using steam.exe
         options.put("-applaunch", "440");
       } else {
+        if (mode.equals("hlae")) {
+          options.put("-insecure", "");
+        }
         // Launch using hl2.exe
         options.put("-steam", "");
         options.put("-game", "tf");
@@ -316,17 +321,28 @@ public abstract class CommandLine {
       }
       // prepare list of options
       ProcessBuilder pb;
-      if (useSteam) {
+      if (mode.equals("steam")) {
         pb = getBuilderStartSteam(cfg.getString(Key.SteamDir));
         pb.command().add("-applaunch");
         pb.command().add(options.get("-applaunch"));
+      } else if (mode.equals("hlae")) {
+        pb = getBuilderStartHLAE(cfg.getString(Key.HlaePath), cfg.getString(Key.TfDir));
       } else {
         pb = getBuilderStartTF2(cfg.getString(Key.TfDir));
       }
       options.remove("-applaunch");
-      for (Entry<String, String> e : options.entrySet()) {
-        pb.command().add(e.getKey());
-        pb.command().add(e.getValue());
+      if (mode.equals("hlae")) {
+        StringBuilder cmdLine = new StringBuilder("\"");
+        for (Entry<String, String> e : options.entrySet()) {
+          cmdLine.append(e.getKey()).append(" ").append(e.getValue()).append(" ");
+        }
+        cmdLine.append("\"");
+        pb.command().add(cmdLine.toString());
+      } else {
+        for (Entry<String, String> e : options.entrySet()) {
+          pb.command().add(e.getKey());
+          pb.command().add(e.getValue());
+        }
       }
       // keeping this for compatibility
       if (cfg.getInsecure()) {
@@ -336,7 +352,7 @@ public abstract class CommandLine {
       log.info("Launching: "
           + pb.command().toString().replaceAll("\\[|\\]|,", "").replaceAll("\\s\\s+", " "));
       Process pr = pb.start();
-      if (useSteam) {
+      if (mode.equals("steam")) {
         try (BufferedReader input = newProcessReader(pr)) {
           String line;
           while ((line = input.readLine()) != null) {

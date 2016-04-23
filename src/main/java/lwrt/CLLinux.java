@@ -28,8 +28,12 @@ public class CLLinux extends CommandLine {
 
   @Override
   public ProcessBuilder getBuilderStartTF2(String gamePath) {
-    throw new UnsupportedOperationException(
-        "Please use 'Launch using Steam' from the advanced menu");
+    throw new UnsupportedOperationException("Must be launched through Steam");
+  }
+
+  @Override
+  public ProcessBuilder getBuilderStartHLAE(String hlaePath, String gamePath) {
+    throw new UnsupportedOperationException("HLAE is not supported here");
   }
 
   @Override
