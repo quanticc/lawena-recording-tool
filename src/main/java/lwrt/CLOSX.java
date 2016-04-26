@@ -54,6 +54,11 @@ public class CLOSX extends CommandLine {
   }
 
   @Override
+  public ProcessBuilder getBuilderHLAEProcessKiller() {
+    throw new UnsupportedOperationException("HLAE not supported here");
+  }
+
+  @Override
   public ProcessBuilder getBuilderVTFCmd(String skyboxFilename) {
     return null;
   }

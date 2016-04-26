@@ -100,7 +100,7 @@ public class AboutDialog extends JDialog {
     ((HTMLDocument) aboutTextPane.getDocument()).getStyleSheet().addRule(style);
     aboutTextPane
         .setText("Simple Team Fortress 2 (TF2) Recording Tool<br>"
-            + "Copyright 2011-2015 Montz, Quantic, contributors and others<br>"
+            + "Copyright 2011-2016 Montz, Quantic, contributors and others<br>"
             + "<a href=\"http://lawena.github.io/\">http://lawena.github.io/</a><br><br>"
             + "Lawena is free software; you can redistribute it and/or modify it under the terms of the <a href=\"https://github.com/iabarca/lawena-recording-tool/blob/master/LICENSE.txt\">GNU GPLv3</a>.<br>"
             + "Graphical .cfg files are almost entirely based on <a href=\"http://chrisdown.name/tf2/\">Chris' maxquality config</a>, with very slight tweaks.<br>"

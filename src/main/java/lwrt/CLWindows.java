@@ -54,6 +54,11 @@ public class CLWindows extends CommandLine {
   }
 
   @Override
+  public ProcessBuilder getBuilderHLAEProcessKiller() {
+    return new ProcessBuilder("taskkill", "/F", "/IM", "HLAE.exe");
+  }
+
+  @Override
   public ProcessBuilder getBuilderVTFCmd(String skyboxFilename) {
     return new ProcessBuilder("vtfcmd\\VTFCmd.exe", "-file", "skybox\\" + skyboxFilename,
         "-output", "skybox", "-exportformat", "png");

@@ -51,12 +51,14 @@ public abstract class CommandLine {
 
   /**
    * Returns the necessary {@link ProcessBuilder} to stop or kill the TF2 process, to abort its
-   * execution. It will be used when {@link #killTf2Process()} is called.
+   * execution. It will be used when {@link #killTF2Process()} is called.
    * 
    * @return The <code>ProcessBuilder</code> used to create a {@link Process} and kill the TF2
    *         process or <code>null</code> if it couldn't be created.
    */
-  public abstract ProcessBuilder getBuilderTF2ProcessKiller();
+  public abstract ProcessBuilder getBuilderTF2ProcessKiller();  
+
+  public abstract ProcessBuilder getBuilderHLAEProcessKiller();
 
   /**
    * Returns the necessary {@link ProcessBuilder} to generate a preview of a VTF file, in particular
@@ -238,19 +240,35 @@ public abstract class CommandLine {
    * 
    * @see #getBuilderTF2ProcessKiller()
    */
-  public void killTf2Process() {
+  public void killTF2Process() {
     try {
       ProcessBuilder pb = getBuilderTF2ProcessKiller();
       Process pr = pb.start();
       try (BufferedReader input = newProcessReader(pr)) {
         String line;
         while ((line = input.readLine()) != null) {
-          log.fine("[taskkill] " + line);
+          log.fine("[TF2 Process Killer] " + line);
         }
       }
       pr.waitFor();
     } catch (InterruptedException | IOException e) {
       log.info("Problem stopping TF2 process");
+    }
+  }
+  
+  public void killHLAEProcess() {
+    try {
+      ProcessBuilder pb = getBuilderHLAEProcessKiller();
+      Process pr = pb.start();
+      try (BufferedReader input = newProcessReader(pr)) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          log.fine("[HLAE Process Killer] " + line);
+        }
+      }
+      pr.waitFor();
+    } catch (InterruptedException | IOException e) {
+      log.info("Problem stopping HLAE process");
     }
   }
 

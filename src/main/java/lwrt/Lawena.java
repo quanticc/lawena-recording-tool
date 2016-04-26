@@ -242,7 +242,7 @@ public class Lawena {
         Path customPath = tfpath.resolve("custom");
 
         setProgress(20);
-        closeTf2Handles();
+        closeOpenHandles();
 
         // Restoring user files
         status.info("Restoring your files");
@@ -354,17 +354,17 @@ public class Lawena {
         }
 
         Thread.sleep(5000);
-        closeTf2Handles();
+        closeOpenHandles();
 
       } else {
         if (cl.isRunningTF2()) {
           status.info("Attempting to finish TF2 process...");
-          cl.killTf2Process();
+          cl.killTF2Process();
           Thread.sleep(5000);
           if (!cl.isRunningTF2()) {
             startTfTask.cancel(true);
           }
-          closeTf2Handles();
+          closeOpenHandles();
         } else {
           status.info("TF2 was not running, cancelling");
         }
@@ -373,11 +373,15 @@ public class Lawena {
       return true;
     }
 
-    private void closeTf2Handles() {
+    private void closeOpenHandles() {
       status.info("Closing open handles in TF2 'cfg' folder...");
       cl.closeHandles(settings.getTfPath().resolve("cfg"));
       status.info("Closing open handles in TF2 'custom' folder...");
       cl.closeHandles(settings.getTfPath().resolve("custom"));
+      if (settings.getString(Key.LaunchMode).equals("hlae")) {
+        status.info("Stopping HLAE executable...");
+        cl.killHLAEProcess();
+      }
     }
 
     private boolean verifyCustomHud() {
