@@ -115,7 +115,7 @@ public class FileManager {
       configPath.toFile().setWritable(true);
       Files.move(configPath, configBackupPath);
       mkdirs(configPath);
-      copyReadOnly(Paths.get("cfg"), configPath);
+      copy(Paths.get("cfg"), configPath);
       if (cfg.getBoolean(Key.CopyUserConfig)) {
         Path configCfg = configBackupPath.resolve("config.cfg");
         if (Files.exists(configCfg)) {
