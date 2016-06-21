@@ -179,8 +179,8 @@ public final class LwrtUtils {
                 && Files.isDirectory(gamePath)
                 && Files.exists(path)
                 && Files.isDirectory(path)
-                && !path.startsWith(Paths.get("").toAbsolutePath().getParent())
-                && Files.exists(path.resolve(executableName));
+                && !path.startsWith(Paths.get("").toAbsolutePath().getParent());
+                //&& Files.exists(path.resolve(executableName));
     }
 
     /**
