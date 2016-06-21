@@ -8,6 +8,8 @@
   <menus>
     <Menu mnemonicParsing="false" text="%ui.menu.file.title">
       <items>
+            <MenuItem mnemonicParsing="false" onAction="#importSettings" text="Import Settings from File..." />
+            <SeparatorMenuItem mnemonicParsing="false" />
         <MenuItem mnemonicParsing="false" onAction="#exit" text="%ui.menu.file.exit">
                <accelerator>
                   <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP" />

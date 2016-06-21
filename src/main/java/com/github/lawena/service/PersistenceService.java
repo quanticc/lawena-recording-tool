@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.lawena.config.LawenaProperties;
 import com.github.lawena.domain.AppProfile;
 import com.github.lawena.domain.Launcher;
+import com.github.lawena.util.LwrtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,6 +129,14 @@ public class PersistenceService {
             log.info("Saving launch configuration to file: {}", path);
         } catch (IOException e) {
             log.debug("Could not save launch configuration: {}", e.toString());
+        }
+    }
+
+    public void tryAutodetectFolders() {
+        // TODO try to do this in other operating systems
+        if (LwrtUtils.isWindows()) {
+            // first try to get a Steam path automatically
+
         }
     }
 }

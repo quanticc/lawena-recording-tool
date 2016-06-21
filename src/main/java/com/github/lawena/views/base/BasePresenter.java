@@ -17,6 +17,7 @@ import com.github.lawena.util.LwrtUtils;
 import com.github.lawena.views.GameView;
 import com.github.lawena.views.dialog.NewProfileDialog;
 import com.github.lawena.views.launch.LaunchView;
+import com.github.lawena.views.menu.MenuPresenter;
 import com.github.lawena.views.menu.MenuView;
 import com.github.lawena.views.updates.UpdatesView;
 import de.jensd.fx.glyphs.GlyphsDude;
@@ -36,7 +37,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Callback;
 import javafx.util.Pair;
+import org.controlsfx.control.NotificationPane;
 import org.controlsfx.control.TaskProgressView;
+import org.controlsfx.control.action.Action;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 import org.slf4j.Logger;
@@ -80,8 +83,6 @@ public class BasePresenter {
     private UpdatesView updatesView;
 
     @FXML
-    private MenuButton menu;
-    @FXML
     private ComboBox<Profile> profilesComboBox;
     @FXML
     private Label leftStatus;
@@ -109,6 +110,7 @@ public class BasePresenter {
     private SplitMenuButton profileSplitMenuButton;
 
     private DirectoryChooser directoryChooser = new DirectoryChooser();
+    private NotificationPane bottomNotificationPane;
 
     /**
      * Listener for changes to the Resource folders, like "lwrt/tf2/custom"
@@ -132,8 +134,11 @@ public class BasePresenter {
 
     @FXML
     private void initialize() {
+        bottomNotificationPane = new NotificationPane(tabs);
         VBox.setVgrow(taskProgressView, Priority.ALWAYS);
+        VBox.setVgrow(bottomNotificationPane, Priority.ALWAYS);
         mainContainer.getChildren().add(0, menuView.getView());
+        mainContainer.getChildren().set(1, bottomNotificationPane);
         tasksPane.getChildren().add(taskProgressView);
         Platform.runLater(() -> {
             welcomeTab.setContent(updatesView.getView());
@@ -220,6 +225,7 @@ public class BasePresenter {
             Launcher launcher = profiles.getLauncher(profile).get();
             GameView view = profiles.getView(launcher);
             syncResourceFolders(launcher);
+            checkGamePath(launcher);
             // perform binding and display view
             Platform.runLater(() -> {
                 view.getPresenter().bind(profile);
@@ -286,6 +292,40 @@ public class BasePresenter {
 
     private boolean isValidBasePath(Path path) {
         return path != null && Files.isDirectory(path) && path.startsWith(Constants.LWRT_PATH);
+    }
+
+    private void checkGamePath(Launcher launcher) {
+        // check if we have the gamePath set
+        // simplify check, this is mainly for first-time users
+        String gamePath = launcher.getGamePath();
+        Path path = LwrtUtils.tryGetPath(launcher.getGamePath())
+                .filter(p -> LwrtUtils.isValidGamePath(p, launcher.getGameExecutable().get()))
+                .orElse(null);
+        if (path == null) {
+            bottomNotificationPane.setGraphic(GlyphsDude.createIconLabel(FontAwesomeIcon.INFO_CIRCLE, "", "24px", null, ContentDisplay.LEFT).getGraphic());
+            bottomNotificationPane.setText("Don't forget to set the game folder");
+            bottomNotificationPane.getActions().add(new Action("Select...", event -> {
+                DirectoryChooser chooser = new DirectoryChooser();
+                chooser.setTitle(Messages.getString("ui.launchers.gamePath.title"));
+                File selected = chooser.showDialog(tabs.getScene().getWindow());
+                if (selected != null) {
+                    Path selectedPath = selected.toPath().toAbsolutePath();
+                    String executableName = launcher.getGameExecutable().get();
+                    if (LwrtUtils.isValidGamePath(selectedPath, executableName)) {
+                        launcher.setGamePath(selectedPath.toString());
+                        bottomNotificationPane.setGraphic(GlyphsDude.createIconLabel(FontAwesomeIcon.CHECK_CIRCLE, "", "24px", null, ContentDisplay.LEFT).getGraphic());
+                        bottomNotificationPane.setText("Game folder set to: " + selectedPath);
+                        bottomNotificationPane.getActions().clear();
+                        taskService.scheduleLater(2000, b -> bottomNotificationPane.hide());
+                    } else {
+                        FXUtils.showAlert(Messages.getString("ui.launchers.gamePath.alertTitle"),
+                                Messages.getString("ui.launchers.gamePath.alertHeader"),
+                                Messages.getString("ui.launchers.gamePath.alertContent", executableName));
+                    }
+                }
+            }));
+            bottomNotificationPane.getActions().add(new Action("Import", event -> ((MenuPresenter) menuView.getPresenter()).importSettings(event)));
+        }
     }
 
     // ***********************************************************************

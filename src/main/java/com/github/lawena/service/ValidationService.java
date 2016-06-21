@@ -180,15 +180,10 @@ public class ValidationService {
     }
 
     public Path getGamePath(Profile profile) throws LaunchException {
-        String key = "lawena.gamePath";
         Launcher launcher = profiles.getLauncher(profile).get();
-        Path path = LwrtUtils.tryGetPath(profile.get(key).map(Object::toString).orElse(null))
+        Path path = LwrtUtils.tryGetPath(launcher.getGamePath())
                 .filter(p -> hasGameExecutable(p, launcher))
-                .orElseGet(
-                        () -> LwrtUtils.tryGetPath(launcher.getGamePath())
-                                .filter(p -> hasGameExecutable(p, launcher))
-                                .orElse(null)
-                );
+                .orElse(null);
         if (path == null) {
             throw new LaunchException("Invalid game path");
         }

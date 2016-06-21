@@ -11,15 +11,27 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 @Component
 public class MenuPresenter {
+
+    private static final Logger log = LoggerFactory.getLogger(MenuPresenter.class);
 
     @Autowired
     private LawenaProperties properties;
@@ -43,7 +55,7 @@ public class MenuPresenter {
     }
 
     @FXML
-    private void configureLaunchers(ActionEvent event) {
+    public void configureLaunchers(ActionEvent event) {
         Parent view = launchersView.getView();
         LaunchersPresenter presenter = (LaunchersPresenter) launchersView.getPresenter();
         presenter.load();
@@ -67,14 +79,14 @@ public class MenuPresenter {
     }
 
     @FXML
-    private void checkForUpdates(ActionEvent event) {
+    public void checkForUpdates(ActionEvent event) {
         properties.setLastSkippedVersion(0);
         updatesPresenter.clearCache();
         updatesPresenter.checkForUpdates(true);
     }
 
     @FXML
-    private void about(ActionEvent event) {
+    public void about(ActionEvent event) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle(Messages.getString("ui.about.title"));
         dialog.setDialogPane((DialogPane) aboutView.getView());
@@ -85,5 +97,34 @@ public class MenuPresenter {
     private void exit(ActionEvent event) {
         Stage stage = (Stage) menuBar.getScene().getWindow();
         stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+    }
+
+    @FXML
+    public void importSettings(ActionEvent event) {
+
+    }
+
+    public Map<String, String> getImportedSettings() {
+        Map<String, String> map = null;
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("(Experimental) Select a file to import settings from");
+        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Lawena v4.1 settings file", "lwf"));
+        File selected = chooser.showOpenDialog(menuBar.getScene().getWindow());
+        if (selected != null) {
+            Properties properties = new Properties();
+            try (InputStream input = Files.newInputStream(selected.toPath())) {
+                map = new LinkedHashMap<>();
+                properties.load(input);
+                // Lawena v4.1 only supports TF2
+                // TODO: import more settings
+                String importedGamePath = properties.getProperty("TfDir");
+                if (importedGamePath != null && !importedGamePath.isEmpty()) {
+                    map.put("gamePath", importedGamePath);
+                }
+            } catch (IOException e) {
+                log.warn("Could not read from properties file: {}", e.toString());
+            }
+        }
+        return map;
     }
 }
