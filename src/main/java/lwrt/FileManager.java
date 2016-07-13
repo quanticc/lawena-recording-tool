@@ -150,6 +150,7 @@ public class FileManager {
       if (!hudName.equals("custom")) {
         copyReadOnly(Paths.get("hud", hudName, "resource"), resourcePath);
         copyReadOnly(Paths.get("hud", hudName, "scripts"), scriptsPath);
+        Files.copy(Paths.get("hud", hudName, "info.vdf"), tfpath.resolve("custom/lawena"));
       }
     } catch (IOException e) {
       log.log(Level.INFO, "Could not replace hud files", e);
