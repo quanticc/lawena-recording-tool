@@ -22,7 +22,7 @@
     <path></path>
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
-    <minVersion>1.7.0_41</minVersion>
+    <minVersion>1.8.0_40</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
@@ -34,12 +34,12 @@
     <timeoutErr>true</timeoutErr>
   </splash>
   <versionInfo>
-    <fileVersion>4.3.0.0</fileVersion>
-    <txtFileVersion>4.3.0</txtFileVersion>
+    <fileVersion>4.3.1.0</fileVersion>
+    <txtFileVersion>4.3.1</txtFileVersion>
     <fileDescription>Launcher and Updater for Lawena Recording Tool</fileDescription>
     <copyright>Lawena</copyright>
-    <productVersion>4.1.10.0</productVersion>
-    <txtProductVersion>4.1.10</txtProductVersion>
+    <productVersion>4.3.0.0</productVersion>
+    <txtProductVersion>4.3.0</txtProductVersion>
     <productName>Lawena v4 Launcher and Updater</productName>
     <companyName>Lawena</companyName>
     <internalName>lawena</internalName>
