@@ -16,6 +16,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -34,9 +36,17 @@ public class DemoEditor {
 
   public class VdmAddTick implements ActionListener {
 
+    private final String type;
+    private final String template;
+
+    public VdmAddTick(String type, String template) {
+      this.type = type;
+      this.template = template;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-      if (!Files.exists(currentDemoFile.toPath())) {
+      if (currentDemoFile == null || !Files.exists(currentDemoFile.toPath())) {
         JOptionPane.showMessageDialog(view,
             "Please fill the required demo file field with a valid demo file", "Error",
             JOptionPane.ERROR_MESSAGE);
@@ -50,8 +60,10 @@ public class DemoEditor {
           throw new NumberFormatException();
         }
         Tick segment =
-            new Tick(settings.getTfPath().relativize(currentDemoFile.toPath()).toString(), tick1,
-                tick2);
+            new Tick(currentDemoFile, settings.getTfPath().relativize(currentDemoFile.toPath())
+                .toString(), tick1, tick2);
+        segment.setType(type);
+        segment.setTemplate(template);
         model.addTick(segment);
         log.info("Adding segment: " + segment);
       } catch (NumberFormatException ex) {
@@ -217,15 +229,34 @@ public class DemoEditor {
     view = new DemoEditorView();
 
     view.getTableTicks().setModel(model);
-    view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-    int vColIndex = 0;
-    TableColumn col = view.getTableTicks().getColumnModel().getColumn(vColIndex);
-    int columnwidth = 400;
-    col.setPreferredWidth(columnwidth);
-    view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+    // view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    // int vColIndex = 0;
+    // TableColumn col = view.getTableTicks().getColumnModel().getColumn(vColIndex);
+    // int columnwidth = 200;
+    // col.setPreferredWidth(columnwidth);
+    // view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+    view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
     view.getTableTicks().setFillsViewportHeight(true);
 
-    view.getBtnAdd().addActionListener(new VdmAddTick());
+    TableColumn typeColumn =
+        view.getTableTicks().getColumnModel().getColumn(TickTableModel.Column.TYPE.ordinal());
+    JComboBox<String> segmentTypes = new JComboBox<>();
+    segmentTypes.setEditable(false);
+    segmentTypes.addItem(Tick.RECORD_SEGMENT);
+    segmentTypes.addItem(Tick.EXEC_RECORD_SEGMENT);
+    typeColumn.setCellEditor(new DefaultCellEditor(segmentTypes));
+
+    TableColumn templateColumn =
+        view.getTableTicks().getColumnModel().getColumn(TickTableModel.Column.TEMPLATE.ordinal());
+    JComboBox<String> templateTypes = new JComboBox<>();
+    templateTypes.setEditable(true);
+    templateTypes.addItem(Tick.NO_TEMPLATE);
+    templateTypes.addItem(Tick.CAM_IMPORT_TEMPLATE);
+    templateColumn.setCellEditor(new DefaultCellEditor(templateTypes));
+
+    view.getBtnAdd().addActionListener(new VdmAddTick(Tick.RECORD_SEGMENT, Tick.NO_TEMPLATE));
+    view.getBtnAddExecRecord().addActionListener(
+        new VdmAddTick(Tick.EXEC_RECORD_SEGMENT, Tick.CAM_IMPORT_TEMPLATE));
     view.getBtnBrowse().addActionListener(new VdmBrowseDemo());
     view.getBtnClearTickList().addActionListener(new VdmClearTicks());
     view.getBtnCreateVdmFiles().addActionListener(new VdmCreateFile());

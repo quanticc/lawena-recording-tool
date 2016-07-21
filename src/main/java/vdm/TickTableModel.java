@@ -12,7 +12,8 @@ public class TickTableModel extends AbstractTableModel {
   private static final long serialVersionUID = 1L;
 
   public enum Column {
-    DEMO("Demo name"), START("Starting Tick"), END("Ending Tick");
+    DEMO("Demo name"), TYPE("Segment"), TEMPLATE("Template"), START("Starting Tick"), END(
+        "Ending Tick");
 
     private String columnName;
 
@@ -44,6 +45,10 @@ public class TickTableModel extends AbstractTableModel {
         return tick.getStart();
       case END:
         return tick.getEnd();
+      case TYPE:
+        return tick.getType();
+      case TEMPLATE:
+        return tick.getTemplate();
       default:
         return null;
     }
@@ -70,6 +75,17 @@ public class TickTableModel extends AbstractTableModel {
           log.fine("Cannot set end tick, bad numeric format in: " + aValue);
         }
         break;
+      case TYPE:
+        tick.setType((String) aValue);
+        if (!tick.getType().equals(Tick.EXEC_RECORD_SEGMENT)) {
+          tick.setTemplate(Tick.NO_TEMPLATE);
+        }
+        fireTableRowsUpdated(rowIndex, rowIndex);
+        break;
+      case TEMPLATE:
+        tick.setTemplate((String) aValue);
+        fireTableCellUpdated(rowIndex, columnIndex);
+        break;
       default:
         break;
     }
@@ -77,6 +93,12 @@ public class TickTableModel extends AbstractTableModel {
 
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
+    if (columnIndex == Column.TEMPLATE.ordinal()) {
+      if (rowIndex >= 0 && rowIndex < list.size()) {
+        Tick tick = list.get(rowIndex);
+        return tick.getType().equals(Tick.EXEC_RECORD_SEGMENT);
+      }
+    }
     return columnIndex != Column.DEMO.ordinal();
   }
 

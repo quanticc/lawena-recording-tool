@@ -42,6 +42,7 @@ public class DemoEditorView extends JPanel {
   private JScrollPane scrollPane;
   private JTextArea txtrDemodetails;
   private JCheckBox chckbxSrcDemoFix;
+  private JButton btnAddExecRecord;
 
   /**
    * Create the panel.
@@ -148,10 +149,13 @@ public class DemoEditorView extends JPanel {
     gbc_panelButtonsRight.gridy = 3;
     add(panelButtonsRight, gbc_panelButtonsRight);
 
-    btnAdd = new JButton("Add Segment");
+    btnAdd = new JButton("Add Record");
     panelButtonsRight.add(btnAdd);
 
-    btnDeleteSelectedTick = new JButton("Delete Segment");
+    btnAddExecRecord = new JButton("Add Exec + Record");
+    panelButtonsRight.add(btnAddExecRecord);
+
+    btnDeleteSelectedTick = new JButton("Delete Selected");
     panelButtonsRight.add(btnDeleteSelectedTick);
 
     btnClearTickList = new JButton("Clear List");
@@ -241,4 +245,9 @@ public class DemoEditorView extends JPanel {
   public JCheckBox getChckbxSrcDemoFix() {
     return chckbxSrcDemoFix;
   }
+
+  public JButton getBtnAddExecRecord() {
+    return btnAddExecRecord;
+  }
+
 }

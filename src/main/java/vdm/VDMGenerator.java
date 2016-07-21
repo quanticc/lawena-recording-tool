@@ -1,16 +1,25 @@
 package vdm;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+
+import util.Util;
 import lwrt.SettingsManager;
 
 public class VDMGenerator {
@@ -47,6 +56,8 @@ public class VDMGenerator {
       previous = tick.getDemoname();
     }
 
+    int cfgCount = 1;
+
     for (Entry<String, List<Tick>> e : demomap.entrySet()) {
       String demo = e.getKey();
       log.finer("Creating VDM file for demo: " + demo);
@@ -62,8 +73,55 @@ public class VDMGenerator {
           lines.add(segment(count++, "SkipAhead", "skip", "starttick \"" + (previousEndTick + 1)
               + "\"", "skiptotick \"" + (tick.getStart() - 500) + "\""));
         }
+        String command = "startrecording";
+        if (tick.getType().equals(Tick.EXEC_RECORD_SEGMENT)) {
+          String demoCfgName = Util.stripFilenameExtension(tick.getDemoFile().getName());
+          if (tick.getTemplate().equals(Tick.NO_TEMPLATE) || tick.getTemplate().isEmpty()) {
+            // Assumes a default pre-created CFG file with the name of the demo located in TF dir
+            log.warning("Template for tick " + tick.toString() + " does not have a template!");
+          } else {
+            /**
+             * Config files auto-generated will be placed in the TF dir. Templates will be resolved
+             * against it.
+             * 
+             * The following templates are available:
+             * 
+             * - {{BVH_PATH}} resolves into the full path of a BVH named the same as the demo,
+             * located in your TF dir.
+             * 
+             * - {{TF_PATH}} and {{MOVIE_PATH}} for the absolute paths of TF and your movie folder,
+             * respectively.
+             * 
+             * - {{DEMO_NAME}} and {{DEMO_PATH}} for the name of the demo and the full path of it.
+             * Also, an additional {{DEMO_PATH_NOEXT}} is given with the full path of the demo
+             * without the file extension. In this way, {{BVH_PATH}} is created by appending ".bvh"
+             * to {{DEMO_PATH_NOEXT}}.
+             * 
+             * - {{NEW_LINE}} resolves into a new line
+             */
+            log.info("Generating template #" + cfgCount + " for Tick " + tick);
+            Map<String, Object> scopes = new HashMap<>();
+            scopes.put("TF_PATH", cfg.getTfPath().toAbsolutePath());
+            scopes.put("MOVIE_PATH", cfg.getMoviePath().toAbsolutePath());
+            scopes.put("DEMO_NAME", demoCfgName);
+            scopes.put("DEMO_PATH", tick.getDemoFile().getAbsoluteFile());
+            scopes.put("DEMO_PATH_NOEXT", cfg.getTfPath().toAbsolutePath().resolve(demoCfgName));
+            scopes.put("BVH_PATH", cfg.getTfPath().toAbsolutePath().resolve(demoCfgName + ".bvh"));
+            scopes.put("NEW_LINE", "\n");
+            Path outputPath = cfg.getTfPath().resolve(demoCfgName + "_" + cfgCount + ".cfg");
+            try (Writer writer = Files.newBufferedWriter(outputPath, Charset.forName("UTF-8"))) {
+              MustacheFactory mf = new DefaultMustacheFactory();
+              Mustache mustache = mf.compile(new StringReader(tick.getTemplate()), demoCfgName);
+              mustache.execute(writer, scopes);
+              writer.flush();
+            } catch (IOException ex) {
+              log.log(Level.WARNING, "Could not generate template", ex);
+            }
+          }
+          command = "exec " + demoCfgName + "_" + (cfgCount++) + "; startrecording";
+        }
         lines.add(segment(count++, "PlayCommands", "startrec", "starttick \"" + tick.getStart()
-            + "\"", "commands \"startrecording\""));
+            + "\"", "commands \"" + command + "\""));
         lines.add(segment(count++, "PlayCommands", "stoprec",
             "starttick \"" + tick.getEnd() + "\"", "commands \"stoprecording\""));
         previousEndTick = tick.getEnd();
@@ -78,9 +136,12 @@ public class VDMGenerator {
       }
       lines.add("}\n");
 
+      // TODO: check for potential bugs for demos located in folders other than TF dir
       Path added =
-          Files.write(cfg.getTfPath().resolve(demo.substring(0, demo.indexOf(".dem")) + ".vdm"),
-              lines, Charset.defaultCharset());
+          Files.write(
+              cfg.getTfPath()
+                  .resolve(Util.stripFilenameExtension(demo.replace("\\", "/")) + ".vdm"), lines,
+              Charset.defaultCharset());
       paths.add(added);
       log.fine("VDM file written to " + added);
 
@@ -88,7 +149,7 @@ public class VDMGenerator {
     return paths;
   }
 
-  public String segment(int count, String factory, String name, String... args) {
+  public static String segment(int count, String factory, String name, String... args) {
     StringBuilder sb = new StringBuilder();
     sb.append("\t\"" + count + "\"\n");
     sb.append("\t{\n");

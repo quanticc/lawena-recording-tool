@@ -90,7 +90,7 @@ public class Util {
     String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
     return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
   }
-  
+
   public static int startProcess(List<String> command) {
     try {
       ProcessBuilder builder = new ProcessBuilder(command);
@@ -100,6 +100,29 @@ public class Util {
       log.warning("Process could not be completed: " + e.toString()); //$NON-NLS-1$
     }
     return 1;
+  }
+
+  /**
+   * Strip the filename extension from the given Java resource path, e.g. "mypath/myfile.txt" ->
+   * "mypath/myfile".
+   * 
+   * @param path the file path (may be {@code null})
+   * @return the path with stripped filename extension, or {@code null} if none
+   * @author Spring Framework StringUtils
+   */
+  public static String stripFilenameExtension(String path) {
+    if (path == null) {
+      return null;
+    }
+    int extIndex = path.lastIndexOf('.');
+    if (extIndex == -1) {
+      return path;
+    }
+    int folderIndex = path.lastIndexOf('/');
+    if (folderIndex > extIndex) {
+      return path;
+    }
+    return path.substring(0, extIndex);
   }
 
   private Util() {}
