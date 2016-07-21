@@ -815,4 +815,31 @@ event RespecEarnedPulseEndLoss
 	StopEvent RespecEarnedPulseLoopLoss	0.0
 }
 
+event MMenu_PlayList_Expand
+{
+	Animate ItemsContainer			ypos 420 Spline 0 0.4
+	Animate EventPromo				ypos 470 Spline 0 0.4
+	Animate SafeMode				ypos 470 Spline 0 0.4
+	Animate VRBGPanel				ypos 633 Spline 0 0.4
+	Animate VRModeButton			ypos 639 Spline 0 0.4
+	Animate ShowPromoCodesButton	ypos 639 Spline 0 0.4
+
+	Animate PlayListContainer Tall 260	 Spline	0.0 0.40
+
+	FireCommand 0 "soundentry Panel.SlideDown"
+}
+
+event MMenu_PlayList_Collapse
+{
+	Animate ItemsContainer			ypos 160 Spline 0 0.4
+	Animate EventPromo				ypos 210 Spline 0 0.4
+	Animate SafeMode				ypos 210 Spline 0 0.4
+	Animate VRBGPanel				ypos 373 Spline	0 0.4
+	Animate VRModeButton			ypos 379 Spline 0 0.4
+	Animate ShowPromoCodesButton	ypos 379 Spline 0 0.4
+
+	Animate PlayListContainer Tall 0 Spline 0 0.4
+
+	FireCommand 0 "soundentry Panel.SlideUp"
+}
 //
