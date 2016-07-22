@@ -115,6 +115,7 @@ public class DemoEditor {
           status.info("VDM generated: " + paths.size()
               + (paths.size() == 1 ? " new file" : " new files") + " in TF2 directory");
           new SwingWorker<Void, Void>() {
+            @Override
             protected Void doInBackground() throws Exception {
               cl.openFolder(paths.get(0));
               return null;
@@ -136,14 +137,21 @@ public class DemoEditor {
     @Override
     protected Void doInBackground() throws Exception {
       SwingUtilities.invokeAndWait(new Runnable() {
-
         @Override
         public void run() {
           view.getBtnDeleteVdmFiles().setEnabled(false);
         }
       });
-      try (DirectoryStream<Path> stream = Files.newDirectoryStream(settings.getTfPath(), "*.vdm")) {
+      deleteVdmFromFolder(settings.getTfPath());
+      if (currentDemoFile != null) {
+        deleteVdmFromFolder(currentDemoFile.getParentFile().toPath());
+      }
+      return null;
+    }
 
+    private void deleteVdmFromFolder(Path dir) {
+      log.info("Deleting VDM files from " + dir);
+      try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.vdm")) {
         for (Path path : stream) {
           if (isCancelled()) {
             break;
@@ -152,20 +160,16 @@ public class DemoEditor {
           Files.delete(path);
           publish(path);
         }
-
       } catch (IOException ex) {
         log.log(Level.INFO, "Problem while deleting VDM files", ex);
       }
-
-      return null;
     }
 
     @Override
     protected void process(List<Path> chunks) {
       count += chunks.size();
-      status.info("Deleting " + count + (count == 1 ? " VDM file " : " VDM files ")
-          + "from TF2 folder...");
-    };
+      status.info("Deleting " + count + (count == 1 ? " VDM file " : " VDM files "));
+    }
 
     @Override
     protected void done() {
@@ -181,7 +185,7 @@ public class DemoEditor {
         }
         view.getBtnDeleteVdmFiles().setEnabled(true);
       }
-    };
+    }
 
   }
 
@@ -214,13 +218,14 @@ public class DemoEditor {
         }
       }
 
+      @Override
       protected void done() {
         try {
           view.getTxtrDemodetails().setText(get());
         } catch (InterruptedException | ExecutionException e) {
           view.getTxtrDemodetails().setText("Could not retrieve demo details");
         }
-      };
+      }
 
     }.execute();
   }
@@ -229,12 +234,6 @@ public class DemoEditor {
     view = new DemoEditorView();
 
     view.getTableTicks().setModel(model);
-    // view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-    // int vColIndex = 0;
-    // TableColumn col = view.getTableTicks().getColumnModel().getColumn(vColIndex);
-    // int columnwidth = 200;
-    // col.setPreferredWidth(columnwidth);
-    // view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
     view.getTableTicks().setFillsViewportHeight(true);
 
@@ -265,9 +264,11 @@ public class DemoEditor {
       @Override
       public void actionPerformed(ActionEvent e) {
         int answer =
-            JOptionPane.showConfirmDialog(view,
-                "Are you sure you want to clear all .vdm files in your TF2 folder?",
-                "Clear VDM Files", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            JOptionPane
+                .showConfirmDialog(
+                    view,
+                    "Are you sure you want to clear all .vdm files in your TF2 and current demo folder?",
+                    "Clear VDM Files", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (answer == JOptionPane.YES_OPTION) {
           new ClearVdmFilesTask().execute();
         }
