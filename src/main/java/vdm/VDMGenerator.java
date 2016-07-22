@@ -6,6 +6,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -97,7 +98,9 @@ public class VDMGenerator {
              * without the file extension. In this way, {{BVH_PATH}} is created by appending ".bvh"
              * to {{DEMO_PATH_NOEXT}}.
              * 
-             * - {{NEW_LINE}} resolves into a new line
+             * - {{LAWENA_PATH}} resolves into the absolute location of the Lawena folder.
+             * 
+             * - {{NEW_LINE}} resolves into a new line.
              */
             log.info("Generating template #" + cfgCount + " for Tick " + tick);
             Map<String, Object> scopes = new HashMap<>();
@@ -107,8 +110,10 @@ public class VDMGenerator {
             scopes.put("DEMO_PATH", tick.getDemoFile().getAbsoluteFile());
             scopes.put("DEMO_PATH_NOEXT", cfg.getTfPath().toAbsolutePath().resolve(demoCfgName));
             scopes.put("BVH_PATH", cfg.getTfPath().toAbsolutePath().resolve(demoCfgName + ".bvh"));
+            scopes.put("LAWENA_PATH", Paths.get("").toAbsolutePath());
             scopes.put("NEW_LINE", "\n");
-            Path outputPath = cfg.getTfPath().resolve(demoCfgName + "_" + cfgCount + ".cfg");
+            Path outputPath = Paths.get("cfg", demoCfgName + "_" + cfgCount + ".cfg");
+            Files.deleteIfExists(outputPath);
             try (Writer writer = Files.newBufferedWriter(outputPath, Charset.forName("UTF-8"))) {
               MustacheFactory mf = new DefaultMustacheFactory();
               Mustache mustache = mf.compile(new StringReader(tick.getTemplate()), demoCfgName);
