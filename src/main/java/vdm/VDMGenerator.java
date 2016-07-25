@@ -119,6 +119,7 @@ public class VDMGenerator {
               Mustache mustache = mf.compile(new StringReader(tick.getTemplate()), demoCfgName);
               mustache.execute(writer, scopes);
               writer.flush();
+              paths.add(outputPath);
             } catch (IOException ex) {
               log.log(Level.WARNING, "Could not generate template", ex);
             }

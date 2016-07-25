@@ -112,12 +112,13 @@ public class DemoEditor {
         vdmgenerator = new VDMGenerator(model.getTickList(), settings);
         try {
           final List<Path> paths = vdmgenerator.generate();
-          status.info("VDM generated: " + paths.size()
-              + (paths.size() == 1 ? " new file" : " new files") + " in TF2 directory");
+          status.info("Created " + paths.size() + (paths.size() == 1 ? " new file" : " new files"));
           new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
-              cl.openFolder(paths.get(0));
+              // open each parent of the generated files, removing duplicates
+              paths.stream().map(p -> p.toAbsolutePath().getParent()).filter(p -> p != null)
+                  .distinct().forEach(p -> cl.open(p));
               return null;
             }
           }.execute();

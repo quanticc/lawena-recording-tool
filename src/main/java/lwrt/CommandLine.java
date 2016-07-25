@@ -56,7 +56,7 @@ public abstract class CommandLine {
    * @return The <code>ProcessBuilder</code> used to create a {@link Process} and kill the TF2
    *         process or <code>null</code> if it couldn't be created.
    */
-  public abstract ProcessBuilder getBuilderTF2ProcessKiller();  
+  public abstract ProcessBuilder getBuilderTF2ProcessKiller();
 
   public abstract ProcessBuilder getBuilderHLAEProcessKiller();
 
@@ -255,7 +255,7 @@ public abstract class CommandLine {
       log.info("Problem stopping TF2 process");
     }
   }
-  
+
   public void killHLAEProcess() {
     try {
       ProcessBuilder pb = getBuilderHLAEProcessKiller();
@@ -410,6 +410,14 @@ public abstract class CommandLine {
       Desktop.getDesktop().open(dir.toFile());
     } catch (IOException e) {
       log.log(Level.INFO, "Could not open directory: " + dir, e);
+    }
+  }
+
+  public void open(Path path) {
+    try {
+      Desktop.getDesktop().open(path.toFile());
+    } catch (IOException e) {
+      log.log(Level.INFO, "Could not open file: " + path, e);
     }
   }
 
