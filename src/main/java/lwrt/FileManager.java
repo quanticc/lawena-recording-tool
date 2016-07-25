@@ -120,7 +120,7 @@ public class FileManager {
         Path configCfg = configBackupPath.resolve("config.cfg");
         if (Files.exists(configCfg)) {
           log.fine("Copying user config.cfg to be used in Lawena");
-          Files.copy(configCfg, configPath.resolve("config.cfg"), 
+          Files.copy(configCfg, configPath.resolve("config.cfg"),
               StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         }
       }
@@ -150,7 +150,10 @@ public class FileManager {
       if (!hudName.equals("custom")) {
         copyReadOnly(Paths.get("hud", hudName, "resource"), resourcePath);
         copyReadOnly(Paths.get("hud", hudName, "scripts"), scriptsPath);
-        Files.copy(Paths.get("hud", hudName, "info.vdf"), tfpath.resolve("custom/lawena/info.vdf"));
+        if (!hudName.equals("default")) {
+          Files.copy(Paths.get("hud", hudName, "info.vdf"),
+              tfpath.resolve("custom/lawena/info.vdf"));
+        }
       }
     } catch (IOException e) {
       log.log(Level.INFO, "Could not replace hud files", e);
