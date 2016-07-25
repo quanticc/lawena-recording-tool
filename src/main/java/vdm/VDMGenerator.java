@@ -72,7 +72,7 @@ public class VDMGenerator {
               + "\""));
         } else {
           lines.add(segment(count++, "SkipAhead", "skip", "starttick \"" + (previousEndTick + 1)
-              + "\"", "skiptotick \"" + (tick.getStart() - 500) + "\""));
+              + "\"", "skiptotick \"" + Math.max(0, tick.getStart() - 500) + "\""));
         }
         String command = "startrecording";
         if (tick.getType().equals(Tick.EXEC_RECORD_SEGMENT)) {
