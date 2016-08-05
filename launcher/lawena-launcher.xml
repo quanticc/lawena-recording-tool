@@ -34,8 +34,8 @@
     <timeoutErr>true</timeoutErr>
   </splash>
   <versionInfo>
-    <fileVersion>4.3.1.0</fileVersion>
-    <txtFileVersion>4.3.1</txtFileVersion>
+    <fileVersion>4.3.2.0</fileVersion>
+    <txtFileVersion>4.3.2</txtFileVersion>
     <fileDescription>Launcher and Updater for Lawena Recording Tool</fileDescription>
     <copyright>Lawena</copyright>
     <productVersion>4.3.0.0</productVersion>
