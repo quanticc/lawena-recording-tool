@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -28,6 +29,7 @@ import javax.swing.table.TableColumn;
 
 import lwrt.CommandLine;
 import lwrt.SettingsManager;
+import lwrt.SettingsManager.Key;
 
 public class DemoEditor {
 
@@ -285,12 +287,21 @@ public class DemoEditor {
         }
       }
     });
-    view.getChckbxSrcDemoFix().setSelected(settings.getVdmSrcDemoFix());
-    view.getChckbxSrcDemoFix().addActionListener(new ActionListener() {
+
+    String rawSkipMode = settings.getString(Key.VdmSkipMode);
+    SkipMode skipMode = SkipMode.SKIP_AHEAD;
+    try {
+      skipMode = SkipMode.valueOf(rawSkipMode);
+    } catch (IllegalArgumentException e) {
+      log.warning("Invalid value detected for skip mode: " + rawSkipMode);
+    }
+    view.getCmbSkipMode().setSelectedItem(skipMode);
+    view.getCmbSkipMode().addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        settings.setVdmSrcDemoFix(view.getChckbxSrcDemoFix().isSelected());
+        settings.setString(Key.VdmSkipMode,
+            ((SkipMode) view.getCmbSkipMode().getSelectedItem()).name());
       }
     });
 

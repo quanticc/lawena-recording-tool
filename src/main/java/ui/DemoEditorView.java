@@ -15,6 +15,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import vdm.SkipMode;
 
 public class DemoEditorView extends JPanel {
 
@@ -43,6 +46,8 @@ public class DemoEditorView extends JPanel {
   private JTextArea txtrDemodetails;
   private JCheckBox chckbxSrcDemoFix;
   private JButton btnAddExecRecord;
+  private JLabel lblSkipMode;
+  private JComboBox<SkipMode> cmbSkipMode;
 
   /**
    * Create the panel.
@@ -142,7 +147,7 @@ public class DemoEditorView extends JPanel {
     flowLayout.setHgap(0);
     GridBagConstraints gbc_panelButtonsRight = new GridBagConstraints();
     gbc_panelButtonsRight.anchor = GridBagConstraints.WEST;
-    gbc_panelButtonsRight.gridwidth = 4;
+    gbc_panelButtonsRight.gridwidth = 5;
     gbc_panelButtonsRight.insets = new Insets(0, 5, 5, 5);
     gbc_panelButtonsRight.fill = GridBagConstraints.VERTICAL;
     gbc_panelButtonsRight.gridx = 0;
@@ -158,7 +163,7 @@ public class DemoEditorView extends JPanel {
     btnDeleteSelectedTick = new JButton("Delete Selected");
     panelButtonsRight.add(btnDeleteSelectedTick);
 
-    btnClearTickList = new JButton("Clear List");
+    btnClearTickList = new JButton("Clear");
     panelButtonsRight.add(btnClearTickList);
 
     scrollPane_1 = new JScrollPane();
@@ -175,12 +180,10 @@ public class DemoEditorView extends JPanel {
 
     panelButtonsLeft = new JPanel();
     FlowLayout fl_panelButtonsLeft = (FlowLayout) panelButtonsLeft.getLayout();
-    fl_panelButtonsLeft.setVgap(0);
-    fl_panelButtonsLeft.setHgap(0);
     GridBagConstraints gbc_panelButtonsLeft = new GridBagConstraints();
-    gbc_panelButtonsLeft.gridwidth = 4;
+    gbc_panelButtonsLeft.gridwidth = 7;
     gbc_panelButtonsLeft.anchor = GridBagConstraints.WEST;
-    gbc_panelButtonsLeft.insets = new Insets(0, 5, 5, 5);
+    gbc_panelButtonsLeft.insets = new Insets(0, 0, 0, 0);
     gbc_panelButtonsLeft.gridx = 0;
     gbc_panelButtonsLeft.gridy = 5;
     add(panelButtonsLeft, gbc_panelButtonsLeft);
@@ -190,12 +193,19 @@ public class DemoEditorView extends JPanel {
 
     btnDeleteVdmFiles = new JButton("Delete VDM Files...");
     panelButtonsLeft.add(btnDeleteVdmFiles);
+    
+    lblSkipMode = new JLabel("Skip Mode:");
+    lblSkipMode.setToolTipText("Select how tick skipping is handled by the VDM generator");
+    panelButtonsLeft.add(lblSkipMode);
+    
+    cmbSkipMode = new JComboBox<>();
+    cmbSkipMode.setModel(new DefaultComboBoxModel<>(SkipMode.values()));
+    panelButtonsLeft.add(cmbSkipMode);
 
-    chckbxSrcDemoFix = new JCheckBox("SrcDemo\u00B2 Fix (hover for details)");
-    chckbxSrcDemoFix
-        .setToolTipText("<html>Don't add \"skiptotick\" lines to VDM files created, which<br>\r\nin some cases, can solve VDM playback along with SrcDemo\u00B2");
-    panelButtonsLeft.add(chckbxSrcDemoFix);
-
+  }
+  
+  public JComboBox<SkipMode> getCmbSkipMode() {
+    return cmbSkipMode;
   }
 
   public JTextField getTxtDemofile() {

@@ -22,6 +22,7 @@ import com.github.mustachejava.MustacheFactory;
 
 import util.Util;
 import lwrt.SettingsManager;
+import lwrt.SettingsManager.Key;
 
 public class VDMGenerator {
 
@@ -59,6 +60,17 @@ public class VDMGenerator {
 
     int cfgCount = 1;
 
+    int padding = cfg.getInt(Key.VdmTickPadding);
+    String skipStart = cfg.getString(Key.VdmSkipStartCommand);
+    String skipStop = cfg.getString(Key.VdmSkipStopCommand);
+    String rawSkipMode = cfg.getString(Key.VdmSkipMode);
+    SkipMode skipMode = SkipMode.SKIP_AHEAD;
+    try {
+      skipMode = SkipMode.valueOf(rawSkipMode);
+    } catch (IllegalArgumentException ex) {
+      log.warning("Invalid value detected for skip mode: " + rawSkipMode);
+    }
+
     for (Entry<String, List<Tick>> e : demomap.entrySet()) {
       String demo = e.getKey();
       log.finer("Creating VDM file for demo: " + demo);
@@ -67,12 +79,15 @@ public class VDMGenerator {
       int count = 1;
       int previousEndTick = 0;
       for (Tick tick : e.getValue()) {
-        if (cfg.getVdmSrcDemoFix()) {
+        int safeStart = Math.max(0, tick.getStart() - padding);
+        if (skipMode == SkipMode.DEMO_TIMESCALE) {
+          lines.add(segment(count++, "PlayCommands", "startskip", "starttick \""
+              + (previousEndTick + 1) + "\"", "commands \"" + skipStart + "\""));
+          lines.add(segment(count++, "PlayCommands", "stopskip", "starttick \"" + safeStart + "\"",
+              "commands \"" + skipStop + "\""));
+        } else if (skipMode == SkipMode.SKIP_AHEAD) {
           lines.add(segment(count++, "SkipAhead", "skip", "starttick \"" + (previousEndTick + 1)
-              + "\""));
-        } else {
-          lines.add(segment(count++, "SkipAhead", "skip", "starttick \"" + (previousEndTick + 1)
-              + "\"", "skiptotick \"" + Math.max(0, tick.getStart() - 500) + "\""));
+              + "\"", "skiptotick \"" + safeStart + "\""));
         }
         String command = "startrecording";
         if (tick.getType().equals(Tick.EXEC_RECORD_SEGMENT)) {

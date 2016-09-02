@@ -51,7 +51,10 @@ public class SettingsManager {
     LogUiLevel("FINE"),
     LaunchTimeout(120, 0, Integer.MAX_VALUE),
     Insecure(false),
-    VdmSrcDemoFix(false),
+    VdmSkipMode("SKIP_AHEAD"),
+    VdmSkipStartCommand("demo_timescale 5"),
+    VdmSkipStopCommand("demo_timescale 1"),
+    VdmTickPadding(500, 0, Integer.MAX_VALUE),
     InstallFonts(true),
     CopyUserConfig(true),
     CustomSettings("// Custom User Settings"),
@@ -71,21 +74,21 @@ public class SettingsManager {
     private int min = Integer.MIN_VALUE;
     private int max = Integer.MAX_VALUE;
 
-    private Key(String value) {
+    Key(String value) {
       this.value = value;
     }
 
-    private Key(boolean value) {
+    Key(boolean value) {
       this.value = value;
     }
 
-    private Key(int value, int min, int max) {
+    Key(int value, int min, int max) {
       this.value = value;
       this.min = min;
       this.max = max;
     }
 
-    private Key(String value, String... validValues) {
+    Key(String value, String... validValues) {
       this(value);
       if (validValues != null) {
         this.allowedValues = Arrays.asList(validValues);
@@ -432,10 +435,6 @@ public class SettingsManager {
     setBoolean(Key.Insecure, value);
   }
 
-  public void setVdmSrcDemoFix(boolean value) {
-    setBoolean(Key.VdmSrcDemoFix, value);
-  }
-
   public void setHudPlayerModel(boolean value) {
     setBoolean(Key.HudPlayerModel, value);
   }
@@ -566,10 +565,6 @@ public class SettingsManager {
 
   public boolean getInsecure() {
     return getBoolean(Key.Insecure);
-  }
-
-  public boolean getVdmSrcDemoFix() {
-    return getBoolean(Key.VdmSrcDemoFix);
   }
 
   public boolean getHudPlayerModel() {
