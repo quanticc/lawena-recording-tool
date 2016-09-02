@@ -3,7 +3,6 @@ package lwrt;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
-import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
@@ -57,6 +56,7 @@ import javax.swing.JTextArea;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
@@ -182,7 +182,7 @@ public class Lawena {
     protected void process(List<Path> chunks) {
       count += chunks.size();
       status.info("Deleting " + count + " files from movie folder...");
-    };
+    }
 
     @Override
     protected void done() {
@@ -198,7 +198,7 @@ public class Lawena {
         view.getBtnClearMovieFolder().setText("Clear Movie Files");
         status.info("");
       }
-    };
+    }
 
   }
 
@@ -750,7 +750,7 @@ public class Lawena {
             @Override
             public void entryModified(Path child) {
               customPaths.updatePath(child);
-            };
+            }
 
             @Override
             public void entryDeleted(Path child) {
@@ -843,7 +843,7 @@ public class Lawena {
       public void actionPerformed(ActionEvent e) {
         if (dialog == null) {
           dialog = new AboutDialog(version, build);
-          dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+          dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
           dialog.setModalityType(ModalityType.APPLICATION_MODAL);
           dialog.getBtnUpdater().addActionListener(new ActionListener() {
 
@@ -938,6 +938,7 @@ public class Lawena {
     TableRowSorter<CustomPathList> sorter = new TableRowSorter<>(customPaths);
     table.setRowSorter(sorter);
     RowFilter<CustomPathList, Object> filter = new RowFilter<CustomPathList, Object>() {
+      @Override
       public boolean include(Entry<? extends CustomPathList, ? extends Object> entry) {
         CustomPath cp = (CustomPath) entry.getValue(CustomPathList.Column.PATH.ordinal());
         return !cp.getContents().contains(PathContents.READONLY);
@@ -1018,6 +1019,7 @@ public class Lawena {
       @Override
       public void actionPerformed(ActionEvent e) {
         new SwingWorker<Void, Void>() {
+          @Override
           protected Void doInBackground() throws Exception {
             try {
               Desktop.getDesktop().open(settings.getMoviePath().toFile());
@@ -1034,6 +1036,7 @@ public class Lawena {
       @Override
       public void actionPerformed(ActionEvent e) {
         new SwingWorker<Void, Void>() {
+          @Override
           protected Void doInBackground() throws Exception {
             try {
               Desktop.getDesktop().open(Paths.get("custom").toFile());
@@ -1128,7 +1131,7 @@ public class Lawena {
   private void startCustomSettingsDialog() {
     if (customSettings == null) {
       customSettings = new CustomSettingsDialog();
-      customSettings.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      customSettings.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
       customSettings.setModalityType(ModalityType.APPLICATION_MODAL);
       customSettings.setResizable(true);
       final JTextArea textArea = customSettings.getTextArea();
@@ -1165,7 +1168,7 @@ public class Lawena {
   private void startParticlesDialog() {
     if (particles == null) {
       particles = new ParticlesDialog();
-      particles.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      particles.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
       particles.setModalityType(ModalityType.APPLICATION_MODAL);
       DefaultTableModel dtm = new DefaultTableModel(0, 2) {
         private static final long serialVersionUID = 1L;
@@ -1258,7 +1261,7 @@ public class Lawena {
 
   private SegmentsDialog newSegmentsDialog() {
     final SegmentsDialog d = new SegmentsDialog();
-    d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     d.setModalityType(ModalityType.APPLICATION_MODAL);
     DefaultTableModel dtm = newSegmentsModel();
     final JTable tableSegments = d.getTableSegments();
@@ -1493,7 +1496,7 @@ public class Lawena {
     skyboxMap = new HashMap<>(data.size());
     new SkyboxPreviewTask(new ArrayList<>(data)).execute();
     data.add(0, (String) Key.Skybox.defValue());
-    combo.setModel(new DefaultComboBoxModel<String>(data));
+    combo.setModel(new DefaultComboBoxModel<>(data));
     combo.addActionListener(new ActionListener() {
 
       @Override
@@ -1614,6 +1617,7 @@ public class Lawena {
           view.getProgressBar().setIndeterminate(indeterminate);
           view.getProgressBar().setValue(0);
           worker.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
             public void propertyChange(PropertyChangeEvent evt) {
               if ("progress".equals(evt.getPropertyName())) {
                 view.getProgressBar().setValue((Integer) evt.getNewValue());
