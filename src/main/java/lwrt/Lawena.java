@@ -260,8 +260,8 @@ public class Lawena {
           status.info("Failed to save lawena settings to file");
           return false;
         }
-        // Allow failing this without cancelling launch, notify user
-        // See https://github.com/iabarca/lawena-recording-tool/issues/36
+
+        // Allow failing this without cancelling launch, notify user. See #36
         try {
           movies.movieOffset();
         } catch (IOException e) {
@@ -559,7 +559,7 @@ public class Lawena {
     }
 
   }
-  
+
   public class HlaePathChange implements ActionListener {
 
     @Override
@@ -688,7 +688,7 @@ public class Lawena {
     log.fine("Retrieving system dxlevel and Steam path");
     oDxlevel = getOriginalDxlevel();
 
-    // get SteamPath from registry, this value might be invalid or there might not be a value at all    
+    // get SteamPath from registry, this value might be invalid or there might not be a value at all
     Path steampath = cl.getSteamPath();
 
     // retrieve GamePath, attempt resolving via SteamPath, otherwise ask user for it
@@ -1448,9 +1448,9 @@ public class Lawena {
     if (view.getSourceLaunch().isSelected()) {
       settings.setString(Key.LaunchMode, "hl2");
     } else if (view.getSteamLaunch().isSelected()) {
-      settings.setString(Key.LaunchMode, "steam");      
+      settings.setString(Key.LaunchMode, "steam");
     } else if (view.getHlaeLaunch().isSelected()) {
-      settings.setString(Key.LaunchMode, "hlae");            
+      settings.setString(Key.LaunchMode, "hlae");
     }
     settings.setHudPlayerModel(view.getUsePlayerModel().isSelected());
     settings.setString(Key.SourceRecorderVideoFormat, view.getCmbSourceVideoFormat()
@@ -1572,23 +1572,22 @@ public class Lawena {
     }
     return selected;
   }
-  
+
   private Path getChosenHlaePath() {
     Path selected = null;
     int ret = 0;
-    while ((selected == null && ret == 0)
-        || (selected != null && (!Files.exists(selected)))) {
+    while ((selected == null && ret == 0) || (selected != null && (!Files.exists(selected)))) {
       chooser = new JFileChooser();
       chooser.setDialogTitle("Choose the HLAE executable");
       chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       chooser.setFileHidingEnabled(false);
       chooser.setFileFilter(new FileFilter() {
-        
+
         @Override
         public String getDescription() {
           return "HLAE Executable";
         }
-        
+
         @Override
         public boolean accept(File f) {
           return f.isDirectory() || f.getName().equalsIgnoreCase("HLAE.exe");

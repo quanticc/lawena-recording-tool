@@ -76,14 +76,14 @@ public class LawenaView extends JFrame {
   }
 
   private static final String renderingTutorialURL =
-      "https://github.com/iabarca/lawena-recording-tool/wiki/Synchronize-audio-and-video";
+      "https://github.com/quanticc/lawena-recording-tool/wiki/Synchronize-audio-and-video";
   private static final String releasesURL =
-      "https://github.com/iabarca/lawena-recording-tool/releases";
-  private static final String projectPageURL = "https://github.com/iabarca/lawena-recording-tool";
+      "https://github.com/quanticc/lawena-recording-tool/releases";
+  private static final String projectPageURL = "https://github.com/quanticc/lawena-recording-tool";
   private static final String vdmTutorialURL =
-      "https://github.com/iabarca/lawena-recording-tool/wiki/VDM-tutorial";
+      "https://github.com/quanticc/lawena-recording-tool/wiki/VDM-tutorial";
   private static final String instructionsURL =
-      "https://github.com/iabarca/lawena-recording-tool/wiki/Instructions";
+      "https://github.com/quanticc/lawena-recording-tool/wiki/Instructions";
 
   private static class MntmRenderingTutorialActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
