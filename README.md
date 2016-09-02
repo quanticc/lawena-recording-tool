@@ -1,4 +1,4 @@
-Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-recording-tool.svg?branch=v4.1.x)](https://travis-ci.org/iabarca/lawena-recording-tool) [![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Lawena Recording Tool [![Build Status](https://travis-ci.org/quanticc/lawena-recording-tool.svg?branch=v4.1.x)](https://travis-ci.org/quanticc/lawena-recording-tool) [![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 =====================
 
 ![Lawena Recording Tool](http://i.imgur.com/dlRdaeA.png)
@@ -6,8 +6,6 @@ Lawena Recording Tool [![Build Status](https://travis-ci.org/iabarca/lawena-reco
 Lawena is a simple Java program that greatly enhances your TF2 and other Source games image quality for recording purposes, with little performance loss compared to other alternatives. Records using in-game **Source Recorder**, with key bindings to ease the process.
 
 Easy to install and use. Does not interfere with your regular configs, HUD or launch options.
-
-![Main Window](http://i.imgur.com/kXHsYDu.png)
 
 ## Features
 
@@ -19,13 +17,13 @@ Easy to install and use. Does not interfere with your regular configs, HUD or la
 * Allows custom commands for extra tweaks not present in the tool
 * Includes a set of built-in skyboxes, and supports custom ones via simple drag-and-drop
 * [SrcDemo2](http://code.google.com/p/srcdemo2/) support to reduce drive usage and space and increase recording speed
-* [VDM](https://developer.valvesoftware.com/wiki/Demo_Recording_Tools) file support for automatic movie recording process. Check the [tutorial](https://github.com/iabarca/lawena-recording-tool/wiki/VDM-tutorial)
+* [VDM](https://developer.valvesoftware.com/wiki/Demo_Recording_Tools) file support for automatic movie recording process. Check the [tutorial](https://github.com/quanticc/lawena-recording-tool/wiki/VDM-tutorial)
 * Creates backups in case something goes wrong
 * Automatic updates
 
 ## Installing Lawena
 
-Check the [releases](https://github.com/iabarca/lawena-recording-tool/releases) page and follow the instructions. If you don't have Java installed you will find a direct download link there.
+Check the [releases](https://github.com/quanticc/lawena-recording-tool/releases) page and follow the instructions. If you don't have Java installed you will find a direct download link there.
 
 ## Credits
 

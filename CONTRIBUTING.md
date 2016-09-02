@@ -6,7 +6,7 @@ First of all, thanks for reading this! There are lots of ways you can help, and 
 
 If you need help or have questions, please use the [issue tracker](#issues). If you're [raising a bug](#bugs) please be sure to [include as much info as possible](#bug-template) so that can be fixed. If you've got some code you want to [pull request](#pull-requests) please ask first and together we'll find a way to make it work.
 
-Currently the only one actively developing Lawena Recording Tool is **Quantic** ([github](https://github.com/iabarca)) ([steam](http://steamcommunity.com/profiles/76561198012092861/)). Montz is no longer developing the tool so only bother him to thank him for starting the project. If you want to help [in other ways](#get-involved), tell me about it via Steam or the [Gitter chat](https://gitter.im/iabarca/lawena-recording-tool).
+Currently the only one actively developing Lawena Recording Tool is **Quantic** ([github](https://github.com/quanticc)) ([steam](http://steamcommunity.com/profiles/76561198012092861/)). Montz is no longer developing the tool so only bother him to thank him for starting the project. If you want to help [in other ways](#get-involved), tell me about it via Steam or the [Gitter chat](https://gitter.im/iabarca/lawena-recording-tool).
 
 <a name="get-involved"></a>
 ### Get involved
@@ -14,7 +14,7 @@ Currently the only one actively developing Lawena Recording Tool is **Quantic** 
 Tasks that need your help:
 
 1. *Making sure Lawena does it's job* &mdash; Sometimes I mess up after an update. Please let me know! Also anything not working out correctly, I'm always listening.
-2. *Contributing to the GitHub Wiki* &mdash; The [wiki](https://github.com/iabarca/lawena-recording-tool/wiki) is a great place to collect helpful information regarding the tool. You only require a GitHub account to edit the wiki so I will greatly appreciate all contributions.
+2. *Contributing to the GitHub Wiki* &mdash; The [wiki](https://github.com/quanticc/lawena-recording-tool/wiki) is a great place to collect helpful information regarding the tool. You only require a GitHub account to edit the wiki so I will greatly appreciate all contributions.
 3. *Porting Lawena to other games* &mdash; The tool can work out with most Source games with little modifications. If you are interested or want to suggest a game let me know.
 4. *Helping with translations* &mdash; Contact me on [Steam](http://steamcommunity.com/profiles/76561198012092861/) for details.
 5. *Increasing Linux/OSX support* &mdash; Lawena supports those operating systems but the truth is that they are far from optimal. I'm looking for help especially about supporting OSX.
@@ -22,7 +22,7 @@ Tasks that need your help:
 <a name="issues"></a>
 ## Using the issue tracker
 
-The [issue tracker](https://github.com/iabarca/lawena-recording-tool/issues) is
+The [issue tracker](https://github.com/quanticc/lawena-recording-tool/issues) is
 the preferred channel for [bug reports](#bugs), [feature requests](#features), [change requests](#changes) and [submitting pull requests](#pull-requests). I am always actively monitoring everything that happens there. That being said, I don't check forums too much.
 
 <a name="bugs"></a>
@@ -34,11 +34,11 @@ Good bug reports are extremely helpful - thank you!
 Guidelines for bug reports:
 
 1. **Use the GitHub issue search** &mdash; check if the issue has already been
-   reported or even fixed to avoid duplicates. Don't forget searching [closed issues](https://github.com/iabarca/lawena-recording-tool/issues?q=is%3Aissue+is%3Aclosed).
+   reported or even fixed to avoid duplicates. Don't forget searching [closed issues](https://github.com/quanticc/lawena-recording-tool/issues?q=is%3Aissue+is%3Aclosed).
 
 2. **Include a screenshot or video if relevant** - Is your issue about a design or front end feature or bug? Use [LICEcap](http://www.cockos.com/licecap/) to quickly and easily record a short screencast (24fps) and save it as an animated gif! Embed it directly into your GitHub issue. If the issues happen while capturing frames, send me a YouTube link or the ``.dem`` file itself so we can test it together.
 
-3. **Include as much info as possible!** Use the **Bug Report template** below or [click this link](https://github.com/iabarca/lawena-recording-tool/issues/new?title=Bug%3A&body=%23%23%23%20Issue%20Summary%0A%0A%23%23%23%20Steps%20to%20Reproduce%0A%0A1.%20This%20is%20the%20first%20step%0A%0AThis%20is%20a%20bug%20because...%0A%0A%23%23%23%20Technical%20details%0A%0A*%20Lawena%20Version%3A%20INSERT%20VERSION%20OR%20COMMIT%20REF%0A*%20Game%3A%20%0A*%20Your%20OS%3A%20%0A*%20Log%20file%3A%20) to start creating a bug report with the template automatically.
+3. **Include as much info as possible!** Use the **Bug Report template** below or [click this link](https://github.com/quanticc/lawena-recording-tool/issues/new?title=Bug%3A&body=%23%23%23%20Issue%20Summary%0A%0A%23%23%23%20Steps%20to%20Reproduce%0A%0A1.%20This%20is%20the%20first%20step%0A%0AThis%20is%20a%20bug%20because...%0A%0A%23%23%23%20Technical%20details%0A%0A*%20Lawena%20Version%3A%20INSERT%20VERSION%20OR%20COMMIT%20REF%0A*%20Game%3A%20%0A*%20Your%20OS%3A%20%0A*%20Log%20file%3A%20) to start creating a bug report with the template automatically.
 
 A good bug report shouldn't leave others needing to chase you up for more information. Please try to be as detailed as possible in your report. Any details will help people to fix any potential bugs.
 
