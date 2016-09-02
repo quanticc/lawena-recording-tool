@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import com.threerings.getdown.util.ConfigUtil;
-import com.threerings.getdown.util.LaunchUtil;
 
 public class UpdateHelper {
 

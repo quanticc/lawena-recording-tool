@@ -21,6 +21,7 @@ public class LwrtGUI {
     Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
       boolean dialogShown = false;
 
+      @Override
       public void uncaughtException(Thread t, final Throwable e) {
         log.log(Level.SEVERE, "Unexpected problem in " + t, e);
         if (!dialogShown) {
@@ -35,6 +36,7 @@ public class LwrtGUI {
       final Lawena lawena = new Lawena(cfg);
       log.fine("Preparing to display main user interface");
       SwingUtilities.invokeAndWait(new Runnable() {
+        @Override
         public void run() {
           try {
             lawena.start();

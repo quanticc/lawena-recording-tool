@@ -35,9 +35,11 @@ public class AboutDialog extends JDialog {
   private static final long serialVersionUID = 1L;
 
   private static class AboutTextPaneHyperlinkListener implements HyperlinkListener {
+    @Override
     public void hyperlinkUpdate(final HyperlinkEvent e) {
       if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
         new SwingWorker<Void, Void>() {
+          @Override
           protected Void doInBackground() throws Exception {
             try {
               Desktop.getDesktop().browse(e.getURL().toURI());
@@ -52,6 +54,7 @@ public class AboutDialog extends JDialog {
   }
 
   private class BtnOkActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       setVisible(false);
     }

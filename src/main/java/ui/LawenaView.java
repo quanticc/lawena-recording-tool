@@ -86,30 +86,35 @@ public class LawenaView extends JFrame {
       "https://github.com/quanticc/lawena-recording-tool/wiki/Instructions";
 
   private static class MntmRenderingTutorialActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(renderingTutorialURL).execute();
     }
   }
 
   private static class MntmPatchNotesActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(releasesURL).execute();
     }
   }
 
   private static class MntmProjectPageActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(projectPageURL).execute();
     }
   }
 
   private static class MntmVdmTutorialActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(vdmTutorialURL).execute();
     }
   }
 
   private static class MntmInstructionsActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       new LaunchURLWorker(instructionsURL).execute();
     }

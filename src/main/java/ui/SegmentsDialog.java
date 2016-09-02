@@ -22,6 +22,7 @@ import javax.swing.border.EmptyBorder;
 public class SegmentsDialog extends JDialog {
 
   private class BtnSelectNoneActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       for (int i = 0; i < tableSegments.getRowCount(); i++) {
         tableSegments.setValueAt(false, i, 0);
@@ -30,6 +31,7 @@ public class SegmentsDialog extends JDialog {
   }
 
   private class BtnSelectAllActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       for (int i = 0; i < tableSegments.getRowCount(); i++) {
         tableSegments.setValueAt(true, i, 0);

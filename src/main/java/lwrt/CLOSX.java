@@ -12,7 +12,7 @@ import java.util.logging.Level;
 
 public class CLOSX extends CommandLine {
 
-  private static Set<PosixFilePermission> perms777 = new HashSet<PosixFilePermission>();
+  private static Set<PosixFilePermission> perms777 = new HashSet<>();
 
   {
     perms777.add(PosixFilePermission.OWNER_READ);

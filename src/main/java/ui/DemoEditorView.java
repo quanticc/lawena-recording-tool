@@ -179,7 +179,6 @@ public class DemoEditorView extends JPanel {
     scrollPane_1.setViewportView(tableTicks);
 
     panelButtonsLeft = new JPanel();
-    FlowLayout fl_panelButtonsLeft = (FlowLayout) panelButtonsLeft.getLayout();
     GridBagConstraints gbc_panelButtonsLeft = new GridBagConstraints();
     gbc_panelButtonsLeft.gridwidth = 7;
     gbc_panelButtonsLeft.anchor = GridBagConstraints.WEST;

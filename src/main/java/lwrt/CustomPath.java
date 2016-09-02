@@ -8,9 +8,10 @@ public class CustomPath {
   public enum PathContents {
     DEFAULT, READONLY, HUD, CONFIG, SKYBOX;
 
+    @Override
     public String toString() {
       return name().toLowerCase();
-    };
+    }
   }
 
   private Path path;

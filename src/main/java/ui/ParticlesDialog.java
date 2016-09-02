@@ -22,6 +22,7 @@ import javax.swing.border.EmptyBorder;
 public class ParticlesDialog extends JDialog {
 
   private class BtnSelectNoneActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       for (int i = 0; i < tableParticles.getRowCount(); i++) {
         tableParticles.setValueAt(false, i, 0);
@@ -30,6 +31,7 @@ public class ParticlesDialog extends JDialog {
   }
 
   private class BtnSelectAllActionListener implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent e) {
       for (int i = 0; i < tableParticles.getRowCount(); i++) {
         tableParticles.setValueAt(true, i, 0);
