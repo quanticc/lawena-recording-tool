@@ -218,19 +218,16 @@ public class SettingsManager {
     lines.add("tf_dingalingaling " + (getHitsounds() ? "1" : "0"));
     lines.add("tf_dingalingaling_lasthit " + (getHitsounds() ? "1" : "0"));
     lines.add("voice_enable " + (getVoice() ? "1" : "0"));
-    lines.add("alias voice_enable \"\"");
     lines.add("cl_autorezoom 0");
     lines.add("cl_autoreload 0");
     lines.add("hud_saytext_time 0");
     lines.add("net_graph 0");
-    lines.add("alias net_graph \"\"");
     lines.add("alias voice_menu_1 \"\"");
     lines.add("alias voice_menu_2 \"\"");
     lines.add("alias voice_menu_3 \"\"");
     lines.add("alias +taunt \"\"");
     lines.add("alias +context_action \"\"");
     lines.add("cl_showfps 0");
-    lines.add("alias cl_showfps \"\"");
     lines.add("volume 0.5");
     lines.add("hud_fastswitch 1");
     lines.add("cl_hud_minmode " + (getHudMinmode() ? "1" : "0"));
@@ -244,6 +241,9 @@ public class SettingsManager {
     lines.add((getViewmodelSwitch().equals("on") ? "//" : "") + "lockviewmodelsoff");
     lines.add((crosshairswitch ? "//" : "") + "lockcrosshair");
     lines.add((crosshairswitch ? "//" : "") + "alias toggle \"\"");
+    lines.add("alias net_graph \"\"");
+    lines.add("alias cl_showfps \"\"");
+    lines.add("alias voice_enable \"\"");
     Files.write(Paths.get("cfg/settings.cfg"), lines, Charset.forName("UTF-8"));
 
     if (demoname != null) {
