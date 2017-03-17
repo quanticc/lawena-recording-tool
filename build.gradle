@@ -109,7 +109,7 @@ task buildLauncher {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', launch4jPath, 'lawena-launcher.xml'
             } else {
-                commandLine launch4jPath, 'lawena-launcher.xml'
+                commandLine 'java', '-jar', launch4jPath, 'lawena-launcher.xml'
             }
         }
     }
