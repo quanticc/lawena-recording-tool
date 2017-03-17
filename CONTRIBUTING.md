@@ -6,7 +6,7 @@ First of all, thanks for reading this! There are lots of ways you can help, and 
 
 If you need help or have questions, please use the [issue tracker](#issues). If you're [raising a bug](#bugs) please be sure to [include as much info as possible](#bug-template) so that can be fixed. If you've got some code you want to [pull request](#pull-requests) please ask first and together we'll find a way to make it work.
 
-Currently the only one actively developing Lawena Recording Tool is **Quantic** ([github](https://github.com/quanticc)) ([steam](http://steamcommunity.com/profiles/76561198012092861/)). Montz is no longer developing the tool so only bother him to thank him for starting the project. If you want to help [in other ways](#get-involved), tell me about it via Steam or the [Gitter chat](https://gitter.im/iabarca/lawena-recording-tool).
+Currently the only one actively developing Lawena Recording Tool is **Quantic** ([github](https://github.com/quanticc)) ([steam](http://steamcommunity.com/profiles/76561198012092861/)). Montz is no longer developing the tool so only bother him to thank him for starting the project. If you want to help [in other ways](#get-involved), tell me about it via Steam or the [Gitter chat](https://gitter.im/quanticc/lawena-recording-tool).
 
 <a name="get-involved"></a>
 ### Get involved
@@ -74,7 +74,7 @@ reported. Especially, why do you consider this to be a bug? What do you expect t
 
 I really like feature requests! Please use the issue tracker for this as well, stating that it's a feature request somewhere in there, after you do this:
 
-1. Visit the [Roadmap](https://github.com/iabarca/lawena-recording-tool/wiki/Roadmap) & **use the GitHub search** to see if the feature has already been requested and then use the issue tracker to tell me about it.
+1. Visit the [Roadmap](https://github.com/quanticc/lawena-recording-tool/wiki/Roadmap) & **use the GitHub search** to see if the feature has already been requested and then use the issue tracker to tell me about it.
 
 2. Please provide as much detail and context as possible, this means explaining the use case and why it is likely to be common.
 

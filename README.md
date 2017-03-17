@@ -1,4 +1,4 @@
-Lawena Recording Tool [![Build Status](https://travis-ci.org/quanticc/lawena-recording-tool.svg?branch=v4.1.x)](https://travis-ci.org/quanticc/lawena-recording-tool) [![Join the chat at https://gitter.im/iabarca/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iabarca/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Lawena Recording Tool [![Build Status](https://travis-ci.org/quanticc/lawena-recording-tool.svg?branch=v4.1.x)](https://travis-ci.org/quanticc/lawena-recording-tool) [![Join the chat at https://gitter.im/quanticc/lawena-recording-tool](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/quanticc/lawena-recording-tool?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 =====================
 
 ![Lawena Recording Tool](http://i.imgur.com/dlRdaeA.png)
