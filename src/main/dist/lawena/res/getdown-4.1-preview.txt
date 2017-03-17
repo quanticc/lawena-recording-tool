@@ -1,4 +1,4 @@
-appbase = https://quantic.top/lawena/v4.1.x/preview/latest/
+appbase = https://s3-us-west-1.amazonaws.com/lawena/v4.1.x/preview/latest/
 
 ui.name = Lawena Recording Tool
 ui.background_image = res/background.png

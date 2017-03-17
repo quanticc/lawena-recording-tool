@@ -1,6 +1,6 @@
 version = <version>
-appbase = https://quantic.top/lawena/v4.1.x/<channel>/%VERSION%
-latest = https://quantic.top/lawena/v4.1.x/<channel>/latest/getdown.txt
+appbase = https://s3-us-west-1.amazonaws.com/lawena/v4.1.x/<channel>/%VERSION%
+latest = https://s3-us-west-1.amazonaws.com/lawena/v4.1.x/<channel>/latest/getdown.txt
 allow_offline = true
 channel = <channel>
 

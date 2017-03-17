@@ -12,6 +12,8 @@ launcher/*.exe
 src/main/dist/*.exe
 src/main/dist/lawena/code/*.exe
 gradle.properties
+*.sh
+.idea/
 
 ### Java template
 # Compiled class file

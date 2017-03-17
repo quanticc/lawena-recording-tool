@@ -1,5 +1,5 @@
 version = <version>
-appbase = https://quantic.top/lawena/v4.1.x/<channel>/latest/
+appbase = https://s3-us-west-1.amazonaws.com/lawena/v4.1.x/<channel>/latest/
 channel = <channel>
 
 ui.name = Lawena Recording Tool [<channel>]
