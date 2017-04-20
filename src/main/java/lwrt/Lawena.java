@@ -85,7 +85,6 @@ public class Lawena {
         } else {
             throw new UnsupportedOperationException("OS not supported");
         }
-        cl.setLookAndFeel();
 
         // Perform after-update checks
         updater = new UpdateHelper();
@@ -95,6 +94,11 @@ public class Lawena {
         settings = cfg;
         log.fine("Retrieving system dxlevel and Steam path");
         oDxlevel = getOriginalDxlevel();
+
+        if (settings.getBoolean(Key.SetSystemLookAndFeel)) {
+            log.fine("Setting system look and feel");
+            cl.setLookAndFeel();
+        }
 
         // get SteamPath from registry, this value might be invalid or there might not be a value at all
         Path steampath = cl.getSteamPath();

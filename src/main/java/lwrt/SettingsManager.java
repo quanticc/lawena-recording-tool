@@ -519,6 +519,7 @@ public class SettingsManager {
         SourceRecorderJpegQuality(50, 1, 100),
         DeleteBackupsWhenRestoring(false),
         BigFolderMBThreshold(200, 0, Integer.MAX_VALUE),
+        SetSystemLookAndFeel(true),
         HlaePath(""),
         LaunchMode("hl2"),
         LaunchOptions("-novid -console");
