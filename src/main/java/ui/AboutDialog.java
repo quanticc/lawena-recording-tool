@@ -8,13 +8,17 @@ import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class AboutDialog extends JDialog {
 
@@ -64,9 +68,11 @@ public class AboutDialog extends JDialog {
 		try {
 			URL aboutUrl = AboutDialog.class.getClassLoader().getResource("ui/about.html");
 			if (aboutUrl != null) {
-				aboutTextPane.setText(new String(Files.readAllBytes(Paths.get(aboutUrl.toURI()))));
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(aboutUrl.openStream()))) {
+					aboutTextPane.setText(reader.lines().collect(Collectors.joining()));
+				}
 			}
-		} catch (URISyntaxException | IOException e) {
+		} catch (IOException e) {
 			log.log(Level.FINE, "Could not display text", e);
 		}
 		contentPanel.add(aboutTextPane, BorderLayout.SOUTH);
