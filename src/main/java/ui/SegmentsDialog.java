@@ -5,6 +5,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
 public class SegmentsDialog extends JDialog {
 
@@ -21,10 +22,10 @@ public class SegmentsDialog extends JDialog {
         setTitle("Select Segments to Delete");
         setModalityType(ModalityType.APPLICATION_MODAL);
         setBounds(100, 100, 450, 300);
-        try {
-            setIconImage(new ImageIcon(getClass().getClassLoader().getResource("ui/tf2.png")).getImage());
-        } catch (Exception e) {
-        }
+	    URL url = getClass().getClassLoader().getResource("ui/tf2.png");
+	    if (url != null) {
+		    setIconImage(new ImageIcon(url).getImage());
+	    }
         BorderLayout borderLayout = new BorderLayout();
         getContentPane().setLayout(borderLayout);
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));

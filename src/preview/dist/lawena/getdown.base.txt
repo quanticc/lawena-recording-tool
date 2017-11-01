@@ -24,7 +24,7 @@ delete = ../LEEME.txt
 delete = ../README.txt
 delete = custom/skybox.vpk
 
-java_version = 1070042
+java_version = 1080000
 class = ui.LwrtGUI
 
 jvmarg = -Xmx32m
@@ -43,6 +43,6 @@ ui.install_error = http://lawena.github.io/
 ui.background = 111100
 ui.progress_bar = 500446
 
-tracking_url = http://www.google-analytics.com/__utm.gif?utmwv=4.5.9&utmac=UA-41559116-3&utmcs=UTF-8&utmdt=Getdown&utmhn=dl.dropboxusercontent.com&utmsc=24-bit&utmsr=1024x768&utmul=en-us&utmje=1&utmfl=10.0%20r32&utmr=-&utmp=%2Fgetdown%2F
+tracking_url = http://www.google-analytics.com/__utm.gif?utmwv=4.5.9&utmac=UA-41559116-3&utmcs=UTF-8&utmdt=Getdown&utmhn=s3-us-west-1.amazonaws.com&utmsc=24-bit&utmsr=1024x768&utmul=en-us&utmje=1&utmfl=10.0%20r32&utmr=-&utmp=%2Fgetdown%2F
 tracking_percents = 5,25,50,75,99
 tracking_ga_hash = 214144805

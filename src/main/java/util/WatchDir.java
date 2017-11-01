@@ -40,109 +40,109 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 public abstract class WatchDir {
 
-    private static final Logger log = Logger.getLogger("lawena");
+	private static final Logger log = Logger.getLogger("lawena");
 
-    private final WatchService watcher;
-    private final Map<WatchKey, Path> keys;
-    private final boolean recursive;
+	private final WatchService watcher;
+	private final Map<WatchKey, Path> keys;
+	private final boolean recursive;
 
-    /**
-     * Creates a WatchService and registers the given directory
-     */
-    public WatchDir(Path dir, boolean recursive) throws IOException {
-        this.watcher = FileSystems.getDefault().newWatchService();
-        this.keys = new HashMap<>();
-        this.recursive = recursive;
-        if (recursive) {
-            registerAll(dir);
-        } else {
-            register(dir);
-        }
-    }
+	/**
+	 * Creates a WatchService and registers the given directory
+	 */
+	public WatchDir(Path dir, boolean recursive) throws IOException {
+		this.watcher = FileSystems.getDefault().newWatchService();
+		this.keys = new HashMap<>();
+		this.recursive = recursive;
+		if (recursive) {
+			registerAll(dir);
+		} else {
+			register(dir);
+		}
+	}
 
-    @SuppressWarnings("unchecked")
-    private static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>) event;
-    }
+	@SuppressWarnings("unchecked")
+	private static <T> WatchEvent<T> cast(WatchEvent<?> event) {
+		return (WatchEvent<T>) event;
+	}
 
-    /**
-     * Register the given directory with the WatchService
-     */
-    private void register(Path dir) throws IOException {
-        WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-        keys.put(key, dir);
-    }
+	/**
+	 * Register the given directory with the WatchService
+	 */
+	private void register(Path dir) throws IOException {
+		WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+		keys.put(key, dir);
+	}
 
-    /**
-     * Register the given directory, and all its sub-directories, with the WatchService.
-     */
-    private void registerAll(final Path start) throws IOException {
-        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                throws IOException {
-                register(dir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
-    }
+	/**
+	 * Register the given directory, and all its sub-directories, with the WatchService.
+	 */
+	private void registerAll(final Path start) throws IOException {
+		Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+					throws IOException {
+				register(dir);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
 
-    /**
-     * Process all events for keys queued to the watcher
-     */
-    public void processEvents() {
-        for (; ; ) {
-            WatchKey key;
-            try {
-                key = watcher.take();
-            } catch (InterruptedException x) {
-                return;
-            }
-            Path dir = keys.get(key);
-            if (dir == null) {
-                continue;
-            }
-            for (WatchEvent<?> event : key.pollEvents()) {
-                final Kind<?> kind = event.kind();
-                if (kind == OVERFLOW) {
-                    continue;
-                }
-                WatchEvent<Path> ev = cast(event);
-                Path name = ev.context();
-                final Path child = dir.resolve(name);
-                log.finer("[watchdir] " + event.kind().name() + ": " + child);
-                SwingUtilities.invokeLater(() -> {
-                    if (kind == ENTRY_CREATE) {
-                        entryCreated(child);
-                    } else if (kind == ENTRY_MODIFY) {
-                        entryModified(child);
-                    } else if (kind == ENTRY_DELETE) {
-                        entryDeleted(child);
-                    }
-                });
-                if (recursive && (kind == ENTRY_CREATE)) {
-                    try {
-                        if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
-                            registerAll(child);
-                        }
-                    } catch (IOException ignored) {
-                    }
-                }
-            }
-            boolean valid = key.reset();
-            if (!valid) {
-                keys.remove(key);
-                if (keys.isEmpty()) {
-                    break;
-                }
-            }
-        }
-    }
+	/**
+	 * Process all events for keys queued to the watcher
+	 */
+	public void processEvents() {
+		for (; ; ) {
+			WatchKey key;
+			try {
+				key = watcher.take();
+			} catch (InterruptedException x) {
+				return;
+			}
+			Path dir = keys.get(key);
+			if (dir == null) {
+				continue;
+			}
+			for (WatchEvent<?> event : key.pollEvents()) {
+				final Kind<?> kind = event.kind();
+				if (kind == OVERFLOW) {
+					continue;
+				}
+				WatchEvent<Path> ev = cast(event);
+				Path name = ev.context();
+				final Path child = dir.resolve(name);
+				log.finer("[watchdir] " + event.kind().name() + ": " + child);
+				SwingUtilities.invokeLater(() -> {
+					if (kind == ENTRY_CREATE) {
+						entryCreated(child);
+					} else if (kind == ENTRY_MODIFY) {
+						entryModified(child);
+					} else if (kind == ENTRY_DELETE) {
+						entryDeleted(child);
+					}
+				});
+				if (recursive && (kind == ENTRY_CREATE)) {
+					try {
+						if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
+							registerAll(child);
+						}
+					} catch (IOException ignored) {
+					}
+				}
+			}
+			boolean valid = key.reset();
+			if (!valid) {
+				keys.remove(key);
+				if (keys.isEmpty()) {
+					break;
+				}
+			}
+		}
+	}
 
-    public abstract void entryDeleted(Path child);
+	public abstract void entryDeleted(Path child);
 
-    public abstract void entryModified(Path child);
+	public abstract void entryModified(Path child);
 
-    public abstract void entryCreated(Path child);
+	public abstract void entryCreated(Path child);
 
 }

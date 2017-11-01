@@ -24,9 +24,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.threerings:getdown:1.5'
+    compile 'com.threerings:getdown:1.6.4'
     compile 'net.lingala.zip4j:zip4j:1.3.2'
-    compile 'com.github.spullara.mustache.java:compiler:0.9.3'
+    compile 'com.github.spullara.mustache.java:compiler:0.9.5'
     testCompile 'junit:junit:4.12'
 }
 
@@ -73,7 +73,7 @@ jar {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.0'
+    gradleVersion = '4.3'
 }
 
 task run(type: JavaExec, dependsOn: 'classes') {
