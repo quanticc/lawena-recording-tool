@@ -10,8 +10,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 class MovieManager {
+
+	private static final Logger log = Logger.getLogger("lawena");
 
 	private SettingsManager cfg;
 
@@ -50,11 +53,38 @@ class MovieManager {
 		if (!Files.exists(folder)) {
 			Files.createDirectories(folder);
 		}
+		String moviePath = "";
+		if (cfg.getMoviePath().startsWith(cfg.getTfPath())) {
+			try {
+				Path movieRelatedToGame = cfg.getTfPath().relativize(cfg.getMoviePath());
+				moviePath = movieRelatedToGame.toString();
+			} catch (IllegalArgumentException e) {
+				// different root
+				log.info("Cannot relativize path: " + e.toString());
+			}
+		} else if (shareSameRoot(cfg.getMoviePath(), cfg.getTfPath())) {
+			moviePath = cfg.getMoviePath().toString().replaceFirst("^[A-Z]:(.*)$", "$1");
+		} else {
+			moviePath = cfg.getMoviePath().toString();
+		}
+		String escape = needsEscape(moviePath) ? "\"" : "";
+		moviePath = moviePath.replace("\\", "/") + (moviePath.isEmpty() ? "" : "/");
+		log.info("Resolved movie recording path: " + moviePath);
 		for (String prefix : prefixes) {
-			List<String> lines =
-					Collections.singletonList("startmovie \"" + cfg.getMoviePath() + "/" + prefix + "_\" " + video +
-							" " + audio + (video.equals("jpg") ? " jpeg_quality " + quality : ""));
+			String command = "startmovie " + escape + moviePath + prefix + "_" + escape + " " +
+					video + " " + audio + (video.equals("jpg") ? " jpeg_quality " + quality : "");
+			List<String> lines = Collections.singletonList(command);
 			Files.write(Paths.get("cfg/mov/" + prefix + ".cfg"), lines, Charset.forName("UTF-8"));
 		}
+	}
+
+	private boolean shareSameRoot(Path path1, Path path2) {
+		String root1 = path1.toString().replaceFirst("^([A-Z]):.*$", "$1");
+		String root2 = path2.toString().replaceFirst("^([A-Z]):.*$", "$1");
+		return root1.equals(root2);
+	}
+
+	private boolean needsEscape(String str) {
+		return str != null && str.contains(" ");
 	}
 }
