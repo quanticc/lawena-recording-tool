@@ -64,6 +64,7 @@ public class LawenaView extends JFrame {
 	private JMenuItem mntmSaveSettings;
 	private JMenuItem mntmSelectEnhancedParticles;
 	private JMenuItem mntmAddCustomSettings;
+	private JMenuItem mntmOpenGameFolder;
 	private JMenuItem mntmOpenMovieFolder;
 	private JMenuItem mntmOpenCustomFolder;
 	private JMenuItem mntmChangeTfLaunch;
@@ -100,6 +101,9 @@ public class LawenaView extends JFrame {
 
 		JSeparator separator_4 = new JSeparator();
 		mnFile.add(separator_4);
+
+		JMenuItem mntmOpenGameFolder = new JMenuItem("Open Game Folder");
+		mnFile.add(mntmOpenGameFolder);
 
 		JMenuItem mntmOpenMovieFolder = new JMenuItem("Open Movie Folder");
 		mnFile.add(mntmOpenMovieFolder);
@@ -646,6 +650,7 @@ public class LawenaView extends JFrame {
 		this.useHudMinmode = useHudMinmode;
 		this.mntmSelectEnhancedParticles = mntmSelectEnhancedParticles;
 		this.mntmAddCustomSettings = mntmAddCustomSettings;
+		this.mntmOpenGameFolder = mntmOpenGameFolder;
 		this.mntmOpenMovieFolder = mntmOpenMovieFolder;
 		this.mntmOpenCustomFolder = mntmOpenCustomFolder;
 		this.mntmChangeTfLaunch = mntmChangeTfLaunch;
@@ -814,6 +819,10 @@ public class LawenaView extends JFrame {
 
 	public JMenuItem getMntmAddCustomSettings() {
 		return mntmAddCustomSettings;
+	}
+
+	public JMenuItem getMntmOpenGameFolder() {
+		return mntmOpenGameFolder;
 	}
 
 	public JMenuItem getMntmOpenMovieFolder() {

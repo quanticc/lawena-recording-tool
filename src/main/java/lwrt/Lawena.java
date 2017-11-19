@@ -417,13 +417,24 @@ public class Lawena {
 		view.getMntmSaveSettings().addActionListener(e -> saveSettings());
 		view.getBtnStartTf().addActionListener(e -> new StartTfTask().execute());
 		view.getBtnClearMovieFolder().addActionListener(e -> startSegmentsDialog());
+		view.getMntmOpenGameFolder().addActionListener(e -> new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception {
+				try {
+					Desktop.getDesktop().open(settings.getTfPath().toFile());
+				} catch (IOException ex) {
+					log.log(Level.FINE, "Could not open game folder", ex);
+				}
+				return null;
+			}
+		}.execute());
 		view.getMntmOpenMovieFolder().addActionListener(e -> new SwingWorker<Void, Void>() {
 			@Override
 			protected Void doInBackground() throws Exception {
 				try {
 					Desktop.getDesktop().open(settings.getMoviePath().toFile());
 				} catch (IOException ex) {
-					log.log(Level.FINE, "Could not open custom folder", ex);
+					log.log(Level.FINE, "Could not open movie folder", ex);
 				}
 				return null;
 			}
