@@ -516,7 +516,7 @@ public class SettingsManager {
 		CustomSettings("// Custom User Settings"),
 		CustomSettingsDialogWidth(300, 200, Integer.MAX_VALUE),
 		CustomSettingsDialogHeight(200, 100, Integer.MAX_VALUE),
-		SourceRecorderVideoFormat("tga", "tga", "jpg", "h264"),
+		SourceRecorderVideoFormat("tga", "tga", "jpg", "h264", "webm"),
 		SourceRecorderAudioFormat("wav", "wav", ""),
 		SourceRecorderJpegQuality(50, 1, 100),
 		DeleteBackupsWhenRestoring(false),
