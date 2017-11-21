@@ -27,10 +27,23 @@ public class CLLinux extends CommandLine {
 		perms777.add(PosixFilePermission.OTHERS_EXECUTE);
 	}
 
-	@Override
-	public ProcessBuilder getBuilderStartTF2(String gamePath) {
-		throw new UnsupportedOperationException("Must be launched through Steam");
-	}
+    private String hl2 = "hl2.sh";
+
+
+    @Override
+    public ProcessBuilder getBuilderStartTF2(String gamePath) {
+        Path path = Paths.get(gamePath, "..", "hl2.sh");
+        try {
+            Path run = Paths.get(this.getSteamPath().toString(),
+                "ubuntu12_32", "steam-runtime", "run.sh");
+            path = path.toRealPath();
+            return new ProcessBuilder(run.toString(), path.toString());
+        } catch (IOException e) {
+            log.warning("Could not obtain real path of game executable: " + e.toString());
+        }
+        return new ProcessBuilder(path.toString());
+
+    }
 
 	@Override
 	public ProcessBuilder getBuilderStartHLAE(String hlaePath, String gamePath) {
