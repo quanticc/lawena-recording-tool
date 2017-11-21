@@ -436,7 +436,7 @@ public class LawenaView extends JFrame {
 		panelSettings.add(lblOutput, gbc_lblOutput);
 
 		JComboBox<String> cmbSourceVideoFormat = new JComboBox<>();
-		cmbSourceVideoFormat.setModel(new DefaultComboBoxModel<>(new String[]{"TGA", "JPG"}));
+		cmbSourceVideoFormat.setModel(new DefaultComboBoxModel<>(new String[]{"TGA", "JPG", "h264"}));
 		GridBagConstraints gbc_cmbSourceVideoFormat = new GridBagConstraints();
 		gbc_cmbSourceVideoFormat.insets = new Insets(0, 0, 5, 5);
 		gbc_cmbSourceVideoFormat.fill = GridBagConstraints.HORIZONTAL;
