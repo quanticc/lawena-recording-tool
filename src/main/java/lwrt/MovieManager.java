@@ -2,6 +2,7 @@ package lwrt;
 
 import lwrt.SettingsManager.Key;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
@@ -39,7 +40,7 @@ class MovieManager {
 				alias = "alias namescroll noslots";
 			}
 		}
-		Files.write(Paths.get("cfg/namescroll.cfg"), Collections.singletonList(alias), Charset.forName("UTF-8"));
+		Files.write(Paths.get("cfg", "namescroll.cfg"), Collections.singletonList(alias), Charset.forName("UTF-8"));
 	}
 
 	public void createMovienameCfgs() throws IOException {
@@ -49,7 +50,7 @@ class MovieManager {
 		String video = cfg.getString(Key.SourceRecorderVideoFormat);
 		String audio = cfg.getString(Key.SourceRecorderAudioFormat);
 		int quality = cfg.getInt(Key.SourceRecorderJpegQuality);
-		Path folder = Paths.get("cfg/mov");
+		Path folder = Paths.get("cfg", "mov");
 		if (!Files.exists(folder)) {
 			Files.createDirectories(folder);
 		}
@@ -68,13 +69,13 @@ class MovieManager {
 			moviePath = cfg.getMoviePath().toString();
 		}
 		String escape = needsEscape(moviePath) ? "\"" : "";
-		moviePath = moviePath.replace("\\", "/") + (moviePath.isEmpty() ? "" : "/");
+		moviePath = moviePath + (moviePath.isEmpty() ? "" : File.separator);
 		log.info("Resolved movie recording path: " + moviePath);
 		for (String prefix : prefixes) {
 			String command = "startmovie " + escape + moviePath + prefix + "_" + escape + " " +
 					video + " " + audio + (video.equals("jpg") ? " jpeg_quality " + quality : "");
 			List<String> lines = Collections.singletonList(command);
-			Files.write(Paths.get("cfg/mov/" + prefix + ".cfg"), lines, Charset.forName("UTF-8"));
+			Files.write(Paths.get("cfg","mov", prefix + ".cfg"), lines, Charset.forName("UTF-8"));
 		}
 	}
 

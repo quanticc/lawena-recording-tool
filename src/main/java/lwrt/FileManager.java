@@ -11,6 +11,7 @@ import util.LawenaException;
 import util.Util;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.DirectoryStream.Filter;
@@ -22,6 +23,7 @@ import java.util.logging.Logger;
 class FileManager {
 
 	private static final Logger log = Logger.getLogger("lawena");
+    private static final String n = System.getProperty("line.separator");
 
 	private CustomPathList customPathList;
 	private SettingsManager cfg;
@@ -147,8 +149,10 @@ class FileManager {
 		// Copy hud files
 		try {
 			log.fine("Copying selected hud files");
-			Path resourcePath = tfpath.resolve("custom/lawena/resource");
-			Path scriptsPath = tfpath.resolve("custom/lawena/scripts");
+			Path resourcePath = tfpath.resolve(String.join(File.separator,
+                "custom", "lawena", "resource"));
+			Path scriptsPath = tfpath.resolve(String.join(File.separator,
+                "custom", "lawena", "scripts"));
 			mkdirs(resourcePath);
 			mkdirs(scriptsPath);
 			String hudName = cfg.getHud();
@@ -157,7 +161,8 @@ class FileManager {
 				copyReadOnly(Paths.get("hud", hudName, "scripts"), scriptsPath);
 				if (!hudName.equals("hud_default")) {
 					Files.copy(Paths.get("hud", hudName, "info.vdf"),
-							tfpath.resolve("custom/lawena/info.vdf"));
+							tfpath.resolve(String.join(File.separator,
+                                "custom", "lawena", "info.vdf")));
 				}
 			}
 		} catch (IOException e) {
@@ -165,7 +170,8 @@ class FileManager {
 			throw new LawenaException("Failed to replace hud files", e);
 		}
 		// Copy skybox files
-		Path skyboxPath = tfpath.resolve("custom/lawena/materials/skybox");
+		Path skyboxPath = tfpath.resolve(String.join(File.separator,
+            "custom", "lawena", "materials", "skybox"));
 		try {
 			String sky = cfg.getSkybox();
 			if (sky != null && !sky.isEmpty() && !sky.equals(Key.Skybox.defValue())) {
@@ -194,7 +200,7 @@ class FileManager {
 		Path customBackupPath = tfpath.resolve("lwrtcustom");
 		Path customPath = tfpath.resolve("custom");
 		Path localCustomPath = Paths.get("custom");
-		Path customParticlesPath = customPath.resolve("lawena/particles");
+		Path customParticlesPath = customPath.resolve("lawena" + File.separator + "particles");
 
 		log.fine("Copying selected custom vpks and folders");
 		for (CustomPath cp : customPathList.getList()) {
@@ -250,7 +256,8 @@ class FileManager {
 		Path tfpath = cfg.getTfPath();
 		Set<Path> vmtPaths = new LinkedHashSet<>();
 		Set<Path> vtfPaths = new LinkedHashSet<>();
-		Path skyboxPath = tfpath.resolve("custom/lawena/materials/skybox");
+		Path skyboxPath = tfpath.resolve(String.join(File.separator,
+            "custom", "lawena", "materials", "skybox"));
 		String skyboxFilename = cfg.getSkybox();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("skybox"))) {
 			for (Path path : stream) {
@@ -356,14 +363,12 @@ class FileManager {
 							JOptionPane
 									.showConfirmDialog(
 											null,
-											"Your cfg and custom folders are "
-													+ size
-													+ " in size.\nThis might cause Lawena to hang or crash while it " +
-													"creates a backup."
-													+ "\nPlease consider moving unnecesary custom files like maps to" +
-													" " +
-													"tf/download folder."
-													+ "\nDo you still want to create a backup?", "Backup Folder",
+											String.join(n,
+                                                "Your cfg and custom folders are " + size + " in size.",
+                                                "This might cause Lawena to hang or crash while it creates a backup.",
+                                                "Please consider moving unnecessary custom files like maps to tf" + File.separator + "download folder.",
+                                                "Do you still want to create a backup?"),
+                                        "Backup Folder",
 											JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 					if (answer == JOptionPane.NO_OPTION || answer == JOptionPane.CLOSED_OPTION) {
 						log.info("Backup creation skipped by the user");

@@ -144,13 +144,13 @@ public class SettingsManager {
 		lines.add("alias net_graph \"\"");
 		lines.add("alias cl_showfps \"\"");
 		lines.add("alias voice_enable \"\"");
-		Files.write(Paths.get("cfg/settings.cfg"), lines, Charset.forName("UTF-8"));
+		Files.write(Paths.get("cfg","settings.cfg"), lines, Charset.forName("UTF-8"));
 
 		if (demoname != null) {
-			Files.write(Paths.get("cfg/lawena.cfg"), Collections.singletonList("playdemo \"" + demoname + "\""),
+			Files.write(Paths.get("cfg","lawena.cfg"), Collections.singletonList("playdemo \"" + demoname + "\""),
 					Charset.forName("UTF-8"));
 		} else {
-			Files.deleteIfExists(Paths.get("cfg/lawena.cfg"));
+			Files.deleteIfExists(Paths.get("cfg","lawena.cfg"));
 		}
 	}
 

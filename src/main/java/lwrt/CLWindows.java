@@ -14,7 +14,7 @@ public class CLWindows extends CommandLine {
 
 	@Override
 	public ProcessBuilder getBuilderStartTF2(String gamePath) {
-		Path path = Paths.get(gamePath).resolve("../hl2.exe");
+		Path path = Paths.get(gamePath, "..", "hl2.exe");
 		try {
 			path = path.toRealPath();
 		} catch (IOException e) {
@@ -26,12 +26,12 @@ public class CLWindows extends CommandLine {
 
 	@Override
 	public ProcessBuilder getBuilderStartSteam(String steamPath) {
-		return new ProcessBuilder(steamPath + "/steam.exe");
+		return new ProcessBuilder(steamPath + File.separator + "steam.exe");
 	}
 
 	@Override
 	public ProcessBuilder getBuilderStartHLAE(String hlaePath, String gamePath) {
-		Path hl2Path = Paths.get(gamePath).resolve("../hl2.exe");
+		Path hl2Path = Paths.get(gamePath).resolve(".." + File.separator + "hl2.exe");
 		try {
 			hl2Path = hl2Path.toRealPath();
 		} catch (IOException e) {
@@ -164,7 +164,9 @@ public class CLWindows extends CommandLine {
 
 	@Override
 	public Path resolveVpkToolPath(Path tfpath) {
-		return tfpath.resolve("../bin/vpk.exe");
+		return tfpath.resolve(
+		    String.join(File.separator, "..", "bin", "vpk.exe")
+        );
 	}
 
 	@Override

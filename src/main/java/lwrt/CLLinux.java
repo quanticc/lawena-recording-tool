@@ -1,6 +1,7 @@
 package lwrt;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,7 +71,7 @@ public class CLLinux extends CommandLine {
 
 	@Override
 	public Path getSteamPath() {
-		return Paths.get(System.getProperty("user.home"), ".local/share/Steam");
+		return Paths.get(System.getProperty("user.home"), ".local", "share", "Steam");
 	}
 
 	@Override
@@ -115,7 +116,7 @@ public class CLLinux extends CommandLine {
 
 	@Override
 	public Path resolveVpkToolPath(Path tfpath) {
-		Path path = tfpath.resolve("../bin/vpk_linux32");
+		Path path = tfpath.resolve(String.join(File.separator, "..", "bin", "vpk_linux32"));
 		try {
 			Files.setPosixFilePermissions(path, perms777);
 		} catch (IOException e) {

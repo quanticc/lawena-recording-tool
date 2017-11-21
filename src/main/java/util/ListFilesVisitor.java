@@ -24,7 +24,7 @@ public class ListFilesVisitor extends SimpleFileVisitor<Path> {
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 		String str =
-				start.toAbsolutePath().relativize(file.toAbsolutePath()).toString().replace('\\', '/');
+				start.toAbsolutePath().relativize(file.toAbsolutePath()).toString();
 		files.add(str);
 		return FileVisitResult.CONTINUE;
 	}

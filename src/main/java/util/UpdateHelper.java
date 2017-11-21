@@ -62,16 +62,16 @@ public class UpdateHelper {
 	}
 
 	private static void upgradeLauncher() {
-		File oldgd = new File("../lawena-old.exe");
-		File curgd = new File("../lawena.exe");
-		File newgd = new File("code/lawena-new.exe");
+		File oldgd = new File(".."+ File.separator + "lawena-old.exe");
+		File curgd = new File(".."+ File.separator + "lawena.exe");
+		File newgd = new File("code" + File.separator + "lawena-new.exe");
 		upgrade("Lawena launcher", oldgd, curgd, newgd);
 	}
 
 	private static void upgradeGetdown() {
 		File oldgd = new File("getdown-client-old.jar");
 		File curgd = new File("getdown-client.jar");
-		File newgd = new File("code/getdown-client-new.jar");
+		File newgd = new File("code"+ File.separator + "getdown-client-new.jar");
 		upgrade("Lawena updater", oldgd, curgd, newgd);
 	}
 
@@ -141,7 +141,7 @@ public class UpdateHelper {
 
 	public void loadChannels() {
 		channels = new Properties();
-		try (InputStream in = Files.newInputStream(Paths.get("res/channels.txt"))) {
+		try (InputStream in = Files.newInputStream(Paths.get("res", "channels.txt"))) {
 			channels.load(in);
 			log.finer("Loaded updater branches: " + channels.toString());
 		} catch (IOException e) {
