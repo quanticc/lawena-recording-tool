@@ -1,6 +1,7 @@
 package lwrt;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,7 +71,7 @@ public class CLOSX extends CommandLine {
 
 	@Override
 	public Path getSteamPath() {
-		return Paths.get("/Applications/");
+		return Paths.get(File.separator + "Applications" + File.separator);
 	}
 
 	@Override
@@ -115,7 +116,9 @@ public class CLOSX extends CommandLine {
 
 	@Override
 	public Path resolveVpkToolPath(Path tfpath) {
-		Path path = tfpath.resolve("../bin/vpk_osx32");
+		Path path = tfpath.resolve(
+		    String.join(File.separator, "..", "bin", "vpk_osx32")
+        );
 		try {
 			Files.setPosixFilePermissions(path, perms777);
 		} catch (IOException e) {

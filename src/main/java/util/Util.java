@@ -118,7 +118,7 @@ public class Util {
 		if (extIndex == -1) {
 			return path;
 		}
-		int folderIndex = path.lastIndexOf('/');
+		int folderIndex = path.lastIndexOf(File.separatorChar);
 		if (folderIndex > extIndex) {
 			return path;
 		}

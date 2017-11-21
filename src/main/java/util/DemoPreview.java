@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 public class DemoPreview extends RandomAccessFile {
 
 	private static final Logger log = Logger.getLogger("lawena");
+    private static final String n = System.getProperty("line.separator");
 
 	private final static int maxStringLength = 260;
 
@@ -97,17 +98,16 @@ public class DemoPreview extends RandomAccessFile {
 
 	@Override
 	public String toString() {
-		String str = "";
-		str += "Stamp: " + demoStamp;
-		str += "\nDemoProtocol: " + demoProtocol;
-		str += "\nNetworkProtocol: " + networkProtocol;
-		str += "\nGameDirectory: " + gameDirectory;
-		str += "\nPlaybackTime: " + formatSeconds(playbackTime);
-		str += "\nServer: " + serverName;
-		str += "\nPlayer: " + playerName;
-		str += "\nMap: " + mapName;
-		str += "\nTicks: " + tickNumber;
-		return str;
+        return String.join(n,
+            "Stamp: " + demoStamp,
+            "DemoProtocol: " + demoProtocol,
+            "NetworkProtocol: " + networkProtocol,
+            "GameDirectory: " + gameDirectory,
+            "PlaybackTime: " + formatSeconds(playbackTime),
+            "Server: " + serverName,
+            "Player: " + playerName,
+            "Map: " + mapName,
+            "Ticks: " + tickNumber);
 	}
 
 }

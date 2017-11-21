@@ -44,6 +44,7 @@ public class Lawena {
 
 	private static final Logger log = Logger.getLogger("lawena");
 	private static final Logger status = Logger.getLogger("status");
+    private static final String n = System.getProperty("line.separator");
 	private static StartTfTask startTfTask = null;
 	private static ClearMoviesTask clearMoviesTask = null;
 	private LawenaView view;
@@ -104,7 +105,8 @@ public class Lawena {
 		// retrieve GamePath, attempt resolving via SteamPath, otherwise ask user for it
 		Path tfpath = settings.getTfPath();
 		if (tfpath == null || tfpath.toString().isEmpty()) {
-			tfpath = steampath.resolve("SteamApps/common/Team Fortress 2/tf");
+			tfpath = steampath.resolve(String.join(File.separator,
+                "SteamApps", "common", "Team Fortress 2", "tf"));
 		}
 		log.fine("Checking for game path at " + tfpath);
 		if (!tfpath.getFileName().toString().equalsIgnoreCase("tf") || !Files.exists(tfpath)) {
@@ -452,8 +454,10 @@ public class Lawena {
 		}.execute());
 		view.getMntmLaunchTimeout().addActionListener(e -> {
 			Object answer =
-					JOptionPane.showInputDialog(view, "Enter the number of seconds to wait\n"
-									+ "before interrupting TF2 launch.\n" + "Enter 0 to disable timeout.",
+					JOptionPane.showInputDialog(view, String.join(n,
+                        "Enter the number of seconds to wait",
+                        "before interrupting TF2 launch.",
+                        "Enter 0 to disable timeout."),
 							"Launch Timeout", JOptionPane.PLAIN_MESSAGE, null, null,
 							settings.getLaunchTimeout());
 			if (answer != null) {
@@ -1123,7 +1127,10 @@ public class Lawena {
 				// he or she also selects a "hud" in the sidebar
 				if (!verifyCustomHud()) {
 					JOptionPane.showMessageDialog(view,
-							"Please select a custom HUD in the\nCustom Resources table and retry", "Custom HUD",
+                        String.join(n,
+                            "Please select a custom HUD in the",
+                            "Custom Resources table and retry"),
+                        "Custom HUD",
 							JOptionPane.INFORMATION_MESSAGE);
 					log.info("Launch aborted because the custom HUD to use was not specified");
 					return false;
@@ -1392,7 +1399,7 @@ public class Lawena {
 				for (String skybox : data) {
 					setProgress((int) (100 * ((double) i / data.size())));
 					status.fine("Generating skybox preview: " + skybox);
-					String img = "skybox/" + skybox + "up.png";
+					String img = "skybox" + File.separator + skybox + "up.png";
 					if (!Files.exists(Paths.get(img))) {
 						String filename = skybox + "up.vtf";
 						cl.generatePreview(filename);

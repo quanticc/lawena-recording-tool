@@ -4,6 +4,7 @@ import lwrt.CustomPath.PathContents;
 import util.ListFilesVisitor;
 
 import javax.swing.table.AbstractTableModel;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
 
 public class CustomPathList extends AbstractTableModel {
 
-	public static final CustomPath particles = new CustomPath(Paths.get("custom/pldx_particles.vpk"),
+	public static final CustomPath particles = new CustomPath(Paths.get("custom","pldx_particles.vpk"),
 			"Enable enhanced particles", EnumSet.of(PathContents.READONLY));
 	/**
 	 *
@@ -32,18 +33,18 @@ public class CustomPathList extends AbstractTableModel {
 
 	static {
 		List<CustomPath> list = new ArrayList<>();
-		list.add(new CustomPath(Paths.get("custom/default_cfgs.vpk"), "default_cfgs.vpk", EnumSet
+		list.add(new CustomPath(Paths.get("custom","default_cfgs.vpk"), "default_cfgs.vpk", EnumSet
 				.of(PathContents.READONLY)));
-		list.add(new CustomPath(Paths.get("custom/no_announcer_voices.vpk"), "Disable announcer voices"));
-		list.add(new CustomPath(Paths.get("custom/no_applause_sounds.vpk"), "Disable applause sounds"));
-		list.add(new CustomPath(Paths.get("custom/no_domination_sounds.vpk"),
+		list.add(new CustomPath(Paths.get("custom","no_announcer_voices.vpk"), "Disable announcer voices"));
+		list.add(new CustomPath(Paths.get("custom","no_applause_sounds.vpk"), "Disable applause sounds"));
+		list.add(new CustomPath(Paths.get("custom","no_domination_sounds.vpk"),
 				"Disable domination/revenge sounds"));
 		list.add(particles);
 		for (CustomPath path : list) {
 			path.getContents().add(PathContents.DEFAULT);
 			defaultPaths.put(path.getPath(), path);
 		}
-		ignoredPaths.add(Paths.get("custom/skybox.vpk"));
+		ignoredPaths.add(Paths.get("custom","skybox.vpk"));
 	}
 
 	public CustomPathList(SettingsManager cfg, CommandLine cl) {
@@ -186,13 +187,13 @@ public class CustomPathList extends AbstractTableModel {
 			c.retainAll(EnumSet.of(PathContents.DEFAULT));
 			List<String> files = getContentsList(path);
 			for (String file : files) {
-				if (file.startsWith("resource/ui")) {
+				if (file.startsWith("resource" + File.separator + "ui")) {
 					containsResource = true;
-				} else if (file.startsWith("scripts/")) {
+				} else if (file.startsWith("scripts" + File.separator)) {
 					containsScripts = true;
-				} else if (file.startsWith("cfg/") && file.endsWith(".cfg")) {
+				} else if (file.startsWith("cfg" + File.separator) && file.endsWith(".cfg")) {
 					c.add(PathContents.CONFIG);
-				} else if (file.startsWith("materials/skybox/")) {
+				} else if (file.startsWith("materials" + File.separator + "skybox" + File.separator)) {
 					c.add(PathContents.SKYBOX);
 				}
 			}

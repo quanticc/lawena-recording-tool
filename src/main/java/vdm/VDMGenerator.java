@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 class VDMGenerator {
 
 	private static final Logger log = Logger.getLogger("lawena");
+    private static final String n = System.getProperty("line.separator");
 
 	private List<Tick> ticklist;
 	private SettingsManager cfg;
@@ -33,12 +34,12 @@ class VDMGenerator {
 
 	private static String segment(int count, String factory, String name, String... args) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\t\"").append(count).append("\"\n");
-		sb.append("\t{\n");
-		sb.append("\t\tfactory \"").append(factory).append("\"\n");
-		sb.append("\t\tname \"").append(name).append("\"\n");
+		sb.append("\t\"").append(count).append("\"").append(n);
+		sb.append("\t{").append(n);
+		sb.append("\t\tfactory \"").append(factory).append("\"").append(n);
+		sb.append("\t\tname \"").append(name).append("\"").append(n);
 		for (String arg : args) {
-			sb.append("\t\t").append(arg).append("\n");
+			sb.append("\t\t").append(arg).append(n);
 		}
 		sb.append("\t}");
 		return sb.toString();
@@ -83,7 +84,7 @@ class VDMGenerator {
 			String demo = e.getKey();
 			log.finer("Creating VDM file for demo: " + demo);
 			List<String> lines = new ArrayList<>();
-			lines.add("demoactions\n{");
+			lines.add("demoactions" + n + "{");
 			int count = 1;
 			int previousEndTick = 0;
 			for (Tick tick : e.getValue()) {
@@ -134,7 +135,7 @@ class VDMGenerator {
 						scopes.put("DEMO_PATH_NOEXT", cfg.getTfPath().toAbsolutePath().resolve(demoCfgName));
 						scopes.put("BVH_PATH", cfg.getTfPath().toAbsolutePath().resolve(demoCfgName + ".bvh"));
 						scopes.put("LAWENA_PATH", Paths.get("").toAbsolutePath());
-						scopes.put("NEW_LINE", "\n");
+						scopes.put("NEW_LINE", n);
 						Path outputPath = Paths.get("cfg", demoCfgName + "_" + cfgCount + ".cfg");
 						Files.deleteIfExists(outputPath);
 						try (Writer writer = Files.newBufferedWriter(outputPath, Charset.forName("UTF-8"))) {
@@ -169,7 +170,7 @@ class VDMGenerator {
 			Path added =
 					Files.write(
 							cfg.getTfPath()
-									.resolve(Util.stripFilenameExtension(demo.replace("\\", "/")) + ".vdm"), lines,
+									.resolve(Util.stripFilenameExtension(demo) + ".vdm"), lines,
 							Charset.defaultCharset());
 			paths.add(added);
 			log.fine("VDM file written to " + added);
