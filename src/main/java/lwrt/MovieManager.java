@@ -79,8 +79,8 @@ class MovieManager {
 	}
 
 	private boolean shareSameRoot(Path path1, Path path2) {
-		String root1 = path1.toString().replaceFirst("^([A-Z]):.*$", "$1");
-		String root2 = path2.toString().replaceFirst("^([A-Z]):.*$", "$1");
+		String root1 = path1.toString().replaceFirst("^([A-Za-z]):.*$", "$1");
+		String root2 = path2.toString().replaceFirst("^([A-Za-z]):.*$", "$1");
 		return root1.equals(root2);
 	}
 
