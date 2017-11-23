@@ -124,7 +124,8 @@ public class Lawena {
 		// retrieve MoviePath, always ask user
 		Path moviepath = settings.getMoviePath();
 		log.info("Checking for movie path at " + moviepath);
-		if (moviepath == null || moviepath.toString().isEmpty() || !Files.exists(moviepath)) {
+		log.info("moviepath:" + moviepath);
+		if (moviepath == null || moviepath.toString().isEmpty() || (!moviepath.toString().equals("") && !Files.exists(moviepath))) {
 			moviepath = getChosenMoviePath();
 			if (moviepath == null) {
 				log.info("No movie directory specified, exiting.");
@@ -278,7 +279,6 @@ public class Lawena {
 		new StartLogger("status").toLabel(Level.FINE, view.getLblStatus());
 		log.fine("Lawena Recording Tool " + version + " build " + build);
 		log.fine("TF2 path: " + settings.getTfPath());
-		log.fine("Steam path: " + settings.getString(Key.SteamDir));
 		log.fine("Movie path: " + settings.getMoviePath());
 		log.fine("Lawena path: " + Paths.get("").toAbsolutePath());
 
@@ -919,27 +919,6 @@ public class Lawena {
 				selected = null;
 			}
 			log.finer("Selected GamePath: " + selected);
-		}
-		return selected;
-	}
-
-	// TODO: remove
-	private Path getChosenSteamPath() {
-		Path selected = null;
-		int ret = 0;
-		while ((selected == null && ret == 0)
-				|| (selected != null && (!Files.exists(selected.resolve("steam.exe"))))) {
-			chooser = new JFileChooser();
-			chooser.setDialogTitle("Choose your \"Steam\" directory (where steam.exe is)");
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			chooser.setFileHidingEnabled(false);
-			ret = chooser.showOpenDialog(null);
-			if (ret == JFileChooser.APPROVE_OPTION) {
-				selected = chooser.getSelectedFile().toPath();
-			} else {
-				selected = null;
-			}
-			log.finer("Selected SteamPath: " + selected);
 		}
 		return selected;
 	}

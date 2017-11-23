@@ -29,7 +29,20 @@ public class CLOSX extends CommandLine {
 
 	@Override
 	public ProcessBuilder getBuilderStartTF2(String gamePath) {
-		throw new UnsupportedOperationException("Must be launched through Steam");
+        Path path = Paths.get(gamePath, "..", "hl2_osx");
+        Path link = Paths.get(gamePath, "..", "bin");
+        Path start = Paths.get(gamePath, "..");
+        try {
+            path = path.toRealPath();
+            link = link.toRealPath();
+            start = start.toRealPath();
+        } catch (IOException e) {
+            log.warning("Could not obtain real path of game executable: " + e.toString());
+        }
+        ProcessBuilder pb = new ProcessBuilder(path.toString());
+        pb.environment().put("DYLD_LIBRARY_PATH", link.toString());
+        pb.directory(start.toFile());
+        return pb;
 	}
 
 	@Override
@@ -71,7 +84,7 @@ public class CLOSX extends CommandLine {
 
 	@Override
 	public Path getSteamPath() {
-		return Paths.get(File.separator + "Applications" + File.separator);
+		return Paths.get(System.getProperty("user.home"),"Library", "Application Support", "Steam");
 	}
 
 	@Override
@@ -82,7 +95,7 @@ public class CLOSX extends CommandLine {
 		String s = p.toString();
 		return (!s.isEmpty() && Files.isDirectory(p)
 				&& p.getFileName().toString().equalsIgnoreCase("Steam") && Files.exists(p
-				.resolve("Steam.app")));
+				.resolve("Steam.AppBundle")));
 	}
 
 	@Override
