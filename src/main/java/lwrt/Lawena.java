@@ -513,7 +513,7 @@ public class Lawena {
 	}
 
 	private void checkFrameFormatState() {
-		boolean e = view.getCmbSourceVideoFormat().getSelectedIndex() != 0;
+		boolean e = view.getCmbSourceVideoFormat().getSelectedIndex() == 1;
 		view.getLblJpegQuality().setEnabled(e);
 		view.getSpinnerJpegQuality().setEnabled(e);
 	}
