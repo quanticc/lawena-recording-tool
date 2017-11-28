@@ -1,26 +1,39 @@
-package vdm;
+package vdm.Tick;
 
 import java.io.File;
 
-class Tick {
+abstract public class Tick {
 
-	public static final String RECORD_SEGMENT = "record";
-	public static final String EXEC_RECORD_SEGMENT = "exec_record";
-	public static final String NO_TEMPLATE = "N/A";
-	public static final String CAM_IMPORT_TEMPLATE = "mirv_camimport start \"{{BVH_PATH}}\"";
+    public String getSegment() {
+        return segment;
+    }
 
+    private final String segment;
+
+    private final String tickTemplate;
 	private final String demoname;
 	private final File demoFile;
 	private int start;
 	private int end;
-	private String type;
-	private String template;
+    boolean valid;
+    String reason;
 
-	public Tick(File demoFile, String demoname, int start, int end) {
+    public boolean isValid() {
+        return valid;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+	public Tick(File demoFile, String demoname, int start, int end, String segment, String tickTemplate) {
 		this.demoFile = demoFile;
 		this.demoname = demoname;
 		this.start = start;
 		this.end = end;
+		this.segment = segment;
+		this.tickTemplate = tickTemplate;
+		this.valid = true;
 	}
 
 	public File getDemoFile() {
@@ -35,32 +48,12 @@ class Tick {
 		return start;
 	}
 
-	public void setStart(int start) {
-		this.start = start;
-	}
-
 	public int getEnd() {
 		return end;
 	}
 
-	public void setEnd(int end) {
-		this.end = end;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
 	public String getTemplate() {
-		return template;
-	}
-
-	public void setTemplate(String template) {
-		this.template = template;
+		return tickTemplate;
 	}
 
 	@Override
@@ -75,7 +68,7 @@ class Tick {
 		result = prime * result + ((demoname == null) ? 0 : demoname.hashCode());
 		result = prime * result + end;
 		result = prime * result + start;
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((segment == null) ? 0 : segment.hashCode());
 		return result;
 	}
 
@@ -104,14 +97,13 @@ class Tick {
 		if (start != other.start) {
 			return false;
 		}
-		if (type == null) {
-			if (other.type != null) {
+		if (segment == null) {
+			if (other.segment != null) {
 				return false;
 			}
-		} else if (!type.equals(other.type)) {
+		} else if (!segment.equals(other.segment)) {
 			return false;
 		}
 		return true;
 	}
-
 }

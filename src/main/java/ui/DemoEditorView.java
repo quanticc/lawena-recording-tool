@@ -1,6 +1,9 @@
 package ui;
 
 import vdm.SkipMode;
+import vdm.Tick.Exec;
+import vdm.Tick.ExecRecord;
+import vdm.Tick.Record;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,6 +35,7 @@ public class DemoEditorView extends JPanel {
 	private JTextArea txtrDemodetails;
 	private JCheckBox chckbxSrcDemoFix;
 	private JButton btnAddExecRecord;
+	private JButton btnAddExec;
 	private JLabel lblSkipMode;
 	private JComboBox<SkipMode> cmbSkipMode;
 
@@ -140,11 +144,14 @@ public class DemoEditorView extends JPanel {
 		gbc_panelButtonsRight.gridy = 3;
 		add(panelButtonsRight, gbc_panelButtonsRight);
 
-		btnAdd = new JButton("Add Record");
+		btnAdd = new JButton(Record.Text);
 		panelButtonsRight.add(btnAdd);
 
-		btnAddExecRecord = new JButton("Add Exec + Record");
+		btnAddExecRecord = new JButton(ExecRecord.Text);
 		panelButtonsRight.add(btnAddExecRecord);
+
+		btnAddExec = new JButton(Exec.Text);
+		panelButtonsRight.add(btnAddExec);
 
 		btnDeleteSelectedTick = new JButton("Delete Selected");
 		panelButtonsRight.add(btnDeleteSelectedTick);
@@ -243,6 +250,10 @@ public class DemoEditorView extends JPanel {
 
 	public JButton getBtnAddExecRecord() {
 		return btnAddExecRecord;
+	}
+
+	public JButton getBtnAddExec() {
+		return btnAddExec;
 	}
 
 }

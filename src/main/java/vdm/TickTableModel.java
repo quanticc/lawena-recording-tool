@@ -1,6 +1,11 @@
 package vdm;
 
+import vdm.Tick.Tick;
+import vdm.Tick.TickFactory;
+
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -10,8 +15,14 @@ public class TickTableModel extends AbstractTableModel {
 	private static final Logger log = Logger.getLogger("lawena");
 	private static final long serialVersionUID = 1L;
 	private List<Tick> list = new ArrayList<>();
+	private final Component parent;
 
-	@Override
+    public TickTableModel(Component parent) {
+        this.list = list;
+        this.parent = parent;
+    }
+
+    @Override
 	public int getRowCount() {
 		return list.size();
 	}
@@ -33,7 +44,7 @@ public class TickTableModel extends AbstractTableModel {
 			case END:
 				return tick.getEnd();
 			case TYPE:
-				return tick.getType();
+				return tick.getSegment();
 			case TEMPLATE:
 				return tick.getTemplate();
 			default:
@@ -48,7 +59,14 @@ public class TickTableModel extends AbstractTableModel {
 		switch (c) {
 			case START:
 				try {
-					tick.setStart(Integer.parseInt(aValue.toString()));
+				    list.set(rowIndex,
+                        TickFactory.makeTick(
+                            tick.getDemoFile(),
+                            tick.getDemoname(),
+                            Integer.parseInt(aValue.toString()),
+                            tick.getEnd(),
+                            tick.getSegment(),
+                            tick.getTemplate()));
 					fireTableCellUpdated(rowIndex, columnIndex);
 				} catch (NumberFormatException e) {
 					log.fine("Cannot set start tick, bad numeric format in: " + aValue);
@@ -56,21 +74,45 @@ public class TickTableModel extends AbstractTableModel {
 				break;
 			case END:
 				try {
-					tick.setEnd(Integer.parseInt(aValue.toString()));
+                    list.set(rowIndex,
+                        TickFactory.makeTick(
+                            tick.getDemoFile(),
+                            tick.getDemoname(),
+                            tick.getStart(),
+                            Integer.parseInt(aValue.toString()),
+                            tick.getSegment(),
+                            tick.getTemplate()));
 					fireTableCellUpdated(rowIndex, columnIndex);
 				} catch (NumberFormatException e) {
 					log.fine("Cannot set end tick, bad numeric format in: " + aValue);
 				}
 				break;
 			case TYPE:
-				tick.setType((String) aValue);
-				if (!tick.getType().equals(Tick.EXEC_RECORD_SEGMENT)) {
-					tick.setTemplate(Tick.NO_TEMPLATE);
-				}
-				fireTableRowsUpdated(rowIndex, rowIndex);
+			    Tick newTick = TickFactory.makeTick(
+                    tick.getDemoFile(),
+                    tick.getDemoname(),
+                    tick.getStart(),
+                    tick.getEnd(),
+                    (String) aValue,
+                    tick.getTemplate());
+                list.set(rowIndex, newTick);
+                fireTableRowsUpdated(rowIndex, rowIndex);
+                if (!newTick.isValid()) {
+                    log.fine(String.format("Error row %d column %d: %s", rowIndex + 1, columnIndex + 1, newTick.getReason()));
+                    JOptionPane.showMessageDialog(parent,
+                        newTick.getReason(), "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                }
 				break;
 			case TEMPLATE:
-				tick.setTemplate((String) aValue);
+                list.set(rowIndex,
+                    TickFactory.makeTick(
+                        tick.getDemoFile(),
+                        tick.getDemoname(),
+                        tick.getStart(),
+                        tick.getEnd(),
+                        tick.getSegment(),
+                        (String) aValue));
 				fireTableCellUpdated(rowIndex, columnIndex);
 				break;
 			default:
@@ -83,7 +125,7 @@ public class TickTableModel extends AbstractTableModel {
 		if (columnIndex == Column.TEMPLATE.ordinal()) {
 			if (rowIndex >= 0 && rowIndex < list.size()) {
 				Tick tick = list.get(rowIndex);
-				return tick.getType().equals(Tick.EXEC_RECORD_SEGMENT);
+				return tick.getSegment().startsWith("exec");
 			}
 		}
 		return columnIndex != Column.DEMO.ordinal();
