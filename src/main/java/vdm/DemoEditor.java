@@ -5,6 +5,7 @@ import lwrt.SettingsManager;
 import lwrt.SettingsManager.Key;
 import ui.DemoEditorView;
 import util.DemoPreview;
+import vdm.Tick.*;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -41,8 +42,6 @@ public class DemoEditor {
 		choosedemo.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		choosedemo.setFileFilter(new FileNameExtensionFilter("Demo files", "DEM"));
 		choosedemo.setCurrentDirectory(settings.getTfPath().toFile());
-
-		model = new TickTableModel();
 	}
 
 	private void updateDemoDetails() {
@@ -69,6 +68,7 @@ public class DemoEditor {
 
 	public Component start() {
 		view = new DemoEditorView();
+        model = new TickTableModel(view);
 
 		view.getTableTicks().setModel(model);
 		view.getTableTicks().setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -78,21 +78,25 @@ public class DemoEditor {
 				view.getTableTicks().getColumnModel().getColumn(TickTableModel.Column.TYPE.ordinal());
 		JComboBox<String> segmentTypes = new JComboBox<>();
 		segmentTypes.setEditable(false);
-		segmentTypes.addItem(Tick.RECORD_SEGMENT);
-		segmentTypes.addItem(Tick.EXEC_RECORD_SEGMENT);
+		segmentTypes.addItem(Record.Segment);
+		segmentTypes.addItem(ExecRecord.Segment);
+		segmentTypes.addItem(Exec.Segment);
 		typeColumn.setCellEditor(new DefaultCellEditor(segmentTypes));
 
 		TableColumn templateColumn =
 				view.getTableTicks().getColumnModel().getColumn(TickTableModel.Column.TEMPLATE.ordinal());
 		JComboBox<String> templateTypes = new JComboBox<>();
 		templateTypes.setEditable(true);
-		templateTypes.addItem(Tick.NO_TEMPLATE);
-		templateTypes.addItem(Tick.CAM_IMPORT_TEMPLATE);
+		templateTypes.addItem(ExecRecord.Template);
+		templateTypes.addItem(Exec.Template);
+		templateTypes.addItem(Exec.QuitTemplate);
 		templateColumn.setCellEditor(new DefaultCellEditor(templateTypes));
 
-		view.getBtnAdd().addActionListener(new VdmAddTick(Tick.RECORD_SEGMENT, Tick.NO_TEMPLATE));
+		view.getBtnAdd().addActionListener(new VdmAddTick(Record.Segment));
 		view.getBtnAddExecRecord().addActionListener(
-				new VdmAddTick(Tick.EXEC_RECORD_SEGMENT, Tick.CAM_IMPORT_TEMPLATE));
+				new VdmAddTick(ExecRecord.Segment));
+		view.getBtnAddExec().addActionListener(
+		    new VdmAddTick(Exec.Segment));
 		view.getBtnBrowse().addActionListener(new VdmBrowseDemo());
 		view.getBtnClearTickList().addActionListener(new VdmClearTicks());
 		view.getBtnCreateVdmFiles().addActionListener(new VdmCreateFile());
@@ -109,6 +113,9 @@ public class DemoEditor {
 			}
 		});
 		view.getBtnDeleteSelectedTick().addActionListener(e -> {
+		    if (view.getTableTicks().isEditing()) {
+                view.getTableTicks().getCellEditor().stopCellEditing();
+            }
 			int numRows = view.getTableTicks().getSelectedRowCount();
 			for (int i = 0; i < numRows; i++) {
 				model.removeTick(view.getTableTicks().getSelectedRow());
@@ -131,12 +138,10 @@ public class DemoEditor {
 
 	public class VdmAddTick implements ActionListener {
 
-		private final String type;
-		private final String template;
+	    private final String segment;
 
-		public VdmAddTick(String type, String template) {
-			this.type = type;
-			this.template = template;
+		public VdmAddTick(String segment) {
+		    this.segment = segment;
 		}
 
 		@Override
@@ -149,18 +154,18 @@ public class DemoEditor {
 			}
 
 			try {
-				int tick1 = Integer.parseInt(view.getTxtStarttick().getText());
-				int tick2 = Integer.parseInt(view.getTxtEndtick().getText());
-				if (tick1 >= tick2) {
-					throw new NumberFormatException();
-				}
-				Tick segment =
-						new Tick(currentDemoFile, settings.getTfPath().relativize(currentDemoFile.toPath())
-								.toString(), tick1, tick2);
-				segment.setType(type);
-				segment.setTemplate(template);
-				model.addTick(segment);
-				log.info("Adding segment: " + segment);
+                int tick1 = Integer.parseInt(view.getTxtStarttick().getText());
+                int tick2 = Integer.parseInt(view.getTxtEndtick().getText());
+                Tick segment = TickFactory.makeTick(currentDemoFile, settings.getTfPath().relativize(currentDemoFile.toPath())
+                    .toString(), tick1, tick2, this.segment);
+                if(segment.isValid()) {
+                    model.addTick(segment);
+                    log.info("Adding segment: " + segment);
+                } else {
+                    JOptionPane.showMessageDialog(view,
+                        segment.getReason(), "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                }
 			} catch (NumberFormatException ex) {
 				JOptionPane.showMessageDialog(view,
 						"Please fill the required tick fields with valid numbers", "Error",
@@ -194,6 +199,9 @@ public class DemoEditor {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+		    if (view.getTableTicks().isEditing()) {
+                view.getTableTicks().getCellEditor().stopCellEditing();
+            }
 			model.clear();
 		}
 
@@ -204,24 +212,34 @@ public class DemoEditor {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (model.getRowCount() > 0) {
-				vdmgenerator = new VDMGenerator(model.getTickList(), settings);
-				try {
-					final List<Path> paths = vdmgenerator.generate();
-					status.info("Created " + paths.size() + (paths.size() == 1 ? " new file" : " new files"));
-					new SwingWorker<Void, Void>() {
-						@Override
-						protected Void doInBackground() throws Exception {
-							// open each parent of the generated files, removing duplicates
-							paths.stream().map(p -> p.toAbsolutePath().getParent()).filter(p -> p != null)
-									.distinct().forEach(p -> cl.open(p));
-							return null;
-						}
-					}.execute();
+			    List <Tick> tl = model.getTickList();
+                for(int i = 0; i < tl.size(); i++) {
+                    Tick t = tl.get(i);
+                    if (!t.isValid()) {
+                        JOptionPane.showMessageDialog(view,
+                            "Please correct invalid tick in row " + (i + 1) + ". (" + t.getReason() + ")", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+                vdmgenerator = new VDMGenerator(tl, settings);
+                try {
+                    final List<Path> paths = vdmgenerator.generate();
+                    status.info("Created " + paths.size() + (paths.size() == 1 ? " new file" : " new files"));
+                    new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            // open each parent of the generated files, removing duplicates
+                            paths.stream().map(p -> p.toAbsolutePath().getParent()).filter(p -> p != null)
+                                .distinct().forEach(p -> cl.open(p));
+                            return null;
+                        }
+                    }.execute();
 
-				} catch (IOException e1) {
-					log.warning("A problem occurred while generating the VDM: " + e1);
-					status.info("Problem occurred while generating the VDM files");
-				}
+                } catch (IOException e1) {
+                    log.warning("A problem occurred while generating the VDM: " + e1);
+                    status.info("Problem occurred while generating the VDM files");
+                }
 			}
 		}
 	}

@@ -6,6 +6,7 @@ import com.github.mustachejava.MustacheFactory;
 import lwrt.SettingsManager;
 import lwrt.SettingsManager.Key;
 import util.Util;
+import vdm.Tick.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -99,11 +100,11 @@ class VDMGenerator {
 							+ "\"", "skiptotick \"" + safeStart + "\""));
 				}
 				String command = "startrecording";
-				if (tick.getType().equals(Tick.EXEC_RECORD_SEGMENT)) {
+				if (tick.getSegment().startsWith("exec")) {
 					String demoCfgName = Util.stripFilenameExtension(tick.getDemoFile().getName());
-					if (tick.getTemplate().equals(Tick.NO_TEMPLATE) || tick.getTemplate().isEmpty()) {
+					if (tick.getTemplate().equals(Record.Template) || tick.getTemplate().isEmpty()) {
 						// Assumes a default pre-created CFG file with the name of the demo located in TF dir
-						log.warning("Template for tick " + tick.toString() + " does not have a template!");
+						log.warning("Template for tick " + tick.toString() + " does not have a Template!");
 					} else {
 						/*
 						 * Config files auto-generated will be placed in the TF dir. Templates will be resolved
@@ -148,12 +149,17 @@ class VDMGenerator {
 							log.log(Level.WARNING, "Could not generate template", ex);
 						}
 					}
-					command = "exec " + demoCfgName + "_" + (cfgCount++) + "; startrecording";
+					command = ((AbstractExec)tick).getCommand(cfgCount++);
 				}
-				lines.add(segment(count++, "PlayCommands", "startrec", "starttick \"" + tick.getStart()
-						+ "\"", "commands \"" + command + "\""));
-				lines.add(segment(count++, "PlayCommands", "stoprec",
-						"starttick \"" + tick.getEnd() + "\"", "commands \"stoprecording\""));
+				if (tick.getSegment().equals(Exec.Segment)){
+                    lines.add(segment(count++, "PlayCommands", tick.getSegment(), "starttick \"" + tick.getStart()
+                        + "\"", "commands \"" + command + "\""));
+                } else {
+                    lines.add(segment(count++, "PlayCommands", "startrec", "starttick \"" + tick.getStart()
+                        + "\"", "commands \"" + command + "\""));
+                    lines.add(segment(count++, "PlayCommands", "stoprec",
+                        "starttick \"" + tick.getEnd() + "\"", "commands \"stoprecording\""));
+                }
 				previousEndTick = tick.getEnd();
 			}
 			String nextdemo = peeknext.get(demo);
