@@ -11,7 +11,7 @@ abstract public class Tick {
     private final String segment;
 
     private final String tickTemplate;
-	private final String demoname;
+	private final String demoName;
 	private final File demoFile;
 	private int start;
 	private int end;
@@ -26,9 +26,9 @@ abstract public class Tick {
         return reason;
     }
 
-	public Tick(File demoFile, String demoname, int start, int end, String segment, String tickTemplate) {
+	public Tick(File demoFile, String demoName, int start, int end, String segment, String tickTemplate) {
 		this.demoFile = demoFile;
-		this.demoname = demoname;
+		this.demoName = demoName;
 		this.start = start;
 		this.end = end;
 		this.segment = segment;
@@ -40,8 +40,8 @@ abstract public class Tick {
 		return demoFile;
 	}
 
-	public String getDemoname() {
-		return demoname;
+	public String getDemoName() {
+		return demoName;
 	}
 
 	public int getStart() {
@@ -58,14 +58,14 @@ abstract public class Tick {
 
 	@Override
 	public String toString() {
-		return demoname + ": " + start + "-" + end;
+		return demoName + ": " + start + "-" + end;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((demoname == null) ? 0 : demoname.hashCode());
+		result = prime * result + ((demoName == null) ? 0 : demoName.hashCode());
 		result = prime * result + end;
 		result = prime * result + start;
 		result = prime * result + ((segment == null) ? 0 : segment.hashCode());
@@ -84,11 +84,11 @@ abstract public class Tick {
 			return false;
 		}
 		Tick other = (Tick) obj;
-		if (demoname == null) {
-			if (other.demoname != null) {
+		if (demoName == null) {
+			if (other.demoName != null) {
 				return false;
 			}
-		} else if (!demoname.equals(other.demoname)) {
+		} else if (!demoName.equals(other.demoName)) {
 			return false;
 		}
 		if (end != other.end) {

@@ -9,84 +9,91 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DemoPreview extends RandomAccessFile {
+public class DemoPreview {
 
 	private static final Logger log = Logger.getLogger("lawena");
     private static final String n = System.getProperty("line.separator");
 
-	private final static int maxStringLength = 260;
+	public final static int maxStringLength = 260;
 
 	private int demoProtocol;
 	private int networkProtocol;
 	private String demoStamp;
-	private String playerName;
+
+    public int getDemoProtocol() {
+        return demoProtocol;
+    }
+
+    public int getNetworkProtocol() {
+        return networkProtocol;
+    }
+
+    public String getDemoStamp() {
+        return demoStamp;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public String getGameDirectory() {
+        return gameDirectory;
+    }
+
+    public double getPlaybackTime() {
+        return playbackTime;
+    }
+
+    public int getTickNumber() {
+        return tickNumber;
+    }
+
+    public int getFrames() {
+        return frames;
+    }
+
+    public int getSignOnLength() {
+        return signOnLength;
+    }
+
+    public int getTickRate() {
+        return tickRate;
+    }
+
+    private String playerName;
 	private String mapName;
 	private String serverName;
 	private String gameDirectory;
 	private double playbackTime;
 	private int tickNumber;
+	private int frames;
+	private int signOnLength;
+	private int tickRate;
 
-	private DemoPreview(String demoName) throws FileNotFoundException {
-		super(demoName, "r");
-		try {
-			demoStamp = readString(8);
-			demoProtocol = readIntBackwards();
-			networkProtocol = readIntBackwards();
-			serverName = readString(maxStringLength);
-			playerName = readString(maxStringLength);
-			mapName = readString(maxStringLength);
-			gameDirectory = readString(maxStringLength);
-			playbackTime = readFloatBackwards();
-			tickNumber = readIntBackwards();
-		} catch (Exception e) {
-			log.log(Level.FINE, "Could not retrieve demo details", e);
-		}
-	}
+	public DemoPreview(String demoStamp, int demoProtocol, int networkProtocol, String serverName, String playerName,
+                        String mapName, String gameDirectory, float playbackTime, int tickNumber, int frames,
+                        int signOnLength) {
 
-	public DemoPreview(Path demopath) throws FileNotFoundException {
-		this(demopath.toString());
-	}
-
-	private String readString(int length) {
-		byte[] aux = new byte[length];
-		try {
-			read(aux);
-			String result = new String(aux, Charset.forName("UTF-8"));
-			return result.substring(0, result.indexOf(0));
-		} catch (IOException e) {
-			log.warning("Error while reading demo info: " + e);
-		}
-		return null;
-	}
-
-	private float readFloatBackwards() {
-		byte[] aux = new byte[4];
-		try {
-			read(aux);
-			int value = 0;
-			for (int i = 0; i < aux.length; i++) {
-				value += (aux[i] & 0xff) << (8 * i);
-			}
-			return Float.intBitsToFloat(value);
-		} catch (IOException e) {
-			log.warning("Error while reading demo info: " + e);
-		}
-		return 0;
-	}
-
-	private int readIntBackwards() {
-		byte[] aux = new byte[4];
-		try {
-			read(aux);
-			int value = 0;
-			for (int i = 0; i < aux.length; i++) {
-				value += (aux[i] & 0xff) << (8 * i);
-			}
-			return value;
-		} catch (IOException e) {
-			log.warning("Error while reading demo info: " + e);
-		}
-		return 0;
+        this.demoStamp = demoStamp;
+        this.demoProtocol = demoProtocol;
+        this.networkProtocol = networkProtocol;
+        this.serverName = serverName;
+        this.playerName = playerName;
+        this.mapName = mapName;
+        this.gameDirectory = gameDirectory;
+        this.playbackTime = playbackTime;
+        this.tickNumber = tickNumber;
+        this.frames = frames;
+        this.signOnLength = signOnLength;
+        this.tickRate = Math.round(tickNumber / Math.round(playbackTime));
 	}
 
 	private String formatSeconds(double seconds) {
@@ -107,7 +114,10 @@ public class DemoPreview extends RandomAccessFile {
             "Server: " + serverName,
             "Player: " + playerName,
             "Map: " + mapName,
-            "Ticks: " + tickNumber);
+            "Ticks: " + tickNumber,
+            "Frames: " + frames,
+            "SignOnLength: " + signOnLength,
+            "TickRate: " + tickRate);
 	}
 
 }

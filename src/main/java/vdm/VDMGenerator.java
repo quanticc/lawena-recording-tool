@@ -53,19 +53,19 @@ class VDMGenerator {
 		String previous = null;
 		for (Tick tick : ticklist) {
 			List<Tick> ticks;
-			if (!demomap.containsKey(tick.getDemoname())) {
+			if (!demomap.containsKey(tick.getDemoName())) {
 				ticks = new ArrayList<>();
-				demomap.put(tick.getDemoname(), ticks);
+				demomap.put(tick.getDemoName(), ticks);
 			} else {
-				ticks = demomap.get(tick.getDemoname());
+				ticks = demomap.get(tick.getDemoName());
 			}
 			ticks.add(tick);
 			if (previous != null) {
-				if (!peeknext.containsKey(previous) && !previous.equals(tick.getDemoname())) {
-					peeknext.put(previous, tick.getDemoname());
+				if (!peeknext.containsKey(previous) && !previous.equals(tick.getDemoName())) {
+					peeknext.put(previous, tick.getDemoName());
 				}
 			}
-			previous = tick.getDemoname();
+			previous = tick.getDemoName();
 		}
 
 		int cfgCount = 1;
