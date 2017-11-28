@@ -5,6 +5,7 @@ import lwrt.SettingsManager;
 import lwrt.SettingsManager.Key;
 import ui.DemoEditorView;
 import util.DemoPreview;
+import util.DemoPreviewFactory;
 import vdm.Tick.*;
 
 import javax.swing.*;
@@ -34,6 +35,7 @@ public class DemoEditor {
 	private CommandLine cl;
 	private VDMGenerator vdmgenerator;
 	private File currentDemoFile;
+	private DemoPreview demoPreview;
 
 	public DemoEditor(SettingsManager settings, CommandLine cl) {
 		this.settings = settings;
@@ -49,9 +51,8 @@ public class DemoEditor {
 
 			@Override
 			protected String doInBackground() throws Exception {
-				try (DemoPreview dp = new DemoPreview(currentDemoFile.toPath())) {
-					return dp.toString();
-				}
+                demoPreview = DemoPreviewFactory.getDemoPreview(currentDemoFile.toPath());
+				return demoPreview.toString();
 			}
 
 			@Override

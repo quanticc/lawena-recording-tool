@@ -38,7 +38,7 @@ public class TickTableModel extends AbstractTableModel {
 		Column c = Column.values()[columnIndex];
 		switch (c) {
 			case DEMO:
-				return tick.getDemoname();
+				return tick.getDemoName();
 			case START:
 				return tick.getStart();
 			case END:
@@ -62,7 +62,7 @@ public class TickTableModel extends AbstractTableModel {
 				    list.set(rowIndex,
                         TickFactory.makeTick(
                             tick.getDemoFile(),
-                            tick.getDemoname(),
+                            tick.getDemoName(),
                             Integer.parseInt(aValue.toString()),
                             tick.getEnd(),
                             tick.getSegment(),
@@ -77,7 +77,7 @@ public class TickTableModel extends AbstractTableModel {
                     list.set(rowIndex,
                         TickFactory.makeTick(
                             tick.getDemoFile(),
-                            tick.getDemoname(),
+                            tick.getDemoName(),
                             tick.getStart(),
                             Integer.parseInt(aValue.toString()),
                             tick.getSegment(),
@@ -90,7 +90,7 @@ public class TickTableModel extends AbstractTableModel {
 			case TYPE:
 			    Tick newTick = TickFactory.makeTick(
                     tick.getDemoFile(),
-                    tick.getDemoname(),
+                    tick.getDemoName(),
                     tick.getStart(),
                     tick.getEnd(),
                     (String) aValue,
@@ -108,7 +108,7 @@ public class TickTableModel extends AbstractTableModel {
                 list.set(rowIndex,
                     TickFactory.makeTick(
                         tick.getDemoFile(),
-                        tick.getDemoname(),
+                        tick.getDemoName(),
                         tick.getStart(),
                         tick.getEnd(),
                         tick.getSegment(),
