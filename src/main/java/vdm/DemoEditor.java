@@ -160,8 +160,8 @@ public class DemoEditor {
                     tick1 = 3;
                 }
                 int tick2 = Integer.parseInt(view.getTxtEndtick().getText());
-                if(tick2 > demoPreview.getTickNumber()) {
-                    tick2 = demoPreview.getTickNumber();
+                if(tick2 >= demoPreview.getTickNumber()) {
+                    tick2 = demoPreview.getTickNumber() - 1;
                 }
                 Tick segment = TickFactory.makeTick(currentDemoFile, settings.getTfPath().relativize(currentDemoFile.toPath())
                     .toString(), tick1, tick2, this.segment);
