@@ -12,5 +12,5 @@ public class Record extends Tick {
         if (start >= end) {
             throw new NumberFormatException(String.format("end tick (%d) must be greater than start tick (%d)", end, start));
         }
-	}
+    }
 }

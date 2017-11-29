@@ -22,10 +22,10 @@ public class SegmentsDialog extends JDialog {
         setTitle("Select Segments to Delete");
         setModalityType(ModalityType.APPLICATION_MODAL);
         setBounds(100, 100, 450, 300);
-	    URL url = getClass().getClassLoader().getResource("ui/tf2.png");
-	    if (url != null) {
-		    setIconImage(new ImageIcon(url).getImage());
-	    }
+        URL url = getClass().getClassLoader().getResource("ui/tf2.png");
+        if (url != null) {
+            setIconImage(new ImageIcon(url).getImage());
+        }
         BorderLayout borderLayout = new BorderLayout();
         getContentPane().setLayout(borderLayout);
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));

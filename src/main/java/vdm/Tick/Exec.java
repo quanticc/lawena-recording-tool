@@ -8,11 +8,11 @@ public class Exec extends AbstractExec {
     public static final String Template = "exec spec_player";
     public static final String QuitTemplate = "exec quit";
 
-	public Exec(File demoFile, String demoname, int start, String template) {
-		super(demoFile, demoname, start, start, Segment, template);
-	}
+    public Exec(File demoFile, String demoname, int start, String template) {
+        super(demoFile, demoname, start, start, Segment, template);
+    }
 
-	public String getCommand(int count) {
+    public String getCommand(int count) {
         return getTemplate();
     }
 }
