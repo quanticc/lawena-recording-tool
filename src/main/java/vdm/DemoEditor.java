@@ -20,6 +20,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -159,9 +160,13 @@ public class DemoEditor {
                 if(tick1 < 3) {
                     tick1 = 3;
                 }
-                int tick2 = Integer.parseInt(view.getTxtEndtick().getText());
-                if(tick2 >= demoPreview.getTickNumber()) {
-                    tick2 = demoPreview.getTickNumber() - 1;
+                int tick2 = tick1;
+                // exec segments don't need end tick
+                if (!Exec.Segment.equals(segment)) {
+                    tick2 = Integer.parseInt(view.getTxtEndtick().getText());
+                    if (tick2 >= demoPreview.getTickNumber()) {
+                        tick2 = demoPreview.getTickNumber() - 1;
+                    }
                 }
                 Tick segment = TickFactory.makeTick(currentDemoFile, settings.getTfPath().relativize(currentDemoFile.toPath())
                     .toString(), tick1, tick2, this.segment);

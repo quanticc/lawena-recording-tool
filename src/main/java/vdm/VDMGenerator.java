@@ -51,17 +51,13 @@ class VDMGenerator {
 
 	public List<Path> generate() throws IOException {
 		List<Path> paths = new ArrayList<>();
-		Map<String, List<Tick>> demomap = new LinkedHashMap<>();
+		Map<String, Set<Tick>> demomap = new LinkedHashMap<>();
 		Map<String, String> peeknext = new LinkedHashMap<>();
 		String previous = null;
 		for (Tick tick : ticklist) {
-			List<Tick> ticks;
-			if (!demomap.containsKey(tick.getDemoName())) {
-				ticks = new ArrayList<>();
-				demomap.put(tick.getDemoName(), ticks);
-			} else {
-				ticks = demomap.get(tick.getDemoName());
-			}
+			Set<Tick> ticks = demomap.computeIfAbsent(tick.getDemoName(),
+					k -> new TreeSet<>(Comparator.comparing(Tick::getDemoName)
+							.thenComparingInt(Tick::getStart)));
 			ticks.add(tick);
 			if (previous != null) {
 				if (!peeknext.containsKey(previous) && !previous.equals(tick.getDemoName())) {
@@ -84,7 +80,7 @@ class VDMGenerator {
 			log.warning("Invalid value detected for skip mode: " + rawSkipMode);
 		}
 
-		for (Entry<String, List<Tick>> e : demomap.entrySet()) {
+		for (Entry<String, Set<Tick>> e : demomap.entrySet()) {
 			String demo = e.getKey();
 			log.finer("Creating VDM file for demo: " + demo);
 			List<String> lines = new ArrayList<>();
