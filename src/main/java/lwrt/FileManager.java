@@ -306,16 +306,7 @@ class FileManager {
                 log.info("Could not delete lawena custom files: " + e);
             }
             try {
-                if (isEmpty(customPath)) {
-                    if (isSymbolicLink(customBackupPath)) {
-                        Files.deleteIfExists(customPath);
-                        Files.move(customBackupPath, customPath);
-                    } else {
-                        copy(customBackupPath, customPath);
-                    }
-                } else {
-                    restoreComplete = false;
-                }
+                restoreComplete = isRestoreComplete(customBackupPath, customPath, true);
             } catch (IOException e) {
                 log.info("Could not restore custom files: " + e);
                 restoreComplete = false;
@@ -333,16 +324,7 @@ class FileManager {
                 log.info("Could not delete lawena cfg folder: " + e);
             }
             try {
-                if (isEmpty(configPath)) {
-                    if (isSymbolicLink(configBackupPath)) {
-                        Files.deleteIfExists(configPath);
-                        Files.move(configBackupPath, configPath);
-                    } else {
-                        copy(configBackupPath, configPath);
-                    }
-                } else {
-                    restoreComplete = false;
-                }
+                restoreComplete = isRestoreComplete(configBackupPath, configPath, restoreComplete);
             } catch (IOException e) {
                 log.info("Could not restore cfg files: " + e);
                 restoreComplete = false;
@@ -434,6 +416,20 @@ class FileManager {
         return restoreComplete;
     }
 
+    private boolean isRestoreComplete(Path backupPath, Path targetPath, boolean restoreComplete) throws IOException {
+        if (isEmpty(targetPath)) {
+            if (isSymbolicLink(backupPath)) {
+                Files.deleteIfExists(targetPath);
+                Files.move(backupPath, targetPath);
+            } else {
+                copy(backupPath, targetPath);
+            }
+        } else {
+            restoreComplete = false;
+        }
+        return restoreComplete;
+    }
+
     private boolean isSymbolicLink(Path path) {
         String osname = System.getProperty("os.name");
         if (osname.contains("Windows")) {
@@ -453,16 +449,12 @@ class FileManager {
     public boolean copyToCustom(final Path path) {
         Path localCustomPath = Paths.get("custom");
         try {
-            copy(path, localCustomPath.resolve(path.getFileName()), new Filter<Path>() {
-
-                @Override
-                public boolean accept(Path entry) throws IOException {
-                    if (entry.getParent().equals(path)) {
-                        String f = entry.getFileName().toString();
-                        return f.matches("^(resource|scripts|cfg|materials|addons|sound|particles)$");
-                    } else {
-                        return true;
-                    }
+            copy(path, localCustomPath.resolve(path.getFileName()), entry -> {
+                if (entry.getParent().equals(path)) {
+                    String f = entry.getFileName().toString();
+                    return f.matches("^(resource|scripts|cfg|materials|addons|sound|particles)$");
+                } else {
+                    return true;
                 }
             });
             return true;

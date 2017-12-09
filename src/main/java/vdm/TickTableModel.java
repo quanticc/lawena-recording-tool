@@ -18,7 +18,6 @@ public class TickTableModel extends AbstractTableModel {
     private final Component parent;
 
     public TickTableModel(Component parent) {
-        this.list = list;
         this.parent = parent;
     }
 

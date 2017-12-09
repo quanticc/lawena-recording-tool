@@ -20,6 +20,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +34,6 @@ public class DemoEditor {
     private TickTableModel model;
     private SettingsManager settings;
     private CommandLine cl;
-    private VDMGenerator vdmgenerator;
     private File currentDemoFile;
     private DemoPreview demoPreview;
 
@@ -233,15 +233,15 @@ public class DemoEditor {
                         return;
                     }
                 }
-                vdmgenerator = new VDMGenerator(tl, settings);
+                VDMGenerator vdmgenerator = new VDMGenerator(tl, settings);
                 try {
                     final List<Path> paths = vdmgenerator.generate();
                     status.info("Created " + paths.size() + (paths.size() == 1 ? " new file" : " new files"));
                     new SwingWorker<Void, Void>() {
                         @Override
-                        protected Void doInBackground() throws Exception {
+                        protected Void doInBackground() {
                             // open each parent of the generated files, removing duplicates
-                            paths.stream().map(p -> p.toAbsolutePath().getParent()).filter(p -> p != null)
+                            paths.stream().map(p -> p.toAbsolutePath().getParent()).filter(Objects::nonNull)
                                 .distinct().forEach(p -> cl.open(p));
                             return null;
                         }

@@ -11,10 +11,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,8 +21,6 @@ import java.util.logging.Logger;
 /**
  * This class lets you access to all values and actions that are OS-dependent, aiming to simplify the porting of some
  * features to all systems where TF2 can run (Windows, Linux and OSX)
- *
- * @author Ivan
  */
 public abstract class CommandLine {
 
@@ -33,6 +30,20 @@ public abstract class CommandLine {
      * enabled.
      */
     static final Logger log = Logger.getLogger("lawena");
+
+    static Set<PosixFilePermission> ALL_PERMISSIONS = new HashSet<>();
+
+    static {
+        ALL_PERMISSIONS.add(PosixFilePermission.OWNER_READ);
+        ALL_PERMISSIONS.add(PosixFilePermission.OWNER_WRITE);
+        ALL_PERMISSIONS.add(PosixFilePermission.OWNER_EXECUTE);
+        ALL_PERMISSIONS.add(PosixFilePermission.GROUP_READ);
+        ALL_PERMISSIONS.add(PosixFilePermission.GROUP_WRITE);
+        ALL_PERMISSIONS.add(PosixFilePermission.GROUP_EXECUTE);
+        ALL_PERMISSIONS.add(PosixFilePermission.OTHERS_READ);
+        ALL_PERMISSIONS.add(PosixFilePermission.OTHERS_WRITE);
+        ALL_PERMISSIONS.add(PosixFilePermission.OTHERS_EXECUTE);
+    }
 
     /**
      * Returns the necessary {@link ProcessBuilder} to launch TF2. It will be used when {@link
@@ -332,14 +343,18 @@ public abstract class CommandLine {
             }
             // prepare list of options
             ProcessBuilder pb;
-            if (mode.equals("steam")) {
-                pb = getBuilderStartSteam(cfg.getString(Key.SteamDir));
-                pb.command().add("-applaunch");
-                pb.command().add(options.get("-applaunch"));
-            } else if (mode.equals("hlae")) {
-                pb = getBuilderStartHLAE(cfg.getString(Key.HlaePath), cfg.getString(Key.TfDir));
-            } else {
-                pb = getBuilderStartTF2(cfg.getString(Key.TfDir));
+            switch (mode) {
+                case "steam":
+                    pb = getBuilderStartSteam(cfg.getString(Key.SteamDir));
+                    pb.command().add("-applaunch");
+                    pb.command().add(options.get("-applaunch"));
+                    break;
+                case "hlae":
+                    pb = getBuilderStartHLAE(cfg.getString(Key.HlaePath), cfg.getString(Key.TfDir));
+                    break;
+                default:
+                    pb = getBuilderStartTF2(cfg.getString(Key.TfDir));
+                    break;
             }
             options.remove("-applaunch");
             if (mode.equals("hlae")) {
@@ -360,8 +375,9 @@ public abstract class CommandLine {
                 log.fine("Using -insecure in launch options");
                 pb.command().add("-insecure");
             }
-            log.info("Launching: "
-                + pb.command().toString().replaceAll("\\[|\\]|,", "").replaceAll("\\s\\s+", " "));
+            log.info("Launching: " + pb.command().toString()
+                .replaceAll("[\\[\\],]", "")
+                .replaceAll("\\s\\s+", " "));
             Process pr = pb.start();
             if (mode.equals("steam")) {
                 try (BufferedReader input = newProcessReader(pr)) {
@@ -416,6 +432,19 @@ public abstract class CommandLine {
 
     BufferedReader newProcessReader(Process p) {
         return new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("UTF-8")));
+    }
+
+    boolean processOutputHasLine(Process p) {
+        try (BufferedReader input = newProcessReader(p)) {
+            String line;
+            line = input.readLine();
+            if (line != null) {
+                return true;
+            }
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Could not read process output", e);
+        }
+        return false;
     }
 
     /**

@@ -13,7 +13,7 @@ class LwrtGUI {
     private static final Logger log = Logger.getLogger("lawena");
     private static final String n = System.getProperty("line.separator");
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         SettingsManager cfg = new SettingsManager("settings.lwf");
         new StartLogger("lawena").toConsole(cfg.getLogConsoleLevel()).toFile(cfg.getLogFileLevel());
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {

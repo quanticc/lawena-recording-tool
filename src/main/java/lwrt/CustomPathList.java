@@ -52,7 +52,7 @@ public class CustomPathList extends AbstractTableModel {
         this.cl = cl;
     }
 
-    private static boolean accept(Path entry) throws IOException {
+    private static boolean accept(Path entry) {
         return (Files.isDirectory(entry) || entry.toString().endsWith(".vpk"))
             && !ignoredPaths.contains(entry);
     }
@@ -228,7 +228,7 @@ public class CustomPathList extends AbstractTableModel {
         }
     }
 
-    private void insertPath(int index, Path path) throws IOException {
+    private void insertPath(int index, Path path) {
         if (accept(path)) {
             CustomPath cp = defaultPaths.get(path);
             if (cp == null) {
@@ -349,7 +349,7 @@ public class CustomPathList extends AbstractTableModel {
     }
 
     public enum Column {
-        SELECTED, PATH, CONTENTS;
+        SELECTED, PATH, CONTENTS
     }
 
 }

@@ -1,31 +1,13 @@
 package lwrt;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 
 public class CLOSX extends CommandLine {
-
-    private static Set<PosixFilePermission> perms777 = new HashSet<>();
-
-    static {
-        perms777.add(PosixFilePermission.OWNER_READ);
-        perms777.add(PosixFilePermission.OWNER_WRITE);
-        perms777.add(PosixFilePermission.OWNER_EXECUTE);
-        perms777.add(PosixFilePermission.GROUP_READ);
-        perms777.add(PosixFilePermission.GROUP_WRITE);
-        perms777.add(PosixFilePermission.GROUP_EXECUTE);
-        perms777.add(PosixFilePermission.OTHERS_READ);
-        perms777.add(PosixFilePermission.OTHERS_WRITE);
-        perms777.add(PosixFilePermission.OTHERS_EXECUTE);
-    }
 
     @Override
     public ProcessBuilder getBuilderStartTF2(String gamePath) {
@@ -54,7 +36,7 @@ public class CLOSX extends CommandLine {
     public ProcessBuilder getBuilderStartSteam(String steamPath) {
         Path steam = Paths.get(steamPath).resolve("Steam.app");
         try {
-            Files.setPosixFilePermissions(steam, perms777);
+            Files.setPosixFilePermissions(steam, ALL_PERMISSIONS);
             return new ProcessBuilder(steam.toString());
         } catch (IOException e) {
             log.log(Level.INFO, "Problem while settings permissions to steam client", e);
@@ -114,13 +96,7 @@ public class CLOSX extends CommandLine {
         try {
             ProcessBuilder pb = new ProcessBuilder("pgrep", "hl2_osx");
             Process pr = pb.start();
-            try (BufferedReader input = newProcessReader(pr)) {
-                String line;
-                line = input.readLine();
-                if (line != null) {
-                    found = true;
-                }
-            }
+            found = processOutputHasLine(pr);
         } catch (IOException e) {
             log.log(Level.INFO, "", e);
         }
@@ -133,7 +109,7 @@ public class CLOSX extends CommandLine {
             String.join(File.separator, "..", "bin", "vpk_osx32")
         );
         try {
-            Files.setPosixFilePermissions(path, perms777);
+            Files.setPosixFilePermissions(path, ALL_PERMISSIONS);
         } catch (IOException e) {
             log.log(Level.FINE, "Could not set file permissions to VPK tool", e);
         }
