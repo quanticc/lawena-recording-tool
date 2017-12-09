@@ -106,7 +106,7 @@ public class Lawena {
         Path tfpath = settings.getTfPath();
         if (tfpath == null || tfpath.toString().isEmpty()) {
             tfpath = steampath.resolve(String.join(File.separator,
-                "SteamApps", "common", "Team Fortress 2", "tf"));
+                "steamapps", "common", "Team Fortress 2", "tf"));
         }
         log.fine("Checking for game path at " + tfpath);
         if (!tfpath.getFileName().toString().equalsIgnoreCase("tf") || !Files.exists(tfpath)) {
@@ -1158,12 +1158,12 @@ public class Lawena {
                 }
                 setProgress(80);
 
-        /*
-         * Scan for all .fon, .ttf, .ttc, or .otf files inside custom and get their parent folders
-         * to register every font file using the FontReg utility at
-         * http://code.kliu.org/misc/fontreg/. This is an attempt to fix the
-         * "Windows locking uninstalled fonts used by TF2 custom HUDs" issue.
-         */
+                /*
+                 * Scan for all .fon, .ttf, .ttc, or .otf files inside custom and get their parent folders
+                 * to register every font file using the FontReg utility at
+                 * http://code.kliu.org/misc/fontreg/. This is an attempt to fix the
+                 * "Windows locking uninstalled fonts used by TF2 custom HUDs" issue.
+                 */
                 if (settings.getBoolean(Key.InstallFonts)) {
                     try {
                         status.info("Registering all custom fonts found...");
